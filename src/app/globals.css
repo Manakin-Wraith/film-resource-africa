@@ -1,26 +1,168 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-primary: #3b82f6;
+  --color-accent: #f59e0b;
+  --font-sans: var(--font-inter);
+  --font-heading: var(--font-outfit);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+:root {
+  --background: #f8fafc;
+  --foreground: #0f172a;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #09090b;
+    --foreground: #fafafa;
   }
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+.glass-card {
+  background: rgba(25, 25, 25, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+@media (prefers-color-scheme: light) {
+  .glass-card {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+  }
+}
+
+.glass-panel {
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+@media (prefers-color-scheme: light) {
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.8);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+  }
+}
+
+/* Base styles for scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(150, 150, 150, 0.3);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(150, 150, 150, 0.5);
+}
+
+/* Film Grain Noise Overlay */
+.film-grain::before {
+  content: '';
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  right: -50%;
+  bottom: -50%;
+  width: 200%;
+  height: 200%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+  pointer-events: none;
+  z-index: 999;
+  opacity: 0.4;
+  animation: grain 8s steps(10) infinite;
+}
+
+@keyframes grain {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-5%, -10%); }
+  20% { transform: translate(-15%, 5%); }
+  30% { transform: translate(7%, -25%); }
+  40% { transform: translate(-5%, 25%); }
+  50% { transform: translate(-15%, 10%); }
+  60% { transform: translate(15%, 0%); }
+  70% { transform: translate(0%, 15%); }
+  80% { transform: translate(3%, 35%); }
+  90% { transform: translate(-10%, 10%); }
+}
+
+/* Disable film grain on mobile for better performance */
+@media (max-width: 768px) {
+  .film-grain::before {
+    display: none;
+  }
+}
+
+/* Animated Gradient Mesh for Hero */
+@keyframes meshShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.hero-mesh {
+  background: 
+    radial-gradient(ellipse at 20% 50%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(245, 158, 11, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(168, 85, 247, 0.10) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 60%, rgba(20, 184, 166, 0.08) 0%, transparent 40%);
+  background-size: 200% 200%;
+  animation: meshShift 20s ease infinite;
+}
+
+/* African Geometric Patterns — SVG data URIs */
+.pattern-diamonds {
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0L45 15L30 30L15 15Z' fill='none' stroke='white' stroke-width='0.5' opacity='0.04'/%3E%3Cpath d='M0 30L15 45L0 60' fill='none' stroke='white' stroke-width='0.5' opacity='0.04'/%3E%3Cpath d='M60 30L45 45L60 60' fill='none' stroke='white' stroke-width='0.5' opacity='0.04'/%3E%3C/svg%3E");
+  background-size: 60px 60px;
+}
+
+.pattern-crosshatch {
+  background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cline x1='0' y1='0' x2='40' y2='40' stroke='white' stroke-width='0.3' opacity='0.04'/%3E%3Cline x1='40' y1='0' x2='0' y2='40' stroke='white' stroke-width='0.3' opacity='0.04'/%3E%3C/svg%3E");
+  background-size: 40px 40px;
+}
+
+.pattern-circles {
+  background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='40' cy='40' r='30' fill='none' stroke='white' stroke-width='0.4' opacity='0.03'/%3E%3Ccircle cx='40' cy='40' r='15' fill='none' stroke='white' stroke-width='0.4' opacity='0.03'/%3E%3C/svg%3E");
+  background-size: 80px 80px;
+}
+
+.pattern-zigzag {
+  background-image: url("data:image/svg+xml,%3Csvg width='40' height='20' viewBox='0 0 40 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolyline points='0,20 10,0 20,20 30,0 40,20' fill='none' stroke='white' stroke-width='0.4' opacity='0.04'/%3E%3C/svg%3E");
+  background-size: 40px 20px;
+}
+
+.pattern-kente {
+  background-image: url("data:image/svg+xml,%3Csvg width='48' height='48' viewBox='0 0 48 48' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='4' y='4' width='16' height='16' fill='none' stroke='white' stroke-width='0.4' opacity='0.035'/%3E%3Crect x='28' y='28' width='16' height='16' fill='none' stroke='white' stroke-width='0.4' opacity='0.035'/%3E%3Cline x1='4' y1='4' x2='20' y2='20' stroke='white' stroke-width='0.3' opacity='0.025'/%3E%3Cline x1='28' y1='28' x2='44' y2='44' stroke='white' stroke-width='0.3' opacity='0.025'/%3E%3Cline x1='20' y1='4' x2='4' y2='20' stroke='white' stroke-width='0.3' opacity='0.025'/%3E%3Cline x1='44' y1='28' x2='28' y2='44' stroke='white' stroke-width='0.3' opacity='0.025'/%3E%3C/svg%3E");
+  background-size: 48px 48px;
+}
+
+/* Custom Scrollbar for Modal Drill-down */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
 }

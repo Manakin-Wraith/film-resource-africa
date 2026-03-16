@@ -1,0 +1,18 @@
+{
+  "name": "Film Resource Africa",
+  "short_name": "FRA",
+  "description": "A curated directory of global screenwriting labs, co-production funds, and pitch forums for African creators.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#09090b",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
