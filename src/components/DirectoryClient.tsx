@@ -60,6 +60,16 @@ export default function DirectoryClient({ initialData }: { initialData: Opportun
 
   const filters = ['All', 'Funds & Grants', 'Labs & Fellowships', 'Markets & Pitching', 'Festivals', 'AI & Emerging Tech'];
 
+  // Short labels for mobile to keep chips compact
+  const mobileLabels: Record<string, string> = {
+    'All': 'All',
+    'Funds & Grants': 'Funds',
+    'Labs & Fellowships': 'Labs',
+    'Markets & Pitching': 'Markets',
+    'Festivals': 'Festivals',
+    'AI & Emerging Tech': 'AI',
+  };
+
   const closedCount = opportunities.filter(opp => opp.application_status === 'closed').length;
 
   const filteredData = opportunities.filter((opp) => {
@@ -115,8 +125,9 @@ export default function DirectoryClient({ initialData }: { initialData: Opportun
       </div>
 
       {/* Filters & Sort */}
-      <div className="mb-10 space-y-4 relative z-20 flex flex-col items-center">
-        <div className="flex flex-wrap justify-center gap-2 w-full items-center">
+      <div className="mb-10 space-y-3 relative z-20">
+        {/* Category chips — horizontal scroll on mobile, wrap on desktop */}
+        <div className="flex md:flex-wrap md:justify-center gap-2 overflow-x-auto pb-2 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-thin snap-x snap-mandatory">
           {filters.map((f) => {
             const catStyle = f === 'All' ? null : categoryConfig[f];
             const Icon = catStyle ? catStyle.icon : LayoutGrid;
@@ -125,10 +136,10 @@ export default function DirectoryClient({ initialData }: { initialData: Opportun
             return (
               <button
                 key={f}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 border backdrop-blur-md ${
+                className={`flex items-center gap-1.5 md:gap-2 px-4 md:px-5 py-2.5 min-h-[44px] rounded-xl font-semibold text-sm whitespace-nowrap snap-start flex-shrink-0 transition-all duration-300 border backdrop-blur-md ${
                   filter === f 
-                    ? `bg-gradient-to-r ${activeGradient} text-white border-transparent shadow-lg scale-105` 
-                    : 'bg-white/5 hover:bg-white/10 border-white/10 text-foreground/70 hover:text-foreground hover:scale-105'
+                    ? `bg-gradient-to-r ${activeGradient} text-white border-transparent shadow-lg` 
+                    : 'bg-white/5 hover:bg-white/10 border-white/10 text-foreground/70 hover:text-foreground'
                 }`}
                 onClick={() => {
                   setFilter(f);
@@ -138,44 +149,46 @@ export default function DirectoryClient({ initialData }: { initialData: Opportun
                 }}
               >
                 <Icon size={16} className={filter === f ? 'text-white' : (catStyle?.color || 'text-foreground/40')} />
-                <span>{f}</span>
+                <span className="md:hidden">{mobileLabels[f]}</span>
+                <span className="hidden md:inline">{f}</span>
               </button>
             )
           })}
           
-          <div className="w-[1px] h-8 bg-white/15 mx-1 hidden md:block"></div>
+          <div className="w-[1px] h-8 bg-white/15 mx-1 hidden md:flex self-center flex-shrink-0"></div>
           
           <Link 
             href="/submit"
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 border backdrop-blur-md bg-accent/10 hover:bg-accent/20 border-accent/20 text-accent hover:scale-105"
+            className="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 border backdrop-blur-md bg-accent/10 hover:bg-accent/20 border-accent/20 text-accent hover:scale-105 flex-shrink-0"
           >
             <Plus size={16} />
             <span>Submit</span>
           </Link>
         </div>
 
-        <div className="flex items-center gap-4">
+        {/* Sort, count & closed — single compact row */}
+        <div className="flex items-center justify-between md:justify-center gap-3 md:gap-4">
           <div className="flex bg-white/5 p-1 rounded-xl border border-white/10 backdrop-blur-sm">
             <button 
               onClick={() => setSortBy('newest')}
-              className={`px-5 py-2.5 min-h-[44px] rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${sortBy === 'newest' ? 'bg-primary text-white shadow-lg' : 'text-foreground/50 hover:text-foreground'}`}
+              className={`px-3.5 md:px-5 py-2 min-h-[40px] rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${sortBy === 'newest' ? 'bg-primary text-white shadow-lg' : 'text-foreground/50 hover:text-foreground'}`}
             >
               <Calendar size={12} />
               Newest
             </button>
             <button 
               onClick={() => setSortBy('updated')}
-              className={`px-5 py-2.5 min-h-[44px] rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${sortBy === 'updated' ? 'bg-purple-500 text-white shadow-lg' : 'text-foreground/50 hover:text-foreground'}`}
+              className={`px-3.5 md:px-5 py-2 min-h-[40px] rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${sortBy === 'updated' ? 'bg-purple-500 text-white shadow-lg' : 'text-foreground/50 hover:text-foreground'}`}
             >
               <RefreshCw size={12} />
               Updated
             </button>
           </div>
-          <span className="text-foreground/30 text-sm">{filteredData.length} results</span>
+          <span className="text-foreground/30 text-xs md:text-sm">{filteredData.length} results</span>
           {closedCount > 0 && (
             <button
               onClick={() => setShowClosed(!showClosed)}
-              className={`text-xs font-medium px-3 py-2.5 min-h-[44px] rounded-lg border transition-all ${
+              className={`text-xs font-medium px-3 py-2 min-h-[40px] rounded-lg border transition-all ${
                 showClosed
                   ? 'bg-white/10 border-white/20 text-foreground/60'
                   : 'bg-white/5 border-white/10 text-foreground/30 hover:text-foreground/50'

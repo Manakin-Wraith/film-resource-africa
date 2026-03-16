@@ -151,6 +151,16 @@ body {
   background-size: 48px 48px;
 }
 
+/* Hide scrollbar for horizontal scroll strips */
+.scrollbar-thin::-webkit-scrollbar {
+  height: 0;
+  display: none;
+}
+.scrollbar-thin {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* Custom Scrollbar for Modal Drill-down */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
