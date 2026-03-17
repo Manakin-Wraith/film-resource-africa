@@ -124,7 +124,7 @@ export function buildWelcomeEmailHtml(siteUrl: string): string {
                     <p style="margin:0 0 16px;font-size:13px;color:#888;line-height:1.5;">
                       We're a small team keeping this resource free for African filmmakers. Every coffee keeps us going.
                     </p>
-                    <a href="https://pay.yoco.com/celebration-house-entertainment" style="display:inline-block;background-color:#f59e0b;color:#000000;font-weight:700;font-size:14px;text-decoration:none;padding:10px 24px;border-radius:10px;">
+                    <a href="https://pay.yoco.com/celebration-house-entertainment?amount=55.00?reference=coffee" style="display:inline-block;background-color:#f59e0b;color:#000000;font-weight:700;font-size:14px;text-decoration:none;padding:10px 24px;border-radius:10px;">
                       Buy the team a coffee &rarr;
                     </a>
                   </td>

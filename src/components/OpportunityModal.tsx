@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { Calendar, DollarSign, FileText, ExternalLink, X, Info, Target, FileCheck, CheckCircle2, AlertCircle, Share2 } from 'lucide-react';
+import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo, useDragControls } from 'framer-motion';
+import { Calendar, DollarSign, FileText, ExternalLink, X, Info, Target, FileCheck, CheckCircle2, AlertCircle, Share2, Clock, AlertTriangle, Lightbulb } from 'lucide-react';
 import { Opportunity } from '@/app/actions';
 import { getCategoryStyle } from '@/lib/categoryConfig';
 
@@ -15,6 +15,7 @@ export default function OpportunityModal({ selectedOpp, onClose }: OpportunityMo
   const [isMobile, setIsMobile] = useState(false);
   const dragY = useMotionValue(0);
   const overlayOpacity = useTransform(dragY, [0, 300], [1, 0]);
+  const dragControls = useDragControls();
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
@@ -74,6 +75,8 @@ export default function OpportunityModal({ selectedOpp, onClose }: OpportunityMo
             exit={isMobile ? { y: '100%' } : { opacity: 0, scale: 0.9, y: 50 }}
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
             drag={isMobile ? 'y' : false}
+            dragControls={dragControls}
+            dragListener={false}
             dragConstraints={{ top: 0 }}
             dragElastic={0.2}
             onDragEnd={handleDragEnd}
@@ -86,130 +89,165 @@ export default function OpportunityModal({ selectedOpp, onClose }: OpportunityMo
           >
             {/* Mobile drag handle */}
             {isMobile && (
-              <div className="flex justify-center pt-3 pb-1 cursor-grab active:cursor-grabbing">
+              <div
+                className="flex justify-center pt-3 pb-1 cursor-grab active:cursor-grabbing touch-none"
+                onPointerDown={(e) => dragControls.start(e)}
+              >
                 <div className="w-10 h-1 rounded-full bg-white/20" />
               </div>
             )}
-            {/* Modal Header */}
-            <div className="relative p-6 md:p-10 pb-5 md:pb-6 border-b border-white/10 bg-gradient-to-b from-primary/10 to-transparent">
-              <div className="absolute top-4 md:top-6 right-4 md:right-6 flex items-center gap-2 z-10">
-                <button
-                  onClick={handleShare}
-                  className="w-10 h-10 md:w-12 md:h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors border border-white/10 backdrop-blur-md"
-                  aria-label="Share this opportunity"
-                >
-                  <Share2 size={18} />
-                </button>
-                <button 
-                  onClick={onClose}
-                  className="w-10 h-10 md:w-12 md:h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors border border-white/10 backdrop-blur-md"
-                >
-                  <X size={20} className="md:w-6 md:h-6" />
-                </button>
-              </div>
-              
-              <h2 className="text-2xl md:text-5xl font-bold font-heading leading-tight pr-24 md:pr-12 mb-4 md:mb-6">
-                {selectedOpp.title}
-              </h2>
-              
-              <div className="flex flex-wrap gap-3">
-                {(() => {
-                  const catStyle = getCategoryStyle(selectedOpp.category);
-                  const CatIcon = catStyle.icon;
-                  return (
-                    <span className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-sm border ${catStyle.bg} ${catStyle.color}`}>
-                      <CatIcon size={16} />
-                      {catStyle.label}
-                    </span>
-                  );
-                })()}
-                {selectedOpp["For Films or Series?"] && (
-                  <span className="flex items-center gap-2 bg-primary/20 text-primary px-4 py-2 rounded-xl font-medium border border-primary/20">
-                    <FileText size={16} />
-                    {selectedOpp["For Films or Series?"]}
-                  </span>
-                )}
-                {selectedOpp["Cost"] && (
-                  <span className="flex items-center gap-2 bg-green-500/20 text-green-400 px-4 py-2 rounded-xl font-medium border border-green-500/20">
-                    <DollarSign size={16} />
-                    {selectedOpp["Cost"]}
-                  </span>
-                )}
-                <span className="flex items-center gap-2 bg-accent/20 text-accent px-4 py-2 rounded-xl font-medium border border-accent/20">
-                  <Calendar size={16} />
-                  {selectedOpp["Next Deadline"]}
-                </span>
-              </div>
+
+            {/* Floating action buttons — always visible */}
+            <div className="absolute top-3 md:top-6 right-4 md:right-6 flex items-center gap-2 z-30">
+              <button
+                onClick={handleShare}
+                className="w-10 h-10 md:w-12 md:h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors border border-white/10 backdrop-blur-md"
+                aria-label="Share this opportunity"
+              >
+                <Share2 size={18} />
+              </button>
+              <button 
+                onClick={onClose}
+                className="w-10 h-10 md:w-12 md:h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors border border-white/10 backdrop-blur-md"
+              >
+                <X size={20} className="md:w-6 md:h-6" />
+              </button>
             </div>
 
-            {/* Modal Content - Scrollable */}
-            <div className="p-5 md:p-10 overflow-y-auto custom-scrollbar flex-grow space-y-8 md:space-y-10 overscroll-contain">
-              
-              {selectedOpp["What Is It?"] && (
-                <section>
-                  <h3 className="flex items-center gap-3 text-xl font-bold font-heading mb-4 text-primary">
-                    <Info size={24} /> About the Opportunity
-                  </h3>
-                  <p className="text-lg leading-relaxed text-foreground/80">
+            {/* Scrollable area — header + content unified so long titles don't starve mobile viewport */}
+            <div className="overflow-y-auto custom-scrollbar flex-grow overscroll-contain">
+              {/* Header */}
+              <div
+                className="relative p-6 md:p-10 pb-5 md:pb-6 border-b border-white/10 bg-gradient-to-b from-primary/10 to-transparent"
+                onPointerDown={(e) => { if (isMobile) dragControls.start(e); }}
+              >
+                {/* Category badge */}
+                <div className="mb-3 md:mb-4">
+                  {(() => {
+                    const catStyle = getCategoryStyle(selectedOpp.category);
+                    const CatIcon = catStyle.icon;
+                    return (
+                      <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg font-semibold text-xs uppercase tracking-wider border ${catStyle.bg} ${catStyle.color}`}>
+                        <CatIcon size={14} />
+                        {catStyle.label}
+                      </span>
+                    );
+                  })()}
+                </div>
+                
+                <h2 className="text-xl md:text-4xl font-bold font-heading leading-tight pr-24 md:pr-28 mb-4 md:mb-5">
+                  {selectedOpp.title}
+                </h2>
+
+                {/* About — immediately under title */}
+                {selectedOpp["What Is It?"] && (
+                  <p className="text-[15px] md:text-base leading-relaxed text-foreground/70 pr-0 md:pr-12">
                     {selectedOpp["What Is It?"]}
                   </p>
-                </section>
-              )}
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {selectedOpp["Who Can Apply / Eligibility"] && (
-                  <section className="bg-white/5 p-6 rounded-3xl border border-white/5">
-                    <h3 className="flex items-center gap-3 text-lg font-bold font-heading mb-4 text-accent">
-                      <CheckCircle2 size={24} /> Eligibility
-                    </h3>
-                    <p className="leading-relaxed text-foreground/80">
-                      {selectedOpp["Who Can Apply / Eligibility"]}
-                    </p>
-                  </section>
                 )}
+              </div>
 
+              {/* Content */}
+              <div className="p-5 md:p-10 space-y-6 md:space-y-8">
+
+              {/* Key Info Pills */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {selectedOpp["Next Deadline"] && (
+                  <div className="flex items-start gap-3 bg-accent/10 border border-accent/20 rounded-2xl p-4">
+                    <div className="mt-0.5 p-2 bg-accent/20 rounded-xl">
+                      <Calendar size={18} className="text-accent" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-accent/80 mb-1">Deadline</p>
+                      <p className="text-sm font-medium text-foreground/90 leading-snug">{selectedOpp["Next Deadline"]}</p>
+                    </div>
+                  </div>
+                )}
+                {selectedOpp["Cost"] && (
+                  <div className="flex items-start gap-3 bg-green-500/10 border border-green-500/20 rounded-2xl p-4">
+                    <div className="mt-0.5 p-2 bg-green-500/20 rounded-xl">
+                      <DollarSign size={18} className="text-green-400" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-green-400/80 mb-1">Cost</p>
+                      <p className="text-sm font-medium text-foreground/90 leading-snug">{selectedOpp["Cost"]}</p>
+                    </div>
+                  </div>
+                )}
+                {selectedOpp["For Films or Series?"] && (
+                  <div className="flex items-start gap-3 bg-primary/10 border border-primary/20 rounded-2xl p-4">
+                    <div className="mt-0.5 p-2 bg-primary/20 rounded-xl">
+                      <FileText size={18} className="text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-primary/80 mb-1">Format</p>
+                      <p className="text-sm font-medium text-foreground/90 leading-snug">{selectedOpp["For Films or Series?"]}</p>
+                    </div>
+                  </div>
+                )}
+                {selectedOpp["Who Can Apply / Eligibility"] && (
+                  <div className="flex items-start gap-3 bg-cyan-500/10 border border-cyan-500/20 rounded-2xl p-4">
+                    <div className="mt-0.5 p-2 bg-cyan-500/20 rounded-xl">
+                      <CheckCircle2 size={18} className="text-cyan-400" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-cyan-400/80 mb-1">Eligibility</p>
+                      <p className="text-sm font-medium text-foreground/90 leading-snug">{selectedOpp["Who Can Apply / Eligibility"]}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* What You Get + What to Submit */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {selectedOpp["What Do You Get If Selected?"] && (
-                  <section className="bg-white/5 p-6 rounded-3xl border border-white/5">
-                    <h3 className="flex items-center gap-3 text-lg font-bold font-heading mb-4 text-green-400">
-                      <Target size={24} /> What You Get
+                  <section className="bg-gradient-to-br from-green-500/10 to-emerald-500/5 p-5 md:p-6 rounded-2xl border border-green-500/15">
+                    <h3 className="flex items-center gap-2.5 text-base font-bold font-heading mb-3 text-green-400">
+                      <Target size={20} /> What You Get
                     </h3>
-                    <p className="leading-relaxed text-foreground/80">
+                    <p className="text-sm leading-relaxed text-foreground/75">
                       {selectedOpp["What Do You Get If Selected?"]}
                     </p>
                   </section>
                 )}
+
+                {selectedOpp["What to Submit"] && (
+                  <section className="bg-gradient-to-br from-blue-500/10 to-indigo-500/5 p-5 md:p-6 rounded-2xl border border-blue-500/15">
+                    <h3 className="flex items-center gap-2.5 text-base font-bold font-heading mb-3 text-blue-400">
+                      <FileCheck size={20} /> What to Submit
+                    </h3>
+                    <p className="text-sm leading-relaxed text-foreground/75">
+                      {selectedOpp["What to Submit"]}
+                    </p>
+                  </section>
+                )}
               </div>
 
-              {selectedOpp["What to Submit"] && (
-                <section>
-                  <h3 className="flex items-center gap-3 text-xl font-bold font-heading mb-4 text-blue-400">
-                    <FileCheck size={24} /> What to Submit
-                  </h3>
-                  <p className="text-lg leading-relaxed text-foreground/80 bg-blue-500/5 p-6 rounded-3xl border border-blue-500/10">
-                    {selectedOpp["What to Submit"]}
-                  </p>
-                </section>
-              )}
-
+              {/* Insider Tips */}
               {selectedOpp["Strongest Submission Tips"] && (
-                <section>
-                  <h3 className="flex items-center gap-3 text-xl font-bold font-heading mb-4 text-purple-400">
-                    <AlertCircle size={24} /> Insider Tips
+                <section className="bg-gradient-to-br from-purple-500/10 to-violet-500/5 p-5 md:p-6 rounded-2xl border border-purple-500/15">
+                  <h3 className="flex items-center gap-2.5 text-base font-bold font-heading mb-3 text-purple-400">
+                    <Lightbulb size={20} /> Insider Tips
                   </h3>
-                  <p className="text-lg leading-relaxed text-foreground/80 bg-purple-500/5 p-6 rounded-3xl border border-purple-500/10 font-medium italic">
+                  <p className="text-sm leading-relaxed text-foreground/75 italic">
                     &ldquo;{selectedOpp["Strongest Submission Tips"]}&rdquo;
                   </p>
                 </section>
               )}
               
+              {/* Calendar Reminder */}
               {selectedOpp["CALENDAR REMINDER:"] && (
-                <section>
-                  <p className="text-center font-semibold text-accent/80 bg-accent/10 py-4 rounded-xl border border-accent/20">
-                    📅 {selectedOpp["CALENDAR REMINDER:"]}
+                <div className="flex items-center gap-3 bg-accent/8 border border-accent/15 rounded-2xl px-5 py-4">
+                  <div className="p-2 bg-accent/20 rounded-xl shrink-0">
+                    <Clock size={18} className="text-accent" />
+                  </div>
+                  <p className="text-sm font-medium text-accent/90">
+                    {selectedOpp["CALENDAR REMINDER:"]}
                   </p>
-                </section>
+                </div>
               )}
 
+            </div>
             </div>
 
             {/* Modal Footer */}

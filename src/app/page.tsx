@@ -1,20 +1,22 @@
-import { getOpportunities, getClosingSoonOpportunities, getOpenOpportunities, getNews, getNewWaveOpportunities, getJustAddedOpportunities } from './actions';
+import { getOpportunities, getClosingSoonOpportunities, getOpenOpportunities, getNews, getNewWaveOpportunities, getJustAddedOpportunities, getApprovedPartners } from './actions';
 import DirectoryClient from '@/components/DirectoryClient';
 import OpportunityRow from '@/components/OpportunityRow';
 import NewsSection from '@/components/NewsSection';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import HomeClient from '@/components/HomeClient';
+import SponsorTicker from '@/components/SponsorTicker';
 
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
-  const [opportunities, closingSoon, openNow, news, newWave, justAdded] = await Promise.all([
+  const [opportunities, closingSoon, openNow, news, newWave, justAdded, partners] = await Promise.all([
     getOpportunities(),
     getClosingSoonOpportunities(),
     getOpenOpportunities(),
     getNews(),
     getNewWaveOpportunities(),
     getJustAddedOpportunities(),
+    getApprovedPartners(),
   ]);
 
   return (
@@ -34,6 +36,9 @@ export default async function Home() {
             <NewsletterCTA variant="hero" />
           </div>
         </header>
+
+        {/* Sponsor Ticker */}
+        <SponsorTicker partners={partners} />
 
         {/* Closing Soon */}
         <HomeClient

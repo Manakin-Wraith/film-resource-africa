@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.99.1",
+    "@vercel/analytics": "^2.0.1",
     "@vercel/postgres": "^0.10.0",
     "dotenv": "^17.3.1",
     "framer-motion": "^12.35.2",

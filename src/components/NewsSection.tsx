@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { NewsItem } from '@/app/actions';
-import { Newspaper, AlertTriangle, Sparkles, Lightbulb, ArrowRight, Clock } from 'lucide-react';
+import { Newspaper, AlertTriangle, Sparkles, Lightbulb, ArrowRight, Clock, Star } from 'lucide-react';
 import { formatRelativeDate } from '@/lib/dateUtils';
 
 const categoryConfig: Record<string, { icon: typeof Newspaper; label: string; color: string; bg: string }> = {
@@ -11,6 +11,7 @@ const categoryConfig: Record<string, { icon: typeof Newspaper; label: string; co
   deadline_alert: { icon: AlertTriangle, label: 'Deadline Alert', color: 'text-red-400', bg: 'bg-red-500/10 border-red-500/20' },
   new_opportunity: { icon: Sparkles, label: 'New Opportunity', color: 'text-green-400', bg: 'bg-green-500/10 border-green-500/20' },
   tip: { icon: Lightbulb, label: 'Pro Tip', color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20' },
+  community_spotlight: { icon: Star, label: 'Community Spotlight', color: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-500/20' },
 };
 
 export default function NewsSection({ news }: { news: NewsItem[] }) {

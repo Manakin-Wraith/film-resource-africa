@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Home, Database, Newspaper, Plus, Search } from 'lucide-react';
+import { Home, Database, Newspaper, Building2, Clapperboard } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -9,7 +9,8 @@ const tabs = [
   { href: '/', label: 'Home', icon: Home },
   { href: '/#directory', label: 'Directory', icon: Database },
   { href: '/news', label: 'News', icon: Newspaper },
-  { href: '/submit', label: 'Submit', icon: Plus },
+  { href: '/call-sheet', label: 'Call Sheet', icon: Clapperboard },
+  { href: '/industry', label: 'Industry', icon: Building2 },
 ];
 
 export default function MobileTabBar() {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Menu, X, AlertTriangle, Clock, Database, Newspaper, Plus, Globe } from 'lucide-react';
+import { Menu, X, AlertTriangle, Clock, Database, Newspaper, Plus, Globe, Clapperboard, Building2, Star } from 'lucide-react';
 import Link from 'next/link';
 import { getUserTimezone } from '@/lib/dateUtils';
 
@@ -101,6 +101,27 @@ export default function Header({ stats }: HeaderProps) {
               News
             </Link>
             <Link
+              href="/call-sheet"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium text-foreground/60 hover:text-foreground hover:bg-white/5 transition-all"
+            >
+              <Clapperboard size={14} className="text-teal-400" />
+              Call Sheet
+            </Link>
+            <Link
+              href="/industry"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium text-foreground/60 hover:text-foreground hover:bg-white/5 transition-all"
+            >
+              <Building2 size={14} className="text-purple-400" />
+              Industry
+            </Link>
+            <Link
+              href="/community-spotlight"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium text-foreground/60 hover:text-foreground hover:bg-white/5 transition-all"
+            >
+              <Star size={14} className="text-yellow-400" />
+              Spotlight
+            </Link>
+            <Link
               href="/submit"
               className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium text-foreground/60 hover:text-foreground hover:bg-white/5 transition-all"
             >
@@ -136,6 +157,30 @@ export default function Header({ stats }: HeaderProps) {
             >
               <Newspaper size={16} className="text-accent" />
               News
+            </Link>
+            <Link
+              href="/call-sheet"
+              onClick={() => setMenuOpen(false)}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-foreground/70 hover:text-foreground hover:bg-white/5 transition-all"
+            >
+              <Clapperboard size={16} className="text-teal-400" />
+              Call Sheet
+            </Link>
+            <Link
+              href="/industry"
+              onClick={() => setMenuOpen(false)}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-foreground/70 hover:text-foreground hover:bg-white/5 transition-all"
+            >
+              <Building2 size={16} className="text-purple-400" />
+              Industry Directory
+            </Link>
+            <Link
+              href="/community-spotlight"
+              onClick={() => setMenuOpen(false)}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-foreground/70 hover:text-foreground hover:bg-white/5 transition-all"
+            >
+              <Star size={16} className="text-yellow-400" />
+              Community Spotlight
             </Link>
             <Link
               href="/submit"

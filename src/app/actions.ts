@@ -36,12 +36,16 @@ export interface NewsItem {
   title: string;
   summary: string;
   content?: string;
-  category: 'industry_news' | 'deadline_alert' | 'new_opportunity' | 'tip';
+  category: 'industry_news' | 'deadline_alert' | 'new_opportunity' | 'tip' | 'community_spotlight';
   url?: string;
   slug?: string;
   image_url?: string;
   published_at: string;
   created_at?: string;
+  status?: 'pending' | 'published' | 'rejected';
+  submitted_by_name?: string;
+  submitted_by_email?: string;
+  project_name?: string;
 }
 
 export async function getAllOpportunities(): Promise<Opportunity[]> {
@@ -114,6 +118,7 @@ export async function getNews(): Promise<NewsItem[]> {
     const { data, error } = await supabase
       .from('news')
       .select('*')
+      .eq('status', 'published')
       .order('published_at', { ascending: false })
       .limit(6);
       
@@ -146,6 +151,7 @@ export async function getAllNews(): Promise<NewsItem[]> {
     const { data, error } = await supabase
       .from('news')
       .select('*')
+      .eq('status', 'published')
       .order('published_at', { ascending: false });
       
     if (error) throw error;
@@ -154,6 +160,43 @@ export async function getAllNews(): Promise<NewsItem[]> {
     console.error('Failed to fetch all news', error);
     return [];
   }
+}
+
+export async function getAllNewsAdmin(): Promise<NewsItem[]> {
+  try {
+    const { data, error } = await supabase
+      .from('news')
+      .select('*')
+      .order('published_at', { ascending: false });
+      
+    if (error) throw error;
+    return data as NewsItem[];
+  } catch (error) {
+    console.error('Failed to fetch all news for admin', error);
+    return [];
+  }
+}
+
+export async function updateNewsItem(id: number, updatedFields: Partial<NewsItem>) {
+  const { data, error } = await supabase
+    .from('news')
+    .update(updatedFields)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+  return data as NewsItem;
+}
+
+export async function deleteNewsItem(id: number) {
+  const { error } = await supabase
+    .from('news')
+    .delete()
+    .eq('id', id);
+
+  if (error) throw new Error(error.message);
+  return true;
 }
 
 export async function getNewWaveOpportunities(): Promise<Opportunity[]> {
@@ -379,6 +422,511 @@ export async function submitInquiry(inquiry: Omit<Inquiry, 'id' | 'status' | 'cr
   }
 
   return { success: true };
+}
+
+// ─── The Call Sheet ──────────────────────────────────────────────────────────
+
+export interface CallSheetListing {
+  id: string;
+  title: string;
+  production_title: string;
+  production_company: string;
+  producer_name: string;
+  producer_email: string;
+  category: string;
+  description: string;
+  requirements?: string;
+  compensation: string;
+  compensation_type: string;
+  location: string;
+  project_stage: string;
+  start_date?: string;
+  duration?: string;
+  application_url?: string;
+  website?: string;
+  mentorship_included: boolean;
+  status: 'pending' | 'approved' | 'closed';
+  created_at?: string;
+  updated_at?: string;
+}
+
+export async function getCallSheetListings(): Promise<CallSheetListing[]> {
+  try {
+    const { data, error } = await supabase
+      .from('call_sheet_listings')
+      .select('*')
+      .eq('status', 'approved')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data as CallSheetListing[];
+  } catch (error) {
+    console.error('Failed to fetch call sheet listings', error);
+    return [];
+  }
+}
+
+export async function getAllCallSheetListings(): Promise<CallSheetListing[]> {
+  try {
+    const { data, error } = await supabase
+      .from('call_sheet_listings')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data as CallSheetListing[];
+  } catch (error) {
+    console.error('Failed to fetch all call sheet listings', error);
+    return [];
+  }
+}
+
+export async function submitCallSheetListing(listing: Omit<CallSheetListing, 'id' | 'status' | 'created_at' | 'updated_at'>) {
+  const { data, error } = await supabase
+    .from('call_sheet_listings')
+    .insert([{ ...listing, status: 'pending' }])
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+
+  // Notify admin
+  try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    await resend.emails.send({
+      from: 'Film Resource Africa <hello@film-resource-africa.com>',
+      to: ['hello@film-resource-africa.com'],
+      subject: `New Call Sheet Listing: ${listing.title} — ${listing.production_title}`,
+      html: `
+        <div style="font-family: sans-serif; padding: 20px; color: #333; max-width: 600px; margin: auto; border: 1px solid #eee; border-radius: 12px;">
+          <h2 style="color: #0d9488;">New Call Sheet Submission</h2>
+          <p>A new listing has been submitted and is pending approval.</p>
+          <div style="background: #f9fafb; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <p style="margin: 5px 0;"><strong>Role:</strong> ${listing.title}</p>
+            <p style="margin: 5px 0;"><strong>Production:</strong> ${listing.production_title}</p>
+            <p style="margin: 5px 0;"><strong>Company:</strong> ${listing.production_company}</p>
+            <p style="margin: 5px 0;"><strong>Producer:</strong> ${listing.producer_name}</p>
+            <p style="margin: 5px 0;"><strong>Category:</strong> ${listing.category}</p>
+            <p style="margin: 5px 0;"><strong>Compensation:</strong> ${listing.compensation} (${listing.compensation_type})</p>
+            <p style="margin: 5px 0;"><strong>Location:</strong> ${listing.location}</p>
+          </div>
+          <p><strong>Description:</strong></p>
+          <p style="line-height: 1.6;">${listing.description}</p>
+          <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+          <p style="font-size: 14px; color: #666;">Log in to the admin dashboard to review and approve.</p>
+          <div style="margin-top: 20px; text-align: center;">
+            <a href="https://film-resource-africa.vercel.app/admin" style="background: #0d9488; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold;">Go to Admin Dashboard</a>
+          </div>
+        </div>
+      `,
+    });
+  } catch (emailError) {
+    console.error('Failed to send call sheet notification email', emailError);
+  }
+
+  return data as CallSheetListing;
+}
+
+export async function updateCallSheetListing(id: string, updatedFields: Partial<CallSheetListing>) {
+  const { data, error } = await supabase
+    .from('call_sheet_listings')
+    .update({ ...updatedFields, updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+  return data as CallSheetListing;
+}
+
+export async function deleteCallSheetListing(id: string) {
+  const { error } = await supabase
+    .from('call_sheet_listings')
+    .delete()
+    .eq('id', id);
+
+  if (error) throw new Error(error.message);
+  return true;
+}
+
+// ─── Community Spotlight ─────────────────────────────────────────────────────
+
+export async function uploadSpotlightImage(formData: FormData): Promise<string> {
+  const file = formData.get('file') as File;
+  if (!file || !file.size) throw new Error('No file provided');
+
+  const maxSize = 5 * 1024 * 1024; // 5MB
+  if (file.size > maxSize) throw new Error('File too large. Maximum size is 5MB.');
+
+  const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+  if (!allowed.includes(file.type)) throw new Error('Invalid file type. Please upload a JPG, PNG, WebP, or GIF.');
+
+  const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+  const fileName = `spotlight-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const filePath = `spotlight/${fileName}`;
+
+  const arrayBuffer = await file.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+
+  const { error } = await supabase.storage
+    .from('directory-logos')
+    .upload(filePath, buffer, {
+      contentType: file.type,
+      upsert: false,
+    });
+
+  if (error) throw new Error(`Upload failed: ${error.message}`);
+
+  const { data: urlData } = supabase.storage
+    .from('directory-logos')
+    .getPublicUrl(filePath);
+
+  return urlData.publicUrl;
+}
+
+interface CommunitySubmission {
+  title: string;
+  summary: string;
+  content: string;
+  project_name?: string;
+  submitted_by_name: string;
+  submitted_by_email: string;
+  url?: string;
+  image_url?: string;
+}
+
+export async function submitCommunitySpotlight(submission: CommunitySubmission) {
+  const slug = submission.title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .slice(0, 80)
+    .replace(/-$/, '');
+
+  const { data, error } = await supabase
+    .from('news')
+    .insert([{
+      title: submission.title,
+      summary: submission.summary,
+      content: submission.content,
+      category: 'community_spotlight',
+      slug: `community-${slug}-${Date.now().toString(36)}`,
+      url: submission.url || null,
+      image_url: submission.image_url || null,
+      status: 'pending',
+      published_at: new Date().toISOString(),
+      submitted_by_name: submission.submitted_by_name,
+      submitted_by_email: submission.submitted_by_email,
+      project_name: submission.project_name || null,
+    }])
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+
+  // Notify admin
+  try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    await resend.emails.send({
+      from: 'Film Resource Africa <hello@film-resource-africa.com>',
+      to: ['hello@film-resource-africa.com'],
+      subject: `Community Spotlight Submission: ${submission.title}`,
+      html: `
+        <div style="font-family: sans-serif; padding: 20px; color: #333; max-width: 600px; margin: auto; border: 1px solid #eee; border-radius: 12px;">
+          <h2 style="color: #f59e0b;">🌟 New Community Spotlight Submission</h2>
+          <p>A community member has submitted their project for the spotlight.</p>
+          <div style="background: #f9fafb; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <p style="margin: 5px 0;"><strong>Title:</strong> ${submission.title}</p>
+            ${submission.project_name ? `<p style="margin: 5px 0;"><strong>Project:</strong> ${submission.project_name}</p>` : ''}
+            <p style="margin: 5px 0;"><strong>Submitted by:</strong> ${submission.submitted_by_name} (${submission.submitted_by_email})</p>
+            ${submission.url ? `<p style="margin: 5px 0;"><strong>Link:</strong> <a href="${submission.url}">${submission.url}</a></p>` : ''}
+          </div>
+          <p><strong>Summary:</strong></p>
+          <p style="line-height: 1.6;">${submission.summary}</p>
+          <p><strong>Full Story:</strong></p>
+          <p style="line-height: 1.6;">${submission.content.slice(0, 500)}${submission.content.length > 500 ? '...' : ''}</p>
+          <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+          <p style="font-size: 14px; color: #666;">Log in to Supabase to review and set status to "published".</p>
+        </div>
+      `,
+    });
+  } catch (emailError) {
+    console.error('Failed to send community spotlight notification', emailError);
+  }
+
+  return { success: true, id: data.id };
+}
+
+// ─── Image Upload ───────────────────────────────────────────────────────────
+
+export async function uploadDirectoryImage(formData: FormData): Promise<string> {
+  const file = formData.get('file') as File;
+  if (!file || !file.size) throw new Error('No file provided');
+
+  const maxSize = 5 * 1024 * 1024; // 5MB
+  if (file.size > maxSize) throw new Error('File too large. Maximum size is 5MB.');
+
+  const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'];
+  if (!allowed.includes(file.type)) throw new Error('Invalid file type. Please upload a JPG, PNG, WebP, GIF, or SVG.');
+
+  const ext = file.name.split('.').pop()?.toLowerCase() || 'png';
+  const fileName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const filePath = `logos/${fileName}`;
+
+  const arrayBuffer = await file.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+
+  const { error } = await supabase.storage
+    .from('directory-logos')
+    .upload(filePath, buffer, {
+      contentType: file.type,
+      upsert: false,
+    });
+
+  if (error) throw new Error(`Upload failed: ${error.message}`);
+
+  const { data: urlData } = supabase.storage
+    .from('directory-logos')
+    .getPublicUrl(filePath);
+
+  return urlData.publicUrl;
+}
+
+// ─── Partners ───────────────────────────────────────────────────────────────
+
+export interface Partner {
+  id: number;
+  name: string;
+  logo_url: string;
+  website?: string;
+  tier: 'partner' | 'sponsor';
+  status: 'pending' | 'approved' | 'rejected';
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export async function getApprovedPartners(): Promise<Partner[]> {
+  const { data, error } = await supabase
+    .from('partners')
+    .select('*')
+    .eq('status', 'approved')
+    .order('sort_order', { ascending: true })
+    .order('created_at', { ascending: false });
+
+  if (error) return [];
+  return data || [];
+}
+
+export async function getAllPartners(): Promise<Partner[]> {
+  const { data, error } = await supabase
+    .from('partners')
+    .select('*')
+    .order('sort_order', { ascending: true })
+    .order('created_at', { ascending: false });
+
+  if (error) return [];
+  return data || [];
+}
+
+export async function addPartner(partner: Omit<Partner, 'id' | 'created_at' | 'updated_at'>): Promise<Partner> {
+  const { data, error } = await supabase
+    .from('partners')
+    .insert(partner)
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function updatePartner(id: number, updates: Partial<Partner>): Promise<Partner> {
+  const { data, error } = await supabase
+    .from('partners')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function deletePartner(id: number): Promise<boolean> {
+  const { error } = await supabase
+    .from('partners')
+    .delete()
+    .eq('id', id);
+
+  if (error) throw new Error(error.message);
+  return true;
+}
+
+// ─── Industry Directory ─────────────────────────────────────────────────────
+
+export interface DirectoryListing {
+  id: number;
+  name: string;
+  directory_type: 'company' | 'crew' | 'service' | 'training';
+  category: string;
+  description: string;
+  country: string;
+  city?: string;
+  website?: string;
+  email?: string;
+  phone?: string;
+  logo_url?: string;
+  // Company
+  speciality?: string;
+  notable_projects?: string;
+  year_founded?: number;
+  company_size?: 'indie' | 'mid' | 'major';
+  // Crew
+  role?: string;
+  secondary_roles?: string;
+  bio?: string;
+  portfolio_url?: string;
+  credits?: string;
+  availability?: 'available' | 'busy' | 'selective';
+  day_rate_range?: string;
+  // Service
+  service_type?: string;
+  pricing_tier?: 'budget' | 'mid' | 'premium';
+  // Training
+  program_type?: 'school' | 'workshop' | 'online' | 'mentorship' | 'masterclass';
+  duration?: string;
+  cost?: string;
+  accreditation?: string;
+  next_intake?: string;
+  // Meta
+  status: 'approved' | 'pending' | 'rejected';
+  featured: boolean;
+  verified: boolean;
+  votes: number;
+  submitted_by_email?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export async function getDirectoryListings(type?: string): Promise<DirectoryListing[]> {
+  try {
+    let query = supabase
+      .from('directory_listings')
+      .select('*')
+      .eq('status', 'approved')
+      .order('featured', { ascending: false })
+      .order('votes', { ascending: false })
+      .order('name', { ascending: true });
+
+    if (type) {
+      query = query.eq('directory_type', type);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+    return data as DirectoryListing[];
+  } catch (error) {
+    console.error('Failed to fetch directory listings', error);
+    return [];
+  }
+}
+
+export async function getAllDirectoryListings(): Promise<DirectoryListing[]> {
+  try {
+    const { data, error } = await supabase
+      .from('directory_listings')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data as DirectoryListing[];
+  } catch (error) {
+    console.error('Failed to fetch all directory listings', error);
+    return [];
+  }
+}
+
+export async function submitDirectoryListing(listing: Omit<DirectoryListing, 'id' | 'status' | 'featured' | 'verified' | 'votes' | 'created_at' | 'updated_at'>) {
+  const { data, error } = await supabase
+    .from('directory_listings')
+    .insert([{ ...listing, status: 'pending', featured: false, verified: false, votes: 0 }])
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+
+  // Notify admin
+  try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    const typeLabels: Record<string, string> = { company: 'Production Company', crew: 'Crew Member', service: 'Service Provider', training: 'Training Program' };
+    await resend.emails.send({
+      from: 'Film Resource Africa <hello@film-resource-africa.com>',
+      to: ['hello@film-resource-africa.com'],
+      subject: `New Directory Listing: ${listing.name} (${typeLabels[listing.directory_type] || listing.directory_type})`,
+      html: `
+        <div style="font-family: sans-serif; padding: 20px; color: #333; max-width: 600px; margin: auto; border: 1px solid #eee; border-radius: 12px;">
+          <h2 style="color: #3b82f6;">New Directory Submission</h2>
+          <p>A new ${typeLabels[listing.directory_type] || listing.directory_type} listing has been submitted.</p>
+          <div style="background: #f9fafb; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <p style="margin: 5px 0;"><strong>Name:</strong> ${listing.name}</p>
+            <p style="margin: 5px 0;"><strong>Type:</strong> ${typeLabels[listing.directory_type]}</p>
+            <p style="margin: 5px 0;"><strong>Category:</strong> ${listing.category}</p>
+            <p style="margin: 5px 0;"><strong>Country:</strong> ${listing.country}${listing.city ? ', ' + listing.city : ''}</p>
+            ${listing.website ? `<p style="margin: 5px 0;"><strong>Website:</strong> ${listing.website}</p>` : ''}
+          </div>
+          <p><strong>Description:</strong></p>
+          <p style="line-height: 1.6;">${listing.description}</p>
+          <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+          <div style="margin-top: 20px; text-align: center;">
+            <a href="https://film-resource-africa.com/admin" style="background: #3b82f6; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold;">Go to Admin Dashboard</a>
+          </div>
+        </div>
+      `,
+    });
+  } catch (emailError) {
+    console.error('Failed to send directory notification email', emailError);
+  }
+
+  return data as DirectoryListing;
+}
+
+export async function updateDirectoryListing(id: number, updatedFields: Partial<DirectoryListing>) {
+  const { data, error } = await supabase
+    .from('directory_listings')
+    .update({ ...updatedFields, updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+  return data as DirectoryListing;
+}
+
+export async function deleteDirectoryListing(id: number) {
+  const { error } = await supabase
+    .from('directory_listings')
+    .delete()
+    .eq('id', id);
+
+  if (error) throw new Error(error.message);
+  return true;
+}
+
+export async function voteDirectoryListing(id: number) {
+  const { data: current } = await supabase
+    .from('directory_listings')
+    .select('votes')
+    .eq('id', id)
+    .single();
+
+  const { error } = await supabase
+    .from('directory_listings')
+    .update({ votes: (current?.votes || 0) + 1 })
+    .eq('id', id);
+
+  if (error) throw new Error(error.message);
+  return true;
 }
 
 export async function subscribeToNewsletter(email: string) {

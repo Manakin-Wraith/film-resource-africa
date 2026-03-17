@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter, Outfit } from 'next/font/google';
+import { Analytics } from '@vercel/analytics/next';
 import './globals.css';
 import { getHeaderStats } from './actions';
 
@@ -7,9 +8,32 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const outfit = Outfit({ subsets: ['latin'], variable: '--font-outfit' });
 
 export const metadata: Metadata = {
-  title: 'African Film Opportunities Directory',
-  description: 'Global programmes for African writers and producers',
+  title: 'Film Resource Africa — African Film Opportunities',
+  description: 'A curated directory of screenwriting labs, co-production funds, grants, fellowships, and pitch forums for African filmmakers and producers.',
+  metadataBase: new URL('https://film-resource-africa.com'),
   manifest: '/manifest.json',
+  openGraph: {
+    title: 'Film Resource Africa — African Film Opportunities',
+    description: 'A curated directory of screenwriting labs, co-production funds, grants, fellowships, and pitch forums for African filmmakers and producers.',
+    url: 'https://film-resource-africa.com',
+    siteName: 'Film Resource Africa',
+    images: [
+      {
+        url: '/logo_FRA.png',
+        width: 424,
+        height: 378,
+        alt: 'Film Resource Africa',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Film Resource Africa — African Film Opportunities',
+    description: 'A curated directory of screenwriting labs, co-production funds, grants, fellowships, and pitch forums for African filmmakers and producers.',
+    images: ['/logo_FRA.png'],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
@@ -54,6 +78,7 @@ export default async function RootLayout({
         </div>
         <BuyCoffeeButton />
         <MobileTabBar />
+        <Analytics />
       </body>
     </html>
   );

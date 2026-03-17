@@ -25,7 +25,7 @@ export default function BuyCoffeeButton() {
             Every coffee keeps us going <Heart size={10} className="text-red-400 fill-red-400" />
           </p>
           <a
-            href="https://pay.yoco.com/celebration-house-entertainment"
+            href="https://pay.yoco.com/celebration-house-entertainment?amount=55.00&reference=Coffee"
             target="_blank"
             rel="noopener noreferrer"
             className="mt-3 w-full inline-flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-semibold text-sm py-2.5 px-4 rounded-xl transition-all shadow-lg shadow-amber-500/20"

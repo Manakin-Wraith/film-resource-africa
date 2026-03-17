@@ -1,4 +1,4 @@
-import { getAllOpportunities } from '@/app/actions';
+import { getAllOpportunities, getAllCallSheetListings, getAllDirectoryListings, getAllPartners, getAllNewsAdmin } from '@/app/actions';
 import AdminClient from '@/components/AdminClient';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
@@ -11,7 +11,13 @@ export default async function AdminPage() {
     redirect('/login');
   }
 
-  const opportunities = await getAllOpportunities();
+  const [opportunities, callSheetListings, directoryListings, partners, newsItems] = await Promise.all([
+    getAllOpportunities(),
+    getAllCallSheetListings(),
+    getAllDirectoryListings(),
+    getAllPartners(),
+    getAllNewsAdmin(),
+  ]);
 
   return (
     <main className="min-h-screen bg-background relative z-10 p-8">
@@ -34,7 +40,7 @@ export default async function AdminPage() {
           </form>
         </header>
 
-        <AdminClient initialData={opportunities} />
+        <AdminClient initialData={opportunities} callSheetData={callSheetListings} directoryData={directoryListings} partnerData={partners} newsData={newsItems} />
       </div>
     </main>
   );

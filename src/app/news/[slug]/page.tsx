@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { getNewsArticle, getNews, getOpportunities } from '@/app/actions';
 import NewsletterCTA from '@/components/NewsletterCTA';
-import { ArrowLeft, ExternalLink, Calendar, Newspaper, AlertTriangle, Sparkles, Lightbulb } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Calendar, Newspaper, AlertTriangle, Sparkles, Lightbulb, Star } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,6 +13,7 @@ const categoryConfig: Record<string, { label: string; icon: typeof Newspaper; co
   deadline_alert: { label: 'Deadline Alert', icon: AlertTriangle, color: 'text-red-400', bg: 'bg-red-500/10 border-red-500/20' },
   new_opportunity: { label: 'New Opportunity', icon: Sparkles, color: 'text-green-400', bg: 'bg-green-500/10 border-green-500/20' },
   tip: { label: 'Pro Tip', icon: Lightbulb, color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20' },
+  community_spotlight: { label: 'Community Spotlight', icon: Star, color: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-500/20' },
 };
 
 function formatDate(dateStr: string) {

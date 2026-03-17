@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Calendar, DollarSign, ExternalLink, Plus, Heart, Clock, AlertTriangle, LayoutGrid, Sparkles, RefreshCw } from 'lucide-react';
+import { Search, Calendar, DollarSign, ExternalLink, Plus, Heart, Clock, AlertTriangle, LayoutGrid, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { Opportunity, voteOpportunity } from '@/app/actions';
 import OpportunityModal from './OpportunityModal';
 import { categoryConfig, getCategoryStyle } from '@/lib/categoryConfig';
-import { formatDeadline, isNewListing, isUpdatedListing } from '@/lib/dateUtils';
+import { formatDeadline, isNewListing } from '@/lib/dateUtils';
 
 const statusConfig: Record<string, { label: string; color: string; bg: string; icon: typeof Clock }> = {
   open: { label: 'Open', color: 'text-green-400', bg: 'bg-green-500/20 border-green-500/30', icon: Clock },
@@ -19,11 +19,9 @@ const statusConfig: Record<string, { label: string; color: string; bg: string; i
 export default function DirectoryClient({ initialData }: { initialData: Opportunity[] }) {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('All');
-  const [sortBy, setSortBy] = useState<'newest' | 'updated'>('newest');
   const [selectedOpp, setSelectedOpp] = useState<Opportunity | null>(null);
   const [opportunities, setOpportunities] = useState<Opportunity[]>(initialData);
   const [votedIds, setVotedIds] = useState<number[]>([]);
-  const [showClosed, setShowClosed] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem('film_resource_votes');
@@ -70,10 +68,8 @@ export default function DirectoryClient({ initialData }: { initialData: Opportun
     'AI & Emerging Tech': 'AI',
   };
 
-  const closedCount = opportunities.filter(opp => opp.application_status === 'closed').length;
-
   const filteredData = opportunities.filter((opp) => {
-    if (!showClosed && opp.application_status === 'closed') return false;
+    if (opp.application_status === 'closed') return false;
 
     const term = search.toLowerCase();
     const formatStr = (opp["For Films or Series?"] || "").toLowerCase();
@@ -89,15 +85,7 @@ export default function DirectoryClient({ initialData }: { initialData: Opportun
     if (filter === 'All') return true;
     
     return opp.category === filter;
-  }).sort((a, b) => {
-    if (sortBy === 'updated') {
-      const aDate = a.updated_at || a.created_at || '';
-      const bDate = b.updated_at || b.created_at || '';
-      if (aDate && bDate) return new Date(bDate).getTime() - new Date(aDate).getTime();
-      return b.id - a.id;
-    }
-    return b.id - a.id;
-  });
+  }).sort((a, b) => b.id - a.id);
 
   return (
     <div className="w-full">
@@ -166,37 +154,9 @@ export default function DirectoryClient({ initialData }: { initialData: Opportun
           </Link>
         </div>
 
-        {/* Sort, count & closed — single compact row */}
-        <div className="flex items-center justify-between md:justify-center gap-3 md:gap-4">
-          <div className="flex bg-white/5 p-1 rounded-xl border border-white/10 backdrop-blur-sm">
-            <button 
-              onClick={() => setSortBy('newest')}
-              className={`px-3.5 md:px-5 py-2 min-h-[40px] rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${sortBy === 'newest' ? 'bg-primary text-white shadow-lg' : 'text-foreground/50 hover:text-foreground'}`}
-            >
-              <Calendar size={12} />
-              Newest
-            </button>
-            <button 
-              onClick={() => setSortBy('updated')}
-              className={`px-3.5 md:px-5 py-2 min-h-[40px] rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${sortBy === 'updated' ? 'bg-purple-500 text-white shadow-lg' : 'text-foreground/50 hover:text-foreground'}`}
-            >
-              <RefreshCw size={12} />
-              Updated
-            </button>
-          </div>
+        {/* Result count */}
+        <div className="flex items-center justify-center">
           <span className="text-foreground/30 text-xs md:text-sm">{filteredData.length} results</span>
-          {closedCount > 0 && (
-            <button
-              onClick={() => setShowClosed(!showClosed)}
-              className={`text-xs font-medium px-3 py-2 min-h-[40px] rounded-lg border transition-all ${
-                showClosed
-                  ? 'bg-white/10 border-white/20 text-foreground/60'
-                  : 'bg-white/5 border-white/10 text-foreground/30 hover:text-foreground/50'
-              }`}
-            >
-              {showClosed ? 'Hide' : 'Show'} closed ({closedCount})
-            </button>
-          )}
         </div>
       </div>
 
@@ -235,12 +195,6 @@ export default function DirectoryClient({ initialData }: { initialData: Opportun
                       <span className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider border bg-gradient-to-r from-blue-500/20 to-purple-500/20 border-purple-500/30 text-purple-300 animate-pulse">
                         <Sparkles size={10} />
                         NEW
-                      </span>
-                    )}
-                    {!isNewListing(opp.created_at, opp.id) && isUpdatedListing(opp.created_at, opp.updated_at, opp.id) && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider border bg-amber-500/20 border-amber-500/30 text-amber-300">
-                        <RefreshCw size={10} />
-                        UPDATED
                       </span>
                     )}
                   </div>
