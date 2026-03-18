@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Mail, Send, CheckCircle2, AlertCircle } from 'lucide-react';
 import { submitInquiry, InquiryType } from '@/app/actions';
 
-export default function ContactModal({ isOpen, onClose, inquiryType = 'general' }: { isOpen: boolean, onClose: () => void, inquiryType?: InquiryType }) {
+export default function ContactModal({ isOpen, onClose, inquiryType = 'general', source }: { isOpen: boolean, onClose: () => void, inquiryType?: InquiryType, source?: string }) {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +23,7 @@ export default function ContactModal({ isOpen, onClose, inquiryType = 'general' 
     };
 
     try {
-      await submitInquiry(inquiry, inquiryType);
+      await submitInquiry(inquiry, inquiryType, source);
       setSuccess(true);
       setTimeout(() => {
         setSuccess(false);

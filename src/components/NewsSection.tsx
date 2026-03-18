@@ -1,10 +1,12 @@
 'use client';
 
+import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { NewsItem } from '@/app/actions';
 import { Newspaper, AlertTriangle, Sparkles, Lightbulb, ArrowRight, Clock, Star } from 'lucide-react';
 import { formatRelativeDate } from '@/lib/dateUtils';
+import { NewsGhostCard } from './GhostCard';
 
 const categoryConfig: Record<string, { icon: typeof Newspaper; label: string; color: string; bg: string }> = {
   industry_news: { icon: Newspaper, label: 'Industry News', color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20' },
@@ -14,8 +16,10 @@ const categoryConfig: Record<string, { icon: typeof Newspaper; label: string; co
   community_spotlight: { icon: Star, label: 'Community Spotlight', color: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-500/20' },
 };
 
-export default function NewsSection({ news }: { news: NewsItem[] }) {
-  if (!news.length) return null;
+const MAX_NEWS_GHOST_SLOTS = 3;
+
+export default function NewsSection({ news, onGhostClaim }: { news: NewsItem[]; onGhostClaim?: () => void }) {
+  if (!news.length && !onGhostClaim) return null;
 
   return (
     <section className="space-y-8">
@@ -35,56 +39,76 @@ export default function NewsSection({ news }: { news: NewsItem[] }) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {news.map((item) => {
-          const config = categoryConfig[item.category] || categoryConfig.industry_news;
-          const Icon = config.icon;
-          const href = item.slug ? `/news/${item.slug}` : '#';
+        {(() => {
+          // When showing a ghost card, trim news so the total (news + ghost) stays even
+          const showGhost = !!onGhostClaim && news.length >= 1;
+          const displayNews = showGhost && news.length % 2 === 0
+            ? news.slice(0, -1)  // trim one to keep total even
+            : news;
 
-          return (
-            <Link
-              key={item.id}
-              href={href}
-              className="glass-card rounded-[1.5rem] border border-white/10 hover:-translate-y-1 hover:shadow-[0_12px_30px_-10px_rgba(59,130,246,0.2)] transition-all duration-300 group flex flex-col overflow-hidden"
-            >
-              {item.image_url && (
-                <div className="relative w-full h-44 overflow-hidden">
-                  <Image
-                    src={item.image_url}
-                    alt={item.title}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+          return displayNews.map((item, i) => {
+            const config = categoryConfig[item.category] || categoryConfig.industry_news;
+            const Icon = config.icon;
+            const href = item.slug ? `/news/${item.slug}` : '#';
+
+            return (
+              <React.Fragment key={item.id}>
+                {/* Ghost card — 2nd position (after 1st news item) */}
+                {i === 1 && showGhost && (
+                  <NewsGhostCard
+                    key="news-ghost-0"
+                    variant="minimal"
+                    sectionLabel="Latest News"
+                    slotsAvailable={MAX_NEWS_GHOST_SLOTS}
+                    onClaim={onGhostClaim!}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                </div>
-              )}
-              <div className="p-6 flex flex-col flex-grow">
-                <div className="flex items-start justify-between gap-4 mb-4">
-                  <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider border ${config.bg} ${config.color}`}>
-                    <Icon size={14} />
-                    {config.label}
+                )}
+
+              <Link
+                href={href}
+                className="glass-card rounded-[1.5rem] border border-white/10 hover:-translate-y-1 hover:shadow-[0_12px_30px_-10px_rgba(59,130,246,0.2)] transition-all duration-300 group flex flex-col overflow-hidden"
+              >
+                {item.image_url && (
+                  <div className="relative w-full h-44 overflow-hidden">
+                    <Image
+                      src={item.image_url}
+                      alt={item.title}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                  </div>
+                )}
+                <div className="p-6 flex flex-col flex-grow">
+                  <div className="flex items-start justify-between gap-4 mb-4">
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider border ${config.bg} ${config.color}`}>
+                      <Icon size={14} />
+                      {config.label}
+                    </span>
+                    <span className="text-foreground/40 text-xs whitespace-nowrap flex items-center gap-1">
+                      <Clock size={12} />
+                      {formatRelativeDate(item.published_at)}
+                    </span>
+                  </div>
+
+                  <h3 className="text-lg font-bold font-heading mb-2 group-hover:text-primary transition-colors leading-snug">
+                    {item.title}
+                  </h3>
+
+                  <p className="text-foreground/60 text-sm leading-relaxed flex-grow mb-4">
+                    {item.summary}
+                  </p>
+
+                  <span className="inline-flex items-center gap-2 text-primary text-sm font-semibold mt-auto group-hover:gap-3 transition-all">
+                    Read article <ArrowRight size={14} />
                   </span>
-                  <span className="text-foreground/40 text-xs whitespace-nowrap flex items-center gap-1">
-                    <Clock size={12} />
-                    {formatRelativeDate(item.published_at)}
-                  </span>
                 </div>
-
-                <h3 className="text-lg font-bold font-heading mb-2 group-hover:text-primary transition-colors leading-snug">
-                  {item.title}
-                </h3>
-
-                <p className="text-foreground/60 text-sm leading-relaxed flex-grow mb-4">
-                  {item.summary}
-                </p>
-
-                <span className="inline-flex items-center gap-2 text-primary text-sm font-semibold mt-auto group-hover:gap-3 transition-all">
-                  Read article <ArrowRight size={14} />
-                </span>
-              </div>
-            </Link>
+              </Link>
+            </React.Fragment>
           );
-        })}
+          });
+        })()}
       </div>
     </section>
   );

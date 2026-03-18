@@ -2,13 +2,15 @@
 
 import { useState } from 'react';
 import { AlertTriangle, Clock, Sparkles, Plus } from 'lucide-react';
-import { Opportunity, NewsItem } from '@/app/actions';
+import { Opportunity, NewsItem, trackGhostCardClick } from '@/app/actions';
+import type { InquiryType } from '@/app/actions';
 import OpportunityRow from './OpportunityRow';
 import NewsSection from './NewsSection';
 import NewsletterCTA from './NewsletterCTA';
 import DirectoryClient from './DirectoryClient';
 import OpportunityModal from './OpportunityModal';
 import PartnersSection from './PartnersSection';
+import ContactModal from './ContactModal';
 
 interface HomeClientProps {
   closingSoon: Opportunity[];
@@ -21,6 +23,14 @@ interface HomeClientProps {
 
 export default function HomeClient({ closingSoon, openNow, newWave, justAdded, news, allOpportunities }: HomeClientProps) {
   const [selectedOpp, setSelectedOpp] = useState<Opportunity | null>(null);
+  const [isGhostModalOpen, setIsGhostModalOpen] = useState(false);
+  const [ghostSection, setGhostSection] = useState<string | undefined>(undefined);
+
+  const openAdvertiseModal = (section: string) => {
+    trackGhostCardClick(section);
+    setGhostSection(section);
+    setIsGhostModalOpen(true);
+  };
 
   return (
     <>
@@ -42,6 +52,8 @@ export default function HomeClient({ closingSoon, openNow, newWave, justAdded, n
               </div>
             }
             onSelect={setSelectedOpp}
+            ghostVariant="minimal"
+            onGhostClaim={() => openAdvertiseModal('Just Added')}
           />
         </section>
       )}
@@ -64,6 +76,8 @@ export default function HomeClient({ closingSoon, openNow, newWave, justAdded, n
               </div>
             }
             onSelect={setSelectedOpp}
+            ghostVariant="branded"
+            onGhostClaim={() => openAdvertiseModal('Closing Soon')}
           />
         </section>
       )}
@@ -86,6 +100,8 @@ export default function HomeClient({ closingSoon, openNow, newWave, justAdded, n
               </div>
             }
             onSelect={setSelectedOpp}
+            ghostVariant="branded"
+            onGhostClaim={() => openAdvertiseModal('Open Now')}
           />
         </section>
       )}
@@ -108,6 +124,8 @@ export default function HomeClient({ closingSoon, openNow, newWave, justAdded, n
               </div>
             }
             onSelect={setSelectedOpp}
+            ghostVariant="minimal"
+            onGhostClaim={() => openAdvertiseModal('The New Wave: AI Filmmaking')}
           />
         </section>
       )}
@@ -119,7 +137,7 @@ export default function HomeClient({ closingSoon, openNow, newWave, justAdded, n
       >
         <div className="absolute inset-0 pattern-zigzag pointer-events-none"></div>
         <div className="absolute top-0 left-1/2 w-80 h-64 bg-amber-500/8 rounded-full blur-[100px] -translate-y-1/2 -translate-x-1/2 pointer-events-none"></div>
-        <NewsSection news={news} />
+        <NewsSection news={news} onGhostClaim={() => openAdvertiseModal('Latest News')} />
       </section>
 
       {/* Newsletter Banner CTA */}
@@ -140,6 +158,14 @@ export default function HomeClient({ closingSoon, openNow, newWave, justAdded, n
 
       {/* Shared Modal */}
       <OpportunityModal selectedOpp={selectedOpp} onClose={() => setSelectedOpp(null)} />
+
+      {/* Ghost Card → Advertise inquiry modal */}
+      <ContactModal
+        isOpen={isGhostModalOpen}
+        onClose={() => { setIsGhostModalOpen(false); setGhostSection(undefined); }}
+        inquiryType={'advertise' as InquiryType}
+        source={ghostSection}
+      />
     </>
   );
 }

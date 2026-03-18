@@ -388,10 +388,14 @@ export interface Inquiry {
   created_at?: string;
 }
 
-export async function submitInquiry(inquiry: Omit<Inquiry, 'id' | 'status' | 'created_at'>, type: InquiryType = 'general') {
+export async function submitInquiry(inquiry: Omit<Inquiry, 'id' | 'status' | 'created_at'>, type: InquiryType = 'general', source?: string) {
+  const messageWithSource = source
+    ? `[Source: ${source}]\n\n${inquiry.message}`
+    : inquiry.message;
+
   const { error } = await supabase
     .from('contacts')
-    .insert([{ ...inquiry, type }]);
+    .insert([{ ...inquiry, message: messageWithSource, type }]);
 
   if (error) throw new Error(error.message);
 
@@ -401,11 +405,12 @@ export async function submitInquiry(inquiry: Omit<Inquiry, 'id' | 'status' | 'cr
     await resend.emails.send({
       from: 'Film Resource Africa <hello@film-resource-africa.com>',
       to: ['hello@film-resource-africa.com'],
-      subject: `[${type.toUpperCase()}] New Inquiry from ${inquiry.email}`,
+      subject: `[${type.toUpperCase()}]${source ? ` [${source}]` : ''} New Inquiry from ${inquiry.email}`,
       html: `
         <div style="font-family: sans-serif; padding: 20px; color: #333; max-width: 600px; margin: auto; border: 1px solid #eee; border-radius: 12px;">
           <h2 style="color: #3b82f6;">New Contact Inquiry</h2>
           <p>A new message has been received through the contact form.</p>
+          ${source ? `<p style="margin: 5px 0; padding: 8px 12px; background: #fef3c7; border-radius: 6px; font-size: 13px;"><strong>Source Section:</strong> ${source}</p>` : ''}
           <div style="background: #f9fafb; padding: 15px; border-radius: 8px; margin: 20px 0;">
             <p style="margin: 5px 0;"><strong>From:</strong> ${inquiry.name || 'Anonymous'}</p>
             <p style="margin: 5px 0;"><strong>Email:</strong> ${inquiry.email}</p>
@@ -422,6 +427,19 @@ export async function submitInquiry(inquiry: Omit<Inquiry, 'id' | 'status' | 'cr
   }
 
   return { success: true };
+}
+
+// ─── Ghost Card Click Tracking ──────────────────────────────────────────────
+
+export async function trackGhostCardClick(section: string) {
+  try {
+    await supabase
+      .from('ghost_card_clicks')
+      .insert([{ section }]);
+  } catch (err) {
+    // Silent fail — tracking should never block the user
+    console.error('Failed to track ghost card click', err);
+  }
 }
 
 // ─── The Call Sheet ──────────────────────────────────────────────────────────

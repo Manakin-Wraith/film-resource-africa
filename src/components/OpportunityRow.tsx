@@ -4,6 +4,7 @@ import { Opportunity } from '@/app/actions';
 import { Calendar, DollarSign, ExternalLink, AlertTriangle, Clock, Sparkles, RefreshCw } from 'lucide-react';
 import { getCategoryStyle } from '@/lib/categoryConfig';
 import { isNewListing, isUpdatedListing } from '@/lib/dateUtils';
+import GhostCard, { GhostCardVariant } from './GhostCard';
 
 const statusConfig: Record<string, { label: string; color: string; bg: string; icon: typeof Clock }> = {
   open: { label: 'Open', color: 'text-green-400', bg: 'bg-green-500/20 border-green-500/30', icon: Clock },
@@ -12,16 +13,20 @@ const statusConfig: Record<string, { label: string; color: string; bg: string; i
   closed: { label: 'Closed', color: 'text-foreground/40', bg: 'bg-white/5 border-white/10', icon: Clock },
 };
 
+const MAX_GHOST_SLOTS = 3;
+
 interface OpportunityRowProps {
   opportunities: Opportunity[];
   title: string;
   subtitle?: string;
   icon: React.ReactNode;
   onSelect: (opp: Opportunity) => void;
+  ghostVariant?: GhostCardVariant;
+  onGhostClaim?: () => void;
 }
 
-export default function OpportunityRow({ opportunities, title, subtitle, icon, onSelect }: OpportunityRowProps) {
-  if (!opportunities.length) return null;
+export default function OpportunityRow({ opportunities, title, subtitle, icon, onSelect, ghostVariant = 'minimal', onGhostClaim }: OpportunityRowProps) {
+  if (!opportunities.length && !onGhostClaim) return null;
 
   return (
     <section className="space-y-6">
@@ -37,6 +42,17 @@ export default function OpportunityRow({ opportunities, title, subtitle, icon, o
       </div>
 
       <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-thin snap-x snap-mandatory -mx-4 px-4">
+        {/* Ghost card — 1st position */}
+        {onGhostClaim && (
+          <GhostCard
+            key="ghost-0"
+            variant={ghostVariant}
+            sectionLabel={title}
+            slotsAvailable={MAX_GHOST_SLOTS}
+            onClaim={onGhostClaim}
+          />
+        )}
+
         {opportunities.map((opp) => {
           const status = statusConfig[opp.application_status || 'open'];
           const StatusIcon = status.icon;
