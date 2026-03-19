@@ -8,6 +8,7 @@ import { Opportunity, voteOpportunity } from '@/app/actions';
 import OpportunityModal from './OpportunityModal';
 import { categoryConfig, getCategoryStyle } from '@/lib/categoryConfig';
 import { formatDeadline, isNewListing } from '@/lib/dateUtils';
+import { decodeHtmlEntities } from '@/lib/textUtils';
 
 const statusConfig: Record<string, { label: string; color: string; bg: string; icon: typeof Clock }> = {
   open: { label: 'Open', color: 'text-green-400', bg: 'bg-green-500/20 border-green-500/30', icon: Clock },
@@ -234,7 +235,7 @@ export default function DirectoryClient({ initialData }: { initialData: Opportun
                 </div>
 
                 <p className="text-foreground/60 text-sm line-clamp-2 flex-grow mb-4 relative z-10 leading-relaxed">
-                  {opp["What Is It?"]}
+                  {decodeHtmlEntities(opp["What Is It?"])}
                 </p>
 
                 <div className="mt-auto relative z-10 flex items-center justify-between pt-4 border-t border-white/10">

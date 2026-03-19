@@ -5,6 +5,13 @@
  *   1. RSS feeds (African Film Press, Cineuropa, Screen Daily, etc.)
  *   2. Gmail newsletters (LinkedIn, Slated, festival alerts)
  *   3. Web search for new grants/funds/labs/festivals
+ *   4. Key organisation pages (Realness, Docubox, IDFA, Hubert Bals, etc.)
+ *
+ * After scanning and inserting, the --enrich flag runs a post-insert
+ * enrichment pass using Playwright (headless Chromium) to:
+ *   - Scrape full article content from JS-rendered sites (e.g. African Film Press)
+ *   - Fill in thin news summaries with multi-paragraph body text
+ *   - Populate opportunity fields (deadline, eligibility, format, cost) from source pages
  *
  * Deduplicates against existing opportunities in Supabase.
  * Inserts new finds as `pending` for admin review.
@@ -14,9 +21,14 @@
  *   node scan_opportunities.mjs              # full scan + insert
  *   node scan_opportunities.mjs --dry-run    # scan only, no inserts
  *   node scan_opportunities.mjs --news-only  # only scan for news, skip opportunities
+ *   node scan_opportunities.mjs --enrich     # scan + insert + Playwright enrichment
  *
  * Requires .env.local with:
  *   NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, RESEND_API_KEY
+ *
+ * For --enrich mode, also requires:
+ *   npm install playwright (in project or /tmp)
+ *   npx playwright install chromium
  */
 
 import { readFileSync } from 'fs';
@@ -42,6 +54,7 @@ if (!supabaseUrl || !supabaseKey) { console.error('Missing Supabase env vars'); 
 const args = process.argv.slice(2);
 const DRY_RUN = args.includes('--dry-run');
 const NEWS_ONLY = args.includes('--news-only');
+const ENRICH = args.includes('--enrich');
 
 // ─── Supabase REST helpers ───────────────────────────────────────────────────
 
@@ -63,6 +76,16 @@ async function supabaseInsert(table, item) {
     const err = await res.text();
     throw new Error(`Supabase INSERT ${table} failed: ${res.status} ${err}`);
   }
+  return res.json();
+}
+
+async function supabaseUpdate(table, id, updates) {
+  const res = await fetch(`${supabaseUrl}/rest/v1/${table}?id=eq.${id}`, {
+    method: 'PATCH',
+    headers: { ...headers, 'Content-Type': 'application/json', Prefer: 'return=representation' },
+    body: JSON.stringify(updates),
+  });
+  if (!res.ok) throw new Error(`Supabase UPDATE ${table} failed: ${res.status} ${await res.text()}`);
   return res.json();
 }
 
@@ -523,12 +546,199 @@ async function scanKeyPages(existingTitles) {
   return items;
 }
 
+// ─── Playwright enrichment ────────────────────────────────────────────────────
+//
+// JS-rendered sites (e.g. African Film Press) don't expose article content in
+// the static HTML. Playwright launches headless Chromium, waits for the JS to
+// render, then extracts paragraphs from the fully-hydrated DOM.
+//
+// For opportunities, it scrapes source pages for deadline, eligibility, format,
+// cost, and description — replacing the "To be confirmed" placeholders.
+
+async function enrichWithPlaywright() {
+  let chromium;
+  try {
+    ({ chromium } = await import('playwright'));
+  } catch {
+    console.log('  ⚠ Playwright not installed — skipping enrichment.');
+    console.log('    Install with: npm install playwright && npx playwright install chromium');
+    return;
+  }
+
+  const browser = await chromium.launch({ headless: true });
+  const context = await browser.newContext({
+    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+  });
+
+  // ── Phase A: Enrich thin news articles ──────────────────────────────────
+  console.log('\n🎭 Playwright enrichment — thin news articles...');
+  const allNews = await supabaseGet('news', 'select=id,title,content,url&order=id.desc&limit=120');
+  const thinNews = allNews.filter(n => (n.content || '').length < 150 && n.url);
+  console.log(`   ${thinNews.length} thin articles found`);
+
+  let newsEnriched = 0;
+  for (const item of thinNews) {
+    let page;
+    try {
+      page = await context.newPage();
+      await page.goto(item.url, { waitUntil: 'commit', timeout: 15000 });
+      await page.waitForTimeout(5000);
+      try { await page.waitForSelector('p', { timeout: 8000 }); } catch { /* ok */ }
+
+      const articleContent = await page.evaluate(() => {
+        const selectors = [
+          'article p', '[class*="article"] p', '[class*="content"] p',
+          '[class*="post"] p', '[class*="body"] p', 'main p',
+        ];
+        for (const sel of selectors) {
+          const paras = document.querySelectorAll(sel);
+          if (paras.length >= 2) {
+            const texts = Array.from(paras).map(p => p.textContent.trim()).filter(t => t.length > 30);
+            if (texts.length >= 2) return texts.join('\n\n');
+          }
+        }
+        const allP = Array.from(document.querySelectorAll('p'))
+          .map(p => p.textContent.trim())
+          .filter(t => t.length > 40 && !/cookie|subscribe|newsletter|sign up|terms|privacy/i.test(t));
+        if (allP.length >= 2) return allP.join('\n\n');
+
+        const divs = Array.from(document.querySelectorAll('div, section'))
+          .filter(el => (el.innerText || '').length > 200 && (el.innerText || '').length < 10000)
+          .sort((a, b) => (b.innerText || '').length - (a.innerText || '').length);
+        return divs.length > 0 ? divs[0].innerText.trim() : null;
+      });
+
+      if (articleContent && articleContent.length > (item.content || '').length + 50) {
+        let cleaned = articleContent.replace(/\n{3,}/g, '\n\n').replace(/^\s+/gm, '').trim().slice(0, 3000);
+        cleaned = cleaned.replace(/\s*(Share|Related|You may also|Read more|Sign up|Subscribe|Newsletter|Cookie|Privacy|©|Follow us)[\s\S]*$/i, '').trim();
+        if (cleaned.length > (item.content || '').length + 50) {
+          const summary = cleaned.replace(/\n/g, ' ').slice(0, 300).trim();
+          await supabaseUpdate('news', item.id, { content: cleaned, summary });
+          console.log(`  ✅ [${item.id}] ${item.title.slice(0, 55)} — ${(item.content || '').length}→${cleaned.length}`);
+          newsEnriched++;
+        }
+      }
+    } catch (err) {
+      console.log(`  ✗ [${item.id}] ${item.title.slice(0, 40)} — ${err.message.slice(0, 60)}`);
+    } finally {
+      if (page) await page.close().catch(() => {});
+    }
+  }
+  console.log(`   News enriched: ${newsEnriched} / ${thinNews.length}`);
+
+  // ── Phase B: Enrich opportunity fields ──────────────────────────────────
+  console.log('\n🎭 Playwright enrichment — opportunity fields...');
+  const allOpps = await supabaseGet('opportunities',
+    `select=id,title,"What Is It?","Apply:","For Films or Series?","Next Deadline","Who Can Apply / Eligibility","What Do You Get If Selected?","Cost",category&order=id.desc&limit=150`);
+  const needsEnrich = allOpps.filter(o =>
+    (o['For Films or Series?'] === 'To be confirmed') ||
+    (o['Next Deadline'] === 'To be confirmed') ||
+    (o['Who Can Apply / Eligibility'] === 'To be confirmed') ||
+    (o['What Do You Get If Selected?'] === 'To be confirmed') ||
+    (!o.category)
+  );
+  console.log(`   ${needsEnrich.length} opportunities need field enrichment`);
+
+  let oppsEnriched = 0;
+  for (const opp of needsEnrich) {
+    const url = opp['Apply:'];
+    if (!url) continue;
+    let page;
+    try {
+      page = await context.newPage();
+      await page.goto(url, { waitUntil: 'commit', timeout: 15000 });
+      await page.waitForTimeout(3000);
+
+      const scraped = await page.evaluate(() => {
+        const text = document.body.innerText || '';
+        const lower = text.toLowerCase();
+
+        // Deadline
+        let deadline = null;
+        const dlMatch = text.match(/deadline[:\s]*(\d{1,2}\s+(?:january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{4})/i)
+          || text.match(/closes?[:\s]*on?\s*(\d{1,2}\s+(?:january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{4})/i);
+        if (dlMatch) deadline = dlMatch[1];
+
+        // Eligibility
+        let eligibility = null;
+        const eligMatch = text.match(/(?:eligib[a-z]*|who can apply|open to|requirements?)[:\s]*([^.]{20,200}\.)/i);
+        if (eligMatch) eligibility = eligMatch[0].trim();
+
+        // Benefits
+        let benefits = null;
+        const benMatch = text.match(/(?:selected (?:projects?|participants?|filmmakers?) (?:will )?receive|support includes|grant (?:of|amount|value)|funding (?:of|up to))[:\s]*([^.]{20,300}\.)/i)
+          || text.match(/((?:€|£|\$|USD|EUR)\s*[\d,]+(?:\s*(?:thousand|million|k))?[^.]{0,200}\.)/i);
+        if (benMatch) benefits = benMatch[0].trim();
+
+        // Description
+        const paras = Array.from(document.querySelectorAll('p'))
+          .map(p => p.textContent.trim())
+          .filter(p => p.length > 50 && !/cookie|subscribe|privacy/i.test(p));
+        const description = paras.slice(0, 3).join(' ').slice(0, 600) || null;
+
+        // Format
+        let format = null;
+        if (/feature film/i.test(lower)) format = 'Feature Films';
+        else if (/short film/i.test(lower)) format = 'Short Films';
+        else if (/documentary/i.test(lower)) format = 'Documentary';
+        else if (/animation|animated/i.test(lower)) format = 'Animation';
+        else if (/series|tv|television/i.test(lower)) format = 'Series / TV';
+        else if (/all formats|any format/i.test(lower)) format = 'All Formats';
+
+        // Category
+        let category = null;
+        if (/lab|workshop|residency|fellowship|training|mentorship/i.test(lower)) category = 'Labs & Fellowships';
+        else if (/fund|grant|financ|support|bursary/i.test(lower)) category = 'Funds & Grants';
+        else if (/festival|screening|competition|call for (?:entries|films|submissions)/i.test(lower)) category = 'Festivals';
+        else if (/market|pitch|forum|co-?production/i.test(lower)) category = 'Markets & Pitching';
+        else if (/vr|xr|ar|immersive|ai|virtual/i.test(lower)) category = 'AI & Emerging Tech';
+
+        // Cost
+        let cost = 'Free';
+        if (/(?:entry |submission )?fee/i.test(lower)) cost = 'Check website';
+
+        return { description, deadline, eligibility, benefits, format, category, cost };
+      });
+
+      const updates = {};
+      if (scraped.description && (opp['What Is It?'] || '').length < scraped.description.length)
+        updates['What Is It?'] = scraped.description;
+      if (scraped.deadline && opp['Next Deadline'] === 'To be confirmed')
+        updates['Next Deadline'] = scraped.deadline;
+      if (scraped.eligibility && opp['Who Can Apply / Eligibility'] === 'To be confirmed')
+        updates['Who Can Apply / Eligibility'] = scraped.eligibility;
+      if (scraped.benefits && opp['What Do You Get If Selected?'] === 'To be confirmed')
+        updates['What Do You Get If Selected?'] = scraped.benefits;
+      if (scraped.format && opp['For Films or Series?'] === 'To be confirmed')
+        updates['For Films or Series?'] = scraped.format;
+      if (scraped.category && !opp.category)
+        updates.category = scraped.category;
+      if (scraped.cost && opp['Cost'] === 'To be confirmed')
+        updates['Cost'] = scraped.cost;
+
+      if (Object.keys(updates).length > 0) {
+        await supabaseUpdate('opportunities', opp.id, updates);
+        console.log(`  ✅ [${opp.id}] ${opp.title.slice(0, 50)} — ${Object.keys(updates).join(', ')}`);
+        oppsEnriched++;
+      }
+    } catch (err) {
+      // silent — many pages will fail and that's ok
+    } finally {
+      if (page) await page.close().catch(() => {});
+    }
+  }
+  console.log(`   Opps enriched: ${oppsEnriched} / ${needsEnrich.length}`);
+
+  await browser.close();
+  console.log('   🎭 Playwright enrichment complete.');
+}
+
 // ─── Main ────────────────────────────────────────────────────────────────────
 
 async function main() {
   const today = new Date().toISOString().slice(0, 10);
   console.log(`\n🎬 FRA Daily Opportunity Scanner — ${today}`);
-  console.log(`   Mode: ${DRY_RUN ? 'DRY RUN' : 'LIVE'}${NEWS_ONLY ? ' (news only)' : ''}`);
+  console.log(`   Mode: ${DRY_RUN ? 'DRY RUN' : 'LIVE'}${NEWS_ONLY ? ' (news only)' : ''}${ENRICH ? ' + enrichment' : ''}`);
 
   // 1. Load existing data for deduplication
   console.log('\n📦 Loading existing data...');
@@ -612,11 +822,14 @@ async function main() {
         console.log(`  SKIP (slug exists): ${item.title.slice(0, 60)}`);
         continue;
       }
+      // Auto-detect trailers/teasers for separate "Now Screening" section
+      const titleLower = item.title.toLowerCase();
+      const isTrailer = /\btrailer\b|\bteaser\b|\bfirst look\b|\bexclusive clip\b|\bsneak peek\b/.test(titleLower);
       const newsItem = {
         title: item.title,
         summary: (item.description || '').replace(/<[^>]+>/g, '').slice(0, 300),
         content: (item.description || '').replace(/<[^>]+>/g, ''),
-        category: 'industry_news',
+        category: isTrailer ? 'trailer' : 'industry_news',
         url: item.link || null,
         slug,
         image_url: item.imageUrl || null,
@@ -672,7 +885,12 @@ async function main() {
     }
   }
 
-  // 9. Summary
+  // 9. Playwright enrichment (optional)
+  if (ENRICH && !DRY_RUN) {
+    await enrichWithPlaywright();
+  }
+
+  // 10. Summary
   console.log('\n' + '─'.repeat(60));
   console.log(`📊 SCAN SUMMARY — ${today}`);
   console.log(`   RSS news found:      ${results.news.length}`);
@@ -682,7 +900,7 @@ async function main() {
   console.log(`   Opps inserted:       ${oppsInserted}`);
   console.log('─'.repeat(60));
 
-  // 10. Send admin summary email
+  // 11. Send admin summary email
   const totalNew = newsInserted + oppsInserted;
   if (totalNew > 0 && !DRY_RUN && resendApiKey) {
     console.log('\n📧 Sending admin summary...');

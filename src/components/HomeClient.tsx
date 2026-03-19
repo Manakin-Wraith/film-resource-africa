@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 import { AlertTriangle, Clock, Sparkles, Plus } from 'lucide-react';
-import { Opportunity, NewsItem, trackGhostCardClick } from '@/app/actions';
-import type { InquiryType } from '@/app/actions';
+import { Opportunity, NewsItem, trackSponsoredClick } from '@/app/actions';
+import type { InquiryType, SponsoredPlacement } from '@/app/actions';
 import OpportunityRow from './OpportunityRow';
 import NewsSection from './NewsSection';
+import NowScreeningSection from './NowScreeningSection';
 import NewsletterCTA from './NewsletterCTA';
 import DirectoryClient from './DirectoryClient';
 import OpportunityModal from './OpportunityModal';
@@ -18,18 +19,34 @@ interface HomeClientProps {
   newWave: Opportunity[];
   justAdded: Opportunity[];
   news: NewsItem[];
+  trailers: NewsItem[];
   allOpportunities: Opportunity[];
+  placements?: SponsoredPlacement[];
 }
 
-export default function HomeClient({ closingSoon, openNow, newWave, justAdded, news, allOpportunities }: HomeClientProps) {
+export default function HomeClient({ closingSoon, openNow, newWave, justAdded, news, trailers, allOpportunities, placements = [] }: HomeClientProps) {
   const [selectedOpp, setSelectedOpp] = useState<Opportunity | null>(null);
-  const [isGhostModalOpen, setIsGhostModalOpen] = useState(false);
-  const [ghostSection, setGhostSection] = useState<string | undefined>(undefined);
+  const [isAdModalOpen, setIsAdModalOpen] = useState(false);
+  const [adSource, setAdSource] = useState<string | undefined>(undefined);
 
-  const openAdvertiseModal = (section: string) => {
-    trackGhostCardClick(section);
-    setGhostSection(section);
-    setIsGhostModalOpen(true);
+  // Group placements by section for distribution
+  const placementsBySection = (section: string) =>
+    placements.filter(p => p.section === section);
+
+  const handleSponsoredClaim = (placement: SponsoredPlacement | null, section: string) => {
+    // Track the click
+    trackSponsoredClick(
+      placement?.id || null,
+      placement?.partner_id || null,
+      section,
+      placement?.slot_position || null
+    );
+    // Build source string with partner context
+    const source = placement
+      ? `${section} | ${placement.partner_name} | Slot ${placement.slot_position}`
+      : `${section} | Ghost Card`;
+    setAdSource(source);
+    setIsAdModalOpen(true);
   };
 
   return (
@@ -52,8 +69,6 @@ export default function HomeClient({ closingSoon, openNow, newWave, justAdded, n
               </div>
             }
             onSelect={setSelectedOpp}
-            ghostVariant="minimal"
-            onGhostClaim={() => openAdvertiseModal('Just Added')}
           />
         </section>
       )}
@@ -76,8 +91,6 @@ export default function HomeClient({ closingSoon, openNow, newWave, justAdded, n
               </div>
             }
             onSelect={setSelectedOpp}
-            ghostVariant="branded"
-            onGhostClaim={() => openAdvertiseModal('Closing Soon')}
           />
         </section>
       )}
@@ -100,8 +113,6 @@ export default function HomeClient({ closingSoon, openNow, newWave, justAdded, n
               </div>
             }
             onSelect={setSelectedOpp}
-            ghostVariant="branded"
-            onGhostClaim={() => openAdvertiseModal('Open Now')}
           />
         </section>
       )}
@@ -124,9 +135,19 @@ export default function HomeClient({ closingSoon, openNow, newWave, justAdded, n
               </div>
             }
             onSelect={setSelectedOpp}
-            ghostVariant="minimal"
-            onGhostClaim={() => openAdvertiseModal('The New Wave: AI Filmmaking')}
           />
+        </section>
+      )}
+
+      {/* Now Screening — Trailers & First Looks */}
+      {trailers.length > 0 && (
+        <section
+          id="now-screening"
+          className="relative rounded-3xl bg-gradient-to-b from-pink-500/[0.05] to-transparent border border-pink-500/10 p-6 md:p-8 -mx-4 md:mx-0 overflow-hidden"
+        >
+          <div className="absolute inset-0 pattern-zigzag pointer-events-none"></div>
+          <div className="absolute top-0 right-1/4 w-80 h-64 bg-pink-500/8 rounded-full blur-[100px] -translate-y-1/2 pointer-events-none"></div>
+          <NowScreeningSection trailers={trailers} />
         </section>
       )}
 
@@ -137,7 +158,11 @@ export default function HomeClient({ closingSoon, openNow, newWave, justAdded, n
       >
         <div className="absolute inset-0 pattern-zigzag pointer-events-none"></div>
         <div className="absolute top-0 left-1/2 w-80 h-64 bg-amber-500/8 rounded-full blur-[100px] -translate-y-1/2 -translate-x-1/2 pointer-events-none"></div>
-        <NewsSection news={news} onGhostClaim={() => openAdvertiseModal('Latest News')} />
+        <NewsSection
+          news={news}
+          placements={placementsBySection('Latest News')}
+          onSponsoredClaim={handleSponsoredClaim}
+        />
       </section>
 
       {/* Newsletter Banner CTA */}
@@ -159,12 +184,12 @@ export default function HomeClient({ closingSoon, openNow, newWave, justAdded, n
       {/* Shared Modal */}
       <OpportunityModal selectedOpp={selectedOpp} onClose={() => setSelectedOpp(null)} />
 
-      {/* Ghost Card → Advertise inquiry modal */}
+      {/* Sponsored / Ghost Card → Advertise inquiry modal */}
       <ContactModal
-        isOpen={isGhostModalOpen}
-        onClose={() => { setIsGhostModalOpen(false); setGhostSection(undefined); }}
+        isOpen={isAdModalOpen}
+        onClose={() => { setIsAdModalOpen(false); setAdSource(undefined); }}
         inquiryType={'advertise' as InquiryType}
-        source={ghostSection}
+        source={adSource}
       />
     </>
   );

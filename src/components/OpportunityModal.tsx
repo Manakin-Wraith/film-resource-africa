@@ -3,8 +3,32 @@
 import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo, useDragControls } from 'framer-motion';
 import { Calendar, DollarSign, FileText, ExternalLink, X, Info, Target, FileCheck, CheckCircle2, AlertCircle, Share2, Clock, AlertTriangle, Lightbulb } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import { Opportunity } from '@/app/actions';
 import { getCategoryStyle } from '@/lib/categoryConfig';
+import { decodeHtmlEntities } from '@/lib/textUtils';
+
+function ModalMarkdown({ text }: { text: string }) {
+  return (
+    <ReactMarkdown
+      components={{
+        p: ({ children }) => <p className="text-sm leading-relaxed text-foreground/75 mb-2 last:mb-0">{children}</p>,
+        ul: ({ children }) => <ul className="list-disc list-outside pl-5 mb-2 space-y-1">{children}</ul>,
+        ol: ({ children }) => <ol className="list-decimal list-outside pl-5 mb-2 space-y-1">{children}</ol>,
+        li: ({ children }) => <li className="text-sm leading-relaxed text-foreground/75">{children}</li>,
+        strong: ({ children }) => <strong className="font-bold text-foreground/90">{children}</strong>,
+        a: ({ href, children }) => (
+          <a href={href} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-primary/80 underline underline-offset-2 transition-colors">
+            {children}
+          </a>
+        ),
+        h3: ({ children }) => <h3 className="text-sm font-bold text-foreground/85 mt-3 mb-1">{children}</h3>,
+      }}
+    >
+      {decodeHtmlEntities(text)}
+    </ReactMarkdown>
+  );
+}
 
 interface OpportunityModalProps {
   selectedOpp: Opportunity | null;
@@ -141,9 +165,9 @@ export default function OpportunityModal({ selectedOpp, onClose }: OpportunityMo
 
                 {/* About — immediately under title */}
                 {selectedOpp["What Is It?"] && (
-                  <p className="text-[15px] md:text-base leading-relaxed text-foreground/70 pr-0 md:pr-12">
-                    {selectedOpp["What Is It?"]}
-                  </p>
+                  <div className="text-[15px] md:text-base leading-relaxed text-foreground/70 pr-0 md:pr-12">
+                    <ModalMarkdown text={selectedOpp["What Is It?"]} />
+                  </div>
                 )}
               </div>
 
@@ -159,7 +183,7 @@ export default function OpportunityModal({ selectedOpp, onClose }: OpportunityMo
                     </div>
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-wider text-accent/80 mb-1">Deadline</p>
-                      <p className="text-sm font-medium text-foreground/90 leading-snug">{selectedOpp["Next Deadline"]}</p>
+                      <p className="text-sm font-medium text-foreground/90 leading-snug">{decodeHtmlEntities(selectedOpp["Next Deadline"])}</p>
                     </div>
                   </div>
                 )}
@@ -170,7 +194,7 @@ export default function OpportunityModal({ selectedOpp, onClose }: OpportunityMo
                     </div>
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-wider text-green-400/80 mb-1">Cost</p>
-                      <p className="text-sm font-medium text-foreground/90 leading-snug">{selectedOpp["Cost"]}</p>
+                      <p className="text-sm font-medium text-foreground/90 leading-snug">{decodeHtmlEntities(selectedOpp["Cost"])}</p>
                     </div>
                   </div>
                 )}
@@ -181,7 +205,7 @@ export default function OpportunityModal({ selectedOpp, onClose }: OpportunityMo
                     </div>
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-wider text-primary/80 mb-1">Format</p>
-                      <p className="text-sm font-medium text-foreground/90 leading-snug">{selectedOpp["For Films or Series?"]}</p>
+                      <p className="text-sm font-medium text-foreground/90 leading-snug">{decodeHtmlEntities(selectedOpp["For Films or Series?"])}</p>
                     </div>
                   </div>
                 )}
@@ -192,7 +216,7 @@ export default function OpportunityModal({ selectedOpp, onClose }: OpportunityMo
                     </div>
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-wider text-cyan-400/80 mb-1">Eligibility</p>
-                      <p className="text-sm font-medium text-foreground/90 leading-snug">{selectedOpp["Who Can Apply / Eligibility"]}</p>
+                      <div className="text-sm font-medium text-foreground/90 leading-snug"><ModalMarkdown text={selectedOpp["Who Can Apply / Eligibility"]} /></div>
                     </div>
                   </div>
                 )}
@@ -205,9 +229,9 @@ export default function OpportunityModal({ selectedOpp, onClose }: OpportunityMo
                     <h3 className="flex items-center gap-2.5 text-base font-bold font-heading mb-3 text-green-400">
                       <Target size={20} /> What You Get
                     </h3>
-                    <p className="text-sm leading-relaxed text-foreground/75">
-                      {selectedOpp["What Do You Get If Selected?"]}
-                    </p>
+                    <div className="text-sm leading-relaxed text-foreground/75">
+                      <ModalMarkdown text={selectedOpp["What Do You Get If Selected?"]} />
+                    </div>
                   </section>
                 )}
 
@@ -216,9 +240,9 @@ export default function OpportunityModal({ selectedOpp, onClose }: OpportunityMo
                     <h3 className="flex items-center gap-2.5 text-base font-bold font-heading mb-3 text-blue-400">
                       <FileCheck size={20} /> What to Submit
                     </h3>
-                    <p className="text-sm leading-relaxed text-foreground/75">
-                      {selectedOpp["What to Submit"]}
-                    </p>
+                    <div className="text-sm leading-relaxed text-foreground/75">
+                      <ModalMarkdown text={selectedOpp["What to Submit"]} />
+                    </div>
                   </section>
                 )}
               </div>
@@ -229,9 +253,9 @@ export default function OpportunityModal({ selectedOpp, onClose }: OpportunityMo
                   <h3 className="flex items-center gap-2.5 text-base font-bold font-heading mb-3 text-purple-400">
                     <Lightbulb size={20} /> Insider Tips
                   </h3>
-                  <p className="text-sm leading-relaxed text-foreground/75 italic">
-                    &ldquo;{selectedOpp["Strongest Submission Tips"]}&rdquo;
-                  </p>
+                  <div className="text-sm leading-relaxed text-foreground/75 italic">
+                    &ldquo;<ModalMarkdown text={selectedOpp["Strongest Submission Tips"]} />&rdquo;
+                  </div>
                 </section>
               )}
               
@@ -242,7 +266,7 @@ export default function OpportunityModal({ selectedOpp, onClose }: OpportunityMo
                     <Clock size={18} className="text-accent" />
                   </div>
                   <p className="text-sm font-medium text-accent/90">
-                    {selectedOpp["CALENDAR REMINDER:"]}
+                    {decodeHtmlEntities(selectedOpp["CALENDAR REMINDER:"])}
                   </p>
                 </div>
               )}

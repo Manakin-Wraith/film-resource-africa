@@ -119,6 +119,7 @@ export default function Footer() {
             <div className="flex flex-col items-center md:items-end space-y-8">
               <div className="flex gap-4">
                 {[
+                  { icon: Twitter, href: "https://x.com/film_resource_", label: "X" },
                   { icon: Linkedin, href: "#", label: "LinkedIn" },
                 ].map((s, i) => (
                   <a 

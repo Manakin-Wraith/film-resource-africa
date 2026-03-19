@@ -36,7 +36,7 @@ export interface NewsItem {
   title: string;
   summary: string;
   content?: string;
-  category: 'industry_news' | 'deadline_alert' | 'new_opportunity' | 'tip' | 'community_spotlight';
+  category: 'industry_news' | 'deadline_alert' | 'new_opportunity' | 'tip' | 'community_spotlight' | 'trailer';
   url?: string;
   slug?: string;
   image_url?: string;
@@ -113,12 +113,31 @@ export async function getOpenOpportunities(): Promise<Opportunity[]> {
   }
 }
 
+export async function getTrailers(): Promise<NewsItem[]> {
+  try {
+    const { data, error } = await supabase
+      .from('news')
+      .select('*')
+      .eq('status', 'published')
+      .eq('category', 'trailer')
+      .order('published_at', { ascending: false })
+      .limit(10);
+      
+    if (error) throw error;
+    return data as NewsItem[];
+  } catch (error) {
+    console.error('Failed to fetch trailers', error);
+    return [];
+  }
+}
+
 export async function getNews(): Promise<NewsItem[]> {
   try {
     const { data, error } = await supabase
       .from('news')
       .select('*')
       .eq('status', 'published')
+      .neq('category', 'trailer')
       .order('published_at', { ascending: false })
       .limit(6);
       
@@ -429,16 +448,109 @@ export async function submitInquiry(inquiry: Omit<Inquiry, 'id' | 'status' | 'cr
   return { success: true };
 }
 
-// ─── Ghost Card Click Tracking ──────────────────────────────────────────────
+// ─── Sponsored Placements ───────────────────────────────────────────────────
 
-export async function trackGhostCardClick(section: string) {
+export interface SponsoredPlacement {
+  id: string;
+  partner_id: string;
+  partner_name: string;
+  partner_logo_url: string | null;
+  section: string;
+  slot_position: number;
+  variant: 'minimal' | 'branded';
+  cta_text: string;
+  start_date: string;
+  end_date: string | null;
+  active: boolean;
+}
+
+export async function getActivePlacements(): Promise<SponsoredPlacement[]> {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const { data, error } = await supabase
+      .from('sponsored_placements')
+      .select(`
+        id,
+        partner_id,
+        section,
+        slot_position,
+        variant,
+        cta_text,
+        start_date,
+        end_date,
+        active,
+        partners (
+          name,
+          logo_url
+        )
+      `)
+      .eq('active', true)
+      .lte('start_date', today)
+      .or(`end_date.is.null,end_date.gte.${today}`)
+      .order('slot_position', { ascending: true });
+
+    if (error) throw error;
+
+    return (data || []).map((p: Record<string, unknown>) => {
+      const partner = p.partners as Record<string, unknown> | null;
+      return {
+        id: p.id as string,
+        partner_id: p.partner_id as string,
+        partner_name: partner?.name as string || 'Partner',
+        partner_logo_url: (partner?.logo_url as string) || null,
+        section: p.section as string,
+        slot_position: p.slot_position as number,
+        variant: p.variant as 'minimal' | 'branded',
+        cta_text: p.cta_text as string,
+        start_date: p.start_date as string,
+        end_date: p.end_date as string | null,
+        active: p.active as boolean,
+      };
+    });
+  } catch (err) {
+    console.error('Failed to fetch active placements', err);
+    return [];
+  }
+}
+
+export async function trackSponsoredClick(
+  placementId: string | null,
+  partnerId: string | null,
+  section: string,
+  slotPosition: number | null
+) {
   try {
     await supabase
-      .from('ghost_card_clicks')
-      .insert([{ section }]);
+      .from('sponsored_clicks')
+      .insert([{
+        placement_id: placementId,
+        partner_id: partnerId,
+        section,
+        slot_position: slotPosition,
+      }]);
   } catch (err) {
     // Silent fail — tracking should never block the user
-    console.error('Failed to track ghost card click', err);
+    console.error('Failed to track sponsored click', err);
+  }
+}
+
+export async function trackSponsoredImpression(
+  placementId: string,
+  partnerId: string,
+  section: string,
+  slotPosition: number
+) {
+  try {
+    await supabase
+      .from('sponsored_impressions')
+      .insert([{
+        placement_id: placementId,
+        partner_id: partnerId,
+        section,
+        slot_position: slotPosition,
+      }]);
+  } catch (err) {
+    console.error('Failed to track sponsored impression', err);
   }
 }
 
@@ -738,14 +850,19 @@ export async function getApprovedPartners(): Promise<Partner[]> {
 }
 
 export async function getAllPartners(): Promise<Partner[]> {
-  const { data, error } = await supabase
-    .from('partners')
-    .select('*')
-    .order('sort_order', { ascending: true })
-    .order('created_at', { ascending: false });
+  try {
+    const { data, error } = await supabase
+      .from('partners')
+      .select('*')
+      .order('sort_order', { ascending: true })
+      .order('created_at', { ascending: false });
 
-  if (error) return [];
-  return data || [];
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Failed to fetch partners', error);
+    return [];
+  }
 }
 
 export async function addPartner(partner: Omit<Partner, 'id' | 'created_at' | 'updated_at'>): Promise<Partner> {

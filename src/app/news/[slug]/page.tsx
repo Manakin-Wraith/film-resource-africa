@@ -4,7 +4,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { getNewsArticle, getNews, getOpportunities } from '@/app/actions';
 import NewsletterCTA from '@/components/NewsletterCTA';
-import { ArrowLeft, ExternalLink, Calendar, Newspaper, AlertTriangle, Sparkles, Lightbulb, Star } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Calendar, Newspaper, AlertTriangle, Sparkles, Lightbulb, Star, Clapperboard } from 'lucide-react';
+import MarkdownBody from '@/components/MarkdownBody';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,6 +15,7 @@ const categoryConfig: Record<string, { label: string; icon: typeof Newspaper; co
   new_opportunity: { label: 'New Opportunity', icon: Sparkles, color: 'text-green-400', bg: 'bg-green-500/10 border-green-500/20' },
   tip: { label: 'Pro Tip', icon: Lightbulb, color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20' },
   community_spotlight: { label: 'Community Spotlight', icon: Star, color: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-500/20' },
+  trailer: { label: 'Trailer', icon: Clapperboard, color: 'text-pink-400', bg: 'bg-pink-500/10 border-pink-500/20' },
 };
 
 function formatDate(dateStr: string) {
@@ -155,11 +157,9 @@ export default async function NewsArticlePage({ params }: { params: Promise<{ sl
         {/* Article Body */}
         <article className="glass-card rounded-[2rem] p-8 md:p-12 border border-white/10 mb-12">
           <div className="prose prose-invert prose-lg max-w-none">
-            {article.content?.split('\n').map((paragraph, i) => (
-              <p key={i} className="text-foreground/80 leading-relaxed mb-6 text-lg">
-                {paragraph}
-              </p>
-            ))}
+            {article.content ? (
+              <MarkdownBody content={article.content} />
+            ) : null}
           </div>
 
           {/* Source Attribution */}

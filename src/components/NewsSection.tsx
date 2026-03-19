@@ -4,9 +4,10 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { NewsItem } from '@/app/actions';
-import { Newspaper, AlertTriangle, Sparkles, Lightbulb, ArrowRight, Clock, Star } from 'lucide-react';
+import { Newspaper, AlertTriangle, Sparkles, Lightbulb, ArrowRight, Clock, Star, Clapperboard } from 'lucide-react';
 import { formatRelativeDate } from '@/lib/dateUtils';
-import { NewsGhostCard } from './GhostCard';
+import { NewsSponsoredCard } from './SponsoredCard';
+import type { SponsoredPlacement } from '@/app/actions';
 
 const categoryConfig: Record<string, { icon: typeof Newspaper; label: string; color: string; bg: string }> = {
   industry_news: { icon: Newspaper, label: 'Industry News', color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20' },
@@ -14,12 +15,18 @@ const categoryConfig: Record<string, { icon: typeof Newspaper; label: string; co
   new_opportunity: { icon: Sparkles, label: 'New Opportunity', color: 'text-green-400', bg: 'bg-green-500/10 border-green-500/20' },
   tip: { icon: Lightbulb, label: 'Pro Tip', color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20' },
   community_spotlight: { icon: Star, label: 'Community Spotlight', color: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-500/20' },
+  trailer: { icon: Clapperboard, label: 'Trailer', color: 'text-pink-400', bg: 'bg-pink-500/10 border-pink-500/20' },
 };
 
-const MAX_NEWS_GHOST_SLOTS = 3;
+interface NewsSectionProps {
+  news: NewsItem[];
+  placements?: SponsoredPlacement[];
+  onSponsoredClaim?: (placement: SponsoredPlacement | null, section: string) => void;
+  onSponsoredImpression?: (placement: SponsoredPlacement) => void;
+}
 
-export default function NewsSection({ news, onGhostClaim }: { news: NewsItem[]; onGhostClaim?: () => void }) {
-  if (!news.length && !onGhostClaim) return null;
+export default function NewsSection({ news, placements = [], onSponsoredClaim }: NewsSectionProps) {
+  if (!news.length && !onSponsoredClaim) return null;
 
   return (
     <section className="space-y-8">
@@ -40,11 +47,22 @@ export default function NewsSection({ news, onGhostClaim }: { news: NewsItem[]; 
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {(() => {
-          // When showing a ghost card, trim news so the total (news + ghost) stays even
-          const showGhost = !!onGhostClaim && news.length >= 1;
-          const displayNews = showGhost && news.length % 2 === 0
-            ? news.slice(0, -1)  // trim one to keep total even
-            : news;
+          // Single sponsored card per section
+          const showSponsored = !!onSponsoredClaim;
+          const sponsoredCard = showSponsored ? (
+            <NewsSponsoredCard
+              key="news-sponsored-0"
+              placement={placements[0] || null}
+              sectionLabel="Latest News"
+              defaultVariant="minimal"
+              slotsAvailable={placements.length > 0 ? 0 : 1}
+              onClaim={(p) => onSponsoredClaim(p, 'Latest News')}
+            />
+          ) : null;
+
+          // Trim news so total (news + 1 sponsored) stays even for 2-col grid
+          const totalItems = news.length + (showSponsored ? 1 : 0);
+          const displayNews = totalItems % 2 !== 0 ? news.slice(0, -1) : news;
 
           return displayNews.map((item, i) => {
             const config = categoryConfig[item.category] || categoryConfig.industry_news;
@@ -53,16 +71,8 @@ export default function NewsSection({ news, onGhostClaim }: { news: NewsItem[]; 
 
             return (
               <React.Fragment key={item.id}>
-                {/* Ghost card — 2nd position (after 1st news item) */}
-                {i === 1 && showGhost && (
-                  <NewsGhostCard
-                    key="news-ghost-0"
-                    variant="minimal"
-                    sectionLabel="Latest News"
-                    slotsAvailable={MAX_NEWS_GHOST_SLOTS}
-                    onClaim={onGhostClaim!}
-                  />
-                )}
+                {/* Sponsored card — after 1st news item */}
+                {i === 1 && sponsoredCard}
 
               <Link
                 href={href}

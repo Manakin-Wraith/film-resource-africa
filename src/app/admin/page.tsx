@@ -11,13 +11,22 @@ export default async function AdminPage() {
     redirect('/login');
   }
 
-  const [opportunities, callSheetListings, directoryListings, partners, newsItems] = await Promise.all([
-    getAllOpportunities(),
-    getAllCallSheetListings(),
-    getAllDirectoryListings(),
-    getAllPartners(),
-    getAllNewsAdmin(),
-  ]);
+  let opportunities: Awaited<ReturnType<typeof getAllOpportunities>> = [];
+  let callSheetListings: Awaited<ReturnType<typeof getAllCallSheetListings>> = [];
+  let directoryListings: Awaited<ReturnType<typeof getAllDirectoryListings>> = [];
+  let partners: Awaited<ReturnType<typeof getAllPartners>> = [];
+  let newsItems: Awaited<ReturnType<typeof getAllNewsAdmin>> = [];
+  try {
+    [opportunities, callSheetListings, directoryListings, partners, newsItems] = await Promise.all([
+      getAllOpportunities(),
+      getAllCallSheetListings(),
+      getAllDirectoryListings(),
+      getAllPartners(),
+      getAllNewsAdmin(),
+    ]);
+  } catch (err) {
+    console.error('Admin data fetch failed:', err);
+  }
 
   return (
     <main className="min-h-screen bg-background relative z-10 p-8">

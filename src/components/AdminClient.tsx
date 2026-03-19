@@ -744,7 +744,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                   const updated = await updatePartner(editingPartnerId, { ...partnerForm, logo_url: logoUrl });
                   setPData(pData.map(p => p.id === editingPartnerId ? updated : p));
                 } else {
-                  const added = await addPartner({ name: partnerForm.name, logo_url: logoUrl, website: partnerForm.website || undefined, tier: partnerForm.tier || 'partner', status: 'approved', sort_order: partnerForm.sort_order || 0 });
+                  const added = await addPartner({ name: partnerForm.name!, logo_url: logoUrl, website: partnerForm.website || null, tier: partnerForm.tier || 'partner', status: 'approved', sort_order: partnerForm.sort_order || 0 } as any);
                   setPData([...pData, added]);
                 }
                 setIsAddingPartner(false);
