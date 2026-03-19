@@ -146,13 +146,38 @@ function slugify(text) {
 // ─── Source 1: RSS Feeds ─────────────────────────────────────────────────────
 
 const RSS_FEEDS = [
+  // ── Tier 1: Africa-focused film press ──
   {
     name: 'African Film Press',
     url: 'https://africanfilmpress.com/articles/feed.xml',
     type: 'news',
   },
   {
-    name: 'Cineuropa Africa',
+    name: 'Sinema Focus',
+    url: 'https://www.sinemafocus.com/feed/',
+    type: 'news',
+  },
+  {
+    name: 'Africa is a Country',
+    url: 'https://africasacountry.com/feed',
+    type: 'news',
+    filterRelevant: true,
+  },
+  {
+    name: 'Modern Ghana Entertainment',
+    url: 'https://www.modernghana.com/entertainment/rss.xml',
+    type: 'news',
+    filterRelevant: true,
+  },
+  {
+    name: 'Premium Times Arts',
+    url: 'https://www.premiumtimesng.com/arts-entertainment/feed',
+    type: 'news',
+    filterRelevant: true,
+  },
+  // ── Tier 2: International trade press (filter for Africa/relevance) ──
+  {
+    name: 'Cineuropa',
     url: 'https://cineuropa.org/en/rss.aspx?t=news',
     type: 'news',
   },
@@ -160,6 +185,36 @@ const RSS_FEEDS = [
     name: 'Screen Daily',
     url: 'https://www.screendaily.com/feeds/rss',
     type: 'news',
+  },
+  {
+    name: 'Variety',
+    url: 'https://variety.com/feed/',
+    type: 'news',
+    filterRelevant: true,
+  },
+  {
+    name: 'Deadline',
+    url: 'https://deadline.com/feed/',
+    type: 'news',
+    filterRelevant: true,
+  },
+  {
+    name: 'IndieWire',
+    url: 'https://www.indiewire.com/feed/',
+    type: 'news',
+    filterRelevant: true,
+  },
+  {
+    name: 'The Guardian Film',
+    url: 'https://www.theguardian.com/film/rss',
+    type: 'news',
+    filterRelevant: true,
+  },
+  {
+    name: 'Filmmaker Magazine',
+    url: 'https://filmmakermagazine.com/feed/',
+    type: 'news',
+    filterRelevant: true,
   },
 ];
 
@@ -210,12 +265,27 @@ async function fetchRSS(feed) {
 // ─── Source 2: Gmail newsletters ─────────────────────────────────────────────
 
 const GMAIL_SENDERS = [
+  // Industry trade press
   { query: 'from:cineuropa.org', name: 'Cineuropa' },
   { query: 'from:screendaily.com', name: 'Screen Daily' },
   { query: 'from:slated.com', name: 'Slated' },
-  { query: 'from:newsletters-noreply@linkedin.com subject:film OR subject:cinema OR subject:Africa', name: 'LinkedIn Film' },
+  { query: 'from:variety.com', name: 'Variety' },
+  { query: 'from:indiewire.com', name: 'IndieWire' },
+  // Platforms & festivals
   { query: 'from:noreply@filmfreeway.com', name: 'FilmFreeway' },
-  { query: 'subject:"call for" OR subject:"submission" OR subject:"deadline" from:(-game.co.za -gopro -parkrun)', name: 'Festival Alerts' },
+  { query: 'from:submittable.com', name: 'Submittable' },
+  { query: 'from:newsletters-noreply@linkedin.com subject:film OR subject:cinema OR subject:Africa', name: 'LinkedIn Film' },
+  // Funders & institutions
+  { query: 'from:bfi.org.uk', name: 'BFI' },
+  { query: 'from:europa-cinemas.org', name: 'Europa Cinemas' },
+  { query: 'from:realness.institute', name: 'Realness Institute' },
+  { query: 'from:berlinale.de OR from:talentpress.org', name: 'Berlinale / Talents' },
+  { query: 'from:iffr.com OR from:filmfestivalrotterdam.com', name: 'IFFR / Hubert Bals' },
+  { query: 'from:sundance.org OR from:sundanceinstitute.org', name: 'Sundance' },
+  { query: 'from:idfa.nl', name: 'IDFA' },
+  // Broad catch-all alerts
+  { query: 'subject:"call for" OR subject:"submission" OR subject:"deadline" from:(-game.co.za -gopro -parkrun -strava)', name: 'Festival Alerts' },
+  { query: 'subject:"open call" OR subject:"grant" (filmmaker OR cinema OR film) from:(-game.co.za -gopro -parkrun -strava)', name: 'Grant Alerts' },
 ];
 
 function gws(cmd) {
@@ -281,6 +351,7 @@ async function scanGmail() {
 // ─── Source 3: Web search for opportunities ──────────────────────────────────
 
 const SEARCH_QUERIES = [
+  // General African film opportunities
   'African film grants 2026 deadline',
   'film fund Africa submission 2026',
   'African filmmaker fellowship 2026',
@@ -290,6 +361,33 @@ const SEARCH_QUERIES = [
   'African documentary fund open call',
   'site:open-cities.com submissions accelerator',
   'Open Cities accelerator filmmaker submissions 2026',
+  // Regional specificity
+  'South African film fund NFVF open call 2026',
+  'Nigerian film grant Nollywood submission 2026',
+  'East African film lab Kenya Uganda Tanzania 2026',
+  'North African cinema fund Morocco Tunisia Egypt 2026',
+  'Francophone African film fund appel candidatures 2026',
+  'West African film fund Ghana Senegal 2026',
+  // Type-specific
+  'African animation fund submission 2026',
+  'African women filmmaker grant 2026',
+  'African short film fund open call 2026',
+  'African post-production fund finishing 2026',
+  'African screenwriting residency lab 2026',
+  'African VR XR immersive storytelling fund',
+  'African film distribution fund cinema release',
+  // Major funders tracking
+  'site:realness.institute open call 2026',
+  'site:docubox.org open call filmmakers',
+  'site:idfa.nl bertha fund Africa',
+  'site:sundance.org collab Africa lab',
+  'site:iffr.com hubert bals fund open',
+  'site:berlinale.de world cinema fund application',
+  'site:bfi.org.uk international fund Africa',
+  'site:hot-docs.ca crosscurrents fund',
+  'site:tribecafilminstitute.org grant Africa',
+  'site:durbanfilmmart.com call submissions',
+  'site:ffrr.info fund Africa',
 ];
 
 async function webSearch(query) {
@@ -325,17 +423,35 @@ async function webSearch(query) {
 // ─── Relevance filter ────────────────────────────────────────────────────────
 
 const RELEVANCE_KEYWORDS = [
+  // Countries & regions
   'african', 'africa', 'south africa', 'nigeria', 'kenya', 'ghana', 'egypt',
   'morocco', 'tunisia', 'senegal', 'ethiopia', 'tanzania', 'uganda', 'cameroon',
   'zimbabwe', 'mozambique', 'rwanda', 'congo', 'ivory coast', 'mali', 'burkina',
+  'angola', 'botswana', 'namibia', 'zambia', 'malawi', 'madagascar', 'mauritius',
+  'algeria', 'libya', 'sudan', 'somalia', 'benin', 'togo', 'gabon', 'chad',
+  'nollywood', 'east africa', 'west africa', 'north africa', 'southern africa',
+  'francophone', 'lusophone', 'anglophone',
+  // Industry terms
   'filmmaker', 'film fund', 'film grant', 'filmmaking', 'cinema', 'documentary',
   'festival', 'call for entries', 'submission', 'deadline', 'screenplay',
   'co-production', 'production fund', 'development fund', 'emerging talent',
   'short film', 'feature film', 'animation', 'post-production',
+  'distribution', 'exhibition', 'screening', 'premiere',
+  'film policy', 'film commission', 'film incentive', 'film tax',
+  'streaming', 'content creator', 'showrunner',
+  // Major festivals
   'sundance', 'berlinale', 'cannes', 'toronto', 'venice', 'locarno',
-  'durban', 'fespaco', 'zanzibar', 'marrakech', 'carthage',
-  'netflix', 'showmax', 'multichoice', 'dstv',
+  'durban', 'fespaco', 'zanzibar', 'marrakech', 'carthage', 'luxor',
+  'lagos film', 'joburg film', 'cape town film', 'nairobi film',
+  'afrikamera', 'afriff', 'amaa', 'africlap',
+  // Major funders & labs
+  'hubert bals', 'world cinema fund', 'bertha fund',
+  'realness', 'maisha', 'docubox', 'film lab',
+  'hot docs', 'idfa', 'sheffield', 'cph:dox',
+  // Platforms
+  'netflix', 'showmax', 'multichoice', 'dstv', 'canal+', 'amazon',
   'open cities', 'accelerator', 'emerging technologies',
+  'ai filmmaking', 'virtual production',
 ];
 
 function isRelevant(text) {
@@ -346,6 +462,65 @@ function isRelevant(text) {
     if (lower.includes(kw)) score++;
   }
   return score >= 2;
+}
+
+// ─── Source 4: Key organisation pages ────────────────────────────────────────
+
+const KEY_ORG_PAGES = [
+  { name: 'Realness Institute', url: 'https://realness.institute', selector: 'open call|applications|submit|deadline' },
+  { name: 'Docubox', url: 'https://docubox.org', selector: 'open call|applications|submit|deadline' },
+  { name: 'Durban FilmMart', url: 'https://durbanfilmmart.com', selector: 'call for|submissions|apply|deadline' },
+  { name: 'IDFA Bertha Fund', url: 'https://www.idfa.nl/en/info/idfa-bertha-fund', selector: 'apply|deadline|submit|open' },
+  { name: 'Hubert Bals Fund', url: 'https://iffr.com/en/hubert-bals-fund', selector: 'apply|deadline|submit|open' },
+  { name: 'World Cinema Fund', url: 'https://www.berlinale.de/en/world-cinema-fund/', selector: 'apply|deadline|submit|open' },
+  { name: 'Hot Docs', url: 'https://www.hotdocs.ca/funds', selector: 'crosscurrents|apply|deadline|submit' },
+  { name: 'Sundance Labs', url: 'https://www.sundance.org/programs', selector: 'apply|deadline|submit|lab' },
+  { name: 'FESPACO', url: 'https://fespaco.bf', selector: 'appel|candidatures|submit|deadline' },
+  { name: 'Maisha Film Lab', url: 'https://www.maishafilmlab.org', selector: 'apply|call|submit|deadline' },
+  { name: 'Open Cities Lab', url: 'https://open-cities.com', selector: 'accelerator|submissions|apply|deadline' },
+];
+
+async function scanKeyPages(existingTitles) {
+  const items = [];
+  for (const page of KEY_ORG_PAGES) {
+    try {
+      const res = await fetch(page.url, {
+        headers: { 'User-Agent': 'Mozilla/5.0 FRA-Scanner/1.0' },
+        signal: AbortSignal.timeout(15000),
+        redirect: 'follow',
+      });
+      if (!res.ok) {
+        console.log(`  ⚠ ${page.name}: HTTP ${res.status}`);
+        continue;
+      }
+      const html = await res.text();
+
+      // Extract links with text matching the selector keywords
+      const selectorPattern = new RegExp(page.selector, 'i');
+      const linkRegex = /<a[^>]+href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
+      let match;
+      while ((match = linkRegex.exec(html)) !== null) {
+        const href = match[1];
+        const text = match[2].replace(/<[^>]+>/g, '').trim();
+        if (!text || text.length < 10 || text.length > 200) continue;
+        if (!selectorPattern.test(text)) continue;
+        if (isJunkTitle(text)) continue;
+
+        const fullUrl = href.startsWith('http') ? href : new URL(href, page.url).href;
+        items.push({
+          title: text,
+          url: fullUrl,
+          snippet: `Found on ${page.name} website`,
+          source: page.name,
+          type: 'opportunity',
+        });
+      }
+      console.log(`  ✓ ${page.name}: scanned`);
+    } catch (err) {
+      console.log(`  ✗ ${page.name}: ${err.message}`);
+    }
+  }
+  return items;
 }
 
 // ─── Main ────────────────────────────────────────────────────────────────────
@@ -368,7 +543,9 @@ async function main() {
     const items = await fetchRSS(feed);
     for (const item of items) {
       if (isDuplicate(item.title, newsTitles)) continue;
-      if (!isRelevant(`${item.title} ${item.description || ''}`)) continue;
+      // Tier 1 Africa-focused feeds: skip relevance filter (already on-topic)
+      // Tier 2 international feeds: require relevance keywords
+      if (feed.filterRelevant && !isRelevant(`${item.title} ${item.description || ''}`)) continue;
       results.news.push(item);
     }
   }
@@ -399,7 +576,18 @@ async function main() {
     }
   }
 
-  // 5. Deduplicate within results
+  // 5. Scan key org pages for opportunity changes
+  if (!NEWS_ONLY) {
+    console.log('\n🌐 Checking key organisation pages...');
+    const keyPages = await scanKeyPages(oppTitles);
+    for (const item of keyPages) {
+      if (!isDuplicate(item.title, oppTitles)) {
+        results.opportunities.push(item);
+      }
+    }
+  }
+
+  // 6. Deduplicate within results
   const seenTitles = new Set();
   results.news = results.news.filter(item => {
     const key = item.title.toLowerCase().trim();
@@ -414,7 +602,7 @@ async function main() {
     return true;
   });
 
-  // 6. Insert news items
+  // 7. Insert news items
   let newsInserted = 0;
   if (results.news.length > 0) {
     console.log(`\n📰 Found ${results.news.length} new news items`);
@@ -448,7 +636,7 @@ async function main() {
     }
   }
 
-  // 7. Log opportunity leads (insert as pending for manual review)
+  // 8. Log opportunity leads (insert as pending for manual review)
   let oppsInserted = 0;
   if (results.opportunities.length > 0 && !NEWS_ONLY) {
     console.log(`\n🎯 Found ${results.opportunities.length} potential opportunity leads`);
@@ -484,7 +672,7 @@ async function main() {
     }
   }
 
-  // 8. Summary
+  // 9. Summary
   console.log('\n' + '─'.repeat(60));
   console.log(`📊 SCAN SUMMARY — ${today}`);
   console.log(`   RSS news found:      ${results.news.length}`);
@@ -494,7 +682,7 @@ async function main() {
   console.log(`   Opps inserted:       ${oppsInserted}`);
   console.log('─'.repeat(60));
 
-  // 9. Send admin summary email
+  // 10. Send admin summary email
   const totalNew = newsInserted + oppsInserted;
   if (totalNew > 0 && !DRY_RUN && resendApiKey) {
     console.log('\n📧 Sending admin summary...');
