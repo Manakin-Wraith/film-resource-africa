@@ -895,6 +895,21 @@ export async function addPartner(partner: Omit<Partner, 'id' | 'created_at' | 'u
     .single();
 
   if (error) throw new Error(error.message);
+
+  // Auto-create sponsored placement for Growth/Headline bundles
+  if (data && (partner.bundle === 'growth' || partner.bundle === 'headline')) {
+    await supabase.from('sponsored_placements').insert({
+      partner_id: data.id,
+      section: 'Latest News',
+      slot_position: 1,
+      variant: 'branded',
+      cta_text: partner.cta_text || 'Visit Website',
+      start_date: new Date().toISOString().split('T')[0],
+      end_date: null,
+      active: true,
+    });
+  }
+
   return data;
 }
 
@@ -907,6 +922,42 @@ export async function updatePartner(id: number, updates: Partial<Partner>): Prom
     .single();
 
   if (error) throw new Error(error.message);
+
+  // Auto-manage sponsored placement based on bundle
+  if (updates.bundle) {
+    const hasProfileCard = updates.bundle === 'growth' || updates.bundle === 'headline';
+    const { data: existing } = await supabase
+      .from('sponsored_placements')
+      .select('id')
+      .eq('partner_id', id)
+      .eq('section', 'Latest News')
+      .maybeSingle();
+
+    if (hasProfileCard && !existing) {
+      // Upgrading to Growth/Headline — create placement
+      await supabase.from('sponsored_placements').insert({
+        partner_id: id,
+        section: 'Latest News',
+        slot_position: 1,
+        variant: 'branded',
+        cta_text: updates.cta_text || data.cta_text || 'Visit Website',
+        start_date: new Date().toISOString().split('T')[0],
+        end_date: null,
+        active: true,
+      });
+    } else if (hasProfileCard && existing) {
+      // Already has placement — update cta_text if changed
+      await supabase.from('sponsored_placements')
+        .update({ cta_text: updates.cta_text || data.cta_text || 'Visit Website', active: true })
+        .eq('id', existing.id);
+    } else if (!hasProfileCard && existing) {
+      // Downgrading to Starter — deactivate placement
+      await supabase.from('sponsored_placements')
+        .update({ active: false })
+        .eq('id', existing.id);
+    }
+  }
+
   return data;
 }
 
