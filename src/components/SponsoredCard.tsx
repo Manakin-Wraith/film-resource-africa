@@ -290,7 +290,10 @@ export function NewsSponsoredCard({
               href={ctaUrl}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={e => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                onClaim(placement);
+              }}
               className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-500/15 border border-purple-500/25 text-purple-400 text-xs font-bold hover:bg-purple-500/25 transition-all"
             >
               {ctaText} <ExternalLink size={12} />

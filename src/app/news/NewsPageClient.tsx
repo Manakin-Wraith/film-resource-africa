@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { NewsItem } from '@/app/actions';
+import { NewsItem, trackSponsoredClick } from '@/app/actions';
 import type { SponsoredPlacement } from '@/app/actions';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import { NewsSponsoredCard } from '@/components/SponsoredCard';
@@ -106,6 +106,7 @@ export default function NewsPageClient({ news, placements = [] }: { news: NewsIt
                     defaultVariant="branded"
                     slotsAvailable={0}
                     onClaim={() => {
+                      trackSponsoredClick(p.id, p.partner_id, 'news_feed', p.slot_position);
                       if (p.partner_cta_url) window.open(p.partner_cta_url, '_blank');
                     }}
                   />

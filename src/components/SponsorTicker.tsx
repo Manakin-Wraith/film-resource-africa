@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { GraduationCap, Users, Camera, Film, Megaphone, Building2, Handshake, ArrowRight, Crown, CheckCircle2 } from 'lucide-react';
 import ContactModal from './ContactModal';
+import { trackSponsoredClick } from '@/app/actions';
 import type { InquiryType, Partner } from '@/app/actions';
 
 const placeholders = [
@@ -36,6 +37,7 @@ export default function SponsorTicker({ partners = [] }: SponsorTickerProps) {
           href={p.website || '#'}
           target={p.website ? '_blank' : undefined}
           rel="noopener noreferrer"
+          onClick={() => trackSponsoredClick(null, String(p.id), 'ticker', null)}
           className={`flex items-center gap-3 px-7 py-4 mx-3 rounded-2xl border-2 backdrop-blur-md whitespace-nowrap transition-all duration-300 hover:scale-105 flex-shrink-0 relative ${
             isSponsor
               ? 'sponsor-chip-shimmer bg-gradient-to-r from-amber-500/15 to-yellow-500/10 border-amber-400/40 hover:border-amber-400/60'
