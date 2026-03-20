@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from 'next/server';
 // Receives batched pageview/event data from Vercel and inserts into Supabase
 // Docs: https://vercel.com/docs/drains/reference/analytics
 
-const DRAIN_SECRET = process.env.ANALYTICS_DRAIN_SECRET || '';
+const DRAIN_SECRET = (process.env.ANALYTICS_DRAIN_SECRET || '').trim();
 
 interface VercelAnalyticsEvent {
   schema: string;
@@ -34,10 +34,24 @@ interface VercelAnalyticsEvent {
   deviceModel?: string;
 }
 
+// Vercel sends a GET with x-vercel-verify header to validate the drain endpoint
+export async function GET(req: NextRequest) {
+  const verify = req.headers.get('x-vercel-verify');
+  if (verify && DRAIN_SECRET && verify === DRAIN_SECRET) {
+    return new NextResponse(verify, { status: 200 });
+  }
+  return NextResponse.json({ status: 'ok', auth: DRAIN_SECRET ? 'enabled' : 'open' });
+}
+
 export async function POST(req: NextRequest) {
-  // Verify drain secret to prevent unauthorized writes
-  const authHeader = req.headers.get('x-vercel-drain-secret');
-  if (DRAIN_SECRET && authHeader !== DRAIN_SECRET) {
+  // Auth: check header, query param, or Vercel's x-vercel-verify
+  const secret =
+    req.headers.get('x-vercel-drain-secret')?.trim() ||
+    req.headers.get('x-vercel-verify')?.trim() ||
+    req.nextUrl.searchParams.get('secret')?.trim() ||
+    '';
+
+  if (DRAIN_SECRET && secret !== DRAIN_SECRET) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
