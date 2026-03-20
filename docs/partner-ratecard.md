@@ -147,9 +147,19 @@ Placement in the weekly deadline alert email sent to all FRA subscribers.
 | `end_date` | date | Null = indefinite |
 | `active` | bool | Auto-managed on bundle changes |
 
-### `sponsored_clicks` / `sponsored_impressions` tables
+### `sponsored_clicks` table
 
-Click and impression tracking per placement. Recorded automatically on the frontend.
+Tracks real partner engagement clicks. Recorded automatically on the frontend via `trackSponsoredClick()`.
+
+| Click Source | `section` value | Tracked For |
+|-------------|----------------|-------------|
+| **Ticker logo click** | `ticker` | All bundles (Starter/Growth/Headline) |
+| **Profile Card CTA button** | `Latest News` | Growth + Headline (homepage & /news) |
+| **`/news` page card click** | `news_feed` | Growth + Headline |
+
+### `sponsored_impressions` table
+
+Impression tracking per placement. Fires once per session when a sponsored card enters the viewport.
 
 ---
 
@@ -194,5 +204,6 @@ Click and impression tracking per placement. Recorded automatically on the front
 - Homepage prime news slot is limited to **1 Headline partner** for exclusivity
 - `/news` page can show **multiple** Growth + Headline cards scattered in the feed
 - Newsletter goes out weekly (every Monday)
-- Impression and click tracking available for all placements
+- Click tracking covers ticker logos (all bundles), profile card CTAs, and /news card clicks
+- Impressions fire once per session per sponsored card view
 - All partner management is done via `/admin` — no direct DB edits needed
