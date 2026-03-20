@@ -309,6 +309,10 @@ const GMAIL_SENDERS = [
   // Broad catch-all alerts
   { query: 'subject:"call for" OR subject:"submission" OR subject:"deadline" from:(-game.co.za -gopro -parkrun -strava)', name: 'Festival Alerts' },
   { query: 'subject:"open call" OR subject:"grant" (filmmaker OR cinema OR film) from:(-game.co.za -gopro -parkrun -strava)', name: 'Grant Alerts' },
+  // Sales agents, distributors & broad film industry inbox
+  { query: '(film OR cinema OR documentary OR festival OR screening OR distribution OR "sales agent") -from:notifications@ -from:noreply@ -from:no-reply@ -from:game.co.za -from:gopro -from:parkrun -from:strava -from:uber -from:takealot -category:promotions -category:social', name: 'Inbox Film Leads' },
+  { query: 'subject:"market" OR subject:"sales" OR subject:"acquisition" OR subject:"slate" OR subject:"premiere" (film OR cinema) -from:notifications@ -from:noreply@', name: 'Sales & Market Leads' },
+  { query: 'subject:"opportunity" OR subject:"fund" OR subject:"fellowship" OR subject:"residency" OR subject:"workshop" (Africa OR African OR filmmaker) -from:notifications@', name: 'Opportunity Inbox' },
 ];
 
 function gws(cmd) {
