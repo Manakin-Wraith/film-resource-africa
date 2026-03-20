@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { getAllNews } from '@/app/actions';
+import { getAllNews, getActivePlacements } from '@/app/actions';
 import NewsPageClient from './NewsPageClient';
 
 export const dynamic = 'force-dynamic';
@@ -15,6 +15,13 @@ export const metadata: Metadata = {
 };
 
 export default async function NewsPage() {
-  const news = await getAllNews();
-  return <NewsPageClient news={news} />;
+  const [news, placements] = await Promise.all([
+    getAllNews(),
+    getActivePlacements(),
+  ]);
+  // Growth + Headline placements for the news feed
+  const newsPlaycements = placements.filter(
+    p => p.section === 'Latest News' && (p.partner_bundle === 'growth' || p.partner_bundle === 'headline')
+  );
+  return <NewsPageClient news={news} placements={newsPlaycements} />;
 }

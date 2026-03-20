@@ -4,7 +4,9 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { NewsItem } from '@/app/actions';
+import type { SponsoredPlacement } from '@/app/actions';
 import NewsletterCTA from '@/components/NewsletterCTA';
+import { NewsSponsoredCard } from '@/components/SponsoredCard';
 import { ArrowLeft, Newspaper, AlertTriangle, Sparkles, Lightbulb, Clock, ArrowRight, Star, Clapperboard, Play } from 'lucide-react';
 import RelativeDate from '@/components/RelativeDate';
 
@@ -24,7 +26,7 @@ const FILTER_TABS = [
   { key: 'tip', label: 'Tips', icon: Lightbulb },
 ] as const;
 
-export default function NewsPageClient({ news }: { news: NewsItem[] }) {
+export default function NewsPageClient({ news, placements = [] }: { news: NewsItem[]; placements?: SponsoredPlacement[] }) {
   const [activeFilter, setActiveFilter] = useState<string>('all');
 
   const filtered = activeFilter === 'all'
@@ -85,66 +87,91 @@ export default function NewsPageClient({ news }: { news: NewsItem[] }) {
           })}
         </div>
 
-        {/* News Grid */}
+        {/* News Grid with scattered sponsor profile cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
-          {filtered.map((item) => {
-            const config = categoryConfig[item.category] || categoryConfig.industry_news;
-            const Icon = config.icon;
-            const href = item.slug ? `/news/${item.slug}` : '#';
-            const isTrailer = item.category === 'trailer';
+          {(() => {
+            const items: React.ReactNode[] = [];
+            let placementIdx = 0;
 
-            return (
-              <Link
-                key={item.id}
-                href={href}
-                className="glass-card rounded-[1.5rem] border border-white/10 hover:-translate-y-1 hover:shadow-[0_12px_30px_-10px_rgba(59,130,246,0.2)] transition-all duration-300 group flex flex-col overflow-hidden"
-              >
-                {item.image_url && (
-                  <div className={`relative w-full ${isTrailer ? 'h-56' : 'h-48'} overflow-hidden`}>
-                    <Image
-                      src={item.image_url}
-                      alt={item.title}
-                      fill
-                      sizes="(max-width: 768px) 100vw, 50vw"
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                    {isTrailer && (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-14 h-14 rounded-full bg-pink-500/80 backdrop-blur-sm flex items-center justify-center border border-pink-400/30 group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(236,72,153,0.3)]">
-                          <Play size={22} className="text-white ml-1" fill="white" />
+            filtered.forEach((item, i) => {
+              // Insert a sponsor profile card every 4th position (after items 3, 7, 11...)
+              if (i > 0 && i % 4 === 0 && placementIdx < placements.length) {
+                const p = placements[placementIdx];
+                items.push(
+                  <NewsSponsoredCard
+                    key={`sponsor-${p.id}`}
+                    placement={p}
+                    sectionLabel="Latest News"
+                    defaultVariant="branded"
+                    slotsAvailable={0}
+                    onClaim={() => {
+                      if (p.partner_cta_url) window.open(p.partner_cta_url, '_blank');
+                    }}
+                  />
+                );
+                placementIdx++;
+              }
+
+              const config = categoryConfig[item.category] || categoryConfig.industry_news;
+              const Icon = config.icon;
+              const href = item.slug ? `/news/${item.slug}` : '#';
+              const isTrailer = item.category === 'trailer';
+
+              items.push(
+                <Link
+                  key={item.id}
+                  href={href}
+                  className="glass-card rounded-[1.5rem] border border-white/10 hover:-translate-y-1 hover:shadow-[0_12px_30px_-10px_rgba(59,130,246,0.2)] transition-all duration-300 group flex flex-col overflow-hidden"
+                >
+                  {item.image_url && (
+                    <div className={`relative w-full ${isTrailer ? 'h-56' : 'h-48'} overflow-hidden`}>
+                      <Image
+                        src={item.image_url}
+                        alt={item.title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                      {isTrailer && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="w-14 h-14 rounded-full bg-pink-500/80 backdrop-blur-sm flex items-center justify-center border border-pink-400/30 group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(236,72,153,0.3)]">
+                            <Play size={22} className="text-white ml-1" fill="white" />
+                          </div>
                         </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-                <div className="p-6 flex flex-col flex-grow">
-                  <div className="flex items-start justify-between gap-4 mb-4">
-                    <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider border ${config.bg} ${config.color}`}>
-                      <Icon size={14} />
-                      {config.label}
+                      )}
+                    </div>
+                  )}
+                  <div className="p-6 flex flex-col flex-grow">
+                    <div className="flex items-start justify-between gap-4 mb-4">
+                      <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider border ${config.bg} ${config.color}`}>
+                        <Icon size={14} />
+                        {config.label}
+                      </span>
+                      <span className="text-foreground/40 text-xs whitespace-nowrap flex items-center gap-1">
+                        <Clock size={12} />
+                        <RelativeDate date={item.published_at} />
+                      </span>
+                    </div>
+
+                    <h2 className="text-xl font-bold font-heading mb-2 group-hover:text-primary transition-colors leading-snug">
+                      {item.title}
+                    </h2>
+
+                    <p className="text-foreground/60 text-sm leading-relaxed flex-grow mb-4">
+                      {item.summary}
+                    </p>
+
+                    <span className="inline-flex items-center gap-2 text-primary text-sm font-semibold mt-auto group-hover:gap-3 transition-all">
+                      {isTrailer ? 'Watch trailer' : 'Read article'} <ArrowRight size={14} />
                     </span>
-                    <span className="text-foreground/40 text-xs whitespace-nowrap flex items-center gap-1">
-                      <Clock size={12} />
-                      <RelativeDate date={item.published_at} />
-                    </span>
                   </div>
+                </Link>
+              );
+            });
 
-                  <h2 className="text-xl font-bold font-heading mb-2 group-hover:text-primary transition-colors leading-snug">
-                    {item.title}
-                  </h2>
-
-                  <p className="text-foreground/60 text-sm leading-relaxed flex-grow mb-4">
-                    {item.summary}
-                  </p>
-
-                  <span className="inline-flex items-center gap-2 text-primary text-sm font-semibold mt-auto group-hover:gap-3 transition-all">
-                    {isTrailer ? 'Watch trailer' : 'Read article'} <ArrowRight size={14} />
-                  </span>
-                </div>
-              </Link>
-            );
-          })}
+            return items;
+          })()}
         </div>
 
         {filtered.length === 0 && (

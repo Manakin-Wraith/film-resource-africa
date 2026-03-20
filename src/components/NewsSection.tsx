@@ -47,15 +47,16 @@ export default function NewsSection({ news, placements = [], onSponsoredClaim }:
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {(() => {
-          // Single sponsored card per section
+          // Homepage: only Headline bundle gets the prime slot
+          const headlinePlacement = placements.find(p => p.partner_bundle === 'headline') || null;
           const showSponsored = !!onSponsoredClaim;
           const sponsoredCard = showSponsored ? (
             <NewsSponsoredCard
               key="news-sponsored-0"
-              placement={placements[0] || null}
+              placement={headlinePlacement}
               sectionLabel="Latest News"
               defaultVariant="minimal"
-              slotsAvailable={placements.length > 0 ? 0 : 1}
+              slotsAvailable={headlinePlacement ? 0 : 1}
               onClaim={(p) => onSponsoredClaim(p, 'Latest News')}
             />
           ) : null;
