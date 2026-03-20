@@ -6,7 +6,7 @@ import { getNewsArticle, getNews, getOpportunities } from '@/app/actions';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import { ArrowLeft, ExternalLink, Calendar, Newspaper, AlertTriangle, Sparkles, Lightbulb, Star, Clapperboard } from 'lucide-react';
 import MarkdownBody from '@/components/MarkdownBody';
-import { decodeEntities } from '@/lib/decodeEntities';
+import { decodeEntities, cleanText } from '@/lib/decodeEntities';
 
 export const dynamic = 'force-dynamic';
 
@@ -136,7 +136,7 @@ export default async function NewsArticlePage({ params }: { params: Promise<{ sl
           </h1>
 
           <p className="text-xl text-foreground/60 leading-relaxed">
-            {decodeEntities(article.summary)}
+            {cleanText(article.summary)}
           </p>
         </header>
 
@@ -159,7 +159,7 @@ export default async function NewsArticlePage({ params }: { params: Promise<{ sl
         <article className="glass-card rounded-[2rem] p-8 md:p-12 border border-white/10 mb-12">
           <div className="prose prose-invert prose-lg max-w-none">
             {article.content ? (
-              <MarkdownBody content={article.content} />
+              <MarkdownBody content={cleanText(article.content)} />
             ) : null}
           </div>
 

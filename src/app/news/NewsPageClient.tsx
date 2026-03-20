@@ -9,7 +9,7 @@ import NewsletterCTA from '@/components/NewsletterCTA';
 import { NewsSponsoredCard } from '@/components/SponsoredCard';
 import { ArrowLeft, Newspaper, AlertTriangle, Sparkles, Lightbulb, Clock, ArrowRight, Star, Clapperboard, Play } from 'lucide-react';
 import RelativeDate from '@/components/RelativeDate';
-import { decodeEntities } from '@/lib/decodeEntities';
+import { decodeEntities, cleanText } from '@/lib/decodeEntities';
 
 const categoryConfig: Record<string, { label: string; icon: typeof Newspaper; color: string; bg: string }> = {
   industry_news: { label: 'Industry News', icon: Newspaper, color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20' },
@@ -160,7 +160,7 @@ export default function NewsPageClient({ news, placements = [] }: { news: NewsIt
                     </h2>
 
                     <p className="text-foreground/60 text-sm leading-relaxed flex-grow mb-4">
-                      {decodeEntities(item.summary)}
+                      {cleanText(item.summary)}
                     </p>
 
                     <span className="inline-flex items-center gap-2 text-primary text-sm font-semibold mt-auto group-hover:gap-3 transition-all">

@@ -876,8 +876,8 @@ async function main() {
       const isTrailer = /\btrailer\b|\bteaser\b|\bfirst look\b|\bexclusive clip\b|\bsneak peek\b/.test(titleLower);
       const newsItem = {
         title: decodeEntities(item.title),
-        summary: decodeEntities((item.description || '').replace(/<[^>]+>/g, '')).slice(0, 300),
-        content: decodeEntities((item.description || '').replace(/<[^>]+>/g, '')),
+        summary: decodeEntities((item.description || '')).replace(/<[^>]+>/g, '').replace(/\s{2,}/g, ' ').trim().slice(0, 300),
+        content: decodeEntities((item.description || '')).replace(/<[^>]+>/g, '').replace(/\s{2,}/g, ' ').trim(),
         category: isTrailer ? 'trailer' : 'industry_news',
         url: item.link || null,
         slug,

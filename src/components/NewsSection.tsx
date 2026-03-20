@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { NewsItem } from '@/app/actions';
 import { Newspaper, AlertTriangle, Sparkles, Lightbulb, ArrowRight, Clock, Star, Clapperboard } from 'lucide-react';
 import { formatRelativeDate } from '@/lib/dateUtils';
-import { decodeEntities } from '@/lib/decodeEntities';
+import { decodeEntities, cleanText } from '@/lib/decodeEntities';
 import { NewsSponsoredCard } from './SponsoredCard';
 import type { SponsoredPlacement } from '@/app/actions';
 
@@ -109,7 +109,7 @@ export default function NewsSection({ news, placements = [], onSponsoredClaim }:
                   </h3>
 
                   <p className="text-foreground/60 text-sm leading-relaxed flex-grow mb-4">
-                    {decodeEntities(item.summary)}
+                    {cleanText(item.summary)}
                   </p>
 
                   <span className="inline-flex items-center gap-2 text-primary text-sm font-semibold mt-auto group-hover:gap-3 transition-all">

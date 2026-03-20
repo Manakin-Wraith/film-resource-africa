@@ -22,3 +22,16 @@ export function decodeEntities(str: string): string {
     .replace(/&hellip;/g, '\u2026')
     .replace(/&nbsp;/g, ' ');
 }
+
+/**
+ * Strip HTML tags from a string and clean up whitespace.
+ * Decodes entities first so encoded tags like &lt;p&gt; are also caught.
+ * Use for card summaries where only plain text should be displayed.
+ */
+export function cleanText(str: string): string {
+  if (!str) return str;
+  let s = decodeEntities(str);
+  s = s.replace(/<[^>]+>/g, '');
+  s = s.replace(/\s{2,}/g, ' ').trim();
+  return s;
+}
