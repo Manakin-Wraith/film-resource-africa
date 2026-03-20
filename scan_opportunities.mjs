@@ -56,6 +56,28 @@ const DRY_RUN = args.includes('--dry-run');
 const NEWS_ONLY = args.includes('--news-only');
 const ENRICH = args.includes('--enrich');
 
+// ─── HTML entity decoder ────────────────────────────────────────────────────
+
+function decodeEntities(str) {
+  if (!str) return str;
+  return str
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n, 10)))
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, n) => String.fromCharCode(parseInt(n, 16)))
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&rsquo;/g, "\u2019")
+    .replace(/&lsquo;/g, "\u2018")
+    .replace(/&rdquo;/g, "\u201D")
+    .replace(/&ldquo;/g, "\u201C")
+    .replace(/&mdash;/g, "\u2014")
+    .replace(/&ndash;/g, "\u2013")
+    .replace(/&hellip;/g, "\u2026")
+    .replace(/&nbsp;/g, ' ');
+}
+
 // ─── Supabase REST helpers ───────────────────────────────────────────────────
 
 const headers = { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` };
@@ -853,9 +875,9 @@ async function main() {
       const titleLower = item.title.toLowerCase();
       const isTrailer = /\btrailer\b|\bteaser\b|\bfirst look\b|\bexclusive clip\b|\bsneak peek\b/.test(titleLower);
       const newsItem = {
-        title: item.title,
-        summary: (item.description || '').replace(/<[^>]+>/g, '').slice(0, 300),
-        content: (item.description || '').replace(/<[^>]+>/g, ''),
+        title: decodeEntities(item.title),
+        summary: decodeEntities((item.description || '').replace(/<[^>]+>/g, '')).slice(0, 300),
+        content: decodeEntities((item.description || '').replace(/<[^>]+>/g, '')),
         category: isTrailer ? 'trailer' : 'industry_news',
         url: item.link || null,
         slug,
@@ -882,8 +904,8 @@ async function main() {
     console.log(`\n🎯 Found ${results.opportunities.length} potential opportunity leads`);
     for (const item of results.opportunities.slice(0, 15)) {
       const oppItem = {
-        title: item.title,
-        'What Is It?': item.snippet || 'Discovered via automated scan — needs review.',
+        title: decodeEntities(item.title),
+        'What Is It?': decodeEntities(item.snippet) || 'Discovered via automated scan — needs review.',
         'For Films or Series?': 'To be confirmed',
         'What Do You Get If Selected?': 'To be confirmed',
         'Cost': 'To be confirmed',

@@ -6,6 +6,7 @@ import { getNewsArticle, getNews, getOpportunities } from '@/app/actions';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import { ArrowLeft, ExternalLink, Calendar, Newspaper, AlertTriangle, Sparkles, Lightbulb, Star, Clapperboard } from 'lucide-react';
 import MarkdownBody from '@/components/MarkdownBody';
+import { decodeEntities } from '@/lib/decodeEntities';
 
 export const dynamic = 'force-dynamic';
 
@@ -131,11 +132,11 @@ export default async function NewsArticlePage({ params }: { params: Promise<{ sl
           </div>
 
           <h1 className="text-4xl md:text-5xl font-bold font-heading leading-tight">
-            {article.title}
+            {decodeEntities(article.title)}
           </h1>
 
           <p className="text-xl text-foreground/60 leading-relaxed">
-            {article.summary}
+            {decodeEntities(article.summary)}
           </p>
         </header>
 
@@ -240,7 +241,7 @@ export default async function NewsArticlePage({ params }: { params: Promise<{ sl
                       {itemConfig.label}
                     </span>
                     <h3 className="font-bold font-heading text-sm group-hover:text-primary transition-colors leading-snug">
-                      {item.title}
+                      {decodeEntities(item.title)}
                     </h3>
                   </Link>
                 );
