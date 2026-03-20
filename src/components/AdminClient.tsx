@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Opportunity, updateOpportunity, deleteOpportunity, addOpportunity, CallSheetListing, updateCallSheetListing, deleteCallSheetListing, DirectoryListing, updateDirectoryListing, deleteDirectoryListing, Partner, addPartner, updatePartner, deletePartner, uploadDirectoryImage, NewsItem, updateNewsItem, deleteNewsItem } from '@/app/actions';
-import { Edit2, Trash2, Plus, X, CheckCircle2, Clapperboard, Building2, Handshake, Upload, Crown, Star } from 'lucide-react';
+import { Edit2, Trash2, Plus, X, CheckCircle2, Clapperboard, Building2, Handshake, Upload, Crown, Star, Package, FileText, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function AdminClient({ initialData, callSheetData = [], directoryData = [], partnerData = [], newsData = [] }: { initialData: Opportunity[]; callSheetData?: CallSheetListing[]; directoryData?: DirectoryListing[]; partnerData?: Partner[]; newsData?: NewsItem[] }) {
@@ -29,6 +29,8 @@ export default function AdminClient({ initialData, callSheetData = [], directory
   const [newsFormData, setNewsFormData] = useState<Partial<NewsItem>>({});
   const [partnerLogoFile, setPartnerLogoFile] = useState<File | null>(null);
   const [partnerLogoPreview, setPartnerLogoPreview] = useState<string | null>(null);
+  const [featuredImageFile, setFeaturedImageFile] = useState<File | null>(null);
+  const [featuredImagePreview, setFeaturedImagePreview] = useState<string | null>(null);
   const [partnerSaving, setPartnerSaving] = useState(false);
 
   const handleEdit = (opp: Opportunity) => {
@@ -618,8 +620,8 @@ export default function AdminClient({ initialData, callSheetData = [], directory
               <tr className="border-b border-white/10">
                 <th className="p-4 font-heading text-sm opacity-60 uppercase tracking-wider">Logo</th>
                 <th className="p-4 font-heading text-sm opacity-60 uppercase tracking-wider">Name</th>
-                <th className="p-4 font-heading text-sm opacity-60 uppercase tracking-wider">Tier</th>
-                <th className="p-4 font-heading text-sm opacity-60 uppercase tracking-wider">Website</th>
+                <th className="p-4 font-heading text-sm opacity-60 uppercase tracking-wider">Bundle</th>
+                <th className="p-4 font-heading text-sm opacity-60 uppercase tracking-wider">Features</th>
                 <th className="p-4 font-heading text-sm opacity-60 uppercase tracking-wider">Status</th>
                 <th className="p-4 font-heading text-sm opacity-60 uppercase tracking-wider">Order</th>
                 <th className="p-4 font-heading text-sm opacity-60 uppercase tracking-wider text-right">Actions</th>
@@ -635,14 +637,21 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                   </td>
                   <td className="p-4 font-medium">
                     {p.name}
-                    {p.tier === 'sponsor' && <Crown size={12} className="inline ml-1.5 text-amber-400" />}
+                    {p.bundle === 'headline' && <Sparkles size={12} className="inline ml-1.5 text-amber-400" />}
+                    {p.bundle === 'growth' && <Crown size={12} className="inline ml-1.5 text-blue-400" />}
                   </td>
                   <td className="p-4">
-                    <span className={`px-2 py-1 rounded-lg text-xs font-bold ${p.tier === 'sponsor' ? 'bg-amber-500/20 text-amber-400' : 'bg-white/10 text-foreground/60'}`}>
-                      {p.tier}
+                    <span className={`px-2 py-1 rounded-lg text-xs font-bold ${p.bundle === 'headline' ? 'bg-amber-500/20 text-amber-400' : p.bundle === 'growth' ? 'bg-blue-500/20 text-blue-400' : 'bg-white/10 text-foreground/60'}`}>
+                      {p.bundle || 'starter'}
                     </span>
                   </td>
-                  <td className="p-4 text-sm text-primary/70 truncate max-w-[200px]">{p.website || '—'}</td>
+                  <td className="p-4">
+                    <div className="flex flex-wrap gap-1">
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-green-500/15 text-green-400">Ticker</span>
+                      {(p.bundle === 'growth' || p.bundle === 'headline') && <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-500/15 text-purple-400">News Card</span>}
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-cyan-500/15 text-cyan-400">{p.newsletter_type === 'spotlight' ? 'NL Spotlight' : 'NL Mention'}</span>
+                    </div>
+                  </td>
                   <td className="p-4">
                     <span className={`px-2 py-1 rounded-lg text-xs font-bold ${p.status === 'approved' ? 'bg-green-500/20 text-green-400' : p.status === 'pending' ? 'bg-amber-500/20 text-amber-400' : 'bg-red-500/10 text-red-400'}`}>
                       {p.status}
@@ -673,14 +682,41 @@ export default function AdminClient({ initialData, callSheetData = [], directory
       )}
 
       {/* Partner add/edit form */}
-      {activeTab === 'partners' && (isAddingPartner || editingPartnerId) && (
+      {activeTab === 'partners' && (isAddingPartner || editingPartnerId) && (() => {
+        const bundle = partnerForm.bundle || 'starter';
+        const hasProfileCard = bundle === 'growth' || bundle === 'headline';
+        const bundleConfig = {
+          starter: { label: 'Starter — $75/mo', color: 'border-white/20', desc: 'Ticker placement + Newsletter mention', tier: 'partner' as const, newsletter: 'mention' as const },
+          growth: { label: 'Growth — $250/mo', color: 'border-blue-500', desc: 'Sponsor ticker + News profile card + Newsletter mention', tier: 'sponsor' as const, newsletter: 'mention' as const },
+          headline: { label: 'Headline — $300/mo', color: 'border-amber-500', desc: 'Sponsor ticker + News profile card + Newsletter spotlight', tier: 'sponsor' as const, newsletter: 'spotlight' as const },
+        };
+        const cfg = bundleConfig[bundle];
+        return (
         <div className="glass-card p-6 rounded-2xl relative z-20">
           <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
             <h2 className="text-2xl font-bold font-heading">{editingPartnerId ? 'Edit Partner' : 'Add New Partner'}</h2>
-            <button onClick={() => { setIsAddingPartner(false); setEditingPartnerId(null); setPartnerForm({}); setPartnerLogoFile(null); setPartnerLogoPreview(null); }} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+            <button onClick={() => { setIsAddingPartner(false); setEditingPartnerId(null); setPartnerForm({}); setPartnerLogoFile(null); setPartnerLogoPreview(null); setFeaturedImageFile(null); setFeaturedImagePreview(null); }} className="p-2 hover:bg-white/10 rounded-full transition-colors">
               <X size={24} />
             </button>
           </div>
+
+          {/* Bundle selector */}
+          <div className="mb-8">
+            <label className="block text-sm font-medium opacity-80 mb-3">Select Bundle *</label>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {(Object.keys(bundleConfig) as Array<keyof typeof bundleConfig>).map(key => (
+                <button key={key} onClick={() => setPartnerForm({ ...partnerForm, bundle: key })} className={`p-4 rounded-xl border-2 text-left transition-all ${bundle === key ? bundleConfig[key].color + ' bg-white/5 ring-1 ring-white/20' : 'border-white/10 hover:border-white/20'}`}>
+                  <div className="flex items-center gap-2 mb-1">
+                    {key === 'headline' ? <Sparkles size={16} className="text-amber-400" /> : key === 'growth' ? <Crown size={16} className="text-blue-400" /> : <Package size={16} className="text-foreground/50" />}
+                    <span className="font-bold text-sm capitalize">{key}</span>
+                  </div>
+                  <p className="text-xs opacity-50 mt-1">{bundleConfig[key].desc}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Common fields */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium opacity-80 mb-2">Partner Name *</label>
@@ -691,15 +727,14 @@ export default function AdminClient({ initialData, callSheetData = [], directory
               <input type="url" value={partnerForm.website || ''} onChange={e => setPartnerForm({ ...partnerForm, website: e.target.value })} className="w-full bg-black/5 border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="https://..." />
             </div>
             <div>
-              <label className="block text-sm font-medium opacity-80 mb-2">Tier</label>
-              <select value={partnerForm.tier || 'partner'} onChange={e => setPartnerForm({ ...partnerForm, tier: e.target.value as Partner['tier'] })} className="w-full bg-black/5 border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-500">
-                <option value="partner">Partner</option>
-                <option value="sponsor">Sponsor</option>
-              </select>
-            </div>
-            <div>
               <label className="block text-sm font-medium opacity-80 mb-2">Sort Order</label>
               <input type="number" value={partnerForm.sort_order ?? 0} onChange={e => setPartnerForm({ ...partnerForm, sort_order: parseInt(e.target.value) || 0 })} className="w-full bg-black/5 border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-500" />
+            </div>
+            <div className="flex items-end">
+              <div className="px-4 py-3 rounded-xl bg-white/5 border border-white/10 w-full">
+                <p className="text-xs opacity-40 mb-1">Auto-set from bundle</p>
+                <p className="text-sm"><span className="font-medium">Tier:</span> <span className={cfg.tier === 'sponsor' ? 'text-amber-400' : 'text-foreground/60'}>{cfg.tier}</span> · <span className="font-medium">Newsletter:</span> <span className={cfg.newsletter === 'spotlight' ? 'text-amber-400' : 'text-foreground/60'}>{cfg.newsletter}</span></p>
+              </div>
             </div>
             <div className="md:col-span-2">
               <label className="block text-sm font-medium opacity-80 mb-2">Logo *</label>
@@ -724,12 +759,68 @@ export default function AdminClient({ initialData, callSheetData = [], directory
               </div>
             </div>
           </div>
+
+          {/* Company Profile section — Growth & Headline only */}
+          {hasProfileCard && (
+            <div className="mt-8 pt-6 border-t border-white/10">
+              <div className="flex items-center gap-2 mb-4">
+                <FileText size={18} className="text-purple-400" />
+                <h3 className="text-lg font-bold font-heading">Company Profile Card</h3>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-400 font-bold">News Card</span>
+              </div>
+              <p className="text-sm opacity-50 mb-6">This powers your branded profile card in the Latest News section — your mini storefront.</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium opacity-80 mb-2">About *</label>
+                  <textarea value={partnerForm.about || ''} onChange={e => setPartnerForm({ ...partnerForm, about: e.target.value })} className="w-full bg-black/5 border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 min-h-[100px]" placeholder="2-3 sentences about your company. What do you do? Who do you serve?" />
+                  <p className="text-xs opacity-40 mt-1">{(partnerForm.about || '').length}/300 characters recommended</p>
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium opacity-80 mb-2">Services / Specialities</label>
+                  <input type="text" value={partnerForm.services || ''} onChange={e => setPartnerForm({ ...partnerForm, services: e.target.value })} className="w-full bg-black/5 border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Post-Production, VFX, Color Grading, Sound Design" />
+                  <p className="text-xs opacity-40 mt-1">Comma-separated — displayed as tags on the profile card</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium opacity-80 mb-2">CTA Button Text</label>
+                  <input type="text" value={partnerForm.cta_text || ''} onChange={e => setPartnerForm({ ...partnerForm, cta_text: e.target.value })} className="w-full bg-black/5 border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Visit Website" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium opacity-80 mb-2">CTA Link URL</label>
+                  <input type="url" value={partnerForm.cta_url || ''} onChange={e => setPartnerForm({ ...partnerForm, cta_url: e.target.value })} className="w-full bg-black/5 border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="https://..." />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium opacity-80 mb-2">Featured Image (optional)</label>
+                  <div className="flex items-center gap-4">
+                    <div className="w-24 h-14 rounded-xl border border-white/10 bg-white/5 overflow-hidden flex items-center justify-center flex-shrink-0">
+                      {featuredImagePreview || partnerForm.featured_image_url ? (
+                        <img src={featuredImagePreview || partnerForm.featured_image_url || ''} alt="Featured" className="w-full h-full object-cover" />
+                      ) : (
+                        <Upload size={16} className="text-foreground/20" />
+                      )}
+                    </div>
+                    <div>
+                      <input type="file" accept="image/*" onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setFeaturedImageFile(file);
+                          setFeaturedImagePreview(URL.createObjectURL(file));
+                        }
+                      }} className="text-sm text-foreground/70 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-500 file:cursor-pointer file:transition-colors" />
+                      <p className="text-xs opacity-40 mt-1">Banner behind the profile card. Landscape recommended.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="mt-8 flex justify-end gap-4">
-            <button onClick={() => { setIsAddingPartner(false); setEditingPartnerId(null); setPartnerForm({}); setPartnerLogoFile(null); setPartnerLogoPreview(null); }} className="px-6 py-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors font-medium">
+            <button onClick={() => { setIsAddingPartner(false); setEditingPartnerId(null); setPartnerForm({}); setPartnerLogoFile(null); setPartnerLogoPreview(null); setFeaturedImageFile(null); setFeaturedImagePreview(null); }} className="px-6 py-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors font-medium">
               Cancel
             </button>
             <button disabled={partnerSaving} onClick={async () => {
               if (!partnerForm.name) { alert('Name is required'); return; }
+              if (hasProfileCard && !partnerForm.about) { alert('About is required for Growth/Headline bundles'); return; }
               setPartnerSaving(true);
               try {
                 let logoUrl = partnerForm.logo_url || '';
@@ -740,11 +831,34 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                 }
                 if (!logoUrl) { alert('Logo is required'); setPartnerSaving(false); return; }
 
+                let featuredUrl = partnerForm.featured_image_url || null;
+                if (featuredImageFile) {
+                  const fd = new FormData();
+                  fd.append('file', featuredImageFile);
+                  featuredUrl = await uploadDirectoryImage(fd);
+                }
+
+                const partnerPayload = {
+                  name: partnerForm.name!,
+                  logo_url: logoUrl,
+                  website: partnerForm.website || null,
+                  tier: cfg.tier,
+                  bundle: bundle,
+                  status: 'approved' as const,
+                  sort_order: partnerForm.sort_order || 0,
+                  newsletter_type: cfg.newsletter,
+                  about: partnerForm.about || null,
+                  services: partnerForm.services || null,
+                  cta_text: partnerForm.cta_text || 'Visit Website',
+                  cta_url: partnerForm.cta_url || partnerForm.website || null,
+                  featured_image_url: featuredUrl,
+                };
+
                 if (editingPartnerId) {
-                  const updated = await updatePartner(editingPartnerId, { ...partnerForm, logo_url: logoUrl });
+                  const updated = await updatePartner(editingPartnerId, partnerPayload);
                   setPData(pData.map(p => p.id === editingPartnerId ? updated : p));
                 } else {
-                  const added = await addPartner({ name: partnerForm.name!, logo_url: logoUrl, website: partnerForm.website || null, tier: partnerForm.tier || 'partner', status: 'approved', sort_order: partnerForm.sort_order || 0 } as any);
+                  const added = await addPartner(partnerPayload as any);
                   setPData([...pData, added]);
                 }
                 setIsAddingPartner(false);
@@ -752,6 +866,8 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                 setPartnerForm({});
                 setPartnerLogoFile(null);
                 setPartnerLogoPreview(null);
+                setFeaturedImageFile(null);
+                setFeaturedImagePreview(null);
                 router.refresh();
               } catch (err: any) {
                 alert(err.message || 'Failed to save partner');
@@ -763,7 +879,8 @@ export default function AdminClient({ initialData, callSheetData = [], directory
             </button>
           </div>
         </div>
-      )}
+        );
+      })()}
 
       {/* Spotlight edit view */}
       {activeTab === 'spotlight' && editingNewsId && (() => {

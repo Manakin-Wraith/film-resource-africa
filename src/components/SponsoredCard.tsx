@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import Image from 'next/image';
-import { ArrowRight, Plus } from 'lucide-react';
+import { ArrowRight, Plus, ExternalLink } from 'lucide-react';
 import type { SponsoredPlacement } from '@/app/actions';
 
 // ─── Value props per section (used for ghost fallback) ───────────────────────
@@ -220,7 +220,88 @@ export function NewsSponsoredCard({
     }
   }, [placement, onImpression]);
 
-  // ── Branded partner card (news grid) ──
+  // ── Company Profile Card (Growth/Headline bundles) ──
+  if (placement && placement.partner_about && (placement.partner_bundle === 'growth' || placement.partner_bundle === 'headline')) {
+    const services = placement.partner_services ? placement.partner_services.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const ctaUrl = placement.partner_cta_url || '#';
+    const ctaText = placement.cta_text || 'Visit Website';
+
+    return (
+      <div className="glass-card rounded-[1.5rem] border border-purple-500/20 hover:border-purple-500/40 hover:-translate-y-1 hover:shadow-[0_12px_30px_-10px_rgba(168,85,247,0.2)] transition-all duration-300 group flex flex-col overflow-hidden">
+        {/* Featured image or logo banner */}
+        <div className="relative w-full h-44 overflow-hidden">
+          {placement.partner_featured_image_url ? (
+            <>
+              <Image
+                src={placement.partner_featured_image_url}
+                alt={placement.partner_name}
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+            </>
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-purple-500/10 via-amber-500/5 to-purple-600/10 flex items-center justify-center">
+              {placement.partner_logo_url ? (
+                <Image src={placement.partner_logo_url} alt={placement.partner_name} width={120} height={40} className="object-contain max-h-[40px] opacity-60" />
+              ) : (
+                <span className="text-[11px] font-bold uppercase tracking-[3px] text-purple-400/40">{placement.partner_name}</span>
+              )}
+            </div>
+          )}
+          <div className="absolute top-3 right-3 z-10">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-[10px] font-bold uppercase tracking-wider border bg-purple-500/15 border-purple-500/25 text-purple-400 backdrop-blur-sm">
+              Partner Profile
+            </span>
+          </div>
+          {/* Logo overlay on featured image */}
+          {placement.partner_featured_image_url && placement.partner_logo_url && (
+            <div className="absolute bottom-3 left-4 z-10">
+              <div className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 overflow-hidden flex items-center justify-center">
+                <Image src={placement.partner_logo_url} alt={placement.partner_name} width={32} height={32} className="object-contain" />
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="p-6 flex flex-col flex-grow">
+          <h3 className="text-lg font-bold font-heading mb-2 text-foreground group-hover:text-purple-400 transition-colors leading-snug">
+            {placement.partner_name}
+          </h3>
+          <p className="text-foreground/60 text-sm leading-relaxed mb-4">
+            {placement.partner_about}
+          </p>
+
+          {/* Service tags */}
+          {services.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-4">
+              {services.slice(0, 5).map(s => (
+                <span key={s} className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-purple-500/10 border border-purple-500/15 text-purple-400">
+                  {s}
+                </span>
+              ))}
+            </div>
+          )}
+
+          <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/10">
+            <span className="text-[11px] text-foreground/25">Sponsored</span>
+            <a
+              href={ctaUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={e => e.stopPropagation()}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-500/15 border border-purple-500/25 text-purple-400 text-xs font-bold hover:bg-purple-500/25 transition-all"
+            >
+              {ctaText} <ExternalLink size={12} />
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Branded partner card (news grid) — no profile data ──
   if (placement) {
     const variant = placement.variant || defaultVariant;
 

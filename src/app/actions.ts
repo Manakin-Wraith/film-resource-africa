@@ -462,6 +462,11 @@ export interface SponsoredPlacement {
   start_date: string;
   end_date: string | null;
   active: boolean;
+  partner_about?: string | null;
+  partner_services?: string | null;
+  partner_cta_url?: string | null;
+  partner_featured_image_url?: string | null;
+  partner_bundle?: 'starter' | 'growth' | 'headline';
 }
 
 export async function getActivePlacements(): Promise<SponsoredPlacement[]> {
@@ -481,7 +486,12 @@ export async function getActivePlacements(): Promise<SponsoredPlacement[]> {
         active,
         partners (
           name,
-          logo_url
+          logo_url,
+          bundle,
+          about,
+          services,
+          cta_url,
+          featured_image_url
         )
       `)
       .eq('active', true)
@@ -498,6 +508,11 @@ export async function getActivePlacements(): Promise<SponsoredPlacement[]> {
         partner_id: p.partner_id as string,
         partner_name: partner?.name as string || 'Partner',
         partner_logo_url: (partner?.logo_url as string) || null,
+        partner_about: (partner?.about as string) || null,
+        partner_services: (partner?.services as string) || null,
+        partner_cta_url: (partner?.cta_url as string) || null,
+        partner_featured_image_url: (partner?.featured_image_url as string) || null,
+        partner_bundle: (partner?.bundle as 'starter' | 'growth' | 'headline') || 'starter',
         section: p.section as string,
         slot_position: p.slot_position as number,
         variant: p.variant as 'minimal' | 'branded',
@@ -829,10 +844,17 @@ export interface Partner {
   id: number;
   name: string;
   logo_url: string;
-  website?: string;
+  website?: string | null;
   tier: 'partner' | 'sponsor';
   status: 'pending' | 'approved' | 'rejected';
   sort_order: number;
+  bundle: 'starter' | 'growth' | 'headline';
+  about?: string | null;
+  services?: string | null;
+  cta_text?: string | null;
+  cta_url?: string | null;
+  featured_image_url?: string | null;
+  newsletter_type: 'mention' | 'spotlight';
   created_at: string;
   updated_at: string;
 }
