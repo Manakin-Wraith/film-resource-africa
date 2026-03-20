@@ -92,13 +92,12 @@ async function supabaseUpdate(table, id, updates) {
 // ─── Deduplication ───────────────────────────────────────────────────────────
 
 async function getExistingTitles() {
-  const opps = await supabaseGet('opportunities', 'select=title,url');
+  const opps = await supabaseGet('opportunities', 'select=title');
   const news = await supabaseGet('news', 'select=title,slug,url');
   // Normalize URLs for comparison (strip trailing slash, query params, protocol)
   const normalizeUrl = (u) => u ? u.toLowerCase().replace(/^https?:\/\//, '').replace(/\/+$/, '').replace(/\?.*$/, '') : '';
   return {
     oppTitles: new Set(opps.map(o => o.title.toLowerCase().trim())),
-    oppUrls: new Set(opps.filter(o => o.url).map(o => normalizeUrl(o.url))),
     newsTitles: new Set(news.map(n => n.title.toLowerCase().trim())),
     newsSlugs: new Set(news.filter(n => n.slug).map(n => n.slug)),
     newsUrls: new Set(news.filter(n => n.url).map(n => normalizeUrl(n.url))),
@@ -751,7 +750,7 @@ async function main() {
 
   // 1. Load existing data for deduplication
   console.log('\n📦 Loading existing data...');
-  const { oppTitles, oppUrls, newsTitles, newsSlugs, newsUrls, normalizeUrl } = await getExistingTitles();
+  const { oppTitles, newsTitles, newsSlugs, newsUrls, normalizeUrl } = await getExistingTitles();
   console.log(`   ${oppTitles.size} opportunities, ${newsTitles.size} news articles in DB`);
 
   const results = { news: [], opportunities: [], emails: [] };
@@ -794,7 +793,7 @@ async function main() {
         if (isJunkTitle(item.title)) continue;
         if (isDuplicate(item.title, oppTitles)) continue;
         if (isDuplicate(item.title, newsTitles)) continue;
-        if (item.link && (oppUrls.has(normalizeUrl(item.link)) || newsUrls.has(normalizeUrl(item.link)))) continue;
+        if (item.link && newsUrls.has(normalizeUrl(item.link))) continue;
         if (!isRelevant(`${item.title} ${item.snippet || ''}`)) continue;
         results.opportunities.push(item);
       }
