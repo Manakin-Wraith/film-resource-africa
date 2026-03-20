@@ -92,12 +92,17 @@ async function supabaseUpdate(table, id, updates) {
 // ─── Deduplication ───────────────────────────────────────────────────────────
 
 async function getExistingTitles() {
-  const opps = await supabaseGet('opportunities', 'select=title');
-  const news = await supabaseGet('news', 'select=title,slug');
+  const opps = await supabaseGet('opportunities', 'select=title,url');
+  const news = await supabaseGet('news', 'select=title,slug,url');
+  // Normalize URLs for comparison (strip trailing slash, query params, protocol)
+  const normalizeUrl = (u) => u ? u.toLowerCase().replace(/^https?:\/\//, '').replace(/\/+$/, '').replace(/\?.*$/, '') : '';
   return {
     oppTitles: new Set(opps.map(o => o.title.toLowerCase().trim())),
+    oppUrls: new Set(opps.filter(o => o.url).map(o => normalizeUrl(o.url))),
     newsTitles: new Set(news.map(n => n.title.toLowerCase().trim())),
     newsSlugs: new Set(news.filter(n => n.slug).map(n => n.slug)),
+    newsUrls: new Set(news.filter(n => n.url).map(n => normalizeUrl(n.url))),
+    normalizeUrl,
   };
 }
 
@@ -746,7 +751,7 @@ async function main() {
 
   // 1. Load existing data for deduplication
   console.log('\n📦 Loading existing data...');
-  const { oppTitles, newsTitles, newsSlugs } = await getExistingTitles();
+  const { oppTitles, oppUrls, newsTitles, newsSlugs, newsUrls, normalizeUrl } = await getExistingTitles();
   console.log(`   ${oppTitles.size} opportunities, ${newsTitles.size} news articles in DB`);
 
   const results = { news: [], opportunities: [], emails: [] };
@@ -757,6 +762,7 @@ async function main() {
     const items = await fetchRSS(feed);
     for (const item of items) {
       if (isDuplicate(item.title, newsTitles)) continue;
+      if (item.link && newsUrls.has(normalizeUrl(item.link))) continue;
       // Tier 1 Africa-focused feeds: skip relevance filter (already on-topic)
       // Tier 2 international feeds: require relevance keywords
       if (feed.filterRelevant && !isRelevant(`${item.title} ${item.description || ''}`)) continue;
@@ -764,11 +770,17 @@ async function main() {
     }
   }
 
-  // 3. Scan Gmail
+  // 3. Scan Gmail (with dedup against DB titles + URLs)
   console.log('\n📧 Scanning Gmail...');
   try {
     const emailItems = await scanGmail();
-    results.emails = emailItems;
+    results.emails = emailItems.filter(item => {
+      if (isDuplicate(item.title, oppTitles) || isDuplicate(item.title, newsTitles)) return false;
+      return true;
+    });
+    if (emailItems.length !== results.emails.length) {
+      console.log(`  ↳ Filtered ${emailItems.length - results.emails.length} duplicate email leads`);
+    }
   } catch (err) {
     console.log(`  ⚠ Gmail scan failed: ${err.message}`);
   }
@@ -782,6 +794,7 @@ async function main() {
         if (isJunkTitle(item.title)) continue;
         if (isDuplicate(item.title, oppTitles)) continue;
         if (isDuplicate(item.title, newsTitles)) continue;
+        if (item.link && (oppUrls.has(normalizeUrl(item.link)) || newsUrls.has(normalizeUrl(item.link)))) continue;
         if (!isRelevant(`${item.title} ${item.snippet || ''}`)) continue;
         results.opportunities.push(item);
       }
@@ -801,18 +814,25 @@ async function main() {
     }
   }
 
-  // 6. Deduplicate within results
+  // 6. Deduplicate within results (by title + URL)
   const seenTitles = new Set();
+  const seenUrls = new Set();
   results.news = results.news.filter(item => {
     const key = item.title.toLowerCase().trim();
+    const urlKey = item.link ? normalizeUrl(item.link) : null;
     if (seenTitles.has(key)) return false;
+    if (urlKey && seenUrls.has(urlKey)) return false;
     seenTitles.add(key);
+    if (urlKey) seenUrls.add(urlKey);
     return true;
   });
   results.opportunities = results.opportunities.filter(item => {
     const key = item.title.toLowerCase().trim();
+    const urlKey = item.link ? normalizeUrl(item.link) : null;
     if (seenTitles.has(key)) return false;
+    if (urlKey && seenUrls.has(urlKey)) return false;
     seenTitles.add(key);
+    if (urlKey) seenUrls.add(urlKey);
     return true;
   });
 
@@ -824,6 +844,10 @@ async function main() {
       const slug = slugify(item.title);
       if (newsSlugs.has(slug)) {
         console.log(`  SKIP (slug exists): ${item.title.slice(0, 60)}`);
+        continue;
+      }
+      if (item.link && newsUrls.has(normalizeUrl(item.link))) {
+        console.log(`  SKIP (URL exists): ${item.title.slice(0, 60)}`);
         continue;
       }
       // Auto-detect trailers/teasers for separate "Now Screening" section
