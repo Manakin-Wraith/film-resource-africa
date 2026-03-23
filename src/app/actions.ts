@@ -177,6 +177,23 @@ export async function getNewsArticle(slug: string): Promise<NewsItem | null> {
   }
 }
 
+export async function getPublishedSpotlights(): Promise<NewsItem[]> {
+  try {
+    const { data, error } = await supabase
+      .from('news')
+      .select('*')
+      .eq('status', 'published')
+      .eq('category', 'community_spotlight')
+      .order('published_at', { ascending: false });
+      
+    if (error) throw error;
+    return data as NewsItem[];
+  } catch (error) {
+    console.error('Failed to fetch published spotlights', error);
+    return [];
+  }
+}
+
 export async function getAllNews(): Promise<NewsItem[]> {
   try {
     const { data, error } = await supabase
