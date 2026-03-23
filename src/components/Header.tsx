@@ -1,10 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Menu, X, AlertTriangle, Clock, Database, Newspaper, Plus, Globe, Clapperboard, Building2, Star } from 'lucide-react';
+import { Menu, X, Database, Newspaper, Plus, Globe, Clapperboard, Building2, Star } from 'lucide-react';
 import Link from 'next/link';
-import { getUserTimezone } from '@/lib/dateUtils';
-
 interface HeaderProps {
   stats: {
     total: number;
@@ -16,54 +14,15 @@ interface HeaderProps {
 export default function Header({ stats }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [tz, setTz] = useState('');
-  const [localDate, setLocalDate] = useState('');
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll, { passive: true });
-    setTz(getUserTimezone());
-    setLocalDate(new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }));
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'shadow-lg' : ''}`}>
-      {/* Stats Strip */}
-      <div className={`transition-all duration-300 overflow-hidden ${scrolled ? 'max-h-0 opacity-0' : 'max-h-12 opacity-100'}`}>
-        <div className="bg-primary/10 backdrop-blur-md border-b border-white/5">
-          <div className="container mx-auto px-4 py-2 flex items-center justify-center gap-6 text-xs font-medium">
-            <span className="flex items-center gap-1.5 text-foreground/60">
-              <Database size={12} className="text-primary" />
-              <strong className="text-foreground/90">{stats.total}</strong> Opportunities
-            </span>
-            <span className="w-[1px] h-3 bg-white/15"></span>
-            {stats.closingSoon > 0 && (
-              <>
-                <span className="flex items-center gap-1.5 text-red-400">
-                  <AlertTriangle size={12} />
-                  <strong>{stats.closingSoon}</strong> Closing Soon
-                </span>
-                <span className="w-[1px] h-3 bg-white/15"></span>
-              </>
-            )}
-            <span className="flex items-center gap-1.5 text-green-400">
-              <Clock size={12} />
-              <strong>{stats.open}</strong> Open Now
-            </span>
-            {tz && (
-              <>
-                <span className="w-[1px] h-3 bg-white/15 hidden sm:block"></span>
-                <span className="flex items-center gap-1.5 text-foreground/40 hidden sm:block">
-                  <Globe size={10} className="inline" />
-                  {localDate} · {tz}
-                </span>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-
       {/* Main Nav Bar */}
       <nav className="glass-panel backdrop-blur-xl">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">

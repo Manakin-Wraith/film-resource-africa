@@ -74,7 +74,7 @@ export default async function RootLayout({
       </head>
       <body className={`${inter.variable} ${outfit.variable} font-sans antialiased text-foreground bg-background film-grain`}>
         <Header stats={stats} />
-        <div className="flex flex-col min-h-screen pt-[100px] pb-[72px] md:pb-0">
+        <div className="flex flex-col min-h-screen pt-[64px] pb-[72px] md:pb-0">
           <div className="flex-grow">
             {children}
           </div>
