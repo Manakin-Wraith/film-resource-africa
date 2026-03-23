@@ -1,6 +1,7 @@
 import { getCallSheetListings } from '@/app/actions';
 import CallSheetClient from '@/components/CallSheetClient';
 import NewsletterCTA from '@/components/NewsletterCTA';
+import Breadcrumbs from '@/components/Breadcrumbs';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,6 +16,7 @@ export default async function CallSheetPage() {
   return (
     <main className="min-h-screen relative overflow-hidden">
       <div className="relative z-10 container mx-auto px-4 py-12 space-y-12">
+        <Breadcrumbs items={[{ name: 'Home', href: '/' }, { name: 'The Call Sheet', href: '/call-sheet' }]} />
         {/* Hero */}
         <header className="relative text-center space-y-5 py-6 -mx-4 px-4 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-teal-500/[0.05] to-transparent pointer-events-none rounded-3xl"></div>

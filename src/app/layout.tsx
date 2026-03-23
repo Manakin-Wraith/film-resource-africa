@@ -56,6 +56,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import BuyCoffeeButton from '@/components/BuyCoffeeButton';
 import MobileTabBar from '@/components/MobileTabBar';
+import { OrganizationJsonLd } from '@/components/JsonLd';
 
 export const dynamic = 'force-dynamic';
 
@@ -68,6 +69,9 @@ export default async function RootLayout({
 
   return (
     <html lang="en" className="touch-manipulation">
+      <head>
+        <OrganizationJsonLd />
+      </head>
       <body className={`${inter.variable} ${outfit.variable} font-sans antialiased text-foreground bg-background film-grain`}>
         <Header stats={stats} />
         <div className="flex flex-col min-h-screen pt-[100px] pb-[72px] md:pb-0">

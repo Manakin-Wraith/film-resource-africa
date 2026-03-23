@@ -43,7 +43,7 @@ export default function Footer() {
     <>
       <footer className="relative z-20 border-t border-white/10 bg-black/40 backdrop-blur-xl py-12 pb-24 md:pb-20">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 items-start text-center md:text-left">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 items-start text-center md:text-left">
             {/* Branding Section */}
             <div className="space-y-6">
               <div className="flex items-center justify-center md:justify-start gap-4 text-primary">
@@ -113,6 +113,19 @@ export default function Footer() {
                 {error && <p className="text-red-400 text-[10px] ml-2">{error}</p>}
                 {subscribed && <p className="text-green-400 text-[10px] ml-2">Successfully subscribed! Welcome aboard.</p>}
               </form>
+            </div>
+
+            {/* Quick Links */}
+            <div className="hidden md:block space-y-4">
+              <h3 className="font-bold text-white uppercase tracking-widest text-xs">Explore</h3>
+              <nav className="flex flex-col gap-2 text-sm">
+                <a href="/" className="text-foreground/50 hover:text-primary transition-colors">Opportunities</a>
+                <a href="/news" className="text-foreground/50 hover:text-primary transition-colors">News & Insights</a>
+                <a href="/call-sheet" className="text-foreground/50 hover:text-primary transition-colors">The Call Sheet</a>
+                <a href="/industry" className="text-foreground/50 hover:text-primary transition-colors">Industry Directory</a>
+                <a href="/film-opportunities" className="text-foreground/50 hover:text-primary transition-colors">Opportunities by Country</a>
+                <a href="/submit" className="text-foreground/50 hover:text-primary transition-colors">Submit an Opportunity</a>
+              </nav>
             </div>
 
             {/* Social & Localization */}

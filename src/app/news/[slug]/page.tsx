@@ -7,6 +7,7 @@ import NewsletterCTA from '@/components/NewsletterCTA';
 import { ArrowLeft, ExternalLink, Calendar, Newspaper, AlertTriangle, Sparkles, Lightbulb, Star, Clapperboard } from 'lucide-react';
 import MarkdownBody from '@/components/MarkdownBody';
 import { decodeEntities, cleanText } from '@/lib/decodeEntities';
+import Breadcrumbs from '@/components/Breadcrumbs';
 
 export const dynamic = 'force-dynamic';
 
@@ -109,13 +110,11 @@ export default async function NewsArticlePage({ params }: { params: Promise<{ sl
       <div className="relative z-10 container mx-auto px-4 py-12 max-w-4xl">
         {/* Breadcrumb */}
         <div className="mb-8">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-foreground/50 hover:text-primary transition-colors text-sm font-medium"
-          >
-            <ArrowLeft size={16} />
-            Back to Directory
-          </Link>
+          <Breadcrumbs items={[
+            { name: 'Home', href: '/' },
+            { name: 'News', href: '/news' },
+            { name: decodeEntities(article.title), href: `/news/${slug}` },
+          ]} />
         </div>
 
         {/* Article Header */}

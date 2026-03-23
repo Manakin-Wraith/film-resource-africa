@@ -1,6 +1,7 @@
 import { getDirectoryListings } from '@/app/actions';
 import IndustryDirectoryClient from '@/components/IndustryDirectoryClient';
 import NewsletterCTA from '@/components/NewsletterCTA';
+import Breadcrumbs from '@/components/Breadcrumbs';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,6 +16,7 @@ export default async function IndustryDirectoryPage() {
   return (
     <main className="min-h-screen relative overflow-hidden">
       <div className="relative z-10 container mx-auto px-4 py-12 space-y-12 pt-32 md:pt-28">
+        <Breadcrumbs items={[{ name: 'Home', href: '/' }, { name: 'Industry Directory', href: '/industry' }]} />
         {/* Hero */}
         <header className="relative text-center space-y-4">
           <h1 className="text-4xl md:text-6xl font-bold font-heading tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">

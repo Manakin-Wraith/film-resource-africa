@@ -3,6 +3,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 import { buildWelcomeEmailHtml } from '@/lib/welcomeEmail';
+import type { Country } from '@/lib/countries';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -1217,5 +1218,86 @@ export async function subscribeToNewsletter(email: string) {
   } catch (error: any) {
     console.error("[Newsletter] CRITICAL ACTION FAILURE:", error.message || error);
     throw error;
+  }
+}
+
+// ─── Location Pages (Countries) ──────────────────────────────────────────────
+
+export async function getCountryBySlug(slug: string): Promise<Country | null> {
+  try {
+    const { data, error } = await supabase
+      .from('countries')
+      .select('*')
+      .eq('slug', slug)
+      .single();
+
+    if (error) throw error;
+    return data as Country;
+  } catch (error) {
+    console.error('Failed to fetch country', error);
+    return null;
+  }
+}
+
+export async function getAllCountries(): Promise<Country[]> {
+  try {
+    const { data, error } = await supabase
+      .from('countries')
+      .select('*')
+      .order('name');
+
+    if (error) throw error;
+    return data as Country[];
+  } catch (error) {
+    console.error('Failed to fetch countries', error);
+    return [];
+  }
+}
+
+export async function getCountriesWithOpportunityCounts(): Promise<
+  Array<{ country: Country; opportunity_count: number }>
+> {
+  try {
+    const countries = await getAllCountries();
+    const results = await Promise.all(
+      countries.map(async (country) => {
+        const { count } = await supabase
+          .from('opportunity_countries')
+          .select('*', { count: 'exact', head: true })
+          .eq('country_id', country.id);
+        return { country, opportunity_count: count || 0 };
+      })
+    );
+    return results;
+  } catch (error) {
+    console.error('Failed to fetch countries with counts', error);
+    return [];
+  }
+}
+
+export async function getCountryOpportunities(countryId: string): Promise<Opportunity[]> {
+  try {
+    const { data: links, error: linkError } = await supabase
+      .from('opportunity_countries')
+      .select('opportunity_id')
+      .eq('country_id', countryId);
+
+    if (linkError) throw linkError;
+    if (!links || links.length === 0) return [];
+
+    const oppIds = links.map((l) => l.opportunity_id);
+
+    const { data, error } = await supabase
+      .from('opportunities')
+      .select('*')
+      .in('id', oppIds)
+      .eq('status', 'approved')
+      .order('id', { ascending: false });
+
+    if (error) throw error;
+    return data as Opportunity[];
+  } catch (error) {
+    console.error('Failed to fetch country opportunities', error);
+    return [];
   }
 }
