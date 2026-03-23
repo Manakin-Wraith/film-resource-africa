@@ -3,7 +3,7 @@
 import { Opportunity } from '@/app/actions';
 import { Calendar, DollarSign, ExternalLink, AlertTriangle, Clock, Sparkles, RefreshCw } from 'lucide-react';
 import { getCategoryStyle } from '@/lib/categoryConfig';
-import { isNewListing, isUpdatedListing } from '@/lib/dateUtils';
+import { isNewListing, isUpdatedListing, formatDeadline } from '@/lib/dateUtils';
 import { decodeHtmlEntities } from '@/lib/textUtils';
 import SponsoredCard from './SponsoredCard';
 import { trackOpportunityClick } from '@/lib/analytics';
@@ -63,6 +63,7 @@ export default function OpportunityRow({ opportunities, title, subtitle, icon, o
           const catStyle = getCategoryStyle(opp.category);
           const CatIcon = catStyle.icon;
           const isFree = /free/i.test(opp["Cost"] || '');
+          const deadline = opp.deadline_date ? formatDeadline(opp.deadline_date) : null;
 
           return (
             <div
@@ -89,6 +90,16 @@ export default function OpportunityRow({ opportunities, title, subtitle, icon, o
                     </span>
                   )}
                 </div>
+                {deadline && deadline.urgency !== 'passed' && deadline.urgency !== 'normal' && (
+                  <span className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[10px] font-bold border whitespace-nowrap ${
+                    deadline.urgency === 'critical'
+                      ? 'bg-red-500/20 border-red-500/30 text-red-400'
+                      : 'bg-amber-500/20 border-amber-500/30 text-amber-400'
+                  }`}>
+                    <AlertTriangle size={10} />
+                    {deadline.countdownText}
+                  </span>
+                )}
               </div>
 
               <h3 className="text-xl font-bold font-heading mb-2 group-hover:text-primary transition-colors leading-tight line-clamp-2">

@@ -87,10 +87,21 @@ export async function getClosingSoonOpportunities(): Promise<Opportunity[]> {
       .select('*')
       .eq('status', 'approved')
       .eq('application_status', 'closing_soon')
-      .order('deadline_date', { ascending: true });
+      .order('deadline_date', { ascending: true, nullsFirst: false });
       
     if (error) throw error;
-    return data as Opportunity[];
+
+    // Extra client-side sort: entries with a real deadline_date closest to
+    // today come first; nulls/unparseable go to the back.
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const sorted = (data as Opportunity[]).sort((a, b) => {
+      const da = a.deadline_date ? new Date(a.deadline_date).getTime() : Infinity;
+      const db = b.deadline_date ? new Date(b.deadline_date).getTime() : Infinity;
+      return da - db;
+    });
+
+    return sorted;
   } catch (error) {
     console.error('Failed to fetch closing soon', error);
     return [];
