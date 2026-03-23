@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { getCountryBySlug, getCountryOpportunities, getOpportunities } from '@/app/actions';
+import { getCountryBySlug, getCountryOpportunities, getDirectoryListingsByCountry } from '@/app/actions';
 import { getCountryFAQs } from '@/lib/countries';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import { BreadcrumbJsonLd } from '@/components/JsonLd';
@@ -9,6 +9,7 @@ import CountryHero from '@/components/location/CountryHero';
 import CountryStats from '@/components/location/CountryStats';
 import CountryFAQ from '@/components/location/CountryFAQ';
 import CountryOpportunities from '@/components/location/CountryOpportunities';
+import CountryDirectory from '@/components/location/CountryDirectory';
 import NewsletterCTA from '@/components/NewsletterCTA';
 
 export const dynamic = 'force-dynamic';
@@ -29,7 +30,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   return {
     title: `Film Opportunities in ${countryData.name} | Film Resource Africa`,
-    description: `Comprehensive guide to film festivals, grants, labs, and industry resources in ${countryData.name}. Updated ${now}.`,
+    description: `Comprehensive guide to film festivals, grants, labs, production companies, crew, and industry services in ${countryData.name}. Updated ${now}.`,
     openGraph: {
       title: `Film Opportunities in ${countryData.name}`,
       description: `Find film festivals, funding, and resources in ${countryData.name}. Your guide to filmmaking opportunities.`,
@@ -53,7 +54,10 @@ export default async function CountryPage({ params }: PageProps) {
 
   if (!countryData) notFound();
 
-  const opportunities = await getCountryOpportunities(countryData.id);
+  const [opportunities, directoryListings] = await Promise.all([
+    getCountryOpportunities(countryData.id),
+    getDirectoryListingsByCountry(countryData.name),
+  ]);
   const faqs = getCountryFAQs(countryData);
 
   // JSON-LD for the country page
@@ -130,6 +134,12 @@ export default async function CountryPage({ params }: PageProps) {
           <div className="lg:col-span-2 space-y-12">
             <CountryOpportunities
               opportunities={opportunities}
+              countryName={countryData.name}
+            />
+
+            {/* Film Services Directory */}
+            <CountryDirectory
+              listings={directoryListings}
               countryName={countryData.name}
             />
 

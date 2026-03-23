@@ -250,6 +250,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                   <option value="crew">Crew</option>
                   <option value="service">Service</option>
                   <option value="training">Training</option>
+                  <option value="agency">Agency</option>
                 </select>
               ) : (
                 <input
@@ -474,7 +475,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
             </thead>
             <tbody>
               {dirData.map(listing => {
-                const typeLabels: Record<string, string> = { company: 'Company', crew: 'Crew', service: 'Service', training: 'Training' };
+                const typeLabels: Record<string, string> = { company: 'Company', crew: 'Crew', service: 'Service', training: 'Training', agency: 'Agency' };
                 return (
                   <tr key={listing.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
                     <td className="p-4 font-medium">

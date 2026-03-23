@@ -977,7 +977,7 @@ export async function deletePartner(id: number): Promise<boolean> {
 export interface DirectoryListing {
   id: number;
   name: string;
-  directory_type: 'company' | 'crew' | 'service' | 'training';
+  directory_type: 'company' | 'crew' | 'service' | 'training' | 'agency';
   category: string;
   description: string;
   country: string;
@@ -1041,6 +1041,25 @@ export async function getDirectoryListings(type?: string): Promise<DirectoryList
   }
 }
 
+export async function getDirectoryListingsByCountry(countryName: string): Promise<DirectoryListing[]> {
+  try {
+    const { data, error } = await supabase
+      .from('directory_listings')
+      .select('*')
+      .eq('status', 'approved')
+      .eq('country', countryName)
+      .order('featured', { ascending: false })
+      .order('votes', { ascending: false })
+      .order('name', { ascending: true });
+
+    if (error) throw error;
+    return data as DirectoryListing[];
+  } catch (error) {
+    console.error('Failed to fetch directory listings by country', error);
+    return [];
+  }
+}
+
 export async function getAllDirectoryListings(): Promise<DirectoryListing[]> {
   try {
     const { data, error } = await supabase
@@ -1068,7 +1087,7 @@ export async function submitDirectoryListing(listing: Omit<DirectoryListing, 'id
   // Notify admin
   try {
     const resend = new Resend(process.env.RESEND_API_KEY);
-    const typeLabels: Record<string, string> = { company: 'Production Company', crew: 'Crew Member', service: 'Service Provider', training: 'Training Program' };
+    const typeLabels: Record<string, string> = { company: 'Production Company', crew: 'Crew Member', service: 'Service Provider', training: 'Training Program', agency: 'Agency' };
     await resend.emails.send({
       from: 'Film Resource Africa <hello@film-resource-africa.com>',
       to: ['hello@film-resource-africa.com'],

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { ArrowLeft, CheckCircle2, Building2, Users, Wrench, GraduationCap, Upload, X, ImageIcon } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Building2, Users, Wrench, GraduationCap, Briefcase, Upload, X, ImageIcon } from 'lucide-react';
 import Link from 'next/link';
 import { submitDirectoryListing, uploadDirectoryImage } from '@/app/actions';
 import { directoryTypes, getCategoriesForType, africanCountries } from '@/lib/industryDirectoryConfig';
@@ -11,6 +11,7 @@ const typeIcons: Record<string, typeof Building2> = {
   crew: Users,
   service: Wrench,
   training: GraduationCap,
+  agency: Briefcase,
 };
 
 export default function SubmitDirectoryListingPage() {
@@ -366,6 +367,26 @@ export default function SubmitDirectoryListingPage() {
                     <option value="mid">Mid-Range</option>
                     <option value="premium">Premium</option>
                   </select>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {directoryType === 'agency' && (
+            <div className="space-y-5 border-t border-white/10 pt-8">
+              <h3 className="text-lg font-bold font-heading text-pink-400">Agency Details</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                  <label className={labelClass}>Speciality</label>
+                  <input type="text" value={formData.speciality || ''} onChange={(e) => updateField('speciality', e.target.value)} className={inputClass} placeholder="e.g. On-screen talent, Below-the-line crew" />
+                </div>
+                <div>
+                  <label className={labelClass}>Year Founded</label>
+                  <input type="number" value={formData.year_founded || ''} onChange={(e) => updateField('year_founded', e.target.value)} className={inputClass} placeholder="e.g. 2010" />
+                </div>
+                <div className="md:col-span-2">
+                  <label className={labelClass}>Notable Talent / Projects</label>
+                  <textarea rows={3} value={formData.notable_projects || ''} onChange={(e) => updateField('notable_projects', e.target.value)} className={inputClass} placeholder="List key talent or productions you've placed..." />
                 </div>
               </div>
             </div>
