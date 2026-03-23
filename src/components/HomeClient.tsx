@@ -12,6 +12,13 @@ import DirectoryClient from './DirectoryClient';
 import OpportunityModal from './OpportunityModal';
 import PartnersSection from './PartnersSection';
 import ContactModal from './ContactModal';
+import BrowseByCountry from './BrowseByCountry';
+import type { Country } from '@/lib/countries';
+
+interface CountryWithCount {
+  country: Country;
+  opportunity_count: number;
+}
 
 interface HomeClientProps {
   closingSoon: Opportunity[];
@@ -22,9 +29,10 @@ interface HomeClientProps {
   trailers: NewsItem[];
   allOpportunities: Opportunity[];
   placements?: SponsoredPlacement[];
+  countriesWithCounts?: CountryWithCount[];
 }
 
-export default function HomeClient({ closingSoon, openNow, newWave, justAdded, news, trailers, allOpportunities, placements = [] }: HomeClientProps) {
+export default function HomeClient({ closingSoon, openNow, newWave, justAdded, news, trailers, allOpportunities, placements = [], countriesWithCounts = [] }: HomeClientProps) {
   const [selectedOpp, setSelectedOpp] = useState<Opportunity | null>(null);
   const [isAdModalOpen, setIsAdModalOpen] = useState(false);
   const [adSource, setAdSource] = useState<string | undefined>(undefined);
@@ -171,6 +179,9 @@ export default function HomeClient({ closingSoon, openNow, newWave, justAdded, n
         heading="Stay ahead of every deadline"
         subtext="Weekly alerts on new funds, closing deadlines, and industry shifts — delivered to your inbox."
       />
+
+      {/* Browse by Country */}
+      <BrowseByCountry countries={countriesWithCounts} />
 
       {/* Partners & Industry Network */}
       <PartnersSection />

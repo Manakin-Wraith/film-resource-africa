@@ -94,6 +94,13 @@ export default function Header({ stats }: HeaderProps) {
               Directory
             </Link>
             <Link
+              href="/film-opportunities"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium text-foreground/60 hover:text-foreground hover:bg-white/5 transition-all"
+            >
+              <Globe size={14} className="text-emerald-400" />
+              Countries
+            </Link>
+            <Link
               href="/news"
               className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium text-foreground/60 hover:text-foreground hover:bg-white/5 transition-all"
             >
@@ -149,6 +156,14 @@ export default function Header({ stats }: HeaderProps) {
             >
               <Database size={16} className="text-primary" />
               Directory
+            </Link>
+            <Link
+              href="/film-opportunities"
+              onClick={() => setMenuOpen(false)}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-foreground/70 hover:text-foreground hover:bg-white/5 transition-all"
+            >
+              <Globe size={16} className="text-emerald-400" />
+              Countries
             </Link>
             <Link
               href="/news"
