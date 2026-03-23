@@ -71,33 +71,34 @@ export default function OpportunityRow({ opportunities, title, subtitle, icon, o
               onClick={() => { trackOpportunityClick(opp.title, opp.category || '', title); onSelect(opp); }}
               className={`glass-card rounded-[1.5rem] p-6 min-w-[320px] max-w-[360px] flex-shrink-0 snap-start cursor-pointer border border-white/10 hover:-translate-y-1 hover:shadow-[0_16px_32px_-10px_rgba(59,130,246,0.25)] transition-all duration-300 group flex flex-col border-l-[3px] ${catStyle.borderLeft}`}
             >
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider border ${status.bg} ${status.color}`}>
-                    <StatusIcon size={12} />
-                    {status.label}
-                  </span>
-                  {isNewListing(opp.created_at, opp.id) && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider border bg-gradient-to-r from-blue-500/20 to-purple-500/20 border-purple-500/30 text-purple-300 animate-pulse">
-                      <Sparkles size={10} />
-                      NEW
-                    </span>
-                  )}
-                  {!isNewListing(opp.created_at, opp.id) && isUpdatedListing(opp.created_at, opp.updated_at, opp.id) && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider border bg-amber-500/20 border-amber-500/30 text-amber-300">
-                      <RefreshCw size={10} />
-                      UPDATED
-                    </span>
-                  )}
+              {/* Countdown badge — prominent top row */}
+              {deadline && deadline.urgency !== 'passed' && deadline.urgency !== 'normal' && (
+                <div className={`-mx-6 -mt-6 mb-4 px-5 py-2 text-center text-xs font-bold tracking-wide rounded-t-[1.5rem] ${
+                  deadline.urgency === 'critical'
+                    ? 'bg-red-500/20 text-red-400 border-b border-red-500/20'
+                    : 'bg-amber-500/20 text-amber-400 border-b border-amber-500/20'
+                }`}>
+                  <AlertTriangle size={12} className="inline -mt-0.5 mr-1.5" />
+                  {deadline.countdownText}
                 </div>
-                {deadline && deadline.urgency !== 'passed' && deadline.urgency !== 'normal' && (
-                  <span className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[10px] font-bold border whitespace-nowrap ${
-                    deadline.urgency === 'critical'
-                      ? 'bg-red-500/20 border-red-500/30 text-red-400'
-                      : 'bg-amber-500/20 border-amber-500/30 text-amber-400'
-                  }`}>
-                    <AlertTriangle size={10} />
-                    {deadline.countdownText}
+              )}
+
+              {/* Status badges */}
+              <div className="flex items-center gap-1.5 mb-3 flex-wrap">
+                <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border ${status.bg} ${status.color}`}>
+                  <StatusIcon size={10} />
+                  {status.label}
+                </span>
+                {isNewListing(opp.created_at, opp.id) && (
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border bg-gradient-to-r from-blue-500/20 to-purple-500/20 border-purple-500/30 text-purple-300">
+                    <Sparkles size={9} />
+                    NEW
+                  </span>
+                )}
+                {!isNewListing(opp.created_at, opp.id) && isUpdatedListing(opp.created_at, opp.updated_at, opp.id) && (
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border bg-amber-500/20 border-amber-500/30 text-amber-300">
+                    <RefreshCw size={9} />
+                    UPDATED
                   </span>
                 )}
               </div>
