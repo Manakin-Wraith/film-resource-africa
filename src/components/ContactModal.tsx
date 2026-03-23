@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Mail, Send, CheckCircle2, AlertCircle } from 'lucide-react';
 import { submitInquiry, InquiryType } from '@/app/actions';
+import { trackContactInquiry } from '@/lib/analytics';
 
 export default function ContactModal({ isOpen, onClose, inquiryType = 'general', source }: { isOpen: boolean, onClose: () => void, inquiryType?: InquiryType, source?: string }) {
   const [loading, setLoading] = useState(false);
@@ -24,6 +25,7 @@ export default function ContactModal({ isOpen, onClose, inquiryType = 'general',
 
     try {
       await submitInquiry(inquiry, inquiryType, source);
+      trackContactInquiry(inquiryType, source);
       setSuccess(true);
       setTimeout(() => {
         setSuccess(false);

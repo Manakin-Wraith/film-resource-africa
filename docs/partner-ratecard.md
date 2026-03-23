@@ -24,9 +24,9 @@ Bundles are the single source of truth. Each bundle maps to a **ticker tier**, *
 
 | Bundle | Ticker Tier | News Placement | Newsletter | Price |
 |--------|-------------|----------------|------------|-------|
-| **Starter** | Partner (blue glow) | — | Mention | $75/mo |
-| **Growth** | Sponsor (gold shimmer) | Scattered in `/news` feed | Mention | $250/mo |
-| **Headline** | Sponsor (gold shimmer) | Prime slot on homepage | Spotlight | $300/mo |
+| **Starter** | Partner (blue glow) | — | Mention | R300/mo |
+| **Growth** | Sponsor (gold shimmer) | Scattered in `/news` feed | Mention | R800/mo |
+| **Headline** | Sponsor (gold shimmer) | Prime slot on homepage | Spotlight | R1,200/mo |
 
 ### What each bundle sets automatically
 
@@ -191,7 +191,7 @@ Impression tracking per placement. Fires once per session when a sponsored card 
 - **"Your logo on every page, every visit"** — ticker is homepage-persistent
 - **"Right next to the content they're reading"** — news card is contextual, not banner-blind
 - **"Direct to inbox"** — newsletter bypasses algorithms
-- **Low entry point** — $75/mo gets you started with Starter
+- **Low entry point** — R300/mo gets you started with Starter
 - **No long-term lock-in** — monthly billing, cancel anytime
 - **Full company profile** — Growth/Headline partners get a mini storefront in the news feed
 

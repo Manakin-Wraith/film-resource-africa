@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Send, CheckCircle2, Bell } from 'lucide-react';
+import { trackNewsletterSignup } from '@/lib/analytics';
 
 interface NewsletterCTAProps {
   variant?: 'hero' | 'inline' | 'banner';
@@ -37,6 +38,7 @@ export default function NewsletterCTA({
       }
       setSubscribed(true);
       setEmail('');
+      trackNewsletterSignup(variant, typeof window !== 'undefined' ? window.location.pathname : '/');
       setTimeout(() => setSubscribed(false), 5000);
     } catch (err: any) {
       setError(err.message || 'Subscription failed. Please try again.');

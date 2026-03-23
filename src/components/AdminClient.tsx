@@ -686,9 +686,9 @@ export default function AdminClient({ initialData, callSheetData = [], directory
         const bundle = partnerForm.bundle || 'starter';
         const hasProfileCard = bundle === 'growth' || bundle === 'headline';
         const bundleConfig = {
-          starter: { label: 'Starter — $75/mo', color: 'border-white/20', desc: 'Ticker placement + Newsletter mention', tier: 'partner' as const, newsletter: 'mention' as const },
-          growth: { label: 'Growth — $250/mo', color: 'border-blue-500', desc: 'Sponsor ticker + News profile card + Newsletter mention', tier: 'sponsor' as const, newsletter: 'mention' as const },
-          headline: { label: 'Headline — $300/mo', color: 'border-amber-500', desc: 'Sponsor ticker + News profile card + Newsletter spotlight', tier: 'sponsor' as const, newsletter: 'spotlight' as const },
+          starter: { label: 'Starter — R300/mo', color: 'border-white/20', desc: 'Ticker placement + Newsletter mention', tier: 'partner' as const, newsletter: 'mention' as const },
+          growth: { label: 'Growth — R800/mo', color: 'border-blue-500', desc: 'Sponsor ticker + News profile card + Newsletter mention', tier: 'sponsor' as const, newsletter: 'mention' as const },
+          headline: { label: 'Headline — R1,200/mo', color: 'border-amber-500', desc: 'Sponsor ticker + News profile card + Newsletter spotlight', tier: 'sponsor' as const, newsletter: 'spotlight' as const },
         };
         const cfg = bundleConfig[bundle];
         return (

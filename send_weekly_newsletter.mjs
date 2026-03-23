@@ -116,8 +116,18 @@ async function fetchJustAdded() {
 }
 
 async function fetchRecentNews() {
-  // Latest 3 news items
-  return supabaseGet('news', 'order=published_at.desc&limit=3');
+  // Fetch a larger pool, then prioritise Africa-focused stories
+  const pool = await supabaseGet('news', 'order=published_at.desc&limit=30');
+  const africaRe = /africa|nigeria|kenya|south.afric|ghana|ethiopi|senegal|morocco|egypt|congo|tanzania|rwanda|sudan|cameroon|uganda|mozambi|zimbabwe|namibia|botswana|burkina|mali[^c]|ivory.coast|côte.d.ivoire|algeri|tunis|zanzibar|nairobi|lagos|johannesburg|joburg|accra|addis|dakar|casablanca|luanda|nollywood|fespaco|showmax|multichoice|canal\+|dstv|nfvf|safta|amaa|durban|fame.week|cape.town|hubert.bals|idfa.bertha|realness|docubox|wunmi.mosaku|michaela.coel|haile.gerima/i;
+  const africa = pool.filter(n => africaRe.test(`${n.title} ${n.summary || ''}`));
+  const other = pool.filter(n => !africaRe.test(`${n.title} ${n.summary || ''}`));
+  // Lead with up to 3 Africa stories, fill remaining slots with general news
+  const MAX_NEWS = 5;
+  const picked = africa.slice(0, MAX_NEWS);
+  if (picked.length < MAX_NEWS) {
+    picked.push(...other.slice(0, MAX_NEWS - picked.length));
+  }
+  return picked;
 }
 
 async function fetchProTip() {
@@ -203,6 +213,28 @@ function truncate(str, maxLen = 120) {
   return str.slice(0, maxLen).replace(/\s+\S*$/, '') + '…';
 }
 
+/**
+ * Append UTM query params to a URL for newsletter click attribution.
+ * Only adds UTM to our own site URLs — external links are left untouched.
+ * @param {string} url
+ * @param {string} content - identifies which link in the email (e.g. 'closing_soon', 'news', 'partner_cta')
+ * @returns {string}
+ */
+function utm(url, content = '') {
+  try {
+    const u = new URL(url);
+    // Only tag our own domain
+    if (!u.hostname.includes('film-resource-africa')) return url;
+    u.searchParams.set('utm_source', 'newsletter');
+    u.searchParams.set('utm_medium', 'email');
+    u.searchParams.set('utm_campaign', 'weekly_digest');
+    if (content) u.searchParams.set('utm_content', content);
+    return u.toString();
+  } catch {
+    return url;
+  }
+}
+
 function buildOpportunityRow(opp, tagColor, tagLabel) {
   const title = escapeHtml(opp.title);
   const deadline = opp.deadline_date ? formatDate(opp.deadline_date) : (opp['Next Deadline'] ? escapeHtml(truncate(opp['Next Deadline'], 60)) : '');
@@ -210,7 +242,8 @@ function buildOpportunityRow(opp, tagColor, tagLabel) {
   const cost = escapeHtml(opp.Cost || '');
   const applyLink = opp['Apply:'] || '';
   const linkMatch = applyLink.match(/(https?:\/\/[^\s|]+|[\w.-]+\.[a-z]{2,}[^\s|]*)/i);
-  const url = linkMatch ? (linkMatch[0].startsWith('http') ? linkMatch[0] : `https://${linkMatch[0]}`) : `${siteUrl}/#directory`;
+  const rawUrl = linkMatch ? (linkMatch[0].startsWith('http') ? linkMatch[0] : `https://${linkMatch[0]}`) : `${siteUrl}/#directory`;
+  const url = utm(rawUrl, tagLabel || 'opportunity');
   const tag = tagLabel ? `<span style="display:inline-block;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:${tagColor};background:${tagColor}12;padding:2px 8px;border-radius:4px;margin-right:6px;">${tagLabel}</span>` : '';
 
   return `
@@ -275,13 +308,29 @@ function buildNewsletterHtml({ closingSoon, newlyOpen, justAdded, news, proTip, 
     sections += '</table></td></tr>';
   }
 
+  // ── Mid-newsletter: Support the team ──
+  sections += `
+      <tr>
+        <td style="padding:28px 16px 0;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f7f6f3;border-radius:8px;">
+            <tr>
+              <td style="padding:16px 20px;text-align:center;">
+                <p style="margin:0 0 4px;font-size:14px;color:#37352f;font-weight:600;">Support the team &#9749;</p>
+                <p style="margin:0 0 12px;font-size:13px;color:#787774;line-height:1.5;">We keep this free for African filmmakers. Every contribution helps.</p>
+                <a href="https://pay.yoco.com/celebration-house-entertainment" style="display:inline-block;background:#37352f;color:#ffffff;font-weight:600;font-size:13px;text-decoration:none;padding:8px 20px;border-radius:6px;">Buy the team a coffee</a>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>`;
+
   // ── Section 4: News ──
   if (news.length > 0) {
     sections += buildSectionHeading('Industry News');
     sections += '<tr><td style="padding:0 16px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e8e8e8;border-radius:8px;overflow:hidden;">';
     for (const item of news) {
       const slug = item.slug || '';
-      const newsUrl = slug ? `${siteUrl}/news/${slug}` : `${siteUrl}/news`;
+      const newsUrl = utm(slug ? `${siteUrl}/news/${slug}` : `${siteUrl}/news`, 'news');
       const catLabel = (item.category || '').replace(/_/g, ' ');
       sections += `
         <tr>
@@ -323,7 +372,7 @@ function buildNewsletterHtml({ closingSoon, newlyOpen, justAdded, news, proTip, 
       sections += `
         <tr>
           <td style="padding:12px 16px;border-bottom:1px solid #f0f0f0;">
-            <a href="${siteUrl}/call-sheet" style="color:#37352f;font-weight:600;font-size:15px;text-decoration:none;">${escapeHtml(listing.title)}</a>${mentorBadge}
+            <a href="${utm(`${siteUrl}/call-sheet`, 'call_sheet')}" style="color:#37352f;font-weight:600;font-size:15px;text-decoration:none;">${escapeHtml(listing.title)}</a>${mentorBadge}
             <br/><span style="color:#787774;font-size:13px;">${escapeHtml(listing.production_title)} &middot; ${escapeHtml(listing.production_company)}</span>
             <br/><span style="color:#0f7b6c;font-size:13px;font-weight:600;">${escapeHtml(listing.compensation)}</span>
             <span style="color:#9b9a97;font-size:12px;"> &middot; ${escapeHtml(listing.location)}</span>
@@ -331,7 +380,7 @@ function buildNewsletterHtml({ closingSoon, newlyOpen, justAdded, news, proTip, 
         </tr>`;
     }
     sections += '</table></td></tr>';
-    sections += `<tr><td style="padding:8px 16px 0;" align="center"><a href="${siteUrl}/call-sheet" style="color:#2f80ed;font-size:13px;font-weight:600;text-decoration:none;">View all crew calls &rarr;</a></td></tr>`;
+    sections += `<tr><td style="padding:8px 16px 0;" align="center"><a href="${utm(`${siteUrl}/call-sheet`, 'call_sheet_cta')}" style="color:#2f80ed;font-size:13px;font-weight:600;text-decoration:none;">View all crew calls &rarr;</a></td></tr>`;
   }
 
   // ── Section 7: Community Spotlight ──
@@ -340,7 +389,7 @@ function buildNewsletterHtml({ closingSoon, newlyOpen, justAdded, news, proTip, 
     sections += '<tr><td style="padding:0 16px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e8e8e8;border-radius:8px;overflow:hidden;">';
     for (const item of communitySpotlights) {
       const slug = item.slug || '';
-      const spotlightUrl = slug ? `${siteUrl}/news/${slug}` : `${siteUrl}/news`;
+      const spotlightUrl = utm(slug ? `${siteUrl}/news/${slug}` : `${siteUrl}/news`, 'spotlight');
       sections += `
         <tr>
           <td style="padding:12px 16px;border-bottom:1px solid #f0f0f0;">
@@ -351,7 +400,7 @@ function buildNewsletterHtml({ closingSoon, newlyOpen, justAdded, news, proTip, 
         </tr>`;
     }
     sections += '</table></td></tr>';
-    sections += `<tr><td style="padding:8px 16px 0;" align="center"><a href="${siteUrl}/community-spotlight" style="color:#2f80ed;font-size:13px;font-weight:600;text-decoration:none;">Share your story &rarr;</a></td></tr>`;
+    sections += `<tr><td style="padding:8px 16px 0;" align="center"><a href="${utm(`${siteUrl}/community-spotlight`, 'spotlight_cta')}" style="color:#2f80ed;font-size:13px;font-weight:600;text-decoration:none;">Share your story &rarr;</a></td></tr>`;
   }
 
   // ── Empty state ──
@@ -382,33 +431,89 @@ function buildNewsletterHtml({ closingSoon, newlyOpen, justAdded, news, proTip, 
     }
   }
 
-  // ── Partners section ──
+  // ── Partners / Sponsors section ──
   let partnersSection = '';
   if (partners && partners.length > 0) {
-    let partnerCards = '';
-    for (const p of partners) {
-      const pUrl = p.website || siteUrl;
-      const pLogo = p.logo_url;
-      const pName = escapeHtml(p.name);
-      partnerCards += `
-              <tr>
-                <td style="padding:12px 20px;${partners.indexOf(p) < partners.length - 1 ? 'border-bottom:1px solid #f0f0f0;' : ''}">
-                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-                    <tr>
-                      ${pLogo ? `<td style="width:48px;vertical-align:middle;"><a href="${escapeHtml(pUrl)}" style="text-decoration:none;"><img src="${escapeHtml(pLogo)}" alt="${pName}" width="44" height="44" style="width:44px;height:44px;border-radius:8px;object-fit:contain;display:block;" /></a></td>` : ''}
-                      <td style="${pLogo ? 'padding-left:14px;' : ''}vertical-align:middle;">
-                        <a href="${escapeHtml(pUrl)}" style="color:#37352f;font-weight:600;font-size:14px;text-decoration:none;">${pName}</a>
-                        <br/><span style="color:#9b9a97;font-size:12px;">${escapeHtml(pUrl.replace('https://', '').replace(/\/$/, ''))}</span>
-                      </td>
-                      <td style="width:60px;vertical-align:middle;text-align:right;">
-                        <a href="${escapeHtml(pUrl)}" style="display:inline-block;font-size:12px;font-weight:600;color:#2f80ed;text-decoration:none;border:1px solid #e8e8e8;padding:4px 10px;border-radius:6px;">Visit</a>
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-              </tr>`;
+    const sponsors = partners.filter(p => p.tier === 'sponsor' || p.bundle === 'headline');
+    const regularPartners = partners.filter(p => p.tier !== 'sponsor' && p.bundle !== 'headline');
+
+    // Headline sponsor banners
+    for (const s of sponsors) {
+      const sUrl = s.cta_url || s.website || siteUrl;
+      const sName = escapeHtml(s.name);
+      const sAbout = escapeHtml(s.about || '').replace(/\n/g, '<br/>');
+      const sCta = escapeHtml(s.cta_text || 'Learn More');
+      const sFeatured = s.featured_image_url;
+      const sLogo = s.logo_url;
+
+      partnersSection += `
+          <tr><td style="padding:24px 24px 0;"><div style="border-top:1px solid #e8e8e8;"></div></td></tr>
+          <tr>
+            <td style="padding:16px 24px 4px;">
+              <p style="margin:0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#9b9a97;">Sponsored by</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:8px 24px 0;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-radius:12px;overflow:hidden;border:1px solid #e8e8e8;">
+                ${sFeatured ? `<tr>
+                  <td>
+                    <a href="${escapeHtml(sUrl)}" style="text-decoration:none;">
+                      <img src="${escapeHtml(sFeatured)}" alt="${sName}" width="592" style="width:100%;height:auto;display:block;border-radius:12px 12px 0 0;" />
+                    </a>
+                  </td>
+                </tr>` : ''}
+                <tr>
+                  <td style="padding:20px 24px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        ${sLogo ? `<td style="width:52px;vertical-align:top;padding-right:16px;">
+                          <a href="${escapeHtml(sUrl)}" style="text-decoration:none;">
+                            <img src="${escapeHtml(sLogo)}" alt="${sName}" width="48" height="48" style="width:48px;height:48px;border-radius:10px;object-fit:contain;display:block;" />
+                          </a>
+                        </td>` : ''}
+                        <td style="vertical-align:top;">
+                          <a href="${escapeHtml(sUrl)}" style="color:#37352f;font-weight:700;font-size:17px;text-decoration:none;line-height:1.3;">${sName}</a>
+                          <p style="margin:6px 0 0;font-size:13px;line-height:1.6;color:#787774;">${sAbout}</p>
+                        </td>
+                      </tr>
+                    </table>
+                    <div style="padding-top:16px;text-align:center;">
+                      <a href="${escapeHtml(sUrl)}" style="display:inline-block;background:#37352f;color:#ffffff;font-weight:600;font-size:14px;text-decoration:none;padding:10px 28px;border-radius:8px;">${sCta} &rarr;</a>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>`;
     }
-    partnersSection = `
+
+    // Regular partners (small cards)
+    if (regularPartners.length > 0) {
+      let partnerCards = '';
+      for (const p of regularPartners) {
+        const pUrl = p.website || siteUrl;
+        const pLogo = p.logo_url;
+        const pName = escapeHtml(p.name);
+        partnerCards += `
+                <tr>
+                  <td style="padding:12px 20px;${regularPartners.indexOf(p) < regularPartners.length - 1 ? 'border-bottom:1px solid #f0f0f0;' : ''}">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        ${pLogo ? `<td style="width:48px;vertical-align:middle;"><a href="${escapeHtml(pUrl)}" style="text-decoration:none;"><img src="${escapeHtml(pLogo)}" alt="${pName}" width="44" height="44" style="width:44px;height:44px;border-radius:8px;object-fit:contain;display:block;" /></a></td>` : ''}
+                        <td style="${pLogo ? 'padding-left:14px;' : ''}vertical-align:middle;">
+                          <a href="${escapeHtml(pUrl)}" style="color:#37352f;font-weight:600;font-size:14px;text-decoration:none;">${pName}</a>
+                          <br/><span style="color:#9b9a97;font-size:12px;">${escapeHtml(pUrl.replace('https://', '').replace(/\/$/, ''))}</span>
+                        </td>
+                        <td style="width:60px;vertical-align:middle;text-align:right;">
+                          <a href="${escapeHtml(pUrl)}" style="display:inline-block;font-size:12px;font-weight:600;color:#2f80ed;text-decoration:none;border:1px solid #e8e8e8;padding:4px 10px;border-radius:6px;">Visit</a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>`;
+      }
+      partnersSection += `
           <tr><td style="padding:20px 24px 0;"><div style="border-top:1px solid #e8e8e8;"></div></td></tr>
           <tr>
             <td style="padding:20px 24px 8px;">
@@ -423,6 +528,7 @@ function buildNewsletterHtml({ closingSoon, newlyOpen, justAdded, news, proTip, 
               </table>
             </td>
           </tr>`;
+    }
   }
 
   // ── Full email ──
@@ -464,6 +570,9 @@ function buildNewsletterHtml({ closingSoon, newlyOpen, justAdded, news, proTip, 
             </td>
           </tr>
 
+          <!-- Sponsor banner (headline sponsors) -->
+          ${partnersSection}
+
           <!-- Divider -->
           <tr><td style="padding:0 24px;"><div style="border-top:1px solid #e8e8e8;"></div></td></tr>
 
@@ -473,32 +582,11 @@ function buildNewsletterHtml({ closingSoon, newlyOpen, justAdded, news, proTip, 
           <!-- CTA -->
           <tr>
             <td style="padding:28px 16px 12px;" align="center">
-              <a href="${siteUrl}/#directory" style="display:inline-block;background-color:#37352f;color:#ffffff;font-weight:600;font-size:14px;text-decoration:none;padding:12px 28px;border-radius:8px;">
+              <a href="${utm(`${siteUrl}/#directory`, 'browse_cta')}" style="display:inline-block;background-color:#37352f;color:#ffffff;font-weight:600;font-size:14px;text-decoration:none;padding:12px 28px;border-radius:8px;">
                 Browse all opportunities &rarr;
               </a>
             </td>
           </tr>
-
-          <!-- Divider -->
-          <tr><td style="padding:20px 24px 0;"><div style="border-top:1px solid #e8e8e8;"></div></td></tr>
-
-          <!-- Support -->
-          <tr>
-            <td style="padding:20px 24px;">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f7f6f3;border-radius:8px;">
-                <tr>
-                  <td style="padding:16px 20px;text-align:center;">
-                    <p style="margin:0 0 4px;font-size:14px;color:#37352f;font-weight:600;">Support the team &#9749;</p>
-                    <p style="margin:0 0 12px;font-size:13px;color:#787774;line-height:1.5;">We keep this free for African filmmakers. Every contribution helps.</p>
-                    <a href="https://pay.yoco.com/celebration-house-entertainment" style="display:inline-block;background:#37352f;color:#ffffff;font-weight:600;font-size:13px;text-decoration:none;padding:8px 20px;border-radius:6px;">Buy the team a coffee</a>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-
-          <!-- Partners -->
-          ${partnersSection}
 
           <!-- Sign-off -->
           <tr>
@@ -514,7 +602,7 @@ function buildNewsletterHtml({ closingSoon, newlyOpen, justAdded, news, proTip, 
             <td align="center" style="padding:20px 24px 28px;font-size:11px;color:#9b9a97;line-height:1.6;border-top:1px solid #e8e8e8;">
               Made with passion in Africa &#127757;<br/>
               You're receiving this because you subscribed at ${siteUrl.replace('https://', '')}<br/>
-              <a href="${siteUrl}" style="color:#2f80ed;text-decoration:none;">${siteUrl.replace('https://', '')}</a>
+              <a href="${utm(siteUrl, 'footer')}" style="color:#2f80ed;text-decoration:none;">${siteUrl.replace('https://', '')}</a>
             </td>
           </tr>
 
@@ -699,9 +787,9 @@ async function main() {
     return;
   }
 
-  // 2. Calculate episode number from previously sent newsletters
-  const sentNewsletters = await supabaseGet('newsletters', 'status=eq.sent&select=id');
-  const episodeNumber = sentNewsletters.length + 1;
+  // 2. Calculate episode number from previously sent WEEKLY newsletters only (exclude midweek Hot News)
+  const sentWeeklies = await supabaseGet('newsletters', 'status=eq.sent&subject=ilike.FRA%20Weekly*&select=id');
+  const episodeNumber = sentWeeklies.length + 1;
   console.log(`\nEpisode: #${episodeNumber}`);
 
   // 3. Fetch content from Supabase

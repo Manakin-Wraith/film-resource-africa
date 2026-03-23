@@ -6,6 +6,7 @@ import { getCategoryStyle } from '@/lib/categoryConfig';
 import { isNewListing, isUpdatedListing } from '@/lib/dateUtils';
 import { decodeHtmlEntities } from '@/lib/textUtils';
 import SponsoredCard from './SponsoredCard';
+import { trackOpportunityClick } from '@/lib/analytics';
 import type { SponsoredPlacement } from '@/app/actions';
 
 const statusConfig: Record<string, { label: string; color: string; bg: string; icon: typeof Clock }> = {
@@ -66,7 +67,7 @@ export default function OpportunityRow({ opportunities, title, subtitle, icon, o
           return (
             <div
               key={opp.id}
-              onClick={() => onSelect(opp)}
+              onClick={() => { trackOpportunityClick(opp.title, opp.category || '', title); onSelect(opp); }}
               className={`glass-card rounded-[1.5rem] p-6 min-w-[320px] max-w-[360px] flex-shrink-0 snap-start cursor-pointer border border-white/10 hover:-translate-y-1 hover:shadow-[0_16px_32px_-10px_rgba(59,130,246,0.25)] transition-all duration-300 group flex flex-col border-l-[3px] ${catStyle.borderLeft}`}
             >
               <div className="flex items-start justify-between mb-4">

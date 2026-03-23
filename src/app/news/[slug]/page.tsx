@@ -8,6 +8,8 @@ import { ArrowLeft, ExternalLink, Calendar, Newspaper, AlertTriangle, Sparkles, 
 import MarkdownBody from '@/components/MarkdownBody';
 import { decodeEntities, cleanText } from '@/lib/decodeEntities';
 import Breadcrumbs from '@/components/Breadcrumbs';
+import TrackNewsRead from '@/components/TrackNewsRead';
+import TrackOutboundLink from '@/components/TrackOutboundLink';
 
 export const dynamic = 'force-dynamic';
 
@@ -107,6 +109,8 @@ export default async function NewsArticlePage({ params }: { params: Promise<{ sl
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
+      <TrackNewsRead slug={slug} category={article.category} />
+
       <div className="relative z-10 container mx-auto px-4 py-12 max-w-4xl">
         {/* Breadcrumb */}
         <div className="mb-8">
@@ -167,10 +171,11 @@ export default async function NewsArticlePage({ params }: { params: Promise<{ sl
             <div className="mt-10 pt-6 border-t border-white/5">
               <p className="text-foreground/30 text-sm">
                 Source:{' '}
-                <a
+                <TrackOutboundLink
                   href={article.url}
                   target="_blank"
                   rel="noopener noreferrer"
+                  context="news_source"
                   className="text-foreground/40 hover:text-foreground/60 underline underline-offset-2 transition-colors"
                 >
                   {(() => {
@@ -179,7 +184,7 @@ export default async function NewsArticlePage({ params }: { params: Promise<{ sl
                       return domain;
                     } catch { return 'Original article'; }
                   })()}
-                </a>
+                </TrackOutboundLink>
               </p>
             </div>
           )}
