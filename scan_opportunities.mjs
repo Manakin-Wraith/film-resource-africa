@@ -265,6 +265,23 @@ const RSS_FEEDS = [
     type: 'news',
     filterRelevant: true,
   },
+  // ── Tier 3: Producer/lab programme feeds ──
+  {
+    name: 'Big World Cinema (Medium)',
+    url: 'https://medium.com/feed/@bigworldcinema_30298',
+    type: 'news',
+  },
+  {
+    name: 'The British Blacklist',
+    url: 'https://thebritishblacklist.co.uk/feed/',
+    type: 'news',
+    filterRelevant: true,
+  },
+  {
+    name: 'Film Efiko',
+    url: 'https://filmefiko.com/feed/',
+    type: 'news',
+  },
 ];
 
 async function fetchRSS(feed) {
@@ -341,6 +358,63 @@ const GMAIL_SENDERS = [
   { query: 'subject:"opportunity" OR subject:"fund" OR subject:"fellowship" OR subject:"residency" OR subject:"workshop" (Africa OR African OR filmmaker) -from:notifications@', name: 'Opportunity Inbox' },
 ];
 
+// ─── Gmail REST API (replaces gws CLI) ──────────────────────────────────────
+
+const gmailRefreshToken = env.GMAIL_REFRESH_TOKEN;
+const gmailClientId = env.GMAIL_CLIENT_ID || '812435843656-v79h346736tin3v5qrun7espa1ooe5r3.apps.googleusercontent.com';
+const gmailClientSecret = env.GMAIL_CLIENT_SECRET || '';
+let gmailAccessToken = null;
+
+async function getGmailAccessToken() {
+  if (gmailAccessToken) return gmailAccessToken;
+  if (!gmailRefreshToken || !gmailClientSecret) return null;
+
+  try {
+    const res = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_id: gmailClientId,
+        client_secret: gmailClientSecret,
+        refresh_token: gmailRefreshToken,
+        grant_type: 'refresh_token',
+      }),
+    });
+    const data = await res.json();
+    if (data.error) {
+      console.error(`  ⚠ Gmail token refresh failed: ${data.error_description || data.error}`);
+      return null;
+    }
+    gmailAccessToken = data.access_token;
+    return gmailAccessToken;
+  } catch (err) {
+    console.error(`  ⚠ Gmail token refresh error: ${err.message}`);
+    return null;
+  }
+}
+
+async function gmailApi(endpoint, params = {}) {
+  const token = await getGmailAccessToken();
+  if (!token) return null;
+
+  const qs = new URLSearchParams(params).toString();
+  const url = `https://gmail.googleapis.com/gmail/v1/users/me/${endpoint}${qs ? '?' + qs : ''}`;
+  try {
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}` },
+      signal: AbortSignal.timeout(15000),
+    });
+    if (!res.ok) {
+      if (res.status === 401) { gmailAccessToken = null; } // Force re-auth next call
+      return null;
+    }
+    return res.json();
+  } catch {
+    return null;
+  }
+}
+
+// Legacy gws fallback (used only if no refresh token configured)
 function gws(cmd) {
   try {
     return execSync(`gws ${cmd}`, { encoding: 'utf-8', timeout: 30000, stdio: ['pipe', 'pipe', 'pipe'] });
@@ -351,7 +425,6 @@ function gws(cmd) {
 
 function parseGwsJson(output) {
   if (!output) return null;
-  // Strip non-JSON prefix (e.g. "Using keyring backend: keyring")
   const jsonStart = output.indexOf('{');
   if (jsonStart === -1) {
     const arrStart = output.indexOf('[');
@@ -363,24 +436,47 @@ function parseGwsJson(output) {
 
 async function scanGmail() {
   const items = [];
-  const oneDayAgo = new Date();
-  oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+
+  // Check if direct Gmail API is available
+  const useDirectApi = !!(gmailRefreshToken && gmailClientSecret);
+  if (!useDirectApi) {
+    console.log('  ⚠ No GMAIL_REFRESH_TOKEN in .env.local — falling back to gws CLI');
+    console.log('    Run: node scripts/gmail_auth.mjs  to set up direct Gmail API access');
+  }
 
   for (const sender of GMAIL_SENDERS) {
     const q = `${sender.query} is:unread newer_than:2d`;
-    const raw = gws(`gmail users messages list --params '{"userId":"me","q":"${q}","maxResults":5}'`);
-    const result = parseGwsJson(raw);
 
-    if (!result || !result.messages) {
+    let messages = null;
+
+    if (useDirectApi) {
+      // Direct Gmail REST API
+      const result = await gmailApi('messages', { q, maxResults: '5' });
+      messages = result?.messages || null;
+    } else {
+      // Fallback to gws CLI
+      const raw = gws(`gmail users messages list --params '{"userId":"me","q":"${q}","maxResults":5}'`);
+      const result = parseGwsJson(raw);
+      messages = result?.messages || null;
+    }
+
+    if (!messages) {
       console.log(`  · ${sender.name}: no new messages`);
       continue;
     }
 
-    console.log(`  ✓ ${sender.name}: ${result.messages.length} unread`);
+    console.log(`  ✓ ${sender.name}: ${messages.length} unread`);
 
-    for (const msg of result.messages.slice(0, 3)) {
-      const metaRaw = gws(`gmail users messages get --params '{"userId":"me","id":"${msg.id}","format":"metadata"}'`);
-      const meta = parseGwsJson(metaRaw);
+    for (const msg of messages.slice(0, 3)) {
+      let meta = null;
+
+      if (useDirectApi) {
+        meta = await gmailApi(`messages/${msg.id}`, { format: 'metadata' });
+      } else {
+        const metaRaw = gws(`gmail users messages get --params '{"userId":"me","id":"${msg.id}","format":"metadata"}'`);
+        meta = parseGwsJson(metaRaw);
+      }
+
       if (!meta || !meta.payload) continue;
 
       const hdrs = {};
@@ -500,6 +596,7 @@ const RELEVANCE_KEYWORDS = [
   // Major funders & labs
   'hubert bals', 'world cinema fund', 'bertha fund',
   'realness', 'maisha', 'docubox', 'film lab',
+  'big world cinema', 'african producers accelerator', 'apa programme',
   'hot docs', 'idfa', 'sheffield', 'cph:dox',
   // Platforms
   'netflix', 'showmax', 'multichoice', 'dstv', 'canal+', 'amazon',
@@ -531,6 +628,7 @@ const KEY_ORG_PAGES = [
   { name: 'FESPACO', url: 'https://fespaco.bf', selector: 'appel|candidatures|submit|deadline' },
   { name: 'Maisha Film Lab', url: 'https://www.maishafilmlab.org', selector: 'apply|call|submit|deadline' },
   { name: 'Open Cities Lab', url: 'https://open-cities.com', selector: 'accelerator|submissions|apply|deadline' },
+  { name: 'Big World Cinema', url: 'https://bigworldcinema.com', selector: 'accelerator|apply|call|programme|submit|deadline' },
 ];
 
 async function scanKeyPages(existingTitles) {

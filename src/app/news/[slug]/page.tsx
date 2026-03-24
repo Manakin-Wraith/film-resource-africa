@@ -162,7 +162,7 @@ export default async function NewsArticlePage({ params }: { params: Promise<{ sl
         <article className="glass-card rounded-[2rem] p-8 md:p-12 border border-white/10 mb-12">
           <div className="prose prose-invert prose-lg max-w-none">
             {article.content ? (
-              <MarkdownBody content={cleanText(article.content)} />
+              <MarkdownBody content={decodeEntities(article.content)} />
             ) : null}
           </div>
 
