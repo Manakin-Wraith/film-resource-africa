@@ -52,7 +52,7 @@ UPDATE countries SET
     { "name": "South African Screen Federation (SASFED)", "website": "https://www.sasfed.org", "description": "Umbrella body for the South African screen sector, representing guilds, unions, and industry associations." },
     { "name": "Directors Guild of Southern Africa", "website": "", "description": "Professional guild for directors working in film, television, and commercials across Southern Africa." },
     { "name": "Animation South Africa (ASA)", "website": "https://www.animationsa.org", "description": "Industry body promoting and developing the South African animation sector." },
-    { "name": "South African Society of Cinematographers (SASC)", "website": "https://www.sasc.org.za", "description": "Professional society for directors of photography and cinematographers." }
+    { "name": "South African Society of Cinematographers (SASC)", "website": "https://sasc.co.za", "description": "Professional society for directors of photography and cinematographers." }
   ]'::jsonb,
 
   practical_info = '{
