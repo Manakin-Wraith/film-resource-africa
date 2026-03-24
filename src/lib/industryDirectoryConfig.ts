@@ -1,4 +1,4 @@
-import { Building2, Users, Camera, Film, Megaphone, GraduationCap, Wrench, MapPin, Clapperboard, Palette, Volume2, Lightbulb, Monitor, Truck, UtensilsCrossed, Shield, BookOpen, Laptop, UserCheck, Award, Briefcase, Plane, HardHat, Crosshair, Eye, Pen, Music, Hammer, Shirt, Car, HeartPulse, Rocket } from 'lucide-react';
+import { Building2, Users, Camera, Film, Megaphone, GraduationCap, Wrench, MapPin, Clapperboard, Palette, Volume2, Lightbulb, Monitor, Truck, UtensilsCrossed, Shield, BookOpen, Laptop, UserCheck, Award, Briefcase, Plane, HardHat, Crosshair, Eye, Pen, Music, Hammer, Shirt, Car, HeartPulse, Rocket, Handshake, Warehouse, Languages, FileVideo } from 'lucide-react';
 
 // === Directory Types ===
 export interface DirectoryTypeStyle {
@@ -70,6 +70,8 @@ export const categoryOptions: Record<string, CategoryOption[]> = {
     { value: 'VFX & CGI', label: 'VFX & CGI', icon: Lightbulb },
     { value: 'Distribution', label: 'Distribution', icon: Megaphone },
     { value: 'Line Production', label: 'Line / Service Production', icon: Users },
+    { value: 'Co-Production', label: 'Co-Production Company', icon: Handshake },
+    { value: 'Studio / Facility', label: 'Studio / Facility', icon: Warehouse },
     { value: 'Music Library', label: 'Music Library / Licensing', icon: Music },
   ],
   crew: [
@@ -116,6 +118,9 @@ export const categoryOptions: Record<string, CategoryOption[]> = {
     { value: 'Medical', label: 'Medics on Set', icon: HeartPulse },
     { value: 'Accommodation', label: 'Accommodation / Basecamp', icon: Building2 },
     { value: 'Security', label: 'Security', icon: Shield },
+    { value: 'Gear House', label: 'Gear House / Camera Rental', icon: Warehouse },
+    { value: 'DCP & Deliverables', label: 'DCP & Mastering / Deliverables', icon: FileVideo },
+    { value: 'Subtitling & Localization', label: 'Subtitling / Dubbing / Localization', icon: Languages },
   ],
   training: [
     { value: 'Film School', label: 'Film School', icon: GraduationCap },
@@ -133,6 +138,8 @@ export const categoryOptions: Record<string, CategoryOption[]> = {
     { value: 'Modelling Agency', label: 'Modelling Agency', icon: UserCheck },
     { value: 'Voiceover Agency', label: 'Voiceover Agency', icon: Volume2 },
     { value: 'Music Agency', label: 'Music / Composer Agency', icon: Music },
+    { value: 'Sales Agent', label: 'Sales Agent / Distribution', icon: Megaphone },
+    { value: 'Co-Production Facilitator', label: 'Co-Production Facilitator', icon: Handshake },
   ],
 };
 
