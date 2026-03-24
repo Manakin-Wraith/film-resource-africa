@@ -3,10 +3,80 @@
 import ReactMarkdown from 'react-markdown';
 import { useRef } from 'react';
 
+/**
+ * Strip common scraped boilerplate tails from article content.
+ * These are newsletter CTAs, comment policies, JS snippets, etc.
+ */
+function sanitizeContent(raw: string): string {
+  if (!raw) return raw;
+
+  const cutPhrases = [
+    'Get our Breaking News Alerts',
+    'Comments On Deadline Hollywood',
+    'document.getElementById',
+    'Sign up for our newsletter',
+    'Subscribe to our newsletter',
+    'Sign up to receive',
+    'Join our mailing list',
+    'This article was originally published',
+    'Click here to subscribe',
+    '.setAttribute( "value"',
+    'ak_js_',
+  ];
+
+  let content = raw;
+  for (const phrase of cutPhrases) {
+    const idx = content.indexOf(phrase);
+    if (idx > 0) content = content.slice(0, idx).trim();
+  }
+
+  return content;
+}
+
+/**
+ * Normalise raw article text into proper markdown paragraphs.
+ *
+ * - If the text already has double-newlines, leave it alone.
+ * - If it has single newlines only, promote them to paragraph breaks.
+ * - If it's a wall of text with no newlines, split on sentence boundaries
+ *   (". " followed by a capital letter) roughly every 2-3 sentences.
+ */
+function normaliseContent(raw: string): string {
+  if (!raw) return raw;
+
+  // Already has paragraph breaks — return as-is
+  if (/\n\n/.test(raw)) return raw;
+
+  // Has single newlines — promote to paragraph breaks
+  if (/\n/.test(raw)) {
+    return raw.replace(/\n/g, '\n\n');
+  }
+
+  // Wall of text — split on sentence boundaries (". " before uppercase)
+  // Group ~2-3 sentences per paragraph for readability
+  const sentences = raw.split(/(?<=\.)\s+(?=[A-Z\u201C\u2018"])/);
+  if (sentences.length <= 2) return raw;
+
+  const paragraphs: string[] = [];
+  let current: string[] = [];
+  for (const s of sentences) {
+    current.push(s);
+    if (current.length >= 3) {
+      paragraphs.push(current.join(' '));
+      current = [];
+    }
+  }
+  if (current.length > 0) paragraphs.push(current.join(' '));
+
+  return paragraphs.join('\n\n');
+}
+
 export default function MarkdownBody({ content }: { content: string }) {
   const pCount = useRef(0);
   // Reset counter on each render
   pCount.current = 0;
+
+  const normalisedContent = normaliseContent(sanitizeContent(content));
 
   return (
     <ReactMarkdown
@@ -75,7 +145,7 @@ export default function MarkdownBody({ content }: { content: string }) {
         ),
       }}
     >
-      {content}
+      {normalisedContent}
     </ReactMarkdown>
   );
 }
