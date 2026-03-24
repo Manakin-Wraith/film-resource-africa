@@ -141,14 +141,39 @@ export default function OpportunityModal({ selectedOpp, onClose }: OpportunityMo
 
             {/* Scrollable area — header + content unified so long titles don't starve mobile viewport */}
             <div className="overflow-y-auto custom-scrollbar flex-grow overscroll-contain">
+              {/* OG Image hero banner */}
+              {selectedOpp.og_image_url && (
+                <div className="relative h-40 md:h-56 overflow-hidden">
+                  <Image
+                    src={selectedOpp.og_image_url}
+                    alt=""
+                    fill
+                    sizes="(max-width: 768px) 100vw, 896px"
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+                  {selectedOpp.logo && (
+                    <div className="absolute bottom-3 left-6 md:left-10 flex items-center gap-2 bg-black/50 backdrop-blur-md rounded-xl px-2.5 py-2 border border-white/10">
+                      <Image
+                        src={selectedOpp.logo}
+                        alt=""
+                        width={24}
+                        height={24}
+                        className="object-contain max-w-[24px] max-h-[24px]"
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Header */}
               <div
-                className="relative p-6 md:p-10 pb-5 md:pb-6 border-b border-white/10 bg-gradient-to-b from-primary/10 to-transparent"
+                className={`relative p-6 md:p-10 pb-5 md:pb-6 border-b border-white/10 ${selectedOpp.og_image_url ? '' : 'bg-gradient-to-b from-primary/10 to-transparent'}`}
                 onPointerDown={(e) => { if (isMobile) dragControls.start(e); }}
               >
                 {/* Org logo + Category badge */}
                 <div className="flex items-center gap-3 mb-3 md:mb-4">
-                  {selectedOpp.logo && (
+                  {!selectedOpp.og_image_url && selectedOpp.logo && (
                     <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0">
                       <Image
                         src={selectedOpp.logo}

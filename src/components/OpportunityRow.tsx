@@ -1,7 +1,6 @@
 'use client';
 
 import { Opportunity } from '@/app/actions';
-import Image from 'next/image';
 import { Calendar, DollarSign, ExternalLink, AlertTriangle, Clock, Sparkles, RefreshCw } from 'lucide-react';
 import { getCategoryStyle } from '@/lib/categoryConfig';
 import { isNewListing, isUpdatedListing, formatDeadline } from '@/lib/dateUtils';
@@ -9,6 +8,7 @@ import { decodeHtmlEntities } from '@/lib/textUtils';
 import SponsoredCard from './SponsoredCard';
 import { trackOpportunityClick } from '@/lib/analytics';
 import type { SponsoredPlacement } from '@/app/actions';
+import CardVisualHeader from './CardVisualHeader';
 
 const statusConfig: Record<string, { label: string; color: string; bg: string; icon: typeof Clock }> = {
   open: { label: 'Open', color: 'text-green-400', bg: 'bg-green-500/20 border-green-500/30', icon: Clock },
@@ -72,20 +72,12 @@ export default function OpportunityRow({ opportunities, title, subtitle, icon, o
               onClick={() => { trackOpportunityClick(opp.title, opp.category || '', title); onSelect(opp); }}
               className={`glass-card rounded-[1.5rem] min-w-[320px] max-w-[360px] flex-shrink-0 snap-start cursor-pointer border border-white/10 hover:-translate-y-1 hover:shadow-[0_16px_32px_-10px_rgba(59,130,246,0.25)] transition-all duration-300 group flex flex-col border-l-[3px] ${catStyle.borderLeft} overflow-hidden`}
             >
-              {/* Visual header — logo or category icon on gradient */}
-              <div className={`relative h-20 flex items-center justify-center bg-gradient-to-r ${catStyle.headerGradient} border-b border-white/5`}>
-                {opp.logo ? (
-                  <Image
-                    src={opp.logo}
-                    alt=""
-                    width={96}
-                    height={32}
-                    className="object-contain max-h-[32px] opacity-80 group-hover:opacity-100 transition-opacity drop-shadow-sm"
-                  />
-                ) : (
-                  <CatIcon size={36} className={`${catStyle.color} opacity-20`} />
-                )}
-              </div>
+              <CardVisualHeader
+                logo={opp.logo}
+                ogImage={opp.og_image_url}
+                category={opp.category}
+                title={opp.title}
+              />
 
               <div className="p-6 flex flex-col flex-grow">
               {/* Countdown badge — prominent top row */}

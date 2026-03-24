@@ -97,6 +97,37 @@ async function fetchLogoForUrl(url) {
   } catch { return null; }
 }
 
+async function fetchOgImageForUrl(url) {
+  const domain = extractDomain(url);
+  if (!domain) return null;
+  if (PLATFORM_DOMAINS.has(domain) || PLATFORM_DOMAINS.has(domain.replace(/^[^.]+\./, ''))) return null;
+  try {
+    let u = url.trim();
+    if (!u.startsWith('http')) u = 'https://' + u;
+    const res = await fetch(u, {
+      headers: { 'User-Agent': 'Mozilla/5.0 FRA-Scanner/1.0', 'Accept': 'text/html' },
+      signal: AbortSignal.timeout(10000),
+      redirect: 'follow',
+    });
+    if (!res.ok) return null;
+    const html = await res.text();
+    const patterns = [
+      /<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i,
+      /<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i,
+      /<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i,
+      /<meta[^>]+content=["']([^"']+)["'][^>]+name=["']twitter:image["']/i,
+    ];
+    for (const pattern of patterns) {
+      const match = html.match(pattern);
+      if (match && match[1] && match[1].length > 15 && !match[1].includes('placeholder')) {
+        const imgUrl = match[1].startsWith('http') ? match[1] : new URL(match[1], u).href;
+        return imgUrl;
+      }
+    }
+    return null;
+  } catch { return null; }
+}
+
 // ─── HTML entity decoder ────────────────────────────────────────────────────
 
 function decodeEntities(str) {
@@ -1098,8 +1129,9 @@ async function main() {
   if (results.opportunities.length > 0 && !NEWS_ONLY) {
     console.log(`\n🎯 Found ${results.opportunities.length} potential opportunity leads`);
     for (const item of results.opportunities.slice(0, 15)) {
-      // Fetch logo for the opportunity
+      // Fetch logo and OG image for the opportunity
       const logo = item.url ? await fetchLogoForUrl(item.url) : null;
+      const ogImage = item.url ? await fetchOgImageForUrl(item.url) : null;
       const oppItem = {
         title: decodeEntities(item.title),
         'What Is It?': decodeEntities(item.snippet) || 'Discovered via automated scan — needs review.',
@@ -1116,14 +1148,16 @@ async function main() {
         votes: 0,
         application_status: 'open',
         ...(logo ? { logo } : {}),
+        ...(ogImage ? { og_image_url: ogImage } : {}),
       };
+      const extras = [logo && 'logo', ogImage && 'og'].filter(Boolean).join('+');
       if (DRY_RUN) {
-        console.log(`  [DRY] Would insert opp: ${item.title.slice(0, 60)}${logo ? ' (+ logo)' : ''}`);
+        console.log(`  [DRY] Would insert opp: ${item.title.slice(0, 60)}${extras ? ` (+ ${extras})` : ''}`);
         console.log(`         URL: ${item.url || 'N/A'}`);
       } else {
         try {
           await supabaseInsert('opportunities', oppItem);
-          console.log(`  ✓ Inserted (pending): ${item.title.slice(0, 60)}${logo ? ' (+ logo)' : ''}`);
+          console.log(`  ✓ Inserted (pending): ${item.title.slice(0, 60)}${extras ? ` (+ ${extras})` : ''}`);
           oppsInserted++;
         } catch (err) {
           console.log(`  ✗ Failed: ${item.title.slice(0, 60)} — ${err.message}`);

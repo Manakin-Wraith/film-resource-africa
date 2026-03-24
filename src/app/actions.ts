@@ -23,6 +23,7 @@ export interface Opportunity {
   "Strongest Submission Tips": string;
   "CALENDAR REMINDER:": string;
   logo?: string;
+  og_image_url?: string;
   status?: 'approved' | 'pending';
   created_at?: string;
   votes: number;

@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Image from 'next/image';
 import { Search, Calendar, DollarSign, ExternalLink, Plus, Heart, Clock, AlertTriangle, LayoutGrid, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { Opportunity, voteOpportunity } from '@/app/actions';
@@ -10,6 +9,7 @@ import OpportunityModal from './OpportunityModal';
 import { categoryConfig, getCategoryStyle } from '@/lib/categoryConfig';
 import { formatDeadline, isNewListing } from '@/lib/dateUtils';
 import { decodeHtmlEntities } from '@/lib/textUtils';
+import CardVisualHeader from './CardVisualHeader';
 
 const statusConfig: Record<string, { label: string; color: string; bg: string; icon: typeof Clock }> = {
   open: { label: 'Open', color: 'text-green-400', bg: 'bg-green-500/20 border-green-500/30', icon: Clock },
@@ -187,20 +187,12 @@ export default function DirectoryClient({ initialData }: { initialData: Opportun
                 onClick={() => setSelectedOpp(opp)}
                 className={`glass-card rounded-[1.5rem] flex flex-col hover:-translate-y-1 hover:shadow-[0_16px_32px_-10px_rgba(59,130,246,0.25)] transition-all duration-300 group cursor-pointer border border-white/10 overflow-hidden relative border-l-[3px] ${catStyle.borderLeft}`}
               >
-                {/* Visual header — logo or category icon on gradient */}
-                <div className={`relative h-20 flex items-center justify-center bg-gradient-to-r ${catStyle.headerGradient} border-b border-white/5`}>
-                  {opp.logo ? (
-                    <Image
-                      src={opp.logo}
-                      alt=""
-                      width={96}
-                      height={32}
-                      className="object-contain max-h-[32px] opacity-80 group-hover:opacity-100 transition-opacity drop-shadow-sm"
-                    />
-                  ) : (
-                    <CatIcon size={36} className={`${catStyle.color} opacity-20`} />
-                  )}
-                </div>
+                <CardVisualHeader
+                  logo={opp.logo}
+                  ogImage={opp.og_image_url}
+                  category={opp.category}
+                  title={opp.title}
+                />
 
                 <div className="p-6 flex flex-col flex-grow">
                 <div className="flex items-start justify-between mb-4 relative z-10">
