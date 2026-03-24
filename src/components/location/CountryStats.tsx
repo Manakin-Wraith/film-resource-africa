@@ -1,4 +1,4 @@
-import { Building2, Users, Clapperboard, Award } from 'lucide-react';
+import { Building2, Users, Clapperboard, Award, Handshake, Banknote } from 'lucide-react';
 import type { Country } from '@/lib/countries';
 
 interface CountryStatsProps {
@@ -65,11 +65,36 @@ export default function CountryStats({ country }: CountryStatsProps) {
         {country.tax_incentives && (
           <div>
             <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-foreground/50 mb-3">
-              <Users size={14} /> Tax Incentives
+              <Banknote size={14} /> Tax Incentives
             </h3>
             <p className="text-sm text-foreground/60 leading-relaxed">
               {country.tax_incentives}
             </p>
+          </div>
+        )}
+
+        {/* Co-Production Treaties */}
+        {country.co_production_treaties && country.co_production_treaties.length > 0 && (
+          <div>
+            <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-foreground/50 mb-3">
+              <Handshake size={14} /> Co-Production Treaties
+            </h3>
+            <div className="space-y-2">
+              {country.co_production_treaties.map((treaty) => (
+                <div
+                  key={treaty.country}
+                  className="p-2.5 rounded-xl bg-white/5 border border-white/5"
+                >
+                  <div className="flex items-center justify-between mb-0.5">
+                    <span className="text-xs font-semibold">{treaty.country}</span>
+                    <span className="text-[10px] text-foreground/30">{treaty.year}</span>
+                  </div>
+                  <p className="text-[11px] text-foreground/40 leading-snug">
+                    {treaty.treaty_name}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>

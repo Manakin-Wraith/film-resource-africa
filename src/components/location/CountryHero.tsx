@@ -57,7 +57,13 @@ export default function CountryHero({ country, opportunityCount }: CountryHeroPr
               Browse Opportunities
             </a>
             <a href="#resources" className="px-5 py-2.5 bg-white/10 border border-white/10 rounded-xl font-bold text-sm hover:bg-white/20 transition-colors">
-              Industry Resources
+              Industry Stats
+            </a>
+            <a href="#resources-links" className="px-5 py-2.5 bg-white/10 border border-white/10 rounded-xl font-bold text-sm hover:bg-white/20 transition-colors">
+              Key Resources
+            </a>
+            <a href="#locations" className="px-5 py-2.5 bg-white/10 border border-white/10 rounded-xl font-bold text-sm hover:bg-white/20 transition-colors">
+              Filming Locations
             </a>
             <a href="#faq" className="px-5 py-2.5 bg-white/10 border border-white/10 rounded-xl font-bold text-sm hover:bg-white/20 transition-colors">
               FAQ

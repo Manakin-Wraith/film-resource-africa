@@ -1,5 +1,48 @@
 /** Country types and utilities for location pages */
 
+export interface FilmCommission {
+  name: string;
+  website: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+}
+
+export interface CoProductionTreaty {
+  country: string;
+  treaty_name: string;
+  year: number;
+  details: string;
+}
+
+export interface KeyResource {
+  name: string;
+  url: string;
+  type: 'fund' | 'guild' | 'association' | 'government' | 'festival_org' | 'other';
+  description: string;
+}
+
+export interface FilmingLocation {
+  name: string;
+  region: string;
+  description: string;
+  notable_productions: string[];
+}
+
+export interface IndustryAssociation {
+  name: string;
+  website: string;
+  description: string;
+}
+
+export interface PracticalInfo {
+  currency: string;
+  languages: string[];
+  timezone: string;
+  power_standard: string;
+  visa_info: string;
+}
+
 export interface Country {
   id: string;
   name: string;
@@ -13,6 +56,13 @@ export interface Country {
   intro_text: string;
   filming_permit_info: string;
   tax_incentives: string;
+  film_commission: FilmCommission | null;
+  co_production_treaties: CoProductionTreaty[];
+  key_resources: KeyResource[];
+  filming_locations: FilmingLocation[];
+  industry_associations: IndustryAssociation[];
+  practical_info: PracticalInfo | null;
+  production_guide_url: string | null;
   created_at: string;
   updated_at: string;
 }

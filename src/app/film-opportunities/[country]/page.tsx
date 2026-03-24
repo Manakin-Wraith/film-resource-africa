@@ -10,6 +10,10 @@ import CountryStats from '@/components/location/CountryStats';
 import CountryFAQ from '@/components/location/CountryFAQ';
 import CountryOpportunities from '@/components/location/CountryOpportunities';
 import CountryDirectory from '@/components/location/CountryDirectory';
+import CountryFilmCommission from '@/components/location/CountryFilmCommission';
+import CountryResources from '@/components/location/CountryResources';
+import CountryLocations from '@/components/location/CountryLocations';
+import CountryPracticalInfo from '@/components/location/CountryPracticalInfo';
 import NewsletterCTA from '@/components/NewsletterCTA';
 
 export const dynamic = 'force-dynamic';
@@ -138,6 +142,19 @@ export default async function CountryPage({ params }: PageProps) {
               countryName={countryData.name}
             />
 
+            {/* Key Resources & Associations */}
+            <CountryResources
+              resources={countryData.key_resources || []}
+              associations={countryData.industry_associations || []}
+              countryName={countryData.name}
+            />
+
+            {/* Filming Locations */}
+            <CountryLocations
+              locations={countryData.filming_locations || []}
+              countryName={countryData.name}
+            />
+
             <CountryOpportunities
               opportunities={opportunities}
               countryName={countryData.name}
@@ -159,7 +176,20 @@ export default async function CountryPage({ params }: PageProps) {
 
           {/* Right column — sidebar */}
           <div className="space-y-8">
+            {/* Film Commission */}
+            <CountryFilmCommission
+              commission={countryData.film_commission}
+              productionGuideUrl={countryData.production_guide_url}
+              countryName={countryData.name}
+            />
+
             <CountryStats country={countryData} />
+
+            {/* Practical Info */}
+            <CountryPracticalInfo
+              info={countryData.practical_info}
+              countryName={countryData.name}
+            />
 
             {/* Newsletter signup */}
             <div className="glass-card rounded-[2rem] p-6 border border-white/10">
