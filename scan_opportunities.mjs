@@ -62,6 +62,13 @@ const ENRICH = args.includes('--enrich');
 const LOGOS_DIR = join(process.cwd(), 'public', 'logos');
 if (!existsSync(LOGOS_DIR)) mkdirSync(LOGOS_DIR, { recursive: true });
 
+const PLATFORM_DOMAINS = new Set([
+  'lnkd.in', 'linkedin.com', 'facebook.com', 'fb.com', 'filmfreeway.com',
+  'forms.gle', 'docs.google.com', 'airtable.com', 'bit.ly', 't.co',
+  'tinyurl.com', 'ow.ly', 'youtube.com', 'youtu.be', 'twitter.com',
+  'x.com', 'instagram.com', 'eventbrite.com', 'submittable.com',
+]);
+
 function extractDomain(url) {
   try {
     let u = url.trim();
@@ -73,6 +80,7 @@ function extractDomain(url) {
 async function fetchLogoForUrl(url) {
   const domain = extractDomain(url);
   if (!domain) return null;
+  if (PLATFORM_DOMAINS.has(domain) || PLATFORM_DOMAINS.has(domain.replace(/^[^.]+\./, ''))) return null;
   const localPath = `/logos/${domain}.png`;
   const localFile = join(LOGOS_DIR, `${domain}.png`);
   if (existsSync(localFile)) return localPath;

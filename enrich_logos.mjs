@@ -40,6 +40,21 @@ if (!existsSync(LOGOS_DIR)) mkdirSync(LOGOS_DIR, { recursive: true });
 // Minimum file size to consider a valid logo (skip 1x1 placeholders)
 const MIN_LOGO_BYTES = 200;
 
+// Platform domains — these are hosting/sourcing platforms, not the actual org
+const PLATFORM_DOMAINS = new Set([
+  'lnkd.in', 'linkedin.com',
+  'facebook.com', 'fb.com',
+  'filmfreeway.com',
+  'forms.gle', 'docs.google.com',
+  'airtable.com',
+  'bit.ly', 't.co', 'tinyurl.com', 'ow.ly',
+  'youtube.com', 'youtu.be',
+  'twitter.com', 'x.com',
+  'instagram.com',
+  'eventbrite.com',
+  'submittable.com',
+]);
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function extractDomain(url) {
@@ -48,6 +63,32 @@ function extractDomain(url) {
     if (!u.startsWith('http')) u = 'https://' + u;
     const parsed = new URL(u);
     return parsed.hostname.replace(/^www\./, '');
+  } catch {
+    return null;
+  }
+}
+
+function isPlatformDomain(domain) {
+  if (!domain) return false;
+  return PLATFORM_DOMAINS.has(domain) || PLATFORM_DOMAINS.has(domain.replace(/^[^.]+\./, ''));
+}
+
+async function resolveRedirect(url) {
+  try {
+    let u = url.trim();
+    if (!u.startsWith('http')) u = 'https://' + u;
+    const res = await fetch(u, {
+      method: 'HEAD',
+      redirect: 'follow',
+      headers: { 'User-Agent': 'Mozilla/5.0 FRA-LogoEnricher/1.0' },
+      signal: AbortSignal.timeout(10000),
+    });
+    const finalUrl = res.url;
+    const finalDomain = extractDomain(finalUrl);
+    if (finalDomain && !isPlatformDomain(finalDomain)) {
+      return { url: finalUrl, domain: finalDomain };
+    }
+    return null;
   } catch {
     return null;
   }
@@ -137,16 +178,31 @@ async function main() {
     const url = opp['Apply:'];
     if (!url) { skipped++; continue; }
 
-    const domain = extractDomain(url);
+    let domain = extractDomain(url);
     if (!domain) { skipped++; continue; }
+
+    // If the URL points to a platform, try to resolve the redirect to find the real org
+    if (isPlatformDomain(domain)) {
+      console.log(`  ↻ #${opp.id} ${opp.title.slice(0, 45)} — resolving ${domain}...`);
+      const resolved = await resolveRedirect(url);
+      if (resolved) {
+        domain = resolved.domain;
+        console.log(`    → resolved to ${domain}`);
+      } else {
+        console.log(`    → could not resolve, clearing platform logo`);
+        if (!DRY_RUN && opp.logo) await supabaseUpdate(opp.id, { logo: null });
+        skipped++;
+        continue;
+      }
+    }
 
     const localPath = `/logos/${domain}.png`;
     const localFile = join(LOGOS_DIR, `${domain}.png`);
 
     // Check if we already have this domain's logo locally
     if (existsSync(localFile) && !FORCE) {
-      if (!opp.logo) {
-        // Logo file exists but DB not updated — fix it
+      if (!opp.logo || isPlatformDomain(extractDomain(opp.logo?.replace('/logos/', 'https://') || ''))) {
+        // Logo file exists but DB not updated or has platform logo — fix it
         if (!DRY_RUN) await supabaseUpdate(opp.id, { logo: localPath });
         console.log(`  ✅ #${opp.id} ${opp.title.slice(0, 50)} — linked existing ${domain}`);
         alreadyLocal++;
@@ -174,6 +230,8 @@ async function main() {
       }
       fetched++;
     } else {
+      // Clear platform logo if we can't find a real one
+      if (!DRY_RUN && opp.logo) await supabaseUpdate(opp.id, { logo: null });
       console.log(`  ✗ #${opp.id} ${opp.title.slice(0, 50)} — no logo found for ${domain}`);
       failed++;
     }
