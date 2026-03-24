@@ -31,8 +31,9 @@
  *   npx playwright install chromium
  */
 
-import { readFileSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { execSync } from 'child_process';
+import { join } from 'path';
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 
@@ -55,6 +56,38 @@ const args = process.argv.slice(2);
 const DRY_RUN = args.includes('--dry-run');
 const NEWS_ONLY = args.includes('--news-only');
 const ENRICH = args.includes('--enrich');
+
+// ─── Logo fetcher ───────────────────────────────────────────────────────────
+
+const LOGOS_DIR = join(process.cwd(), 'public', 'logos');
+if (!existsSync(LOGOS_DIR)) mkdirSync(LOGOS_DIR, { recursive: true });
+
+function extractDomain(url) {
+  try {
+    let u = url.trim();
+    if (!u.startsWith('http')) u = 'https://' + u;
+    return new URL(u).hostname.replace(/^www\./, '');
+  } catch { return null; }
+}
+
+async function fetchLogoForUrl(url) {
+  const domain = extractDomain(url);
+  if (!domain) return null;
+  const localPath = `/logos/${domain}.png`;
+  const localFile = join(LOGOS_DIR, `${domain}.png`);
+  if (existsSync(localFile)) return localPath;
+  try {
+    const res = await fetch(`https://www.google.com/s2/favicons?domain=${domain}&sz=128`, {
+      headers: { 'User-Agent': 'Mozilla/5.0 FRA-Scanner/1.0' },
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) return null;
+    const buf = Buffer.from(await res.arrayBuffer());
+    if (buf.length < 200) return null;
+    writeFileSync(localFile, buf);
+    return localPath;
+  } catch { return null; }
+}
 
 // ─── HTML entity decoder ────────────────────────────────────────────────────
 
@@ -698,11 +731,15 @@ async function enrichWithPlaywright() {
     userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
   });
 
-  // ── Phase A: Enrich thin news articles ──────────────────────────────────
-  console.log('\n🎭 Playwright enrichment — thin news articles...');
-  const allNews = await supabaseGet('news', 'select=id,title,content,url&order=id.desc&limit=120');
-  const thinNews = allNews.filter(n => (n.content || '').length < 150 && n.url);
-  console.log(`   ${thinNews.length} thin articles found`);
+  // ── Phase A: Enrich pending/thin news articles ─────────────────────────
+  console.log('\n🎭 Playwright enrichment — pending & thin news articles...');
+  const allNews = await supabaseGet('news', 'select=id,title,content,url,image_url,status&order=id.desc&limit=120');
+  const thinNews = allNews.filter(n => n.url && (
+    n.status === 'pending' ||
+    (n.content || '').length < 150 ||
+    !n.image_url
+  ));
+  console.log(`   ${thinNews.length} articles need enrichment (pending/thin/no image)`);
 
   let newsEnriched = 0;
   for (const item of thinNews) {
@@ -713,7 +750,9 @@ async function enrichWithPlaywright() {
       await page.waitForTimeout(5000);
       try { await page.waitForSelector('p', { timeout: 8000 }); } catch { /* ok */ }
 
-      const articleContent = await page.evaluate(() => {
+      const scraped = await page.evaluate(() => {
+        // ── Scrape article content ──
+        let articleContent = null;
         const selectors = [
           'article p', '[class*="article"] p', '[class*="content"] p',
           '[class*="post"] p', '[class*="body"] p', 'main p',
@@ -722,29 +761,78 @@ async function enrichWithPlaywright() {
           const paras = document.querySelectorAll(sel);
           if (paras.length >= 2) {
             const texts = Array.from(paras).map(p => p.textContent.trim()).filter(t => t.length > 30);
-            if (texts.length >= 2) return texts.join('\n\n');
+            if (texts.length >= 2) { articleContent = texts.join('\n\n'); break; }
           }
         }
-        const allP = Array.from(document.querySelectorAll('p'))
-          .map(p => p.textContent.trim())
-          .filter(t => t.length > 40 && !/cookie|subscribe|newsletter|sign up|terms|privacy/i.test(t));
-        if (allP.length >= 2) return allP.join('\n\n');
+        if (!articleContent) {
+          const allP = Array.from(document.querySelectorAll('p'))
+            .map(p => p.textContent.trim())
+            .filter(t => t.length > 40 && !/cookie|subscribe|newsletter|sign up|terms|privacy/i.test(t));
+          if (allP.length >= 2) articleContent = allP.join('\n\n');
+        }
+        if (!articleContent) {
+          const divs = Array.from(document.querySelectorAll('div, section'))
+            .filter(el => (el.innerText || '').length > 200 && (el.innerText || '').length < 10000)
+            .sort((a, b) => (b.innerText || '').length - (a.innerText || '').length);
+          if (divs.length > 0) articleContent = divs[0].innerText.trim();
+        }
 
-        const divs = Array.from(document.querySelectorAll('div, section'))
-          .filter(el => (el.innerText || '').length > 200 && (el.innerText || '').length < 10000)
-          .sort((a, b) => (b.innerText || '').length - (a.innerText || '').length);
-        return divs.length > 0 ? divs[0].innerText.trim() : null;
+        // ── Scrape image ──
+        let imageUrl = null;
+        // Priority 1: OG image meta tag
+        const ogImage = document.querySelector('meta[property="og:image"]');
+        if (ogImage) imageUrl = ogImage.getAttribute('content');
+        // Priority 2: Twitter card image
+        if (!imageUrl) {
+          const twImage = document.querySelector('meta[name="twitter:image"]');
+          if (twImage) imageUrl = twImage.getAttribute('content');
+        }
+        // Priority 3: First large image in article
+        if (!imageUrl) {
+          const articleImgs = document.querySelectorAll('article img, [class*="article"] img, [class*="content"] img, main img');
+          for (const img of articleImgs) {
+            const src = img.src || img.getAttribute('data-src') || '';
+            const w = img.naturalWidth || parseInt(img.getAttribute('width') || '0');
+            if (src && !src.includes('logo') && !src.includes('icon') && !src.includes('avatar') && !src.includes('data:image') && (w === 0 || w >= 200)) {
+              imageUrl = src;
+              break;
+            }
+          }
+        }
+        // Ensure absolute URL
+        if (imageUrl && !imageUrl.startsWith('http')) {
+          try { imageUrl = new URL(imageUrl, window.location.origin).href; } catch { imageUrl = null; }
+        }
+
+        return { articleContent, imageUrl };
       });
 
-      if (articleContent && articleContent.length > (item.content || '').length + 50) {
-        let cleaned = articleContent.replace(/\n{3,}/g, '\n\n').replace(/^\s+/gm, '').trim().slice(0, 3000);
+      const updates = {};
+
+      // Update content if we got something better
+      if (scraped.articleContent && scraped.articleContent.length > (item.content || '').length + 50) {
+        let cleaned = scraped.articleContent.replace(/\n{3,}/g, '\n\n').replace(/^\s+/gm, '').trim().slice(0, 3000);
         cleaned = cleaned.replace(/\s*(Share|Related|You may also|Read more|Sign up|Subscribe|Newsletter|Cookie|Privacy|©|Follow us)[\s\S]*$/i, '').trim();
         if (cleaned.length > (item.content || '').length + 50) {
-          const summary = cleaned.replace(/\n/g, ' ').slice(0, 300).trim();
-          await supabaseUpdate('news', item.id, { content: cleaned, summary });
-          console.log(`  ✅ [${item.id}] ${item.title.slice(0, 55)} — ${(item.content || '').length}→${cleaned.length}`);
-          newsEnriched++;
+          updates.content = cleaned;
+          updates.summary = cleaned.replace(/\n/g, ' ').slice(0, 300).trim();
         }
+      }
+
+      // Update image if we found one and item doesn't have one
+      if (scraped.imageUrl && !item.image_url) {
+        updates.image_url = scraped.imageUrl;
+      }
+
+      if (Object.keys(updates).length > 0) {
+        await supabaseUpdate('news', item.id, updates);
+        const parts = [];
+        if (updates.content) parts.push(`content ${(item.content || '').length}→${updates.content.length}`);
+        if (updates.image_url) parts.push('+ image');
+        console.log(`  ✅ [${item.id}] ${item.title.slice(0, 55)} — ${parts.join(', ')}`);
+        newsEnriched++;
+      } else {
+        console.log(`  · [${item.id}] ${item.title.slice(0, 55)} — no improvement found`);
       }
     } catch (err) {
       console.log(`  ✗ [${item.id}] ${item.title.slice(0, 40)} — ${err.message.slice(0, 60)}`);
@@ -981,6 +1069,7 @@ async function main() {
         slug,
         image_url: item.imageUrl || null,
         published_at: item.pubDate ? new Date(item.pubDate).toISOString() : new Date().toISOString(),
+        status: 'pending',
       };
       if (DRY_RUN) {
         console.log(`  [DRY] Would insert news: ${item.title.slice(0, 60)}`);
@@ -1001,6 +1090,8 @@ async function main() {
   if (results.opportunities.length > 0 && !NEWS_ONLY) {
     console.log(`\n🎯 Found ${results.opportunities.length} potential opportunity leads`);
     for (const item of results.opportunities.slice(0, 15)) {
+      // Fetch logo for the opportunity
+      const logo = item.url ? await fetchLogoForUrl(item.url) : null;
       const oppItem = {
         title: decodeEntities(item.title),
         'What Is It?': decodeEntities(item.snippet) || 'Discovered via automated scan — needs review.',
@@ -1016,14 +1107,15 @@ async function main() {
         status: 'pending',
         votes: 0,
         application_status: 'open',
+        ...(logo ? { logo } : {}),
       };
       if (DRY_RUN) {
-        console.log(`  [DRY] Would insert opp: ${item.title.slice(0, 60)}`);
+        console.log(`  [DRY] Would insert opp: ${item.title.slice(0, 60)}${logo ? ' (+ logo)' : ''}`);
         console.log(`         URL: ${item.url || 'N/A'}`);
       } else {
         try {
           await supabaseInsert('opportunities', oppItem);
-          console.log(`  ✓ Inserted (pending): ${item.title.slice(0, 60)}`);
+          console.log(`  ✓ Inserted (pending): ${item.title.slice(0, 60)}${logo ? ' (+ logo)' : ''}`);
           oppsInserted++;
         } catch (err) {
           console.log(`  ✗ Failed: ${item.title.slice(0, 60)} — ${err.message}`);
@@ -1032,8 +1124,10 @@ async function main() {
     }
   }
 
-  // 9. Playwright enrichment (optional)
-  if (ENRICH && !DRY_RUN) {
+  // 9. Playwright enrichment
+  // Always enrich when new news was inserted (content + images for pending articles)
+  // Full opportunity enrichment only with --enrich flag
+  if (!DRY_RUN && (newsInserted > 0 || ENRICH)) {
     await enrichWithPlaywright();
   }
 
@@ -1052,7 +1146,7 @@ async function main() {
   if (totalNew > 0 && !DRY_RUN && resendApiKey) {
     console.log('\n📧 Sending admin summary...');
     const emailLines = [];
-    if (newsInserted > 0) emailLines.push(`<p><strong>${newsInserted} new news article${newsInserted > 1 ? 's' : ''}</strong> added to the site.</p>`);
+    if (newsInserted > 0) emailLines.push(`<p><strong>${newsInserted} new news article${newsInserted > 1 ? 's' : ''}</strong> added as PENDING — <a href="${siteUrl}/admin">review & publish in admin</a>.</p>`);
     if (oppsInserted > 0) emailLines.push(`<p><strong>${oppsInserted} new opportunity lead${oppsInserted > 1 ? 's' : ''}</strong> added as PENDING — <a href="${siteUrl}/admin">review in admin</a>.</p>`);
 
     if (results.emails.length > 0) {

@@ -8,6 +8,7 @@ export interface CategoryStyle {
   border: string;
   borderLeft: string;
   filterActive: string;
+  headerGradient: string;
 }
 
 export const categoryConfig: Record<string, CategoryStyle> = {
@@ -19,6 +20,7 @@ export const categoryConfig: Record<string, CategoryStyle> = {
     border: 'border-green-500/30',
     borderLeft: 'border-l-green-500',
     filterActive: 'from-green-600 to-emerald-600',
+    headerGradient: 'from-green-500/15 via-emerald-500/10 to-teal-500/5',
   },
   'Labs & Fellowships': {
     label: 'Labs & Fellowships',
@@ -28,6 +30,7 @@ export const categoryConfig: Record<string, CategoryStyle> = {
     border: 'border-blue-500/30',
     borderLeft: 'border-l-blue-500',
     filterActive: 'from-blue-600 to-cyan-600',
+    headerGradient: 'from-blue-500/15 via-cyan-500/10 to-sky-500/5',
   },
   'Markets & Pitching': {
     label: 'Markets & Pitching',
@@ -37,6 +40,7 @@ export const categoryConfig: Record<string, CategoryStyle> = {
     border: 'border-amber-500/30',
     borderLeft: 'border-l-amber-500',
     filterActive: 'from-amber-600 to-orange-600',
+    headerGradient: 'from-amber-500/15 via-orange-500/10 to-yellow-500/5',
   },
   'Festivals': {
     label: 'Festivals',
@@ -46,6 +50,7 @@ export const categoryConfig: Record<string, CategoryStyle> = {
     border: 'border-rose-500/30',
     borderLeft: 'border-l-rose-500',
     filterActive: 'from-rose-600 to-pink-600',
+    headerGradient: 'from-rose-500/15 via-pink-500/10 to-fuchsia-500/5',
   },
   'AI & Emerging Tech': {
     label: 'AI & Emerging Tech',
@@ -55,6 +60,7 @@ export const categoryConfig: Record<string, CategoryStyle> = {
     border: 'border-purple-500/30',
     borderLeft: 'border-l-purple-500',
     filterActive: 'from-purple-600 to-violet-600',
+    headerGradient: 'from-purple-500/15 via-violet-500/10 to-indigo-500/5',
   },
 };
 
@@ -66,6 +72,7 @@ export const defaultCategory: CategoryStyle = {
   border: 'border-white/10',
   borderLeft: 'border-l-white/20',
   filterActive: 'from-primary to-blue-600',
+  headerGradient: 'from-white/10 via-white/5 to-transparent',
 };
 
 export function getCategoryStyle(category?: string | null): CategoryStyle {

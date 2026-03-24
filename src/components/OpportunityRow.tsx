@@ -1,6 +1,7 @@
 'use client';
 
 import { Opportunity } from '@/app/actions';
+import Image from 'next/image';
 import { Calendar, DollarSign, ExternalLink, AlertTriangle, Clock, Sparkles, RefreshCw } from 'lucide-react';
 import { getCategoryStyle } from '@/lib/categoryConfig';
 import { isNewListing, isUpdatedListing, formatDeadline } from '@/lib/dateUtils';
@@ -69,11 +70,27 @@ export default function OpportunityRow({ opportunities, title, subtitle, icon, o
             <div
               key={opp.id}
               onClick={() => { trackOpportunityClick(opp.title, opp.category || '', title); onSelect(opp); }}
-              className={`glass-card rounded-[1.5rem] p-6 min-w-[320px] max-w-[360px] flex-shrink-0 snap-start cursor-pointer border border-white/10 hover:-translate-y-1 hover:shadow-[0_16px_32px_-10px_rgba(59,130,246,0.25)] transition-all duration-300 group flex flex-col border-l-[3px] ${catStyle.borderLeft}`}
+              className={`glass-card rounded-[1.5rem] min-w-[320px] max-w-[360px] flex-shrink-0 snap-start cursor-pointer border border-white/10 hover:-translate-y-1 hover:shadow-[0_16px_32px_-10px_rgba(59,130,246,0.25)] transition-all duration-300 group flex flex-col border-l-[3px] ${catStyle.borderLeft} overflow-hidden`}
             >
+              {/* Visual header — logo or category icon on gradient */}
+              <div className={`relative h-20 flex items-center justify-center bg-gradient-to-r ${catStyle.headerGradient} border-b border-white/5`}>
+                {opp.logo ? (
+                  <Image
+                    src={opp.logo}
+                    alt=""
+                    width={96}
+                    height={32}
+                    className="object-contain max-h-[32px] opacity-80 group-hover:opacity-100 transition-opacity drop-shadow-sm"
+                  />
+                ) : (
+                  <CatIcon size={36} className={`${catStyle.color} opacity-20`} />
+                )}
+              </div>
+
+              <div className="p-6 flex flex-col flex-grow">
               {/* Countdown badge — prominent top row */}
               {deadline && deadline.urgency !== 'passed' && deadline.urgency !== 'normal' && (
-                <div className={`-mx-6 -mt-6 mb-4 px-5 py-2 text-center text-xs font-bold tracking-wide rounded-t-[1.5rem] ${
+                <div className={`-mx-6 -mt-6 mb-4 px-5 py-2 text-center text-xs font-bold tracking-wide ${
                   deadline.urgency === 'critical'
                     ? 'bg-red-500/20 text-red-400 border-b border-red-500/20'
                     : 'bg-amber-500/20 text-amber-400 border-b border-amber-500/20'
@@ -129,6 +146,7 @@ export default function OpportunityRow({ opportunities, title, subtitle, icon, o
                   <span className="truncate max-w-[200px]">{opp["Next Deadline"]?.substring(0, 40) || "Check website"}</span>
                 </div>
                 <ExternalLink size={16} className="text-foreground/30 group-hover:text-primary transition-colors flex-shrink-0" />
+              </div>
               </div>
             </div>
           );

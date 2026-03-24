@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo, useDragControls } from 'framer-motion';
 import { Calendar, DollarSign, FileText, ExternalLink, X, Info, Target, FileCheck, CheckCircle2, AlertCircle, Share2, Clock, AlertTriangle, Lightbulb } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import Image from 'next/image';
 import { Opportunity } from '@/app/actions';
 import { getCategoryStyle } from '@/lib/categoryConfig';
 import { decodeHtmlEntities } from '@/lib/textUtils';
@@ -145,8 +146,19 @@ export default function OpportunityModal({ selectedOpp, onClose }: OpportunityMo
                 className="relative p-6 md:p-10 pb-5 md:pb-6 border-b border-white/10 bg-gradient-to-b from-primary/10 to-transparent"
                 onPointerDown={(e) => { if (isMobile) dragControls.start(e); }}
               >
-                {/* Category badge */}
-                <div className="mb-3 md:mb-4">
+                {/* Org logo + Category badge */}
+                <div className="flex items-center gap-3 mb-3 md:mb-4">
+                  {selectedOpp.logo && (
+                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+                      <Image
+                        src={selectedOpp.logo}
+                        alt=""
+                        width={40}
+                        height={40}
+                        className="object-contain max-w-[32px] max-h-[32px] md:max-w-[40px] md:max-h-[40px]"
+                      />
+                    </div>
+                  )}
                   {(() => {
                     const catStyle = getCategoryStyle(selectedOpp.category);
                     const CatIcon = catStyle.icon;
