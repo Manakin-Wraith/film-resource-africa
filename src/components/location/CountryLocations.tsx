@@ -10,7 +10,7 @@ export default function CountryLocations({ locations, countryName }: CountryLoca
   if (locations.length === 0) return null;
 
   return (
-    <section id="locations" className="space-y-6">
+    <section id="locations" aria-label={`Filming locations in ${countryName}`} className="space-y-6">
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-2xl bg-rose-500/20 flex items-center justify-center border border-rose-500/20">
           <MapPin size={20} className="text-rose-400" />

@@ -20,7 +20,7 @@ export default function CountryResources({ resources, associations, countryName 
   if (resources.length === 0 && associations.length === 0) return null;
 
   return (
-    <section id="resources-links" className="space-y-6">
+    <section id="resources-links" aria-label={`Key resources and industry bodies in ${countryName}`} className="space-y-6">
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-2xl bg-amber-500/20 flex items-center justify-center border border-amber-500/20">
           <Link2 size={20} className="text-amber-400" />

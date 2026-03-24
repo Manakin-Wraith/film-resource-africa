@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { getCountryBySlug, getCountryOpportunities, getDirectoryListingsByCountry } from '@/app/actions';
 import { getCountryFAQs } from '@/lib/countries';
 import Breadcrumbs from '@/components/Breadcrumbs';
-import { BreadcrumbJsonLd } from '@/components/JsonLd';
 import CountryHero from '@/components/location/CountryHero';
 import CountryStats from '@/components/location/CountryStats';
 import CountryFAQ from '@/components/location/CountryFAQ';
@@ -32,19 +31,34 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const now = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
+  const hasCommission = !!countryData.film_commission;
+  const hasLocations = countryData.filming_locations && countryData.filming_locations.length > 0;
+
   return {
     title: `Film Opportunities in ${countryData.name} | Film Resource Africa`,
-    description: `Comprehensive guide to film festivals, grants, labs, production companies, crew, and industry services in ${countryData.name}. Updated ${now}.`,
+    description: `Comprehensive guide to film festivals, grants, labs, production companies, gear houses, co-production partners, filming locations, and industry services in ${countryData.name}.${hasCommission ? ` Film commission contacts and tax incentives included.` : ''} Updated ${now}.`,
+    keywords: [
+      `film opportunities ${countryData.name}`,
+      `film grants ${countryData.name}`,
+      `film festivals ${countryData.name}`,
+      `production companies ${countryData.name}`,
+      `gear rental ${countryData.name}`,
+      `filming locations ${countryData.name}`,
+      `co-production ${countryData.name}`,
+      `film commission ${countryData.name}`,
+      `African filmmakers`,
+      `${countryData.name} film industry`,
+    ],
     openGraph: {
       title: `Film Opportunities in ${countryData.name}`,
-      description: `Find film festivals, funding, and resources in ${countryData.name}. Your guide to filmmaking opportunities.`,
+      description: `Find film festivals, funding, production companies, gear houses, and filming locations in ${countryData.name}. Your complete guide to filmmaking opportunities.`,
       siteName: 'Film Resource Africa',
       url: `https://film-resource-africa.com/film-opportunities/${countryData.slug}`,
     },
     twitter: {
       card: 'summary_large_image',
       title: `Film Opportunities in ${countryData.name}`,
-      description: `Your guide to filmmaking in ${countryData.name}`,
+      description: `Your complete guide to filmmaking in ${countryData.name} — grants, studios, gear houses, locations & more.`,
     },
     alternates: {
       canonical: `https://film-resource-africa.com/film-opportunities/${countryData.slug}`,
@@ -64,17 +78,19 @@ export default async function CountryPage({ params }: PageProps) {
   ]);
   const faqs = getCountryFAQs(countryData);
 
+  const siteUrl = 'https://film-resource-africa.com';
+
   // JSON-LD for the country page
   const countryJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
     name: `Film Opportunities in ${countryData.name}`,
-    description: `Comprehensive guide to film festivals, grants, labs, and industry resources in ${countryData.name}.`,
-    url: `https://film-resource-africa.com/film-opportunities/${countryData.slug}`,
+    description: `Comprehensive guide to film festivals, grants, production companies, gear houses, filming locations, and industry resources in ${countryData.name}.`,
+    url: `${siteUrl}/film-opportunities/${countryData.slug}`,
     isPartOf: {
       '@type': 'WebSite',
       name: 'Film Resource Africa',
-      url: 'https://film-resource-africa.com',
+      url: siteUrl,
     },
     about: {
       '@type': 'Country',
@@ -83,7 +99,7 @@ export default async function CountryPage({ params }: PageProps) {
     publisher: {
       '@type': 'Organization',
       name: 'Film Resource Africa',
-      url: 'https://film-resource-africa.com',
+      url: siteUrl,
     },
   };
 
@@ -98,8 +114,50 @@ export default async function CountryPage({ params }: PageProps) {
           '@type': 'ListItem',
           position: i + 1,
           name: opp.title,
-          url: `https://film-resource-africa.com/film-opportunities/${countryData.slug}#opp-${opp.id}`,
+          url: `${siteUrl}/film-opportunities/${countryData.slug}#opp-${opp.id}`,
         })),
+      }
+    : null;
+
+  // ItemList schema for directory listings
+  const directoryJsonLd = directoryListings.length > 0
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'ItemList',
+        name: `Film Industry Directory — ${countryData.name}`,
+        description: `Production companies, gear houses, agencies, and services in ${countryData.name}.`,
+        numberOfItems: directoryListings.length,
+        itemListElement: directoryListings.slice(0, 50).map((listing, i) => ({
+          '@type': 'ListItem',
+          position: i + 1,
+          item: {
+            '@type': 'LocalBusiness',
+            name: listing.name,
+            description: listing.description,
+            address: {
+              '@type': 'PostalAddress',
+              addressLocality: listing.city || undefined,
+              addressCountry: countryData.name,
+            },
+            ...(listing.website ? { url: listing.website } : {}),
+          },
+        })),
+      }
+    : null;
+
+  // GovernmentOrganization schema for film commission
+  const commissionJsonLd = countryData.film_commission
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'GovernmentOrganization',
+        name: countryData.film_commission.name,
+        ...(countryData.film_commission.website ? { url: countryData.film_commission.website } : {}),
+        ...(countryData.film_commission.email ? { email: countryData.film_commission.email } : {}),
+        ...(countryData.film_commission.phone ? { telephone: countryData.film_commission.phone } : {}),
+        ...(countryData.film_commission.address
+          ? { address: { '@type': 'PostalAddress', streetAddress: countryData.film_commission.address, addressCountry: countryData.name } }
+          : {}),
+        description: `Official film commission of ${countryData.name}. Manages filming permits, industry regulation, and production support.`,
       }
     : null;
 
@@ -114,6 +172,18 @@ export default async function CountryPage({ params }: PageProps) {
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
+        />
+      )}
+      {directoryJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(directoryJsonLd) }}
+        />
+      )}
+      {commissionJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(commissionJsonLd) }}
         />
       )}
 
