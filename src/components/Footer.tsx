@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Mail, Twitter, Linkedin, Instagram, Send, CheckCircle2, Megaphone } from 'lucide-react';
+import Link from 'next/link';
 import ContactModal from './ContactModal';
 import type { InquiryType } from '@/app/actions';
 
@@ -119,12 +120,12 @@ export default function Footer() {
             <div className="hidden md:block space-y-4">
               <h3 className="font-bold text-white uppercase tracking-widest text-xs">Explore</h3>
               <nav className="flex flex-col gap-2 text-sm">
-                <a href="/" className="text-foreground/50 hover:text-primary transition-colors">Opportunities</a>
-                <a href="/news" className="text-foreground/50 hover:text-primary transition-colors">News & Insights</a>
-                <a href="/call-sheet" className="text-foreground/50 hover:text-primary transition-colors">The Call Sheet</a>
-                <a href="/industry" className="text-foreground/50 hover:text-primary transition-colors">Industry Directory</a>
-                <a href="/film-opportunities" className="text-foreground/50 hover:text-primary transition-colors">Opportunities by Country</a>
-                <a href="/submit" className="text-foreground/50 hover:text-primary transition-colors">Submit an Opportunity</a>
+                <Link href="/" className="text-foreground/50 hover:text-primary transition-colors">Opportunities</Link>
+                <Link href="/news" className="text-foreground/50 hover:text-primary transition-colors">News & Insights</Link>
+                <Link href="/call-sheet" className="text-foreground/50 hover:text-primary transition-colors">The Call Sheet</Link>
+                <Link href="/industry" className="text-foreground/50 hover:text-primary transition-colors">Industry Directory</Link>
+                <Link href="/film-opportunities" className="text-foreground/50 hover:text-primary transition-colors">Opportunities by Country</Link>
+                <Link href="/submit" className="text-foreground/50 hover:text-primary transition-colors">Submit an Opportunity</Link>
               </nav>
             </div>
 

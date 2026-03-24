@@ -1,6 +1,11 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
+export const metadata = {
+  title: 'Login | Film Resource Africa',
+  robots: 'noindex, nofollow',
+};
+
 export default function LoginPage() {
   async function handleLogin(formData: FormData) {
     'use server';

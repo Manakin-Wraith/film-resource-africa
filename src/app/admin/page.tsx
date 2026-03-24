@@ -3,6 +3,11 @@ import AdminClient from '@/components/AdminClient';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
+export const metadata = {
+  title: 'Admin Dashboard | Film Resource Africa',
+  robots: 'noindex, nofollow',
+};
+
 export default async function AdminPage() {
   const cookieStore = await cookies();
   const isAdmin = cookieStore.get('admin_auth')?.value === 'true';

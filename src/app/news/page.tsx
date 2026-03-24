@@ -14,6 +14,14 @@ export const metadata: Metadata = {
     description: 'Latest industry news, deadline alerts, and insights for African filmmakers and creators.',
     siteName: 'Film Resource Africa',
   },
+  twitter: {
+    card: 'summary',
+    title: 'News & Insights | Film Resource Africa',
+    description: 'Latest industry news, deadline alerts, and insights for African filmmakers and creators.',
+  },
+  alternates: {
+    canonical: 'https://film-resource-africa.com/news',
+  },
 };
 
 export default async function NewsPage() {

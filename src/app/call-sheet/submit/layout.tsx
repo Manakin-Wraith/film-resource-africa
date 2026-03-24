@@ -3,6 +3,19 @@ import Breadcrumbs from '@/components/Breadcrumbs';
 export const metadata = {
   title: 'Post a Listing — The Call Sheet | Film Resource Africa',
   description: 'Post paid crew calls, writing rooms, and co-production opportunities for African film productions.',
+  openGraph: {
+    title: 'Post a Listing — The Call Sheet | Film Resource Africa',
+    description: 'Post paid crew calls, writing rooms, and co-production opportunities for African film productions.',
+    siteName: 'Film Resource Africa',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Post a Listing — The Call Sheet | Film Resource Africa',
+    description: 'Post paid crew calls, writing rooms, and co-production opportunities for African film productions.',
+  },
+  alternates: {
+    canonical: 'https://film-resource-africa.com/call-sheet/submit',
+  },
 };
 
 export default function CallSheetSubmitLayout({ children }: { children: React.ReactNode }) {

@@ -18,6 +18,14 @@ export const metadata: Metadata = {
       'Browse film grants, festivals, labs, and funding opportunities across Africa by country.',
     siteName: 'Film Resource Africa',
   },
+  twitter: {
+    card: 'summary',
+    title: 'Film Opportunities by Country | Film Resource Africa',
+    description: 'Browse film grants, festivals, labs, and funding opportunities across Africa by country.',
+  },
+  alternates: {
+    canonical: 'https://film-resource-africa.com/film-opportunities',
+  },
 };
 
 export default async function FilmOpportunitiesIndexPage() {

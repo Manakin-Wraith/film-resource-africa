@@ -52,6 +52,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       description: article.summary,
       ...(article.image_url ? { images: [article.image_url] } : {}),
     },
+    alternates: {
+      canonical: `https://film-resource-africa.com/news/${slug}`,
+    },
   };
 }
 
