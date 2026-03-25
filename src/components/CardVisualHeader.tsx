@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
 import { getCategoryStyle, type CategoryStyle } from '@/lib/categoryConfig';
 
@@ -20,6 +21,7 @@ interface CardVisualHeaderProps {
  *   4. Generative pattern fallback — category gradient with decorative icon watermark
  */
 export default function CardVisualHeader({ logo, ogImage, category, title }: CardVisualHeaderProps) {
+  const [imgError, setImgError] = useState(false);
   const catStyle = getCategoryStyle(category);
   const CatIcon = catStyle.icon;
 
@@ -29,7 +31,7 @@ export default function CardVisualHeader({ logo, ogImage, category, title }: Car
   const patternScale = 0.8 + (seed % 4) * 0.15;
 
   // Tier 1 & 2: OG image hero
-  if (ogImage) {
+  if (ogImage && !imgError) {
     return (
       <div className="relative h-36 overflow-hidden bg-black/20">
         <Image
@@ -38,6 +40,7 @@ export default function CardVisualHeader({ logo, ogImage, category, title }: Car
           fill
           sizes="360px"
           className="object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
+          onError={() => setImgError(true)}
         />
         {/* Dark gradient overlay for readability */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />

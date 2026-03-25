@@ -240,21 +240,6 @@ export default function NewsletterShowcase() {
           </div>
         </div>
 
-        {/* Stats bar */}
-        <div className="flex flex-wrap justify-center gap-6 md:gap-12 mb-8 py-4 border-y border-white/5">
-          {[
-            { value: '2,400+', label: 'Subscribers' },
-            { value: '150+', label: 'Opportunities tracked' },
-            { value: '48', label: 'Countries reached' },
-            { value: '100%', label: 'Free forever' },
-          ].map((stat) => (
-            <div key={stat.label} className="text-center">
-              <p className="text-xl md:text-2xl font-bold font-heading text-primary">{stat.value}</p>
-              <p className="text-xs text-foreground/40 uppercase tracking-wider">{stat.label}</p>
-            </div>
-          ))}
-        </div>
-
         {/* Subscribe form */}
         <form onSubmit={handleSubscribe} className="max-w-xl mx-auto">
           <div className="flex gap-3">
