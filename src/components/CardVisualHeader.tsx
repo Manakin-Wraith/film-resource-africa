@@ -31,7 +31,7 @@ export default function CardVisualHeader({ logo, ogImage, category, title }: Car
   // Tier 1 & 2: OG image hero
   if (ogImage) {
     return (
-      <div className="relative h-28 overflow-hidden bg-black/20">
+      <div className="relative h-36 overflow-hidden bg-black/20">
         <Image
           src={ogImage}
           alt=""

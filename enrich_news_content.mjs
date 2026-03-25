@@ -17,7 +17,7 @@ const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = env.SUPABASE_SERVICE_ROLE_KEY || env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const headers = { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` };
 
-const MAX_CONTENT_LENGTH = 3000;
+const MAX_CONTENT_LENGTH = 15000;
 const MIN_IMPROVEMENT = 100; // only update if we get at least this many more chars
 
 async function supabaseUpdate(id, updates) {

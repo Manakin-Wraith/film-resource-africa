@@ -850,7 +850,7 @@ async function enrichWithPlaywright() {
 
       // Update content if we got something better
       if (scraped.articleContent && scraped.articleContent.length > (item.content || '').length + 50) {
-        let cleaned = scraped.articleContent.replace(/\n{3,}/g, '\n\n').replace(/^\s+/gm, '').trim().slice(0, 3000);
+        let cleaned = scraped.articleContent.replace(/\n{3,}/g, '\n\n').replace(/^\s+/gm, '').trim().slice(0, 15000);
         cleaned = cleaned.replace(/\s*(Share|Related|You may also|Read more|Sign up|Subscribe|Newsletter|Cookie|Privacy|©|Follow us)[\s\S]*$/i, '').trim();
         if (cleaned.length > (item.content || '').length + 50) {
           updates.content = cleaned;
