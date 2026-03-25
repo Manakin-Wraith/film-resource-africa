@@ -25,10 +25,20 @@ function sanitizeContent(raw: string): string {
   ];
 
   let content = raw;
+
+  // Strip trailing boilerplate
   for (const phrase of cutPhrases) {
     const idx = content.indexOf(phrase);
     if (idx > 0) content = content.slice(0, idx).trim();
   }
+
+  // Strip scraped metadata preamble (byline, date, tags at top of article)
+  // e.g. "by Eric Kohn in Directors, Interviews\non Mar 24, 2026\nCannes Film Festival, Lumière..."
+  content = content
+    .replace(/^by\s+[^\n]+\n/i, '')
+    .replace(/^on\s+\w{3,9}\s+\d{1,2},?\s+\d{4}\n/i, '')
+    .replace(/^[A-Z][A-Za-zÀ-ÿ\s,!.:&''""-]{5,80}\n(?=[A-Z])/, '')
+    .trim();
 
   return content;
 }
