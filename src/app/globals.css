@@ -219,7 +219,7 @@ body {
     transparent 80%
   );
   background-size: 200% 100%;
-  animation: sponsorShimmer 3s linear infinite, sponsorGlow 3s ease-in-out infinite;
+  animation: sponsorShimmer 8s linear infinite, sponsorGlow 6s ease-in-out infinite;
 }
 
 /* Ghost Card — shimmer background for branded variant */
