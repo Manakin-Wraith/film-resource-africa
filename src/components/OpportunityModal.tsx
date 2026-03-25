@@ -106,10 +106,10 @@ export default function OpportunityModal({ selectedOpp, onClose }: OpportunityMo
             dragElastic={0.2}
             onDragEnd={handleDragEnd}
             style={isMobile ? { y: dragY } : undefined}
-            className={`w-full glass-card bg-background/95 border border-white/20 overflow-hidden flex flex-col relative shadow-2xl ${
+            className={`w-full border border-white/20 overflow-hidden flex flex-col relative shadow-2xl ${
               isMobile
-                ? 'max-h-[95vh] rounded-t-[2rem]'
-                : 'max-w-4xl max-h-[90vh] rounded-[2.5rem]'
+                ? 'max-h-[95vh] rounded-t-[2rem] bg-background'
+                : 'max-w-4xl max-h-[90vh] rounded-[2.5rem] glass-card bg-background/95'
             }`}
           >
             {/* Mobile drag handle */}
