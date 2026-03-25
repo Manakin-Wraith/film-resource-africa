@@ -11,7 +11,7 @@ import { track } from '@vercel/analytics';
  */
 
 // ── Newsletter signup ────────────────────────────────────────────────────────
-export function trackNewsletterSignup(variant: 'hero' | 'inline' | 'banner', page: string) {
+export function trackNewsletterSignup(variant: 'hero' | 'inline' | 'banner' | 'showcase', page: string) {
   track('newsletter_signup', { variant, page });
 }
 

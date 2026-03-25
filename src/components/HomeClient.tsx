@@ -7,7 +7,7 @@ import type { InquiryType, SponsoredPlacement } from '@/app/actions';
 import OpportunityRow from './OpportunityRow';
 import NewsSection from './NewsSection';
 import NowScreeningSection from './NowScreeningSection';
-import NewsletterCTA from './NewsletterCTA';
+import NewsletterShowcase from './NewsletterShowcase';
 import DirectoryClient from './DirectoryClient';
 import OpportunityModal from './OpportunityModal';
 import PartnersSection from './PartnersSection';
@@ -173,12 +173,8 @@ export default function HomeClient({ closingSoon, openNow, newWave, justAdded, n
         />
       </section>
 
-      {/* Newsletter Banner CTA */}
-      <NewsletterCTA
-        variant="banner"
-        heading="Stay ahead of every deadline"
-        subtext="Weekly alerts on new funds, closing deadlines, and industry shifts — delivered to your inbox."
-      />
+      {/* Newsletter Showcase CTA */}
+      <NewsletterShowcase />
 
       {/* Browse by Country */}
       <BrowseByCountry countries={countriesWithCounts} />
