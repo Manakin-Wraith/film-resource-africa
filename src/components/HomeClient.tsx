@@ -10,7 +10,6 @@ import NowScreeningSection from './NowScreeningSection';
 import NewsletterShowcase from './NewsletterShowcase';
 import DirectoryClient from './DirectoryClient';
 import OpportunityModal from './OpportunityModal';
-import PartnersSection from './PartnersSection';
 import ContactModal from './ContactModal';
 import BrowseByCountry from './BrowseByCountry';
 import type { Country } from '@/lib/countries';
@@ -178,9 +177,6 @@ export default function HomeClient({ closingSoon, openNow, newWave, justAdded, n
 
       {/* Browse by Country */}
       <BrowseByCountry countries={countriesWithCounts} />
-
-      {/* Partners & Industry Network */}
-      <PartnersSection />
 
       {/* Full Directory */}
       <section id="directory" className="space-y-6">
