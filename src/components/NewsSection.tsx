@@ -7,6 +7,7 @@ import { NewsItem } from '@/app/actions';
 import { Newspaper, AlertTriangle, Sparkles, Lightbulb, ArrowRight, Clock, Star, Clapperboard } from 'lucide-react';
 import { formatRelativeDate } from '@/lib/dateUtils';
 import { decodeEntities, cleanText } from '@/lib/decodeEntities';
+import GeoIndicator from '@/components/GeoIndicator';
 import { NewsSponsoredCard } from './SponsoredCard';
 import type { SponsoredPlacement } from '@/app/actions';
 
@@ -94,10 +95,13 @@ export default function NewsSection({ news, placements = [], onSponsoredClaim }:
                 )}
                 <div className="p-6 flex flex-col flex-grow">
                   <div className="flex items-start justify-between gap-4 mb-4">
-                    <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider border ${config.bg} ${config.color}`}>
-                      <Icon size={14} />
-                      {config.label}
-                    </span>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider border ${config.bg} ${config.color}`}>
+                        <Icon size={14} />
+                        {config.label}
+                      </span>
+                      <GeoIndicator geoScope={item.geo_scope} countryIso={item.country_iso} countryName={item.country_name} variant="pill" />
+                    </div>
                     <span className="text-foreground/40 text-xs whitespace-nowrap flex items-center gap-1">
                       <Clock size={12} />
                       {formatRelativeDate(item.published_at)}

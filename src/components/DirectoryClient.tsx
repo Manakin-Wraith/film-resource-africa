@@ -192,6 +192,9 @@ export default function DirectoryClient({ initialData }: { initialData: Opportun
                   ogImage={opp.og_image_url}
                   category={opp.category}
                   title={opp.title}
+                  geoScope={opp.geo_scope}
+                  countryIso={opp.country_iso}
+                  countryName={opp.country_name}
                 />
 
                 <div className="p-6 flex flex-col flex-grow">

@@ -3,12 +3,16 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { getCategoryStyle, type CategoryStyle } from '@/lib/categoryConfig';
+import GeoIndicator, { type GeoScope } from '@/components/GeoIndicator';
 
 interface CardVisualHeaderProps {
   logo?: string | null;
   ogImage?: string | null;
   category?: string | null;
   title: string;
+  geoScope?: GeoScope | null;
+  countryIso?: string | null;
+  countryName?: string | null;
 }
 
 /**
@@ -20,7 +24,7 @@ interface CardVisualHeaderProps {
  *   3. Logo centered on category gradient (if logo but no OG image)
  *   4. Generative pattern fallback — category gradient with decorative icon watermark
  */
-export default function CardVisualHeader({ logo, ogImage, category, title }: CardVisualHeaderProps) {
+export default function CardVisualHeader({ logo, ogImage, category, title, geoScope, countryIso, countryName }: CardVisualHeaderProps) {
   const [imgError, setImgError] = useState(false);
   const catStyle = getCategoryStyle(category);
   const CatIcon = catStyle.icon;
@@ -44,18 +48,23 @@ export default function CardVisualHeader({ logo, ogImage, category, title }: Car
         />
         {/* Dark gradient overlay for readability */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-        {/* Logo pill in bottom-left corner */}
-        {logo && (
-          <div className="absolute bottom-2.5 left-3 flex items-center gap-2 bg-black/50 backdrop-blur-md rounded-lg px-2 py-1.5 border border-white/10">
-            <Image
-              src={logo}
-              alt=""
-              width={20}
-              height={20}
-              className="object-contain max-w-[20px] max-h-[20px]"
-            />
-          </div>
-        )}
+        {/* Logo pill + geo indicator in bottom-left corner */}
+        <div className="absolute bottom-2.5 left-3 flex items-center gap-1.5">
+          {logo && (
+            <div className="flex items-center gap-2 bg-black/50 backdrop-blur-md rounded-lg px-2 py-1.5 border border-white/10">
+              <Image
+                src={logo}
+                alt=""
+                width={20}
+                height={20}
+                className="object-contain max-w-[20px] max-h-[20px]"
+              />
+            </div>
+          )}
+          {geoScope && (
+            <GeoIndicator geoScope={geoScope} countryIso={countryIso} countryName={countryName} variant="overlay" />
+          )}
+        </div>
         {/* Category pill in bottom-right corner */}
         <div className="absolute bottom-2.5 right-3">
           <span className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md bg-black/50 backdrop-blur-md border border-white/10 ${catStyle.color}`}>
@@ -87,6 +96,11 @@ export default function CardVisualHeader({ logo, ogImage, category, title }: Car
           height={36}
           className="object-contain max-h-[36px] opacity-80 group-hover:opacity-100 transition-opacity drop-shadow-sm relative z-10"
         />
+        {geoScope && (
+          <div className="absolute bottom-2 right-2">
+            <GeoIndicator geoScope={geoScope} countryIso={countryIso} countryName={countryName} variant="overlay" />
+          </div>
+        )}
       </div>
     );
   }
@@ -105,6 +119,11 @@ export default function CardVisualHeader({ logo, ogImage, category, title }: Car
       />
       {/* Large watermark icon */}
       <CatIcon size={40} className={`${catStyle.color} opacity-15 relative z-10`} />
+      {geoScope && (
+        <div className="absolute bottom-2 right-2">
+          <GeoIndicator geoScope={geoScope} countryIso={countryIso} countryName={countryName} variant="overlay" />
+        </div>
+      )}
     </div>
   );
 }

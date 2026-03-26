@@ -9,6 +9,17 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+function enrichWithCountry<T extends { country_id?: string; countries?: { iso_code: string; name: string } | null }>(rows: T[]): (T & { country_iso?: string; country_name?: string })[] {
+  return rows.map(row => {
+    const { countries, ...rest } = row as any;
+    return {
+      ...rest,
+      country_iso: countries?.iso_code || undefined,
+      country_name: countries?.name || undefined,
+    };
+  });
+}
+
 export interface Opportunity {
   id: number;
   title: string;
@@ -31,6 +42,10 @@ export interface Opportunity {
   deadline_date?: string;
   application_status?: 'open' | 'closing_soon' | 'upcoming' | 'closed';
   updated_at?: string;
+  geo_scope?: 'country_specific' | 'pan_african' | 'international';
+  country_id?: string;
+  country_iso?: string;
+  country_name?: string;
 }
 
 export interface NewsItem {
@@ -48,17 +63,21 @@ export interface NewsItem {
   submitted_by_name?: string;
   submitted_by_email?: string;
   project_name?: string;
+  geo_scope?: 'country_specific' | 'pan_african' | 'international';
+  country_id?: string;
+  country_iso?: string;
+  country_name?: string;
 }
 
 export async function getAllOpportunities(): Promise<Opportunity[]> {
   try {
     const { data, error } = await supabase
       .from('opportunities')
-      .select('*')
+      .select('*, countries(iso_code, name)')
       .order('id', { ascending: false });
       
     if (error) throw error;
-    return data as Opportunity[];
+    return enrichWithCountry(data) as Opportunity[];
   } catch (error) {
     console.error('Failed to fetch from Supabase', error);
     return [];
@@ -69,12 +88,12 @@ export async function getOpportunities(): Promise<Opportunity[]> {
   try {
     const { data, error } = await supabase
       .from('opportunities')
-      .select('*')
+      .select('*, countries(iso_code, name)')
       .eq('status', 'approved')
       .order('id', { ascending: false });
       
     if (error) throw error;
-    return data as Opportunity[];
+    return enrichWithCountry(data) as Opportunity[];
   } catch (error) {
     console.error('Failed to fetch approved from Supabase', error);
     return [];
@@ -85,7 +104,7 @@ export async function getClosingSoonOpportunities(): Promise<Opportunity[]> {
   try {
     const { data, error } = await supabase
       .from('opportunities')
-      .select('*')
+      .select('*, countries(iso_code, name)')
       .eq('status', 'approved')
       .eq('application_status', 'closing_soon')
       .order('deadline_date', { ascending: true, nullsFirst: false });
@@ -96,7 +115,8 @@ export async function getClosingSoonOpportunities(): Promise<Opportunity[]> {
     // today come first; nulls/unparseable go to the back.
     const now = new Date();
     now.setHours(0, 0, 0, 0);
-    const sorted = (data as Opportunity[]).sort((a, b) => {
+    const enriched = enrichWithCountry(data) as Opportunity[];
+    const sorted = enriched.sort((a, b) => {
       const da = a.deadline_date ? new Date(a.deadline_date).getTime() : Infinity;
       const db = b.deadline_date ? new Date(b.deadline_date).getTime() : Infinity;
       return da - db;
@@ -113,13 +133,13 @@ export async function getOpenOpportunities(): Promise<Opportunity[]> {
   try {
     const { data, error } = await supabase
       .from('opportunities')
-      .select('*')
+      .select('*, countries(iso_code, name)')
       .eq('status', 'approved')
       .eq('application_status', 'open')
       .order('id', { ascending: false });
       
     if (error) throw error;
-    return data as Opportunity[];
+    return enrichWithCountry(data) as Opportunity[];
   } catch (error) {
     console.error('Failed to fetch open opportunities', error);
     return [];
@@ -130,14 +150,14 @@ export async function getTrailers(): Promise<NewsItem[]> {
   try {
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select('*, countries(iso_code, name)')
       .eq('status', 'published')
       .eq('category', 'trailer')
       .order('published_at', { ascending: false })
       .limit(10);
       
     if (error) throw error;
-    return data as NewsItem[];
+    return enrichWithCountry(data) as NewsItem[];
   } catch (error) {
     console.error('Failed to fetch trailers', error);
     return [];
@@ -148,14 +168,14 @@ export async function getNews(): Promise<NewsItem[]> {
   try {
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select('*, countries(iso_code, name)')
       .eq('status', 'published')
       .neq('category', 'trailer')
       .order('published_at', { ascending: false })
       .limit(6);
       
     if (error) throw error;
-    return data as NewsItem[];
+    return enrichWithCountry(data) as NewsItem[];
   } catch (error) {
     console.error('Failed to fetch news', error);
     return [];
@@ -199,12 +219,12 @@ export async function getAllNews(): Promise<NewsItem[]> {
   try {
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select('*, countries(iso_code, name)')
       .eq('status', 'published')
       .order('published_at', { ascending: false });
       
     if (error) throw error;
-    return data as NewsItem[];
+    return enrichWithCountry(data) as NewsItem[];
   } catch (error) {
     console.error('Failed to fetch all news', error);
     return [];

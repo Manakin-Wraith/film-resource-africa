@@ -8,6 +8,7 @@ import Image from 'next/image';
 import { Opportunity } from '@/app/actions';
 import { getCategoryStyle } from '@/lib/categoryConfig';
 import { decodeHtmlEntities } from '@/lib/textUtils';
+import GeoIndicator from '@/components/GeoIndicator';
 
 function ModalMarkdown({ text }: { text: string }) {
   return (
@@ -152,17 +153,20 @@ export default function OpportunityModal({ selectedOpp, onClose }: OpportunityMo
                     className="object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-                  {selectedOpp.logo && (
-                    <div className="absolute bottom-3 left-6 md:left-10 flex items-center gap-2 bg-black/50 backdrop-blur-md rounded-xl px-2.5 py-2 border border-white/10">
-                      <Image
-                        src={selectedOpp.logo}
-                        alt=""
-                        width={24}
-                        height={24}
-                        className="object-contain max-w-[24px] max-h-[24px]"
-                      />
-                    </div>
-                  )}
+                  <div className="absolute bottom-3 left-6 md:left-10 flex items-center gap-2">
+                    {selectedOpp.logo && (
+                      <div className="flex items-center gap-2 bg-black/50 backdrop-blur-md rounded-xl px-2.5 py-2 border border-white/10">
+                        <Image
+                          src={selectedOpp.logo}
+                          alt=""
+                          width={24}
+                          height={24}
+                          className="object-contain max-w-[24px] max-h-[24px]"
+                        />
+                      </div>
+                    )}
+                    <GeoIndicator geoScope={selectedOpp.geo_scope} countryIso={selectedOpp.country_iso} countryName={selectedOpp.country_name} variant="overlay" />
+                  </div>
                 </div>
               )}
 
@@ -194,6 +198,7 @@ export default function OpportunityModal({ selectedOpp, onClose }: OpportunityMo
                       </span>
                     );
                   })()}
+                  <GeoIndicator geoScope={selectedOpp.geo_scope} countryIso={selectedOpp.country_iso} countryName={selectedOpp.country_name} variant="pill" />
                 </div>
                 
                 <h2 className="text-xl md:text-4xl font-bold font-heading leading-tight pr-24 md:pr-28 mb-4 md:mb-5">
