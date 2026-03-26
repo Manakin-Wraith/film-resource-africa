@@ -85,7 +85,7 @@ export default function OpportunityModal({ selectedOpp, onClose }: OpportunityMo
   return (
     <AnimatePresence>
       {selectedOpp && (
-        <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center md:p-8">
+        <div className="fixed inset-0 z-[60] flex items-end md:items-center justify-center md:p-8">
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
