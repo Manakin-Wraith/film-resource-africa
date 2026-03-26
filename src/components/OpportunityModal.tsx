@@ -109,7 +109,7 @@ export default function OpportunityModal({ selectedOpp, onClose }: OpportunityMo
             style={isMobile ? { y: dragY } : undefined}
             className={`w-full border border-white/20 overflow-hidden flex flex-col relative shadow-2xl ${
               isMobile
-                ? 'max-h-[95vh] rounded-t-[2rem] bg-background'
+                ? 'max-h-[95vh] rounded-t-[2rem] bg-[#09090b]'
                 : 'max-w-4xl max-h-[90vh] rounded-[2.5rem] glass-card bg-background/95'
             }`}
           >
