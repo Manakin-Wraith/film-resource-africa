@@ -214,25 +214,20 @@ function truncate(str, maxLen = 120) {
 }
 
 /**
- * Append UTM query params to a URL for newsletter click attribution.
- * Only adds UTM to our own site URLs — external links are left untouched.
- * @param {string} url
- * @param {string} content - identifies which link in the email (e.g. 'closing_soon', 'news', 'partner_cta')
- * @returns {string}
+ * Wrap a URL through the click-tracking redirect endpoint.
+ * Uses {{NEWSLETTER_ID}} and {{SEND_ID}} placeholders that are replaced
+ * per-subscriber at send time for individual attribution.
+ * Tracks ALL links (internal + external) unlike the old UTM-only approach.
+ *
+ * @param {string} url - Destination URL (internal or external)
+ * @param {string} label - Human-readable link label for analytics (e.g. 'closing_soon', 'news', 'partner_cta')
+ * @returns {string} Tracking URL that redirects through /api/track/click
  */
-function utm(url, content = '') {
-  try {
-    const u = new URL(url);
-    // Only tag our own domain
-    if (!u.hostname.includes('film-resource-africa')) return url;
-    u.searchParams.set('utm_source', 'newsletter');
-    u.searchParams.set('utm_medium', 'email');
-    u.searchParams.set('utm_campaign', 'weekly_digest');
-    if (content) u.searchParams.set('utm_content', content);
-    return u.toString();
-  } catch {
-    return url;
-  }
+function trackUrl(url, label = '') {
+  const encoded = encodeURIComponent(url);
+  let trackingUrl = `${siteUrl}/api/track/click?url=${encoded}&nid={{NEWSLETTER_ID}}&sid={{SEND_ID}}&c=weekly_digest`;
+  if (label) trackingUrl += `&label=${encodeURIComponent(label)}`;
+  return trackingUrl;
 }
 
 function buildOpportunityRow(opp, tagColor, tagLabel) {
@@ -243,7 +238,7 @@ function buildOpportunityRow(opp, tagColor, tagLabel) {
   const applyLink = opp['Apply:'] || '';
   const linkMatch = applyLink.match(/(https?:\/\/[^\s|]+|[\w.-]+\.[a-z]{2,}[^\s|]*)/i);
   const rawUrl = linkMatch ? (linkMatch[0].startsWith('http') ? linkMatch[0] : `https://${linkMatch[0]}`) : `${siteUrl}/#directory`;
-  const url = utm(rawUrl, tagLabel || 'opportunity');
+  const url = trackUrl(rawUrl, tagLabel || 'opportunity');
   const tag = tagLabel ? `<span style="display:inline-block;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:${tagColor};background:${tagColor}12;padding:2px 8px;border-radius:4px;margin-right:6px;">${tagLabel}</span>` : '';
 
   return `
@@ -330,7 +325,7 @@ function buildNewsletterHtml({ closingSoon, newlyOpen, justAdded, news, proTip, 
     sections += '<tr><td style="padding:0 16px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e8e8e8;border-radius:8px;overflow:hidden;">';
     for (const item of news) {
       const slug = item.slug || '';
-      const newsUrl = utm(slug ? `${siteUrl}/news/${slug}` : `${siteUrl}/news`, 'news');
+      const newsUrl = trackUrl(slug ? `${siteUrl}/news/${slug}` : `${siteUrl}/news`, 'news');
       const catLabel = (item.category || '').replace(/_/g, ' ');
       sections += `
         <tr>
@@ -372,7 +367,7 @@ function buildNewsletterHtml({ closingSoon, newlyOpen, justAdded, news, proTip, 
       sections += `
         <tr>
           <td style="padding:12px 16px;border-bottom:1px solid #f0f0f0;">
-            <a href="${utm(`${siteUrl}/call-sheet`, 'call_sheet')}" style="color:#37352f;font-weight:600;font-size:15px;text-decoration:none;">${escapeHtml(listing.title)}</a>${mentorBadge}
+            <a href="${trackUrl(`${siteUrl}/call-sheet`, 'call_sheet')}" style="color:#37352f;font-weight:600;font-size:15px;text-decoration:none;">${escapeHtml(listing.title)}</a>${mentorBadge}
             <br/><span style="color:#787774;font-size:13px;">${escapeHtml(listing.production_title)} &middot; ${escapeHtml(listing.production_company)}</span>
             <br/><span style="color:#0f7b6c;font-size:13px;font-weight:600;">${escapeHtml(listing.compensation)}</span>
             <span style="color:#9b9a97;font-size:12px;"> &middot; ${escapeHtml(listing.location)}</span>
@@ -380,7 +375,7 @@ function buildNewsletterHtml({ closingSoon, newlyOpen, justAdded, news, proTip, 
         </tr>`;
     }
     sections += '</table></td></tr>';
-    sections += `<tr><td style="padding:8px 16px 0;" align="center"><a href="${utm(`${siteUrl}/call-sheet`, 'call_sheet_cta')}" style="color:#2f80ed;font-size:13px;font-weight:600;text-decoration:none;">View all crew calls &rarr;</a></td></tr>`;
+    sections += `<tr><td style="padding:8px 16px 0;" align="center"><a href="${trackUrl(`${siteUrl}/call-sheet`, 'call_sheet_cta')}" style="color:#2f80ed;font-size:13px;font-weight:600;text-decoration:none;">View all crew calls &rarr;</a></td></tr>`;
   }
 
   // ── Section 7: Community Spotlight ──
@@ -389,7 +384,7 @@ function buildNewsletterHtml({ closingSoon, newlyOpen, justAdded, news, proTip, 
     sections += '<tr><td style="padding:0 16px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e8e8e8;border-radius:8px;overflow:hidden;">';
     for (const item of communitySpotlights) {
       const slug = item.slug || '';
-      const spotlightUrl = utm(slug ? `${siteUrl}/news/${slug}` : `${siteUrl}/news`, 'spotlight');
+      const spotlightUrl = trackUrl(slug ? `${siteUrl}/news/${slug}` : `${siteUrl}/news`, 'spotlight');
       sections += `
         <tr>
           <td style="padding:12px 16px;border-bottom:1px solid #f0f0f0;">
@@ -400,7 +395,7 @@ function buildNewsletterHtml({ closingSoon, newlyOpen, justAdded, news, proTip, 
         </tr>`;
     }
     sections += '</table></td></tr>';
-    sections += `<tr><td style="padding:8px 16px 0;" align="center"><a href="${utm(`${siteUrl}/community-spotlight`, 'spotlight_cta')}" style="color:#2f80ed;font-size:13px;font-weight:600;text-decoration:none;">Share your story &rarr;</a></td></tr>`;
+    sections += `<tr><td style="padding:8px 16px 0;" align="center"><a href="${trackUrl(`${siteUrl}/community-spotlight`, 'spotlight_cta')}" style="color:#2f80ed;font-size:13px;font-weight:600;text-decoration:none;">Share your story &rarr;</a></td></tr>`;
   }
 
   // ── Empty state ──
@@ -582,7 +577,7 @@ function buildNewsletterHtml({ closingSoon, newlyOpen, justAdded, news, proTip, 
           <!-- CTA -->
           <tr>
             <td style="padding:28px 16px 12px;" align="center">
-              <a href="${utm(`${siteUrl}/#directory`, 'browse_cta')}" style="display:inline-block;background-color:#37352f;color:#ffffff;font-weight:600;font-size:14px;text-decoration:none;padding:12px 28px;border-radius:8px;">
+              <a href="${trackUrl(`${siteUrl}/#directory`, 'browse_cta')}" style="display:inline-block;background-color:#37352f;color:#ffffff;font-weight:600;font-size:14px;text-decoration:none;padding:12px 28px;border-radius:8px;">
                 Browse all opportunities &rarr;
               </a>
             </td>
@@ -602,7 +597,7 @@ function buildNewsletterHtml({ closingSoon, newlyOpen, justAdded, news, proTip, 
             <td align="center" style="padding:20px 24px 28px;font-size:11px;color:#9b9a97;line-height:1.6;border-top:1px solid #e8e8e8;">
               Made with passion in Africa &#127757;<br/>
               You're receiving this because you subscribed at ${siteUrl.replace('https://', '')}<br/>
-              <a href="${utm(siteUrl, 'footer')}" style="color:#2f80ed;text-decoration:none;">${siteUrl.replace('https://', '')}</a>
+              <a href="${trackUrl(siteUrl, 'footer')}" style="color:#2f80ed;text-decoration:none;">${siteUrl.replace('https://', '')}</a>
             </td>
           </tr>
 
@@ -875,19 +870,32 @@ async function main() {
     return;
   }
 
-  // 6. Send to all subscribers
+  // 6. Send to all subscribers (with per-subscriber click tracking)
+  //    - Replace {{NEWSLETTER_ID}} once in the template
+  //    - Pre-insert a newsletter_sends record to get the send_id
+  //    - Replace {{SEND_ID}} per-subscriber so every link tracks back to them
   console.log('\nSending emails...\n');
   let sent = 0;
   let failed = 0;
 
+  const htmlWithNid = html.replace(/\{\{NEWSLETTER_ID\}\}/g, newsletter.id);
+
   for (const sub of subscribers) {
     try {
-      const result = await sendEmail(sub.email, subject, html);
-
-      // Log individual send
-      await supabasePost('newsletter_sends', {
+      // Pre-insert send record to get its ID for tracking links
+      const [sendRecord] = await supabasePost('newsletter_sends', {
         newsletter_id: newsletter.id,
         subscriber_email: sub.email,
+        status: 'pending',
+      });
+
+      // Personalise HTML with this subscriber's send ID
+      const personalHtml = htmlWithNid.replace(/\{\{SEND_ID\}\}/g, sendRecord.id);
+
+      const result = await sendEmail(sub.email, subject, personalHtml);
+
+      // Update send record with success
+      await supabasePatch('newsletter_sends', `id=eq.${sendRecord.id}`, {
         status: 'sent',
         resend_message_id: result.id || null,
         sent_at: new Date().toISOString(),
