@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { NewsItem } from '@/app/actions';
 import { Newspaper, AlertTriangle, Sparkles, Lightbulb, ArrowRight, Clock, Star, Clapperboard } from 'lucide-react';
-import { formatRelativeDate } from '@/lib/dateUtils';
+import RelativeDate from '@/components/RelativeDate';
 import { decodeEntities, cleanText } from '@/lib/decodeEntities';
 import GeoIndicator from '@/components/GeoIndicator';
 import { NewsSponsoredCard } from './SponsoredCard';
@@ -106,7 +106,7 @@ export default function NewsSection({ news, placements = [], onSponsoredClaim }:
                     </div>
                     <span className="text-foreground/40 text-xs whitespace-nowrap flex items-center gap-1">
                       <Clock size={12} />
-                      {formatRelativeDate(item.published_at)}
+                      <RelativeDate date={item.published_at} />
                     </span>
                   </div>
 

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { NewsItem } from '@/app/actions';
 import { Clapperboard, Play, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
-import { formatRelativeDate } from '@/lib/dateUtils';
+import RelativeDate from '@/components/RelativeDate';
 
 interface NowScreeningSectionProps {
   trailers: NewsItem[];
@@ -114,7 +114,7 @@ export default function NowScreeningSection({ trailers }: NowScreeningSectionPro
                   {item.title}
                 </h3>
                 <span className="text-foreground/30 text-xs mt-auto">
-                  {formatRelativeDate(item.published_at)}
+                  <RelativeDate date={item.published_at} />
                 </span>
               </div>
             </Link>
