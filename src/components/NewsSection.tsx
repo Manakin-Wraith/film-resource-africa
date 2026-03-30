@@ -18,6 +18,8 @@ const categoryConfig: Record<string, { icon: typeof Newspaper; label: string; co
   tip: { icon: Lightbulb, label: 'Pro Tip', color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20' },
   community_spotlight: { icon: Star, label: 'Community Spotlight', color: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-500/20' },
   trailer: { icon: Clapperboard, label: 'Trailer', color: 'text-pink-400', bg: 'bg-pink-500/10 border-pink-500/20' },
+  industry_analysis: { icon: Newspaper, label: 'Industry Analysis', color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20' },
+  opportunities: { icon: Sparkles, label: 'Opportunities', color: 'text-green-400', bg: 'bg-green-500/10 border-green-500/20' },
 };
 
 interface NewsSectionProps {

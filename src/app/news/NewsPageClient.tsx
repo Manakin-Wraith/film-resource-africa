@@ -19,6 +19,8 @@ const categoryConfig: Record<string, { label: string; icon: typeof Newspaper; co
   tip: { label: 'Pro Tip', icon: Lightbulb, color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20' },
   community_spotlight: { label: 'Community Spotlight', icon: Star, color: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-500/20' },
   trailer: { label: 'Trailer', icon: Clapperboard, color: 'text-pink-400', bg: 'bg-pink-500/10 border-pink-500/20' },
+  industry_analysis: { label: 'Industry Analysis', icon: Newspaper, color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20' },
+  opportunities: { label: 'Opportunities', icon: Sparkles, color: 'text-green-400', bg: 'bg-green-500/10 border-green-500/20' },
 };
 
 const FILTER_TABS = [

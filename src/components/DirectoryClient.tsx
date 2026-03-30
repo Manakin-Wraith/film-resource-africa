@@ -170,7 +170,7 @@ export default function DirectoryClient({ initialData }: { initialData: Opportun
       >
         <AnimatePresence>
           {filteredData.map((opp) => {
-            const status = statusConfig[opp.application_status || 'open'];
+            const status = statusConfig[opp.application_status || 'open'] || statusConfig.open;
             const StatusIcon = status.icon;
             const catStyle = getCategoryStyle(opp.category);
             const CatIcon = catStyle.icon;
