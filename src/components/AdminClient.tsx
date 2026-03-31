@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Opportunity, updateOpportunity, deleteOpportunity, addOpportunity, CallSheetListing, updateCallSheetListing, deleteCallSheetListing, DirectoryListing, updateDirectoryListing, deleteDirectoryListing, Partner, addPartner, updatePartner, deletePartner, uploadDirectoryImage, NewsItem, updateNewsItem, deleteNewsItem } from '@/app/actions';
+import { Opportunity, updateOpportunity, deleteOpportunity, addOpportunity, CallSheetListing, updateCallSheetListing, deleteCallSheetListing, DirectoryListing, updateDirectoryListing, deleteDirectoryListing, Partner, addPartner, updatePartner, deletePartner, uploadDirectoryImage, uploadNewsImage, NewsItem, updateNewsItem, deleteNewsItem } from '@/app/actions';
 import { Edit2, Trash2, Plus, X, CheckCircle2, Clapperboard, Building2, Handshake, Upload, Crown, Star, Package, FileText, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -31,6 +31,9 @@ export default function AdminClient({ initialData, callSheetData = [], directory
   const [partnerLogoPreview, setPartnerLogoPreview] = useState<string | null>(null);
   const [featuredImageFile, setFeaturedImageFile] = useState<File | null>(null);
   const [featuredImagePreview, setFeaturedImagePreview] = useState<string | null>(null);
+  const [newsImageFile, setNewsImageFile] = useState<File | null>(null);
+  const [newsImagePreview, setNewsImagePreview] = useState<string | null>(null);
+  const [newsImageUploading, setNewsImageUploading] = useState(false);
   const [partnerSaving, setPartnerSaving] = useState(false);
 
   const handleEdit = (opp: Opportunity) => {
@@ -885,17 +888,17 @@ export default function AdminClient({ initialData, callSheetData = [], directory
 
       {/* Spotlight edit view */}
       {activeTab === 'spotlight' && editingNewsId && (() => {
-        const newsFields: (keyof NewsItem)[] = ['title', 'summary', 'content', 'slug', 'url', 'image_url', 'project_name'];
+        const newsTextFields: (keyof NewsItem)[] = ['title', 'summary', 'content', 'slug', 'url', 'project_name'];
         return (
           <div className="glass-card p-6 rounded-2xl relative z-20">
             <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
               <h2 className="text-2xl font-bold font-heading">Edit Spotlight Submission</h2>
-              <button onClick={() => { setEditingNewsId(null); setNewsFormData({}); }} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+              <button onClick={() => { setEditingNewsId(null); setNewsFormData({}); setNewsImageFile(null); setNewsImagePreview(null); }} className="p-2 hover:bg-white/10 rounded-full transition-colors">
                 <X size={24} />
               </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {newsFields.map(field => (
+              {newsTextFields.map(field => (
                 <div key={field} className={field === 'content' || field === 'summary' ? 'col-span-1 md:col-span-2' : ''}>
                   <label className="block text-sm font-medium opacity-80 mb-2">{field}</label>
                   {field === 'content' || field === 'summary' ? (
@@ -914,6 +917,64 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                   )}
                 </div>
               ))}
+
+              {/* Article Image Upload */}
+              <div className="col-span-1 md:col-span-2">
+                <label className="block text-sm font-medium opacity-80 mb-2">Article Image</label>
+                <div className="flex items-start gap-4">
+                  <div className="w-32 h-20 bg-black/20 rounded-xl border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+                    {(newsImagePreview || newsFormData.image_url) ? (
+                      <img src={newsImagePreview || newsFormData.image_url} className="w-full h-full object-cover" alt="Article image" />
+                    ) : (
+                      <FileText size={24} className="opacity-30" />
+                    )}
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    <label className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 cursor-pointer transition-colors text-sm w-fit">
+                      <Upload size={16} />
+                      {newsImageUploading ? 'Uploading...' : 'Upload Image'}
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,image/gif"
+                        className="hidden"
+                        disabled={newsImageUploading}
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          setNewsImageFile(file);
+                          setNewsImagePreview(URL.createObjectURL(file));
+                          setNewsImageUploading(true);
+                          try {
+                            const fd = new FormData();
+                            fd.append('file', file);
+                            const publicUrl = await uploadNewsImage(fd);
+                            setNewsFormData(prev => ({ ...prev, image_url: publicUrl }));
+                          } catch (err) {
+                            alert('Upload failed: ' + (err as Error).message);
+                            setNewsImageFile(null);
+                            setNewsImagePreview(null);
+                          } finally {
+                            setNewsImageUploading(false);
+                          }
+                        }}
+                      />
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Or paste image URL..."
+                      value={(newsFormData.image_url as string) || ''}
+                      onChange={e => { setNewsFormData({ ...newsFormData, image_url: e.target.value }); setNewsImagePreview(null); setNewsImageFile(null); }}
+                      className="w-full bg-black/5 border border-white/20 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500 text-sm"
+                    />
+                    {newsFormData.image_url && (
+                      <button onClick={() => { setNewsFormData({ ...newsFormData, image_url: '' }); setNewsImagePreview(null); setNewsImageFile(null); }} className="text-xs text-red-400 hover:text-red-300">
+                        Remove image
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
               <div>
                 <label className="block text-sm font-medium opacity-80 mb-2">category</label>
                 <select
@@ -926,6 +987,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                   <option value="deadline_alert">Deadline Alert</option>
                   <option value="new_opportunity">New Opportunity</option>
                   <option value="tip">Pro Tip</option>
+                  <option value="trailer">Trailer</option>
                 </select>
               </div>
             </div>
@@ -936,7 +998,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
               </div>
             )}
             <div className="mt-8 flex justify-end gap-4">
-              <button onClick={() => { setEditingNewsId(null); setNewsFormData({}); }} className="px-6 py-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors font-medium">
+              <button onClick={() => { setEditingNewsId(null); setNewsFormData({}); setNewsImageFile(null); setNewsImagePreview(null); }} className="px-6 py-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors font-medium">
                 Cancel
               </button>
               <button onClick={async () => {
@@ -946,6 +1008,8 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                 }
                 setEditingNewsId(null);
                 setNewsFormData({});
+                setNewsImageFile(null);
+                setNewsImagePreview(null);
                 router.refresh();
               }} className="px-6 py-2 rounded-xl bg-yellow-600 hover:bg-yellow-500 text-white transition-colors font-medium">
                 Save Changes

@@ -855,6 +855,39 @@ export async function submitCommunitySpotlight(submission: CommunitySubmission) 
 
 // ─── Image Upload ───────────────────────────────────────────────────────────
 
+export async function uploadNewsImage(formData: FormData): Promise<string> {
+  const file = formData.get('file') as File;
+  if (!file || !file.size) throw new Error('No file provided');
+
+  const maxSize = 5 * 1024 * 1024; // 5MB
+  if (file.size > maxSize) throw new Error('File too large. Maximum size is 5MB.');
+
+  const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+  if (!allowed.includes(file.type)) throw new Error('Invalid file type. Please upload a JPG, PNG, WebP, or GIF.');
+
+  const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+  const fileName = `news-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const filePath = `news/${fileName}`;
+
+  const arrayBuffer = await file.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+
+  const { error } = await supabase.storage
+    .from('directory-logos')
+    .upload(filePath, buffer, {
+      contentType: file.type,
+      upsert: false,
+    });
+
+  if (error) throw new Error(`Upload failed: ${error.message}`);
+
+  const { data: urlData } = supabase.storage
+    .from('directory-logos')
+    .getPublicUrl(filePath);
+
+  return urlData.publicUrl;
+}
+
 export async function uploadDirectoryImage(formData: FormData): Promise<string> {
   const file = formData.get('file') as File;
   if (!file || !file.size) throw new Error('No file provided');

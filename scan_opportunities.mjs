@@ -1,3 +1,4 @@
+import { generateUniqueSummary, verifyAndFixSummary } from './summary_utils.mjs';
 /**
  * FRA Daily Opportunity Scanner
  *
@@ -52,6 +53,9 @@ const siteUrl = env.NEXT_PUBLIC_SITE_URL || 'https://film-resource-africa.com';
 
 if (!supabaseUrl || !supabaseKey) { console.error('Missing Supabase env vars'); process.exit(1); }
 
+// Save native fetch before Playwright overrides it
+const nativeFetch = globalThis.fetch;
+
 const args = process.argv.slice(2);
 const DRY_RUN = args.includes('--dry-run');
 const NEWS_ONLY = args.includes('--news-only');
@@ -85,7 +89,7 @@ async function fetchLogoForUrl(url) {
   const localFile = join(LOGOS_DIR, `${domain}.png`);
   if (existsSync(localFile)) return localPath;
   try {
-    const res = await fetch(`https://www.google.com/s2/favicons?domain=${domain}&sz=128`, {
+    const res = await nativeFetch(`https://www.google.com/s2/favicons?domain=${domain}&sz=128`, {
       headers: { 'User-Agent': 'Mozilla/5.0 FRA-Scanner/1.0' },
       signal: AbortSignal.timeout(8000),
     });
@@ -104,7 +108,7 @@ async function fetchOgImageForUrl(url) {
   try {
     let u = url.trim();
     if (!u.startsWith('http')) u = 'https://' + u;
-    const res = await fetch(u, {
+    const res = await nativeFetch(u, {
       headers: { 'User-Agent': 'Mozilla/5.0 FRA-Scanner/1.0', 'Accept': 'text/html' },
       signal: AbortSignal.timeout(10000),
       redirect: 'follow',
@@ -133,9 +137,12 @@ async function fetchOgImageForUrl(url) {
 function decodeEntities(str) {
   if (!str) return str;
   return str
+    // Pass 1: decode &amp; first so double-encoded entities (&amp;#8217;) become &#8217;
+    .replace(/&amp;/g, '&')
+    // Pass 2: numeric entities (decimal + hex)
     .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n, 10)))
     .replace(/&#x([0-9a-fA-F]+);/g, (_, n) => String.fromCharCode(parseInt(n, 16)))
-    .replace(/&amp;/g, '&')
+    // Pass 3: named entities
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
@@ -147,7 +154,12 @@ function decodeEntities(str) {
     .replace(/&mdash;/g, "\u2014")
     .replace(/&ndash;/g, "\u2013")
     .replace(/&hellip;/g, "\u2026")
-    .replace(/&nbsp;/g, ' ');
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&trade;/g, "\u2122")
+    .replace(/&copy;/g, "\u00A9")
+    .replace(/&reg;/g, "\u00AE")
+    .replace(/&eacute;/g, "\u00E9")
+    .replace(/&egrave;/g, "\u00E8");
 }
 
 // ─── Supabase REST helpers ───────────────────────────────────────────────────
@@ -155,13 +167,13 @@ function decodeEntities(str) {
 const headers = { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` };
 
 async function supabaseGet(table, query) {
-  const res = await fetch(`${supabaseUrl}/rest/v1/${table}?${query}`, { headers });
+  const res = await nativeFetch(`${supabaseUrl}/rest/v1/${table}?${query}`, { headers });
   if (!res.ok) throw new Error(`Supabase GET ${table} failed: ${res.status} ${await res.text()}`);
   return res.json();
 }
 
 async function supabaseInsert(table, item) {
-  const res = await fetch(`${supabaseUrl}/rest/v1/${table}`, {
+  const res = await nativeFetch(`${supabaseUrl}/rest/v1/${table}`, {
     method: 'POST',
     headers: { ...headers, 'Content-Type': 'application/json', Prefer: 'return=representation' },
     body: JSON.stringify(item),
@@ -174,7 +186,7 @@ async function supabaseInsert(table, item) {
 }
 
 async function supabaseUpdate(table, id, updates) {
-  const res = await fetch(`${supabaseUrl}/rest/v1/${table}?id=eq.${id}`, {
+  const res = await nativeFetch(`${supabaseUrl}/rest/v1/${table}?id=eq.${id}`, {
     method: 'PATCH',
     headers: { ...headers, 'Content-Type': 'application/json', Prefer: 'return=representation' },
     body: JSON.stringify(updates),
@@ -264,6 +276,127 @@ function slugify(text) {
     .replace(/-$/, '');
 }
 
+// ─── Pre-insert QC helpers ───────────────────────────────────────────────────
+
+const COUNTRY_KEYWORDS = {
+  nigeria: ['nigeria', 'nigerian', 'lagos', 'nollywood', 'abuja'],
+  'south-africa': ['south africa', 'south african', 'cape town', 'johannesburg', 'durban', 'joburg'],
+  kenya: ['kenya', 'kenyan', 'nairobi', 'mombasa'],
+  ghana: ['ghana', 'ghanaian', 'accra', 'ghallywood', 'kumasi'],
+  egypt: ['egypt', 'egyptian', 'cairo', 'alexandria'],
+  morocco: ['morocco', 'moroccan', 'marrakech', 'casablanca', 'ouarzazate', 'rabat'],
+  tanzania: ['tanzania', 'tanzanian', 'dar es salaam', 'zanzibar', 'dodoma'],
+  ethiopia: ['ethiopia', 'ethiopian', 'addis ababa', 'addis'],
+  uganda: ['uganda', 'ugandan', 'kampala'],
+  rwanda: ['rwanda', 'rwandan', 'kigali'],
+  senegal: ['senegal', 'senegalese', 'dakar'],
+  cameroon: ['cameroon', 'cameroonian', 'yaoundé', 'douala'],
+  tunisia: ['tunisia', 'tunisian', 'tunis', 'carthage'],
+  zimbabwe: ['zimbabwe', 'zimbabwean', 'harare'],
+  'burkina-faso': ['burkina faso', 'burkinabè', 'ouagadougou', 'fespaco'],
+};
+const PAN_AFRICAN_KW = ['africa', 'african', 'pan-african', 'continent', 'sub-saharan', 'global south'];
+
+function detectCountry(text) {
+  const lower = text.toLowerCase();
+  let best = null, bestCount = 0;
+  for (const [slug, kws] of Object.entries(COUNTRY_KEYWORDS)) {
+    const c = kws.filter(kw => lower.includes(kw)).length;
+    if (c > bestCount) { best = slug; bestCount = c; }
+  }
+  return bestCount > 0 ? best : null;
+}
+
+function detectGeoScope(text) {
+  const lower = text.toLowerCase();
+  const countryHits = Object.values(COUNTRY_KEYWORDS).flat().filter(kw => lower.includes(kw)).length;
+  const panHits = PAN_AFRICAN_KW.filter(kw => lower.includes(kw)).length;
+  if (panHits >= 2 || (panHits >= 1 && countryHits === 0)) return 'pan_african';
+  if (countryHits > 0) return 'country_specific';
+  if (/international|global|worldwide|open to all/i.test(text)) return 'international';
+  return null;
+}
+
+async function validateUrl(url) {
+  if (!url) return false;
+  try {
+    const res = await nativeFetch(url, {
+      method: 'HEAD',
+      headers: { 'User-Agent': 'Mozilla/5.0 FRA-Scanner/1.0' },
+      signal: AbortSignal.timeout(10000),
+      redirect: 'follow',
+    });
+    return res.ok || res.status === 405;
+  } catch { return false; }
+}
+
+async function enrichOpportunityFromPage(url) {
+  if (!url) return {};
+  try {
+    const res = await nativeFetch(url, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36' },
+      signal: AbortSignal.timeout(12000),
+      redirect: 'follow',
+    });
+    if (!res.ok) return {};
+    const html = await res.text();
+    const text = html.replace(/<[^>]+>/g, ' ').replace(/\s{2,}/g, ' ');
+    const lower = text.toLowerCase();
+    const fields = {};
+
+    // Deadline
+    const dlPat = /(?:deadline|closes?|due\s*(?:date)?)\s*(?:on)?\s*:?\s*(\d{1,2}\s+(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s+\d{4})/i;
+    const dlMatch = text.match(dlPat);
+    if (dlMatch) fields['Next Deadline'] = dlMatch[1].trim();
+
+    // Eligibility
+    const eligMatch = text.match(/(?:eligib[a-z]*|who can apply|open to)[:\s]*([^.]{20,250}\.)/i);
+    if (eligMatch) fields['Who Can Apply / Eligibility'] = eligMatch[0].trim().slice(0, 300);
+
+    // Benefits / what you get
+    const benMatch = text.match(/(?:selected .{0,30}(?:will )?receive|support includes|grant (?:of|amount|value)|funding (?:of|up to))[:\s]*([^.]{15,300}\.)/i)
+      || text.match(/((?:€|£|\$|USD|EUR|GBP)\s*[\d,]+(?:\s*(?:thousand|million|k))?[^.]{0,200}\.)/i);
+    if (benMatch) fields['What Do You Get If Selected?'] = benMatch[0].trim().slice(0, 400);
+
+    // Format
+    if (/feature film/i.test(lower)) fields['For Films or Series?'] = 'Feature Films';
+    else if (/short film/i.test(lower)) fields['For Films or Series?'] = 'Short Films';
+    else if (/documentary|documentaries/i.test(lower)) fields['For Films or Series?'] = 'Documentary';
+    else if (/animation|animated/i.test(lower)) fields['For Films or Series?'] = 'Animation';
+    else if (/series|tv|television/i.test(lower)) fields['For Films or Series?'] = 'Series / TV';
+    else if (/all formats|any format/i.test(lower)) fields['For Films or Series?'] = 'All Formats';
+
+    // Category
+    if (/lab|workshop|residency|fellowship|training|mentorship/i.test(lower)) fields.category = 'Labs & Fellowships';
+    else if (/fund|grant|financ|support|bursary/i.test(lower)) fields.category = 'Funds & Grants';
+    else if (/festival|screening|competition|call for (?:entries|films|submissions)/i.test(lower)) fields.category = 'Festivals';
+    else if (/market|pitch|forum|co-?production/i.test(lower)) fields.category = 'Markets & Pitching';
+
+    // Cost
+    if (/\b(?:entry|submission)\s*fee/i.test(lower)) fields['Cost'] = 'Check website';
+    else if (/\bfree\b.*(?:entry|submit|apply)/i.test(lower) || /no (?:entry |submission )?fee/i.test(lower)) fields['Cost'] = 'Free';
+
+    // Description (first 2-3 meaningful paragraphs from the HTML)
+    const paraMatch = html.match(/<p[^>]*>([^<]{50,})<\/p>/gi);
+    if (paraMatch) {
+      const paras = paraMatch
+        .map(p => p.replace(/<[^>]+>/g, '').trim())
+        .filter(p => p.length > 50 && !/cookie|subscribe|newsletter|sign up|privacy/i.test(p));
+      if (paras.length > 0) fields.description = paras.slice(0, 3).join(' ').slice(0, 600);
+    }
+
+    // Country & geo scope from combined title+page text
+    const country = detectCountry(text);
+    if (country) fields._detectedCountry = country;
+    const scope = detectGeoScope(text);
+    if (scope) fields._geoScope = scope;
+
+    return fields;
+  } catch {
+    return {};
+  }
+}
+
 // ─── Source 1: RSS Feeds ─────────────────────────────────────────────────────
 
 const RSS_FEEDS = [
@@ -285,28 +418,18 @@ const RSS_FEEDS = [
     filterRelevant: true,
   },
   {
-    name: 'Modern Ghana Entertainment',
-    url: 'https://www.modernghana.com/entertainment/rss.xml',
-    type: 'news',
-    filterRelevant: true,
-  },
-  {
     name: 'Premium Times Arts',
     url: 'https://www.premiumtimesng.com/arts-entertainment/feed',
     type: 'news',
     filterRelevant: true,
   },
+  {
+    name: 'Nollywood Reinvented',
+    url: 'http://feeds.feedburner.com/NollywoodReinvented',
+    type: 'news',
+  },
   // ── Tier 2: International trade press (filter for Africa/relevance) ──
-  {
-    name: 'Cineuropa',
-    url: 'https://cineuropa.org/en/rss.aspx?t=news',
-    type: 'news',
-  },
-  {
-    name: 'Screen Daily',
-    url: 'https://www.screendaily.com/feeds/rss',
-    type: 'news',
-  },
+  // NOTE: Cineuropa & Screen Daily RSS feeds are dead (404). Both still covered via Gmail senders.
   {
     name: 'Variety',
     url: 'https://variety.com/feed/',
@@ -349,17 +472,13 @@ const RSS_FEEDS = [
     type: 'news',
     filterRelevant: true,
   },
-  {
-    name: 'Film Efiko',
-    url: 'https://filmefiko.com/feed/',
-    type: 'news',
-  },
+  // NOTE: Film Efiko (500) and Modern Ghana (403) removed — feeds dead as of 2026-03-31.
 ];
 
 async function fetchRSS(feed) {
   const items = [];
   try {
-    const res = await fetch(feed.url, {
+    const res = await nativeFetch(feed.url, {
       headers: { 'User-Agent': 'Mozilla/5.0 FRA-Scanner/1.0' },
       signal: AbortSignal.timeout(15000),
     });
@@ -387,10 +506,11 @@ async function fetchRSS(feed) {
       const link = get('link');
       const description = get('description');
       const pubDate = get('pubDate');
-      const imageUrl = getAttr('enclosure', 'url') || getAttr('media:content', 'url') || null;
+      const rawImageUrl = getAttr('enclosure', 'url') || getAttr('media:content', 'url') || null;
+      const imageUrl = rawImageUrl ? decodeEntities(rawImageUrl) : null;
 
       if (title) {
-        items.push({ title, link, description, pubDate, imageUrl, source: feed.name, type: feed.type });
+        items.push({ title: decodeEntities(title), link, description, pubDate, imageUrl, source: feed.name, type: feed.type });
       }
     }
     console.log(`  ✓ ${feed.name}: ${items.length} items`);
@@ -442,7 +562,7 @@ async function getGmailAccessToken() {
   if (!gmailRefreshToken || !gmailClientSecret) return null;
 
   try {
-    const res = await fetch('https://oauth2.googleapis.com/token', {
+    const res = await nativeFetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
@@ -472,7 +592,7 @@ async function gmailApi(endpoint, params = {}) {
   const qs = new URLSearchParams(params).toString();
   const url = `https://gmail.googleapis.com/gmail/v1/users/me/${endpoint}${qs ? '?' + qs : ''}`;
   try {
-    const res = await fetch(url, {
+    const res = await nativeFetch(url, {
       headers: { Authorization: `Bearer ${token}` },
       signal: AbortSignal.timeout(15000),
     });
@@ -509,11 +629,29 @@ function parseGwsJson(output) {
 async function scanGmail() {
   const items = [];
 
-  // Check if direct Gmail API is available
-  const useDirectApi = !!(gmailRefreshToken && gmailClientSecret);
-  if (!useDirectApi) {
-    console.log('  ⚠ No GMAIL_REFRESH_TOKEN in .env.local — falling back to gws CLI');
-    console.log('    Run: node scripts/gmail_auth.mjs  to set up direct Gmail API access');
+  // Decide Gmail access method: try direct API first, fall back to gws CLI
+  let method = (gmailRefreshToken && gmailClientSecret) ? 'api' : 'gws';
+
+  // Pre-flight: test direct API token before looping through all senders
+  if (method === 'api') {
+    const token = await getGmailAccessToken();
+    if (!token) {
+      console.log('  ⚠ Direct API token refresh failed — falling back to gws CLI');
+      method = 'gws';
+    }
+  }
+
+  if (method === 'gws') {
+    // Verify gws is available and authenticated
+    const testResult = parseGwsJson(gws(`gmail users messages list --params '{"userId":"me","maxResults":1}'`));
+    if (!testResult) {
+      console.log('  ✗ gws CLI also unavailable — skipping Gmail scan');
+      console.log('    Fix: run "gws auth login" to re-authenticate');
+      return items;
+    }
+    console.log('  ✓ Using gws CLI for Gmail access');
+  } else {
+    console.log('  ✓ Using direct Gmail API');
   }
 
   for (const sender of GMAIL_SENDERS) {
@@ -521,13 +659,11 @@ async function scanGmail() {
 
     let messages = null;
 
-    if (useDirectApi) {
-      // Direct Gmail REST API
+    if (method === 'api') {
       const result = await gmailApi('messages', { q, maxResults: '5' });
       messages = result?.messages || null;
     } else {
-      // Fallback to gws CLI
-      const raw = gws(`gmail users messages list --params '{"userId":"me","q":"${q}","maxResults":5}'`);
+      const raw = gws(`gmail users messages list --params '{"userId":"me","q":"${q.replace(/'/g, "\\'")}","maxResults":5}'`);
       const result = parseGwsJson(raw);
       messages = result?.messages || null;
     }
@@ -542,7 +678,7 @@ async function scanGmail() {
     for (const msg of messages.slice(0, 3)) {
       let meta = null;
 
-      if (useDirectApi) {
+      if (method === 'api') {
         meta = await gmailApi(`messages/${msg.id}`, { format: 'metadata' });
       } else {
         const metaRaw = gws(`gmail users messages get --params '{"userId":"me","id":"${msg.id}","format":"metadata"}'`);
@@ -616,7 +752,7 @@ async function webSearch(query) {
   const items = [];
   try {
     const searchUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
-    const res = await fetch(searchUrl, {
+    const res = await nativeFetch(searchUrl, {
       headers: { 'User-Agent': 'Mozilla/5.0 FRA-Scanner/1.0' },
       signal: AbortSignal.timeout(15000),
     });
@@ -691,58 +827,108 @@ function isRelevant(text) {
 const KEY_ORG_PAGES = [
   { name: 'Realness Institute', url: 'https://realness.institute', selector: 'open call|applications|submit|deadline' },
   { name: 'Docubox', url: 'https://docubox.org', selector: 'open call|applications|submit|deadline' },
-  { name: 'Durban FilmMart', url: 'https://durbanfilmmart.com', selector: 'call for|submissions|apply|deadline' },
+  { name: 'Durban FilmMart', url: 'https://www.durbanfilmmart.co.za', selector: 'call for|submissions|apply|deadline' },
   { name: 'IDFA Bertha Fund', url: 'https://www.idfa.nl/en/info/idfa-bertha-fund', selector: 'apply|deadline|submit|open' },
   { name: 'Hubert Bals Fund', url: 'https://iffr.com/en/hubert-bals-fund', selector: 'apply|deadline|submit|open' },
   { name: 'World Cinema Fund', url: 'https://www.berlinale.de/en/world-cinema-fund/', selector: 'apply|deadline|submit|open' },
-  { name: 'Hot Docs', url: 'https://www.hotdocs.ca/funds', selector: 'crosscurrents|apply|deadline|submit' },
-  { name: 'Sundance Labs', url: 'https://www.sundance.org/programs', selector: 'apply|deadline|submit|lab' },
+  { name: 'Hot Docs', url: 'https://www.hotdocs.ca/industry', selector: 'crosscurrents|apply|deadline|submit|fund' },
   { name: 'FESPACO', url: 'https://fespaco.bf', selector: 'appel|candidatures|submit|deadline' },
   { name: 'Maisha Film Lab', url: 'https://www.maishafilmlab.org', selector: 'apply|call|submit|deadline' },
   { name: 'Open Cities Lab', url: 'https://open-cities.com', selector: 'accelerator|submissions|apply|deadline' },
   { name: 'Big World Cinema', url: 'https://bigworldcinema.com', selector: 'accelerator|apply|call|programme|submit|deadline' },
+  { name: 'Gauteng Film Commission', url: 'https://www.gautengfilm.org.za', selector: 'open call|applications|submit|deadline|funding|grant' },
+  { name: 'Western Cape Film Commission', url: 'https://www.wesgro.co.za/film', selector: 'open call|applications|submit|deadline|funding|grant' },
+  { name: 'KwaZulu-Natal Film Commission', url: 'https://www.kwazulunatalfilm.co.za', selector: 'open call|applications|submit|deadline|funding|grant' },
+  { name: 'Uganda Communications Commission', url: 'https://www.ucc.co.ug', selector: 'open call|film|broadcast|deadline|submit|grant' },
+  { name: 'Uganda Film Festival', url: 'https://filmfreeway.com/UGANDAFILMFESTIVAL-1', selector: 'call for|submissions|apply|deadline|entries' },
 ];
+
+function extractLinksFromHtml(html, page) {
+  const items = [];
+  const selectorPattern = new RegExp(page.selector, 'i');
+  const linkRegex = /<a[^>]+href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
+  let match;
+  while ((match = linkRegex.exec(html)) !== null) {
+    const href = match[1];
+    const text = match[2].replace(/<[^>]+>/g, '').trim();
+    if (!text || text.length < 10 || text.length > 200) continue;
+    if (!selectorPattern.test(text)) continue;
+    if (isJunkTitle(text)) continue;
+
+    const fullUrl = href.startsWith('http') ? href : new URL(href, page.url).href;
+    items.push({
+      title: text,
+      url: fullUrl,
+      snippet: `Found on ${page.name} website`,
+      source: page.name,
+      type: 'opportunity',
+    });
+  }
+  return items;
+}
 
 async function scanKeyPages(existingTitles) {
   const items = [];
+  const failedPages = [];
+
+  // Pass 1: Try with plain fetch
   for (const page of KEY_ORG_PAGES) {
     try {
-      const res = await fetch(page.url, {
-        headers: { 'User-Agent': 'Mozilla/5.0 FRA-Scanner/1.0' },
+      const res = await nativeFetch(page.url, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' },
         signal: AbortSignal.timeout(15000),
         redirect: 'follow',
       });
       if (!res.ok) {
-        console.log(`  ⚠ ${page.name}: HTTP ${res.status}`);
+        console.log(`  ⚠ ${page.name}: HTTP ${res.status} — queued for Playwright retry`);
+        failedPages.push(page);
         continue;
       }
       const html = await res.text();
-
-      // Extract links with text matching the selector keywords
-      const selectorPattern = new RegExp(page.selector, 'i');
-      const linkRegex = /<a[^>]+href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
-      let match;
-      while ((match = linkRegex.exec(html)) !== null) {
-        const href = match[1];
-        const text = match[2].replace(/<[^>]+>/g, '').trim();
-        if (!text || text.length < 10 || text.length > 200) continue;
-        if (!selectorPattern.test(text)) continue;
-        if (isJunkTitle(text)) continue;
-
-        const fullUrl = href.startsWith('http') ? href : new URL(href, page.url).href;
-        items.push({
-          title: text,
-          url: fullUrl,
-          snippet: `Found on ${page.name} website`,
-          source: page.name,
-          type: 'opportunity',
-        });
-      }
+      items.push(...extractLinksFromHtml(html, page));
       console.log(`  ✓ ${page.name}: scanned`);
     } catch (err) {
-      console.log(`  ✗ ${page.name}: ${err.message}`);
+      console.log(`  ⚠ ${page.name}: ${err.message.slice(0, 50)} — queued for Playwright retry`);
+      failedPages.push(page);
     }
   }
+
+  // Pass 2: Retry failed pages with Playwright (bypasses bot-blocking / JS-rendered sites)
+  if (failedPages.length > 0) {
+    let chromium;
+    try {
+      ({ chromium } = await import('playwright'));
+    } catch {
+      console.log(`  ⚠ Playwright not installed — skipping ${failedPages.length} failed pages`);
+      return items;
+    }
+
+    console.log(`  🎭 Retrying ${failedPages.length} blocked pages with Playwright...`);
+    const browser = await chromium.launch({ headless: true });
+    const context = await browser.newContext({
+      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      viewport: { width: 1920, height: 1080 },
+    });
+
+    for (const page of failedPages) {
+      let pwPage;
+      try {
+        pwPage = await context.newPage();
+        await pwPage.goto(page.url, { waitUntil: 'domcontentloaded', timeout: 20000 });
+        await pwPage.waitForTimeout(3000);
+        const html = await pwPage.content();
+        const found = extractLinksFromHtml(html, page);
+        items.push(...found);
+        console.log(`  ✓ ${page.name}: scanned via Playwright (${found.length} links)`);
+      } catch (err) {
+        console.log(`  ✗ ${page.name}: Playwright also failed — ${err.message.slice(0, 50)}`);
+      } finally {
+        if (pwPage) await pwPage.close().catch(() => {});
+      }
+    }
+    await browser.close();
+  }
+
   return items;
 }
 
@@ -767,7 +953,21 @@ async function enrichWithPlaywright() {
 
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({
-    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    viewport: { width: 1920, height: 1080 },
+    extraHTTPHeaders: {
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+      'Accept-Language': 'en-US,en;q=0.5',
+      'Accept-Encoding': 'gzip, deflate, br',
+      'DNT': '1',
+      'Connection': 'keep-alive',
+      'Upgrade-Insecure-Requests': '1',
+      'Sec-Fetch-Dest': 'document',
+      'Sec-Fetch-Mode': 'navigate',
+      'Sec-Fetch-Site': 'none',
+      'Sec-Fetch-User': '?1',
+      'Cache-Control': 'max-age=0'
+    }
   });
 
   // ── Phase A: Enrich pending/thin news articles ─────────────────────────
@@ -790,30 +990,92 @@ async function enrichWithPlaywright() {
       try { await page.waitForSelector('p', { timeout: 8000 }); } catch { /* ok */ }
 
       const scraped = await page.evaluate(() => {
+        // ── Clean text extractor (no markdown links/images) ──
+        function toPlainText(el) {
+          if (!el) return '';
+          let out = '';
+          for (const node of el.childNodes) {
+            if (node.nodeType === 3) { // Text
+              out += node.textContent;
+            } else if (node.nodeType === 1) { // Element
+              const tag = node.tagName.toLowerCase();
+              // Skip nav, footer, sidebar, script, style, form, button elements
+              if (['nav', 'footer', 'aside', 'script', 'style', 'form', 'button', 'noscript', 'svg', 'iframe'].includes(tag)) continue;
+              // Skip elements with nav/menu/sidebar/footer classes
+              const cls = (node.className || '').toString().toLowerCase();
+              if (/\b(nav|menu|sidebar|footer|widget|cookie|banner|social|share|comment|signup|subscribe|ad-|advert)\b/.test(cls)) continue;
+
+              const content = toPlainText(node).trim();
+              if (!content && tag !== 'br') continue;
+
+              switch (tag) {
+                case 'p': out += `\n\n${content}\n\n`; break;
+                case 'h1': case 'h2': case 'h3': case 'h4': case 'h5': out += `\n\n${content}\n\n`; break;
+                case 'strong': case 'b': out += `**${content}**`; break;
+                case 'em': case 'i': out += `*${content}*`; break;
+                case 'a': out += content; break; // Just the link text, no URL
+                case 'ul': case 'ol': out += `\n${content}\n`; break;
+                case 'li': out += `\n- ${content}`; break;
+                case 'blockquote': out += `\n\n> ${content.replace(/\n/g, '\n> ')}\n\n`; break;
+                case 'img': break; // Skip images entirely in text
+                case 'br': out += '\n'; break;
+                case 'hr': out += '\n\n---\n\n'; break;
+                case 'figure': case 'figcaption': break; // Skip figure/caption
+                case 'div': case 'section': case 'article': out += `\n${content}\n`; break;
+                default: out += content;
+              }
+            }
+          }
+          return out.replace(/\n{3,}/g, '\n\n').trim();
+        }
+
+        // ── Quality check: reject content that's mostly short lines (nav menus) ──
+        function isQualityContent(text) {
+          const lines = text.split('\n').filter(l => l.trim().length > 0);
+          if (lines.length < 2) return false;
+          const longLines = lines.filter(l => l.trim().length > 50);
+          // At least 30% of lines should be substantial paragraphs
+          return longLines.length >= Math.max(2, lines.length * 0.3);
+        }
+
         // ── Scrape article content ──
         let articleContent = null;
         const selectors = [
-          'article p', '[class*="article"] p', '[class*="content"] p',
-          '[class*="post"] p', '[class*="body"] p', 'main p',
+          '[class*="article-body"]', '[class*="entry-content"]',
+          '[class*="post-content"]', '[class*="article-content"]', 
+          '.td-post-content', '.post-text', '.article-text',
+          'article', 'main article'
         ];
+        
         for (const sel of selectors) {
-          const paras = document.querySelectorAll(sel);
-          if (paras.length >= 2) {
-            const texts = Array.from(paras).map(p => p.textContent.trim()).filter(t => t.length > 30);
-            if (texts.length >= 2) { articleContent = texts.join('\n\n'); break; }
+          const el = document.querySelector(sel);
+          if (el) {
+            const text = toPlainText(el);
+            if (isQualityContent(text)) {
+              articleContent = text;
+              break;
+            }
           }
         }
+
         if (!articleContent) {
-          const allP = Array.from(document.querySelectorAll('p'))
-            .map(p => p.textContent.trim())
-            .filter(t => t.length > 40 && !/cookie|subscribe|newsletter|sign up|terms|privacy/i.test(t));
-          if (allP.length >= 2) articleContent = allP.join('\n\n');
+          // Fallback: collect all substantial paragraphs
+          const paras = Array.from(document.querySelectorAll('p'))
+            .filter(p => {
+              const text = p.textContent.trim();
+              return text.length > 40 && !/cookie|subscribe|newsletter|sign up|terms|privacy|©|all rights/i.test(text);
+            });
+          if (paras.length >= 2) {
+            articleContent = paras.map(p => toPlainText(p)).join('\n\n');
+          }
         }
+
         if (!articleContent) {
-          const divs = Array.from(document.querySelectorAll('div, section'))
-            .filter(el => (el.innerText || '').length > 200 && (el.innerText || '').length < 10000)
-            .sort((a, b) => (b.innerText || '').length - (a.innerText || '').length);
-          if (divs.length > 0) articleContent = divs[0].innerText.trim();
+          const main = document.querySelector('main') || document.querySelector('#content') || document.querySelector('.content');
+          if (main) {
+            const text = toPlainText(main);
+            if (isQualityContent(text)) articleContent = text;
+          }
         }
 
         // ── Scrape image ──
@@ -849,12 +1111,18 @@ async function enrichWithPlaywright() {
       const updates = {};
 
       // Update content if we got something better
-      if (scraped.articleContent && scraped.articleContent.length > (item.content || '').length + 50) {
-        let cleaned = scraped.articleContent.replace(/\n{3,}/g, '\n\n').replace(/^\s+/gm, '').trim().slice(0, 15000);
-        cleaned = cleaned.replace(/\s*(Share|Related|You may also|Read more|Sign up|Subscribe|Newsletter|Cookie|Privacy|©|Follow us)[\s\S]*$/i, '').trim();
-        if (cleaned.length > (item.content || '').length + 50) {
+      if (scraped.articleContent) {
+        const cleaned = scraped.articleContent.replace(/\s*(Share|Related|You may also|Read more|Sign up|Subscribe|Newsletter|Cookie|Privacy|©|Follow us)[\s\S]*$/i, '').trim();
+        
+        // Priority for 'pending' articles: if we got structured markdown, we want it
+        const isPending = item.status === 'pending';
+        const currentLen = (item.content || '').length;
+        const newLen = cleaned.length;
+        
+        // Always accept if new content is significantly longer, or if pending and looks like quality markdown
+        if (newLen > currentLen + 50 || (isPending && newLen > 300 && newLen > currentLen * 0.7)) {
           updates.content = cleaned;
-          updates.summary = cleaned.replace(/\n/g, ' ').slice(0, 300).trim();
+          updates.summary = generateUniqueSummary(cleaned, 300);
         }
       }
 
@@ -1082,8 +1350,8 @@ async function main() {
     return true;
   });
 
-  // 7. Insert news items
-  let newsInserted = 0;
+  // 7. Validate + insert news items
+  let newsInserted = 0, newsSkipped404 = 0;
   if (results.news.length > 0) {
     console.log(`\n📰 Found ${results.news.length} new news items`);
     for (const item of results.news.slice(0, 10)) {
@@ -1096,12 +1364,24 @@ async function main() {
         console.log(`  SKIP (URL exists): ${item.title.slice(0, 60)}`);
         continue;
       }
+      // Pre-insert QC: validate URL is reachable
+      if (item.link) {
+        const urlOk = await validateUrl(item.link);
+        if (!urlOk) {
+          console.log(`  ✗ SKIP (dead URL): ${decodeEntities(item.title).slice(0, 55)}`);
+          newsSkipped404++;
+          continue;
+        }
+      }
       // Auto-detect trailers/teasers for separate "Now Screening" section
       const titleLower = item.title.toLowerCase();
       const isTrailer = /\btrailer\b|\bteaser\b|\bfirst look\b|\bexclusive clip\b|\bsneak peek\b/.test(titleLower);
+      // Auto-detect country from title + description
+      const combinedText = `${item.title} ${item.description || ''}`;
+      const detectedCountry = detectCountry(combinedText);
       const newsItem = {
         title: decodeEntities(item.title),
-        summary: decodeEntities((item.description || '')).replace(/<[^>]+>/g, '').replace(/\s{2,}/g, ' ').trim().slice(0, 300),
+        summary: generateUniqueSummary(decodeEntities((item.description || '')).replace(/<[^>]+>/g, '').replace(/\s{2,}/g, ' ').trim(), 300),
         content: decodeEntities((item.description || '')).replace(/<[^>]+>/g, '').replace(/\s{2,}/g, ' ').trim(),
         category: isTrailer ? 'trailer' : 'industry_news',
         url: item.link || null,
@@ -1111,59 +1391,87 @@ async function main() {
         status: 'pending',
       };
       if (DRY_RUN) {
-        console.log(`  [DRY] Would insert news: ${item.title.slice(0, 60)}`);
+        console.log(`  [DRY] Would insert news: ${item.title.slice(0, 55)}${detectedCountry ? ` (🌍 ${detectedCountry})` : ''}`);
       } else {
         try {
           await supabaseInsert('news', newsItem);
-          console.log(`  ✓ Inserted news: ${item.title.slice(0, 60)}`);
+          console.log(`  ✓ Inserted news: ${item.title.slice(0, 55)}${detectedCountry ? ` (🌍 ${detectedCountry})` : ''}`);
           newsInserted++;
         } catch (err) {
-          console.log(`  ✗ Failed: ${item.title.slice(0, 60)} — ${err.message}`);
+          console.log(`  ✗ Failed: ${item.title.slice(0, 55)} — ${err.message}`);
         }
       }
     }
+    if (newsSkipped404 > 0) console.log(`   ⚠ Skipped ${newsSkipped404} dead URLs`);
   }
 
-  // 8. Log opportunity leads (insert as pending for manual review)
-  let oppsInserted = 0;
+  // 8. QC + enrich + insert opportunity leads
+  let oppsInserted = 0, oppsSkipped404 = 0;
   if (results.opportunities.length > 0 && !NEWS_ONLY) {
     console.log(`\n🎯 Found ${results.opportunities.length} potential opportunity leads`);
+    console.log('   Running pre-insert QC (URL validation + page enrichment)...');
     for (const item of results.opportunities.slice(0, 15)) {
-      // Fetch logo and OG image for the opportunity
+      // Step A: Validate URL is reachable
+      const urlOk = await validateUrl(item.url);
+      if (!urlOk) {
+        console.log(`  ✗ SKIP (dead URL): ${item.title.slice(0, 55)} — ${item.url}`);
+        oppsSkipped404++;
+        continue;
+      }
+
+      // Step B: Scrape page for real field data
+      const scraped = await enrichOpportunityFromPage(item.url);
+      const enrichedFields = Object.keys(scraped).filter(k => !k.startsWith('_')).length;
+
+      // Step C: Fetch logo and OG image
       const logo = item.url ? await fetchLogoForUrl(item.url) : null;
       const ogImage = item.url ? await fetchOgImageForUrl(item.url) : null;
+
+      // Step D: Auto-detect country from title + snippet + page content
+      const combinedText = `${item.title} ${item.snippet || ''} ${scraped.description || ''}`;
+      const detectedCountry = scraped._detectedCountry || detectCountry(combinedText);
+      const geoScope = scraped._geoScope || detectGeoScope(combinedText);
+
+      // Step E: Build the record with scraped data replacing placeholders
       const oppItem = {
         title: decodeEntities(item.title),
-        'What Is It?': decodeEntities(item.snippet) || 'Discovered via automated scan — needs review.',
-        'For Films or Series?': 'To be confirmed',
-        'What Do You Get If Selected?': 'To be confirmed',
-        'Cost': 'To be confirmed',
-        'Next Deadline': 'To be confirmed',
+        'What Is It?': scraped.description || decodeEntities(item.snippet) || 'Discovered via automated scan — needs review.',
+        'For Films or Series?': scraped['For Films or Series?'] || 'To be confirmed',
+        'What Do You Get If Selected?': scraped['What Do You Get If Selected?'] || 'To be confirmed',
+        'Cost': scraped['Cost'] || 'To be confirmed',
+        'Next Deadline': scraped['Next Deadline'] || 'To be confirmed',
         'Apply:': item.url || '',
-        'Who Can Apply / Eligibility': 'To be confirmed',
+        'Who Can Apply / Eligibility': scraped['Who Can Apply / Eligibility'] || 'To be confirmed',
         'What to Submit': 'To be confirmed',
         'Strongest Submission Tips': '',
         'CALENDAR REMINDER:': '',
         status: 'pending',
         votes: 0,
         application_status: 'open',
+        ...(scraped.category ? { category: scraped.category } : {}),
         ...(logo ? { logo } : {}),
         ...(ogImage ? { og_image_url: ogImage } : {}),
       };
-      const extras = [logo && 'logo', ogImage && 'og'].filter(Boolean).join('+');
+      const extras = [
+        enrichedFields > 0 && `${enrichedFields} fields`,
+        detectedCountry && `🌍 ${detectedCountry}`,
+        logo && 'logo',
+        ogImage && 'og',
+      ].filter(Boolean).join(', ');
+
       if (DRY_RUN) {
-        console.log(`  [DRY] Would insert opp: ${item.title.slice(0, 60)}${extras ? ` (+ ${extras})` : ''}`);
-        console.log(`         URL: ${item.url || 'N/A'}`);
+        console.log(`  [DRY] Would insert opp: ${decodeEntities(item.title).slice(0, 55)}${extras ? ` (${extras})` : ''}`);
       } else {
         try {
           await supabaseInsert('opportunities', oppItem);
-          console.log(`  ✓ Inserted (pending): ${item.title.slice(0, 60)}${extras ? ` (+ ${extras})` : ''}`);
+          console.log(`  ✓ Inserted: ${item.title.slice(0, 55)}${extras ? ` (${extras})` : ''}`);
           oppsInserted++;
         } catch (err) {
-          console.log(`  ✗ Failed: ${item.title.slice(0, 60)} — ${err.message}`);
+          console.log(`  ✗ Failed: ${item.title.slice(0, 55)} — ${err.message}`);
         }
       }
     }
+    if (oppsSkipped404 > 0) console.log(`   ⚠ Skipped ${oppsSkipped404} dead URLs`);
   }
 
   // 9. Playwright enrichment
@@ -1179,8 +1487,8 @@ async function main() {
   console.log(`   RSS news found:      ${results.news.length}`);
   console.log(`   Email leads:         ${results.emails.length}`);
   console.log(`   Web opp leads:       ${results.opportunities.length}`);
-  console.log(`   News inserted:       ${newsInserted}`);
-  console.log(`   Opps inserted:       ${oppsInserted}`);
+  console.log(`   News inserted:       ${newsInserted}${newsSkipped404 ? ` (${newsSkipped404} dead URLs skipped)` : ''}`);
+  console.log(`   Opps inserted:       ${oppsInserted}${oppsSkipped404 ? ` (${oppsSkipped404} dead URLs skipped)` : ''}`);
   console.log('─'.repeat(60));
 
   // 11. Send admin summary email
@@ -1200,7 +1508,7 @@ async function main() {
     }
 
     try {
-      const emailRes = await fetch('https://api.resend.com/emails', {
+      const emailRes = await nativeFetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { Authorization: `Bearer ${resendApiKey}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
