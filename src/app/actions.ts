@@ -1261,7 +1261,7 @@ export async function subscribeToNewsletter(email: string) {
     console.log("[Newsletter] Checking for existing subscription...");
     const { data: existing, error: checkError } = await supabase
       .from('newsletter_subscriptions')
-      .select('id')
+      .select('id, unsubscribed')
       .eq('email', email)
       .maybeSingle();
 
@@ -1270,9 +1270,24 @@ export async function subscribeToNewsletter(email: string) {
       throw new Error(`Database check failed: ${checkError.message}`);
     }
 
-    if (existing) {
+    if (existing && !existing.unsubscribed) {
       console.log("[Newsletter] User already subscribed.");
       return { success: true, alreadySubscribed: true };
+    }
+
+    // Re-subscribe if previously unsubscribed
+    if (existing && existing.unsubscribed) {
+      console.log("[Newsletter] Re-subscribing previously unsubscribed user...");
+      const { error: resubError } = await supabase
+        .from('newsletter_subscriptions')
+        .update({ unsubscribed: false, unsubscribed_at: null })
+        .eq('id', existing.id);
+      if (resubError) {
+        console.error("[Newsletter] Re-subscribe failed:", resubError);
+        throw new Error(`Re-subscribe failed: ${resubError.message}`);
+      }
+      console.log("[Newsletter] User re-subscribed successfully.");
+      return { success: true, resubscribed: true };
     }
 
     console.log("[Newsletter] Inserting new subscription...");

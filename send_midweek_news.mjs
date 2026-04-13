@@ -115,7 +115,7 @@ async function fetchPartners() {
 }
 
 async function fetchSubscribers() {
-  return supabaseGet('newsletter_subscriptions', 'select=id,email&order=created_at.asc');
+  return supabaseGet('newsletter_subscriptions', 'select=id,email,unsubscribe_token&unsubscribed=eq.false&order=created_at.asc');
 }
 
 async function fetchOpportunityStats() {
@@ -333,7 +333,8 @@ function buildHotNewsHtml({ news, partners, dateLabel, oppStats, editionNumber }
             <td align="center" style="padding:16px 24px 24px;font-size:11px;color:#9b9a97;line-height:1.6;border-top:1px solid #e8e8e8;">
               Made with passion in Africa &#127757;<br/>
               You're receiving this because you subscribed at ${siteUrl.replace('https://', '')}<br/>
-              <a href="${siteUrl}" style="color:#2f80ed;text-decoration:none;">${siteUrl.replace('https://', '')}</a>
+              <a href="${siteUrl}" style="color:#2f80ed;text-decoration:none;">${siteUrl.replace('https://', '')}</a><br/><br/>
+              <a href="{{UNSUBSCRIBE_URL}}" style="color:#9b9a97;text-decoration:underline;font-size:11px;">Unsubscribe</a>
             </td>
           </tr>
 
@@ -571,7 +572,11 @@ async function main() {
 
   for (const sub of subscribers) {
     try {
-      const result = await sendEmail(sub.email, subject, html);
+      const unsubscribeUrl = sub.unsubscribe_token
+        ? `${siteUrl}/api/unsubscribe?token=${sub.unsubscribe_token}`
+        : `${siteUrl}`;
+      const personalHtml = html.replace(/\{\{UNSUBSCRIBE_URL\}\}/g, unsubscribeUrl);
+      const result = await sendEmail(sub.email, subject, personalHtml);
 
       await supabasePost('newsletter_sends', {
         newsletter_id: newsletter.id,

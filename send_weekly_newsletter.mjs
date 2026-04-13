@@ -174,7 +174,7 @@ async function fetchPartners() {
 }
 
 async function fetchSubscribers() {
-  return supabaseGet('newsletter_subscriptions', 'select=id,email&order=created_at.asc');
+  return supabaseGet('newsletter_subscriptions', 'select=id,email,unsubscribe_token&unsubscribed=eq.false&order=created_at.asc');
 }
 
 // ─── Date helpers ────────────────────────────────────────────────────────────
@@ -597,7 +597,8 @@ function buildNewsletterHtml({ closingSoon, newlyOpen, justAdded, news, proTip, 
             <td align="center" style="padding:20px 24px 28px;font-size:11px;color:#9b9a97;line-height:1.6;border-top:1px solid #e8e8e8;">
               Made with passion in Africa &#127757;<br/>
               You're receiving this because you subscribed at ${siteUrl.replace('https://', '')}<br/>
-              <a href="${trackUrl(siteUrl, 'footer')}" style="color:#2f80ed;text-decoration:none;">${siteUrl.replace('https://', '')}</a>
+              <a href="${trackUrl(siteUrl, 'footer')}" style="color:#2f80ed;text-decoration:none;">${siteUrl.replace('https://', '')}</a><br/><br/>
+              <a href="{{UNSUBSCRIBE_URL}}" style="color:#9b9a97;text-decoration:underline;font-size:11px;">Unsubscribe</a>
             </td>
           </tr>
 
@@ -889,8 +890,13 @@ async function main() {
         status: 'pending',
       });
 
-      // Personalise HTML with this subscriber's send ID
-      const personalHtml = htmlWithNid.replace(/\{\{SEND_ID\}\}/g, sendRecord.id);
+      // Personalise HTML with this subscriber's send ID and unsubscribe link
+      const unsubscribeUrl = sub.unsubscribe_token
+        ? `${siteUrl}/api/unsubscribe?token=${sub.unsubscribe_token}`
+        : `${siteUrl}`;
+      const personalHtml = htmlWithNid
+        .replace(/\{\{SEND_ID\}\}/g, sendRecord.id)
+        .replace(/\{\{UNSUBSCRIBE_URL\}\}/g, unsubscribeUrl);
 
       const result = await sendEmail(sub.email, subject, personalHtml);
 
