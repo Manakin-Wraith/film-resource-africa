@@ -111,12 +111,22 @@ export async function getClosingSoonOpportunities(): Promise<Opportunity[]> {
       
     if (error) throw error;
 
-    // Extra client-side sort: entries with a real deadline_date closest to
-    // today come first; nulls/unparseable go to the back.
+    // Filter out past-deadline entries (safeguard against stale application_status)
     const now = new Date();
     now.setHours(0, 0, 0, 0);
     const enriched = enrichWithCountry(data) as Opportunity[];
-    const sorted = enriched.sort((a, b) => {
+    const active = enriched.filter((o) => {
+      const raw = o.deadline_date || o["Next Deadline"] || null;
+      if (!raw) return false; // no deadline info = exclude from closing soon
+      const dl = new Date(raw);
+      if (isNaN(dl.getTime())) return false; // unparseable = exclude
+      dl.setHours(23, 59, 59, 999);
+      return dl >= now;
+    });
+
+    // Sort: entries with a real deadline_date closest to today come first;
+    // nulls/unparseable go to the back.
+    const sorted = active.sort((a, b) => {
       const da = a.deadline_date ? new Date(a.deadline_date).getTime() : Infinity;
       const db = b.deadline_date ? new Date(b.deadline_date).getTime() : Infinity;
       return da - db;
