@@ -4,15 +4,8 @@ const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
   turbopack: {
-    root: process.cwd(),
-  },
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**',
-      },
-    ],
+    // Explicitly set the root to avoid misdetection from parent lockfiles
+    root: "/Users/thecasterymedia/Downloads/ANTIGRAVITY/film_resource_africa/film-directory",
   },
 };
 
