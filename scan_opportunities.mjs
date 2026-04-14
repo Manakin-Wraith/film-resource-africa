@@ -323,6 +323,53 @@ function detectGeoScope(text) {
   return null;
 }
 
+// ─── Africa relevance gate ───────────────────────────────────────────────────
+//
+// An opportunity must pass at least ONE of these checks to be inserted:
+//   1. Geo signal: text contains African country names or pan-African terms
+//   2. Known Africa-specific source org
+//   3. Title/content references a known Africa-adjacent funder or programme
+//
+// "international" scope alone is not enough — we skip those unless they
+// come from a trusted Africa-specific source.
+
+const AFRICA_SPECIFIC_SOURCES = new Set([
+  'Realness Institute', 'Docubox', 'Durban FilmMart', 'FESPACO',
+  'Maisha Film Lab', 'Big World Cinema', 'Gauteng Film Commission',
+  'Western Cape Film Commission', 'KwaZulu-Natal Film Commission',
+  'Uganda Communications Commission', 'Uganda Film Festival',
+  'African Film Press', 'Sinema Focus', 'Africa is a Country',
+  'Nollywood Reinvented', 'The British Blacklist',
+]);
+
+const AFRICA_ADJACENT_TERMS = [
+  'hubert bals', 'world cinema fund', 'bertha fund',
+  'idfa bertha', 'hot docs crosscurrents', 'crosscurrents fund',
+  'realness', 'docubox', 'maisha', 'fespaco', 'durban film mart',
+  'durban filmmart', 'nfvf', 'safta', 'catapult film fund',
+  'multichoice', 'showmax', 'canal+', 'mnet films',
+  'africa is a country', 'african producers accelerator',
+  'big world cinema', 'open cities', 'afriff', 'amaa',
+  'zanzibar film', 'marrakech film', 'carthage film',
+  'cape town film', 'nairobi film', 'lagos film',
+];
+
+function isAfricaRelevant(combinedText, source) {
+  const lower = combinedText.toLowerCase();
+
+  // Check 1: Africa-specific source
+  if (source && AFRICA_SPECIFIC_SOURCES.has(source)) return true;
+
+  // Check 2: African country or pan-African geo signal
+  const geoScope = detectGeoScope(combinedText);
+  if (geoScope === 'pan_african' || geoScope === 'country_specific') return true;
+
+  // Check 3: Known Africa-adjacent funder/programme term in content
+  if (AFRICA_ADJACENT_TERMS.some(t => lower.includes(t))) return true;
+
+  return false;
+}
+
 async function validateUrl(url) {
   if (!url) return false;
   try {
@@ -1443,6 +1490,12 @@ async function main() {
       const combinedText = `${item.title} ${item.snippet || ''} ${scraped.description || ''}`;
       const detectedCountry = scraped._detectedCountry || detectCountry(combinedText);
       const geoScope = scraped._geoScope || detectGeoScope(combinedText);
+
+      // Step D.5: Africa relevance gate — skip if not Africa-skewed
+      if (!isAfricaRelevant(combinedText, item.source)) {
+        console.log(`  ✗ SKIP (not Africa-relevant): ${item.title.slice(0, 60)}`);
+        continue;
+      }
 
       // Step E: Build the record with scraped data replacing placeholders
       const oppItem = {
