@@ -34,6 +34,8 @@ jobs:
           ANTHROPIC_API_KEY:             ${{ secrets.ANTHROPIC_API_KEY }}
           VAULT_GITHUB_PAT:              ${{ secrets.VAULT_GITHUB_PAT }}
           VAULT_GITHUB_REPO:             ${{ secrets.VAULT_GITHUB_REPO }}
+          GMAIL_CLIENT_SECRET:           ${{ secrets.GMAIL_CLIENT_SECRET }}
+          GMAIL_REFRESH_TOKEN:           ${{ secrets.GMAIL_REFRESH_TOKEN }}
 
       - name: Upload scan log
         if: always()

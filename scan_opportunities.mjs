@@ -383,9 +383,14 @@ async function validateUrl(url) {
   } catch { return false; }
 }
 
+// ─── Claude API enrichment ───────────────────────────────────────────────────
+
+const anthropicApiKey = env.ANTHROPIC_API_KEY;
+
 async function enrichOpportunityFromPage(url) {
   if (!url) return {};
   try {
+    // Fetch page text
     const res = await nativeFetch(url, {
       headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36' },
       signal: AbortSignal.timeout(12000),
@@ -393,58 +398,105 @@ async function enrichOpportunityFromPage(url) {
     });
     if (!res.ok) return {};
     const html = await res.text();
-    const text = html.replace(/<[^>]+>/g, ' ').replace(/\s{2,}/g, ' ');
-    const lower = text.toLowerCase();
-    const fields = {};
+    const pageText = html
+      .replace(/<script[\s\S]*?<\/script>/gi, '')
+      .replace(/<style[\s\S]*?<\/style>/gi, '')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/\s{2,}/g, ' ')
+      .trim()
+      .slice(0, 6000);
 
-    // Deadline
-    const dlPat = /(?:deadline|closes?|due\s*(?:date)?)\s*(?:on)?\s*:?\s*(\d{1,2}\s+(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s+\d{4})/i;
-    const dlMatch = text.match(dlPat);
-    if (dlMatch) fields['Next Deadline'] = dlMatch[1].trim();
-
-    // Eligibility
-    const eligMatch = text.match(/(?:eligib[a-z]*|who can apply|open to)[:\s]*([^.]{20,250}\.)/i);
-    if (eligMatch) fields['Who Can Apply / Eligibility'] = eligMatch[0].trim().slice(0, 300);
-
-    // Benefits / what you get
-    const benMatch = text.match(/(?:selected .{0,30}(?:will )?receive|support includes|grant (?:of|amount|value)|funding (?:of|up to))[:\s]*([^.]{15,300}\.)/i)
-      || text.match(/((?:€|£|\$|USD|EUR|GBP)\s*[\d,]+(?:\s*(?:thousand|million|k))?[^.]{0,200}\.)/i);
-    if (benMatch) fields['What Do You Get If Selected?'] = benMatch[0].trim().slice(0, 400);
-
-    // Format
-    if (/feature film/i.test(lower)) fields['For Films or Series?'] = 'Feature Films';
-    else if (/short film/i.test(lower)) fields['For Films or Series?'] = 'Short Films';
-    else if (/documentary|documentaries/i.test(lower)) fields['For Films or Series?'] = 'Documentary';
-    else if (/animation|animated/i.test(lower)) fields['For Films or Series?'] = 'Animation';
-    else if (/series|tv|television/i.test(lower)) fields['For Films or Series?'] = 'Series / TV';
-    else if (/all formats|any format/i.test(lower)) fields['For Films or Series?'] = 'All Formats';
-
-    // Category
-    if (/lab|workshop|residency|fellowship|training|mentorship/i.test(lower)) fields.category = 'Labs & Fellowships';
-    else if (/fund|grant|financ|support|bursary/i.test(lower)) fields.category = 'Funds & Grants';
-    else if (/festival|screening|competition|call for (?:entries|films|submissions)/i.test(lower)) fields.category = 'Festivals';
-    else if (/market|pitch|forum|co-?production/i.test(lower)) fields.category = 'Markets & Pitching';
-
-    // Cost
-    if (/\b(?:entry|submission)\s*fee/i.test(lower)) fields['Cost'] = 'Check website';
-    else if (/\bfree\b.*(?:entry|submit|apply)/i.test(lower) || /no (?:entry |submission )?fee/i.test(lower)) fields['Cost'] = 'Free';
-
-    // Description (first 2-3 meaningful paragraphs from the HTML)
-    const paraMatch = html.match(/<p[^>]*>([^<]{50,})<\/p>/gi);
-    if (paraMatch) {
-      const paras = paraMatch
-        .map(p => p.replace(/<[^>]+>/g, '').trim())
-        .filter(p => p.length > 50 && !/cookie|subscribe|newsletter|sign up|privacy/i.test(p));
-      if (paras.length > 0) fields.description = paras.slice(0, 3).join(' ').slice(0, 600);
+    // Detect bot/challenge pages — skip enrichment
+    if (/verif(y|ying) you are|cloudflare|just a moment|enable javascript|browser check/i.test(pageText.slice(0, 300))) {
+      return {};
     }
 
-    // Country & geo scope from combined title+page text
-    const country = detectCountry(text);
-    if (country) fields._detectedCountry = country;
-    const scope = detectGeoScope(text);
-    if (scope) fields._geoScope = scope;
+    // Use Claude if API key available, otherwise fall back to geo-detection only
+    if (anthropicApiKey) {
+      return await claudeEnrichFields(pageText, url);
+    }
 
-    return fields;
+    // Fallback: geo signals only
+    const country = detectCountry(pageText);
+    const scope = detectGeoScope(pageText);
+    return {
+      ...(country ? { _detectedCountry: country } : {}),
+      ...(scope ? { _geoScope: scope } : {}),
+    };
+  } catch {
+    return {};
+  }
+}
+
+async function claudeEnrichFields(pageText, url) {
+  const prompt = `You are extracting structured data about a film industry opportunity for African filmmakers from a scraped web page.
+
+URL: ${url}
+
+Page content:
+${pageText}
+
+Return ONLY a valid JSON object — no markdown, no explanation. Use exactly these keys:
+{
+  "description": "2-3 sentence plain-English description of what this opportunity is. Be specific.",
+  "For Films or Series?": "one of: Feature Films / Short Films / Documentary / Animation / Series / TV / All Formats — pick the best fit",
+  "What Do You Get If Selected?": "specific benefits: funding amount, mentorship, distribution, residency etc. Include currency and amounts if stated.",
+  "Cost": "Free — or the actual fee amount if one exists",
+  "Next Deadline": "deadline in plain text e.g. '30 June 2026', or 'Rolling', or 'TBC' if not found",
+  "Who Can Apply / Eligibility": "nationality, career stage, project stage, country restrictions etc. Be specific.",
+  "What to Submit": "required materials: script, trailer, synopsis, CV, budget etc.",
+  "Strongest Submission Tips": "2-3 practical tips inferred from the eligibility and submission criteria",
+  "CALENDAR REMINDER:": "short string e.g. 'Set reminder: 16 June 2026 (2 weeks before deadline)'",
+  "category": "one of: Funds & Grants / Labs & Fellowships / Festivals / Markets & Pitching / Training / Distribution — pick the best fit",
+  "is_actual_opportunity": true if this page describes a specific actionable grant/fund/festival/lab/residency with application details, false if it is a blog post, list, directory, or generic about page,
+  "africa_relevance": "explain in one sentence why this is relevant to African filmmakers"
+}
+
+Rules:
+- Never invent specifics not supported by the page content
+- Use "TBC" for fields you cannot find — never use "To be confirmed"
+- If the page is bot-protected, a list/directory, or has no real opportunity content, set is_actual_opportunity to false`;
+
+  try {
+    const res = await nativeFetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': anthropicApiKey,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1024,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+      signal: AbortSignal.timeout(30000),
+    });
+
+    if (!res.ok) return {};
+    const data = await res.json();
+    const raw = data.content?.[0]?.text?.trim() || '';
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) return {};
+
+    const parsed = JSON.parse(jsonMatch[0]);
+
+    // Map Claude output to scanner field names
+    return {
+      description:                    parsed.description || '',
+      'For Films or Series?':         parsed['For Films or Series?'] || '',
+      'What Do You Get If Selected?': parsed['What Do You Get If Selected?'] || '',
+      'Cost':                         parsed['Cost'] || '',
+      'Next Deadline':                parsed['Next Deadline'] || '',
+      'Who Can Apply / Eligibility':  parsed['Who Can Apply / Eligibility'] || '',
+      'What to Submit':               parsed['What to Submit'] || '',
+      'Strongest Submission Tips':    parsed['Strongest Submission Tips'] || '',
+      'CALENDAR REMINDER:':           parsed['CALENDAR REMINDER:'] || '',
+      category:                       parsed.category || '',
+      _isActualOpportunity:           parsed.is_actual_opportunity !== false,
+      _detectedCountry:               detectCountry(pageText),
+      _geoScope:                      detectGeoScope(pageText),
+    };
   } catch {
     return {};
   }
@@ -1211,9 +1263,13 @@ async function enrichWithPlaywright() {
     `select=id,title,"What Is It?","Apply:","For Films or Series?","Next Deadline","Who Can Apply / Eligibility","What Do You Get If Selected?","Cost",category,enriched_at&order=id.desc&limit=200`);
   const needsEnrich = allOpps.filter(o => !o.enriched_at && (
     (o['For Films or Series?'] === 'To be confirmed') ||
+    (o['For Films or Series?'] === 'TBC') ||
     (o['Next Deadline'] === 'To be confirmed') ||
+    (o['Next Deadline'] === 'TBC') ||
     (o['Who Can Apply / Eligibility'] === 'To be confirmed') ||
+    (o['Who Can Apply / Eligibility'] === 'TBC') ||
     (o['What Do You Get If Selected?'] === 'To be confirmed') ||
+    (o['What Do You Get If Selected?'] === 'TBC') ||
     (!o.category)
   ));
   console.log(`   ${needsEnrich.length} opportunities need field enrichment`);
@@ -1228,72 +1284,50 @@ async function enrichWithPlaywright() {
       await page.goto(url, { waitUntil: 'commit', timeout: 15000 });
       await page.waitForTimeout(3000);
 
-      const scraped = await page.evaluate(() => {
-        const text = document.body.innerText || '';
-        const lower = text.toLowerCase();
-
-        // Deadline
-        let deadline = null;
-        const dlMatch = text.match(/deadline[:\s]*(\d{1,2}\s+(?:january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{4})/i)
-          || text.match(/closes?[:\s]*on?\s*(\d{1,2}\s+(?:january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{4})/i);
-        if (dlMatch) deadline = dlMatch[1];
-
-        // Eligibility
-        let eligibility = null;
-        const eligMatch = text.match(/(?:eligib[a-z]*|who can apply|open to|requirements?)[:\s]*([^.]{20,200}\.)/i);
-        if (eligMatch) eligibility = eligMatch[0].trim();
-
-        // Benefits
-        let benefits = null;
-        const benMatch = text.match(/(?:selected (?:projects?|participants?|filmmakers?) (?:will )?receive|support includes|grant (?:of|amount|value)|funding (?:of|up to))[:\s]*([^.]{20,300}\.)/i)
-          || text.match(/((?:€|£|\$|USD|EUR)\s*[\d,]+(?:\s*(?:thousand|million|k))?[^.]{0,200}\.)/i);
-        if (benMatch) benefits = benMatch[0].trim();
-
-        // Description
-        const paras = Array.from(document.querySelectorAll('p'))
-          .map(p => p.textContent.trim())
-          .filter(p => p.length > 50 && !/cookie|subscribe|privacy/i.test(p));
-        const description = paras.slice(0, 3).join(' ').slice(0, 600) || null;
-
-        // Format
-        let format = null;
-        if (/feature film/i.test(lower)) format = 'Feature Films';
-        else if (/short film/i.test(lower)) format = 'Short Films';
-        else if (/documentary/i.test(lower)) format = 'Documentary';
-        else if (/animation|animated/i.test(lower)) format = 'Animation';
-        else if (/series|tv|television/i.test(lower)) format = 'Series / TV';
-        else if (/all formats|any format/i.test(lower)) format = 'All Formats';
-
-        // Category
-        let category = null;
-        if (/lab|workshop|residency|fellowship|training|mentorship/i.test(lower)) category = 'Labs & Fellowships';
-        else if (/fund|grant|financ|support|bursary/i.test(lower)) category = 'Funds & Grants';
-        else if (/festival|screening|competition|call for (?:entries|films|submissions)/i.test(lower)) category = 'Festivals';
-        else if (/market|pitch|forum|co-?production/i.test(lower)) category = 'Markets & Pitching';
-        else if (/vr|xr|ar|immersive|ai|virtual/i.test(lower)) category = 'AI & Emerging Tech';
-
-        // Cost
-        let cost = 'Free';
-        if (/(?:entry |submission )?fee/i.test(lower)) cost = 'Check website';
-
-        return { description, deadline, eligibility, benefits, format, category, cost };
+      // Extract full page text via Playwright (handles JS-rendered sites)
+      const pageText = await page.evaluate(() => {
+        const skipTags = new Set(['script', 'style', 'nav', 'footer', 'noscript']);
+        function extract(el) {
+          if (skipTags.has(el.tagName?.toLowerCase())) return '';
+          if (el.nodeType === 3) return el.textContent;
+          return Array.from(el.childNodes).map(extract).join(' ');
+        }
+        return extract(document.body).replace(/\s+/g, ' ').trim().slice(0, 6000);
       });
 
+      // Bot/challenge page — skip
+      if (/verif(y|ying) you are|cloudflare|just a moment|enable javascript/i.test(pageText.slice(0, 300))) {
+        console.log(`  ⚠ [${opp.id}] Bot wall detected — skipping`);
+        continue;
+      }
+
+      // Use Claude to extract all fields from the rendered page text
+      const enriched = anthropicApiKey
+        ? await claudeEnrichFields(pageText, url)
+        : {};
+
+      const placeholder = v => !v || v === 'To be confirmed' || v === 'TBC';
       const updates = {};
-      if (scraped.description && (opp['What Is It?'] || '').length < scraped.description.length)
-        updates['What Is It?'] = scraped.description;
-      if (scraped.deadline && opp['Next Deadline'] === 'To be confirmed')
-        updates['Next Deadline'] = scraped.deadline;
-      if (scraped.eligibility && opp['Who Can Apply / Eligibility'] === 'To be confirmed')
-        updates['Who Can Apply / Eligibility'] = scraped.eligibility;
-      if (scraped.benefits && opp['What Do You Get If Selected?'] === 'To be confirmed')
-        updates['What Do You Get If Selected?'] = scraped.benefits;
-      if (scraped.format && opp['For Films or Series?'] === 'To be confirmed')
-        updates['For Films or Series?'] = scraped.format;
-      if (scraped.category && !opp.category)
-        updates.category = scraped.category;
-      if (scraped.cost && opp['Cost'] === 'To be confirmed')
-        updates['Cost'] = scraped.cost;
+      if (enriched.description && enriched.description.length > (opp['What Is It?'] || '').length)
+        updates['What Is It?'] = enriched.description;
+      if (enriched['Next Deadline'] && enriched['Next Deadline'] !== 'TBC' && placeholder(opp['Next Deadline']))
+        updates['Next Deadline'] = enriched['Next Deadline'];
+      if (enriched['Who Can Apply / Eligibility'] && enriched['Who Can Apply / Eligibility'] !== 'TBC' && placeholder(opp['Who Can Apply / Eligibility']))
+        updates['Who Can Apply / Eligibility'] = enriched['Who Can Apply / Eligibility'];
+      if (enriched['What Do You Get If Selected?'] && enriched['What Do You Get If Selected?'] !== 'TBC' && placeholder(opp['What Do You Get If Selected?']))
+        updates['What Do You Get If Selected?'] = enriched['What Do You Get If Selected?'];
+      if (enriched['For Films or Series?'] && enriched['For Films or Series?'] !== 'TBC' && placeholder(opp['For Films or Series?']))
+        updates['For Films or Series?'] = enriched['For Films or Series?'];
+      if (enriched['What to Submit'] && enriched['What to Submit'] !== 'TBC')
+        updates['What to Submit'] = enriched['What to Submit'];
+      if (enriched['Strongest Submission Tips'])
+        updates['Strongest Submission Tips'] = enriched['Strongest Submission Tips'];
+      if (enriched['CALENDAR REMINDER:'])
+        updates['CALENDAR REMINDER:'] = enriched['CALENDAR REMINDER:'];
+      if (enriched.category && !opp.category)
+        updates.category = enriched.category;
+      if (enriched['Cost'] && enriched['Cost'] !== 'TBC' && placeholder(opp['Cost']))
+        updates['Cost'] = enriched['Cost'];
 
       updates.enriched_at = new Date().toISOString();
       await supabaseUpdate('opportunities', opp.id, updates);
@@ -1491,7 +1525,11 @@ async function main() {
       const detectedCountry = scraped._detectedCountry || detectCountry(combinedText);
       const geoScope = scraped._geoScope || detectGeoScope(combinedText);
 
-      // Step D.5: Africa relevance gate — skip if not Africa-skewed
+      // Step D.5: Quality + Africa relevance gate
+      if (scraped._isActualOpportunity === false) {
+        console.log(`  ✗ SKIP (not an opportunity — blog/list/directory): ${item.title.slice(0, 55)}`);
+        continue;
+      }
       if (!isAfricaRelevant(combinedText, item.source)) {
         console.log(`  ✗ SKIP (not Africa-relevant): ${item.title.slice(0, 60)}`);
         continue;
@@ -1501,15 +1539,15 @@ async function main() {
       const oppItem = {
         title: decodeEntities(item.title),
         'What Is It?': scraped.description || decodeEntities(item.snippet) || 'Discovered via automated scan — needs review.',
-        'For Films or Series?': scraped['For Films or Series?'] || 'To be confirmed',
-        'What Do You Get If Selected?': scraped['What Do You Get If Selected?'] || 'To be confirmed',
-        'Cost': scraped['Cost'] || 'To be confirmed',
-        'Next Deadline': scraped['Next Deadline'] || 'To be confirmed',
+        'For Films or Series?': scraped['For Films or Series?'] || 'TBC',
+        'What Do You Get If Selected?': scraped['What Do You Get If Selected?'] || 'TBC',
+        'Cost': scraped['Cost'] || 'TBC',
+        'Next Deadline': scraped['Next Deadline'] || 'TBC',
         'Apply:': item.url || '',
-        'Who Can Apply / Eligibility': scraped['Who Can Apply / Eligibility'] || 'To be confirmed',
-        'What to Submit': 'To be confirmed',
-        'Strongest Submission Tips': '',
-        'CALENDAR REMINDER:': '',
+        'Who Can Apply / Eligibility': scraped['Who Can Apply / Eligibility'] || 'TBC',
+        'What to Submit': scraped['What to Submit'] || 'TBC',
+        'Strongest Submission Tips': scraped['Strongest Submission Tips'] || '',
+        'CALENDAR REMINDER:': scraped['CALENDAR REMINDER:'] || '',
         status: 'pending',
         votes: 0,
         application_status: 'open',
