@@ -978,13 +978,13 @@ async function enrichWithPlaywright() {
 
   // ── Phase A: Enrich pending/thin news articles ─────────────────────────
   console.log('\n🎭 Playwright enrichment — pending & thin news articles...');
-  const allNews = await supabaseGet('news', 'select=id,title,content,url,image_url,status&order=id.desc&limit=120');
-  const thinNews = allNews.filter(n => n.url && (
+  const allNews = await supabaseGet('news', 'select=id,title,content,url,image_url,status,enriched_at&order=id.desc&limit=200');
+  const thinNews = allNews.filter(n => n.url && !n.enriched_at && (
     n.status === 'pending' ||
     (n.content || '').length < 150 ||
     !n.image_url
   ));
-  console.log(`   ${thinNews.length} articles need enrichment (pending/thin/no image)`);
+  console.log(`   ${thinNews.length} articles need enrichment (unenriched/pending/thin/no image)`);
 
   let newsEnriched = 0;
   for (const item of thinNews) {
@@ -1138,6 +1138,7 @@ async function enrichWithPlaywright() {
       }
 
       if (Object.keys(updates).length > 0) {
+        updates.enriched_at = new Date().toISOString();
         await supabaseUpdate('news', item.id, updates);
         const parts = [];
         if (updates.content) parts.push(`content ${(item.content || '').length}→${updates.content.length}`);
@@ -1145,7 +1146,9 @@ async function enrichWithPlaywright() {
         console.log(`  ✅ [${item.id}] ${item.title.slice(0, 55)} — ${parts.join(', ')}`);
         newsEnriched++;
       } else {
-        console.log(`  · [${item.id}] ${item.title.slice(0, 55)} — no improvement found`);
+        // Mark as enriched even with no improvement — page was visited, no better content exists
+        await supabaseUpdate('news', item.id, { enriched_at: new Date().toISOString() });
+        console.log(`  · [${item.id}] ${item.title.slice(0, 55)} — no improvement, marked done`);
       }
     } catch (err) {
       console.log(`  ✗ [${item.id}] ${item.title.slice(0, 40)} — ${err.message.slice(0, 60)}`);
@@ -1158,14 +1161,14 @@ async function enrichWithPlaywright() {
   // ── Phase B: Enrich opportunity fields ──────────────────────────────────
   console.log('\n🎭 Playwright enrichment — opportunity fields...');
   const allOpps = await supabaseGet('opportunities',
-    `select=id,title,"What Is It?","Apply:","For Films or Series?","Next Deadline","Who Can Apply / Eligibility","What Do You Get If Selected?","Cost",category&order=id.desc&limit=150`);
-  const needsEnrich = allOpps.filter(o =>
+    `select=id,title,"What Is It?","Apply:","For Films or Series?","Next Deadline","Who Can Apply / Eligibility","What Do You Get If Selected?","Cost",category,enriched_at&order=id.desc&limit=200`);
+  const needsEnrich = allOpps.filter(o => !o.enriched_at && (
     (o['For Films or Series?'] === 'To be confirmed') ||
     (o['Next Deadline'] === 'To be confirmed') ||
     (o['Who Can Apply / Eligibility'] === 'To be confirmed') ||
     (o['What Do You Get If Selected?'] === 'To be confirmed') ||
     (!o.category)
-  );
+  ));
   console.log(`   ${needsEnrich.length} opportunities need field enrichment`);
 
   let oppsEnriched = 0;
@@ -1245,13 +1248,16 @@ async function enrichWithPlaywright() {
       if (scraped.cost && opp['Cost'] === 'To be confirmed')
         updates['Cost'] = scraped.cost;
 
-      if (Object.keys(updates).length > 0) {
-        await supabaseUpdate('opportunities', opp.id, updates);
-        console.log(`  ✅ [${opp.id}] ${opp.title.slice(0, 50)} — ${Object.keys(updates).join(', ')}`);
+      updates.enriched_at = new Date().toISOString();
+      await supabaseUpdate('opportunities', opp.id, updates);
+      if (Object.keys(updates).length > 1) {
+        console.log(`  ✅ [${opp.id}] ${opp.title.slice(0, 50)} — ${Object.keys(updates).filter(k => k !== 'enriched_at').join(', ')}`);
         oppsEnriched++;
+      } else {
+        console.log(`  · [${opp.id}] ${opp.title.slice(0, 50)} — no fields extracted, marked done`);
       }
     } catch (err) {
-      // silent — many pages will fail and that's ok
+      // silent — many pages will fail; leave enriched_at null so it retries next run
     } finally {
       if (page) await page.close().catch(() => {});
     }
