@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { Clock, Sparkles, Plus } from 'lucide-react';
 import { Opportunity, NewsItem, trackSponsoredClick } from '@/app/actions';
 import type { InquiryType, SponsoredPlacement } from '@/app/actions';
-import OpportunityRow from './OpportunityRow';
+import JustAddedSection from './JustAddedSection';
+import OpenNowSection from './OpenNowSection';
+import NewWaveSection from './NewWaveSection';
 import NewsSection from './NewsSection';
 import NowScreeningSection from './NowScreeningSection';
 import NewsletterShowcase from './NewsletterShowcase';
@@ -59,90 +60,27 @@ export default function HomeClient({ closingSoon, openNow, newWave, justAdded, n
 
   return (
     <>
-      {/* Just Added Section */}
-      {justAdded.length > 0 && (
-        <section
-          id="just-added"
-          className="mt-14 md:mt-20 pt-6 pb-10 border-t border-white/[0.08] -mx-4 md:mx-0 px-4 md:px-0"
-        >
-          <OpportunityRow
-            opportunities={justAdded}
-            title="Just Added"
-            subtitle="New listings added in the last 2 weeks"
-            icon={
-              <div className="w-10 h-10 rounded-2xl bg-blue-500/20 flex items-center justify-center border border-blue-500/20">
-                <Plus size={20} className="text-blue-400" />
-              </div>
-            }
-            onSelect={setSelectedOpp}
-          />
-        </section>
-      )}
+      {/* Just Added — 2-col editorial grid */}
+      <JustAddedSection opportunities={justAdded} onSelect={setSelectedOpp} />
 
       {/* Closing Soon — editorial featured section */}
       <ClosingSoonSection opportunities={closingSoon} onSelect={setSelectedOpp} />
 
-      {/* Open Now Section */}
-      {openNow.length > 0 && (
-        <section
-          id="open-now"
-          className="mt-14 md:mt-20 pt-6 pb-10 border-t border-white/[0.08] -mx-4 md:mx-0 px-4 md:px-0"
-        >
-          <OpportunityRow
-            opportunities={openNow}
-            title="Open Now"
-            subtitle="Currently accepting applications"
-            icon={
-              <div className="w-10 h-10 rounded-2xl bg-green-500/20 flex items-center justify-center border border-green-500/20">
-                <Clock size={20} className="text-green-400" />
-              </div>
-            }
-            onSelect={setSelectedOpp}
-          />
-        </section>
-      )}
+      {/* Open Now — cleaned snap carousel */}
+      <OpenNowSection opportunities={openNow} onSelect={setSelectedOpp} />
 
-      {/* New Wave Section */}
-      {newWave.length > 0 && (
-        <section
-          id="new-wave"
-          className="mt-14 md:mt-20 pt-6 pb-10 border-t border-white/[0.08] -mx-4 md:mx-0 px-4 md:px-0"
-        >
-          <OpportunityRow
-            opportunities={newWave}
-            title="The New Wave: AI Filmmaking"
-            subtitle="Festivals, funds, and awards for AI-powered creators"
-            icon={
-              <div className="w-10 h-10 rounded-2xl bg-purple-500/20 flex items-center justify-center border border-purple-500/20">
-                <Sparkles size={20} className="text-purple-400" />
-              </div>
-            }
-            onSelect={setSelectedOpp}
-          />
-        </section>
-      )}
+      {/* New Wave — editorial list */}
+      <NewWaveSection opportunities={newWave} onSelect={setSelectedOpp} />
 
       {/* Now Screening — Trailers & First Looks */}
-      {trailers.length > 0 && (
-        <section
-          id="now-screening"
-          className="mt-14 md:mt-20 pt-6 pb-10 border-t border-white/[0.08] -mx-4 md:mx-0 px-4 md:px-0"
-        >
-          <NowScreeningSection trailers={trailers} />
-        </section>
-      )}
+      {trailers.length > 0 && <NowScreeningSection trailers={trailers} />}
 
-      {/* News Section */}
-      <section
-        id="news"
-        className="mt-14 md:mt-20 pt-6 pb-10 border-t border-white/[0.08] -mx-4 md:mx-0 px-4 md:px-0"
-      >
-        <NewsSection
-          news={news}
-          placements={placementsBySection('Latest News')}
-          onSponsoredClaim={handleSponsoredClaim}
-        />
-      </section>
+      {/* News — featured + secondary grid */}
+      <NewsSection
+        news={news}
+        placements={placementsBySection('Latest News')}
+        onSponsoredClaim={handleSponsoredClaim}
+      />
 
       {/* Newsletter Showcase CTA */}
       <NewsletterShowcase />
@@ -151,8 +89,12 @@ export default function HomeClient({ closingSoon, openNow, newWave, justAdded, n
       <BrowseByCountry countries={countriesWithCounts} />
 
       {/* Full Directory */}
-      <section id="directory" className="space-y-6">
-        <h2 className="text-2xl md:text-3xl font-bold font-heading text-center">Full Directory</h2>
+      <section id="directory" className="mt-14 md:mt-20">
+        <div className="section-rule section-rule-muted" />
+        <span className="section-rubric">Full Directory</span>
+        <h2 className="text-[26px] md:text-[34px] font-bold font-heading leading-tight text-foreground mb-6 md:mb-8">
+          All Opportunities
+        </h2>
         <DirectoryClient initialData={allOpportunities} />
       </section>
 
