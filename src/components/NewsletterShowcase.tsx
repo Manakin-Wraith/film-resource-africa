@@ -77,24 +77,25 @@ function EmailPreviewCard({ digest, isActive, onClick }: { digest: typeof digest
   return (
     <button
       onClick={onClick}
-      className={`w-full text-left rounded-2xl p-5 border transition-all duration-300 ${
+      className={`w-full text-left rounded-xl p-4 border transition-all ${
         isActive
-          ? `bg-gradient-to-br ${digest.gradient} ${digest.border} shadow-lg scale-[1.02]`
-          : 'bg-white/[0.03] border-white/10 hover:bg-white/[0.06] hover:border-white/15'
+          ? 'border-white/[0.2] bg-white/[0.04]'
+          : 'border-white/[0.06] hover:border-white/[0.12] hover:bg-white/[0.02]'
       }`}
+      style={isActive ? { background: 'var(--surface-raised)' } : undefined}
     >
-      <div className="flex items-start gap-4">
-        <div className={`w-10 h-10 rounded-xl ${digest.iconBg} flex items-center justify-center flex-shrink-0`}>
-          <Icon size={20} className={digest.iconColor} />
+      <div className="flex items-start gap-3">
+        <div className={`w-8 h-8 rounded-lg ${digest.iconBg} flex items-center justify-center flex-shrink-0 mt-0.5`}>
+          <Icon size={15} className={digest.iconColor} />
         </div>
         <div className="flex-grow min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <h4 className="font-bold text-base">{digest.title}</h4>
-            <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${digest.badge}`}>
+          <div className="flex items-center gap-2 mb-0.5">
+            <h4 className="font-bold text-[14px] text-foreground">{digest.title}</h4>
+            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--foreground-tertiary)' }}>
               {digest.frequency}
             </span>
           </div>
-          <p className="text-foreground/50 text-sm leading-relaxed">{digest.description}</p>
+          <p className="text-[13px] leading-relaxed" style={{ color: 'var(--foreground-secondary)' }}>{digest.description}</p>
         </div>
       </div>
     </button>
@@ -197,85 +198,75 @@ export default function NewsletterShowcase() {
   };
 
   return (
-    <section className="relative rounded-3xl bg-gradient-to-b from-primary/[0.06] via-accent/[0.03] to-transparent border border-white/10 p-8 md:p-12 -mx-4 md:mx-0 overflow-hidden">
-      {/* Background effects */}
-      <div className="absolute -top-32 -right-32 w-96 h-96 bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-accent/10 rounded-full blur-[120px] pointer-events-none" />
-
-      <div className="relative z-10">
-        {/* Header */}
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-4">
-            <Mail size={16} />
-            Free — No spam, unsubscribe anytime
-          </div>
-          <h2 className="text-3xl md:text-4xl font-bold font-heading mb-3">
-            Never Miss an Opportunity
-          </h2>
-          <p className="text-foreground/50 text-lg max-w-2xl mx-auto">
-            Subscribe to get <strong className="text-foreground/80">three curated newsletters</strong> designed
-            to keep African filmmakers ahead of every deadline, trend, and opportunity.
-          </p>
-        </div>
-
-        {/* Two-column layout: digest selector + email mockup */}
-        <div className="grid md:grid-cols-2 gap-8 mb-10">
-          {/* Left: digest cards */}
-          <div className="space-y-3">
-            {digests.map((d, i) => (
-              <EmailPreviewCard
-                key={d.id}
-                digest={d}
-                isActive={activeDigest === i}
-                onClick={() => setActiveDigest(i)}
-              />
-            ))}
-          </div>
-
-          {/* Right: live email mockup */}
-          <div className="flex items-center">
-            <div className="w-full transform md:rotate-1 md:hover:rotate-0 transition-transform duration-500">
-              <EmailMockup digest={digests[activeDigest]} />
-            </div>
-          </div>
-        </div>
-
-        {/* Subscribe form */}
-        <form onSubmit={handleSubscribe} className="max-w-xl mx-auto">
-          <div className="flex gap-3">
-            <div className="relative flex-grow">
-              <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-foreground/30" />
-              <input
-                type="email"
-                required
-                placeholder="your@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-2xl pl-11 pr-5 py-4 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-foreground placeholder:text-foreground/30"
-              />
-            </div>
-            <button
-              disabled={submitting || subscribed}
-              type="submit"
-              className={`px-8 py-4 rounded-2xl font-bold transition-all flex items-center gap-2 shadow-lg whitespace-nowrap ${
-                subscribed
-                  ? 'bg-green-500 text-white'
-                  : 'bg-gradient-to-r from-primary to-blue-600 hover:from-blue-600 hover:to-primary text-white shadow-primary/30 hover:-translate-y-0.5'
-              }`}
-            >
-              {submitting ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : subscribed ? (
-                <><CheckCircle2 size={20} /> Subscribed!</>
-              ) : (
-                <><Send size={18} /> Subscribe</>
-              )}
-            </button>
-          </div>
-          {error && <p className="text-red-400 text-xs mt-2 text-center">{error}</p>}
-          {subscribed && <p className="text-green-400 text-sm mt-3 text-center font-medium">🎉 Welcome aboard! Check your inbox for a confirmation.</p>}
-        </form>
+    <section>
+      {/* Editorial header */}
+      <div className="section-rule section-rule-primary" />
+      <span className="section-rubric">Newsletter</span>
+      <div className="flex items-baseline justify-between mb-6 md:mb-8">
+        <h2 className="text-[26px] md:text-[34px] font-bold font-heading leading-tight text-foreground">
+          Never Miss an Opportunity
+        </h2>
+        <span className="text-sm font-medium ml-4 flex-shrink-0" style={{ color: 'var(--foreground-tertiary)' }}>
+          Free — no spam
+        </span>
       </div>
+
+      {/* Two-column: digest selector + email mockup */}
+      <div className="grid md:grid-cols-2 gap-6 mb-8">
+        <div className="space-y-2">
+          <p className="text-[14px] mb-4" style={{ color: 'var(--foreground-secondary)' }}>
+            Three curated newsletters to keep African filmmakers ahead of every deadline, trend, and opportunity.
+          </p>
+          {digests.map((d, i) => (
+            <EmailPreviewCard
+              key={d.id}
+              digest={d}
+              isActive={activeDigest === i}
+              onClick={() => setActiveDigest(i)}
+            />
+          ))}
+        </div>
+        <div className="flex items-center">
+          <div className="w-full">
+            <EmailMockup digest={digests[activeDigest]} />
+          </div>
+        </div>
+      </div>
+
+      {/* Subscribe form */}
+      <form onSubmit={handleSubscribe} className="max-w-xl">
+        <div className="flex gap-3">
+          <div className="relative flex-grow">
+            <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2" style={{ color: 'var(--foreground-tertiary)' }} />
+            <input
+              type="email"
+              required
+              placeholder="your@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full border border-white/[0.12] rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-primary/50 transition-colors text-foreground placeholder:text-foreground/30 min-h-[48px]"
+              style={{ background: 'var(--surface-raised)' }}
+            />
+          </div>
+          <button
+            disabled={submitting || subscribed}
+            type="submit"
+            className={`px-6 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2 whitespace-nowrap min-h-[48px] ${
+              subscribed ? 'bg-success text-white' : 'bg-primary hover:bg-blue-600 text-white'
+            }`}
+          >
+            {submitting ? (
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : subscribed ? (
+              <><CheckCircle2 size={16} /> Subscribed!</>
+            ) : (
+              <><Send size={15} /> Subscribe</>
+            )}
+          </button>
+        </div>
+        {error && <p className="text-red-400 text-xs mt-2">{error}</p>}
+        {subscribed && <p className="text-sm mt-2 font-medium" style={{ color: 'var(--color-success)' }}>Welcome aboard! Check your inbox for a confirmation.</p>}
+      </form>
     </section>
   );
 }
