@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Menu, X, Database, Newspaper, Plus, Globe, Clapperboard, Building2, Star } from 'lucide-react';
+import { useState } from 'react';
+import { Menu, X } from 'lucide-react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+
 interface HeaderProps {
   stats: {
     total: number;
@@ -11,162 +13,110 @@ interface HeaderProps {
   };
 }
 
-export default function Header({ stats }: HeaderProps) {
-  const [scrolled, setScrolled] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
+const navLinks = [
+  { href: '/#directory', label: 'Directory' },
+  { href: '/film-opportunities', label: 'Countries' },
+  { href: '/news', label: 'News' },
+  { href: '/call-sheet', label: 'Call Sheet' },
+  { href: '/industry', label: 'Industry' },
+  { href: '/rebate-calculator', label: 'Rebate' },
+  { href: '/community-spotlight', label: 'Spotlight' },
+];
 
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+export default function Header({ stats }: HeaderProps) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const pathname = usePathname();
+
+  const isActive = (href: string) => {
+    if (href.startsWith('/#')) return pathname === '/';
+    return pathname === href || (href !== '/' && pathname.startsWith(href));
+  };
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'shadow-lg' : ''}`}>
-      {/* Main Nav Bar */}
-      <nav className="glass-panel backdrop-blur-xl">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-9 h-9 bg-white/10 rounded-xl flex items-center justify-center border border-white/10 overflow-hidden p-1.5 group-hover:scale-110 transition-transform shadow-md">
-              <img 
-                src="/icon.png" 
-                alt="Film Resource Africa" 
-                className="w-full h-full object-contain"
-              />
-            </div>
-            <span className="font-heading font-bold text-lg tracking-tight text-white hidden sm:block">
+    <header className="fixed top-0 left-0 right-0 z-50">
+      <div className="border-b border-white/[0.08]" style={{ background: 'var(--surface)' }}>
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-8">
+
+          {/* Publication wordmark */}
+          <Link href="/" className="flex items-center gap-2.5 flex-shrink-0 group">
+            <img
+              src="/icon.png"
+              alt=""
+              className="w-6 h-6 object-contain opacity-90"
+            />
+            <span className="font-heading font-bold text-[15px] tracking-tight text-foreground">
               Film Resource Africa
-            </span>
-            <span className="font-heading font-bold text-lg tracking-tight text-white sm:hidden">
-              FRA
             </span>
           </Link>
 
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-1">
-            <Link
-              href="/#directory"
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium text-foreground/60 hover:text-foreground hover:bg-white/5 transition-all"
-            >
-              <Database size={14} className="text-primary" />
-              Directory
-            </Link>
-            <Link
-              href="/film-opportunities"
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium text-foreground/60 hover:text-foreground hover:bg-white/5 transition-all"
-            >
-              <Globe size={14} className="text-emerald-400" />
-              Countries
-            </Link>
-            <Link
-              href="/news"
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium text-foreground/60 hover:text-foreground hover:bg-white/5 transition-all"
-            >
-              <Newspaper size={14} className="text-accent" />
-              News
-            </Link>
-            <Link
-              href="/call-sheet"
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium text-foreground/60 hover:text-foreground hover:bg-white/5 transition-all"
-            >
-              <Clapperboard size={14} className="text-teal-400" />
-              Call Sheet
-            </Link>
-            <Link
-              href="/industry"
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium text-foreground/60 hover:text-foreground hover:bg-white/5 transition-all"
-            >
-              <Building2 size={14} className="text-purple-400" />
-              Industry
-            </Link>
-            <Link
-              href="/community-spotlight"
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium text-foreground/60 hover:text-foreground hover:bg-white/5 transition-all"
-            >
-              <Star size={14} className="text-yellow-400" />
-              Spotlight
-            </Link>
-            <Link
-              href="/submit"
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium text-foreground/60 hover:text-foreground hover:bg-white/5 transition-all"
-            >
-              <Plus size={14} className="text-green-400" />
-              Submit
-            </Link>
+          {/* Desktop nav — text only, no icons */}
+          <div className="hidden md:flex items-center gap-0 flex-1">
+            {navLinks.map(({ href, label }) => {
+              const active = isActive(href);
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={`px-3.5 py-2 text-[13px] font-medium transition-colors whitespace-nowrap ${
+                    active ? 'text-foreground font-semibold' : 'hover:text-foreground'
+                  }`}
+                  style={active ? undefined : { color: 'var(--foreground-secondary)' }}
+                >
+                  {label}
+                </Link>
+              );
+            })}
           </div>
 
-          {/* Mobile Menu Toggle */}
+          {/* Submit CTA — desktop only */}
+          <Link
+            href="/submit"
+            className="hidden md:flex items-center px-4 py-2 text-[13px] font-semibold bg-primary hover:bg-blue-600 text-white rounded-lg transition-all flex-shrink-0"
+          >
+            Submit
+          </Link>
+
+          {/* Mobile: Menu toggle — icon only, no pill background */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="md:hidden w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-foreground/70 hover:text-foreground transition-colors"
+            className="md:hidden p-2 -mr-2 transition-colors"
+            style={{ color: menuOpen ? 'var(--foreground)' : 'var(--foreground-secondary)' }}
+            aria-label="Toggle menu"
           >
             {menuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
 
-        {/* Mobile Menu */}
-        <div className={`md:hidden transition-all duration-300 overflow-hidden ${menuOpen ? 'max-h-64 opacity-100' : 'max-h-0 opacity-0'}`}>
-          <div className="container mx-auto px-4 pb-4 space-y-1">
-            <Link
-              href="/#directory"
-              onClick={() => setMenuOpen(false)}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-foreground/70 hover:text-foreground hover:bg-white/5 transition-all"
-            >
-              <Database size={16} className="text-primary" />
-              Directory
-            </Link>
-            <Link
-              href="/film-opportunities"
-              onClick={() => setMenuOpen(false)}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-foreground/70 hover:text-foreground hover:bg-white/5 transition-all"
-            >
-              <Globe size={16} className="text-emerald-400" />
-              Countries
-            </Link>
-            <Link
-              href="/news"
-              onClick={() => setMenuOpen(false)}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-foreground/70 hover:text-foreground hover:bg-white/5 transition-all"
-            >
-              <Newspaper size={16} className="text-accent" />
-              News
-            </Link>
-            <Link
-              href="/call-sheet"
-              onClick={() => setMenuOpen(false)}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-foreground/70 hover:text-foreground hover:bg-white/5 transition-all"
-            >
-              <Clapperboard size={16} className="text-teal-400" />
-              Call Sheet
-            </Link>
-            <Link
-              href="/industry"
-              onClick={() => setMenuOpen(false)}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-foreground/70 hover:text-foreground hover:bg-white/5 transition-all"
-            >
-              <Building2 size={16} className="text-purple-400" />
-              Industry Directory
-            </Link>
-            <Link
-              href="/community-spotlight"
-              onClick={() => setMenuOpen(false)}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-foreground/70 hover:text-foreground hover:bg-white/5 transition-all"
-            >
-              <Star size={16} className="text-yellow-400" />
-              Community Spotlight
-            </Link>
+        {/* Mobile dropdown */}
+        <div
+          className={`md:hidden overflow-hidden transition-all duration-200 ${
+            menuOpen ? 'max-h-[480px] opacity-100' : 'max-h-0 opacity-0'
+          }`}
+        >
+          <div
+            className="border-t border-white/[0.06] container mx-auto px-4 py-2"
+          >
+            {navLinks.map(({ href, label }) => (
+              <Link
+                key={href}
+                href={href}
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center py-3.5 text-sm font-medium border-b border-white/[0.06] last:border-0 transition-colors hover:text-foreground min-h-[44px]"
+                style={{ color: 'var(--foreground-secondary)' }}
+              >
+                {label}
+              </Link>
+            ))}
             <Link
               href="/submit"
               onClick={() => setMenuOpen(false)}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-foreground/70 hover:text-foreground hover:bg-white/5 transition-all"
+              className="flex items-center justify-center mt-3 mb-2 py-3.5 text-sm font-semibold bg-primary text-white rounded-lg min-h-[48px] transition-all hover:bg-blue-600"
             >
-              <Plus size={16} className="text-green-400" />
-              Submit Opportunity
+              Submit an Opportunity
             </Link>
           </div>
         </div>
-      </nav>
+      </div>
     </header>
   );
 }
