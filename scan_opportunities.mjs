@@ -57,6 +57,14 @@ const supabaseKey = env.SUPABASE_SERVICE_ROLE_KEY || env.NEXT_PUBLIC_SUPABASE_AN
 const resendApiKey = env.RESEND_API_KEY;
 const siteUrl = env.NEXT_PUBLIC_SITE_URL || 'https://film-resource-africa.com';
 
+// ─── Scanner config ───────────────────────────────────────────────────────────
+const CONFIG_PATH = join(process.cwd(), 'scanner_config.json');
+if (!existsSync(CONFIG_PATH)) {
+  console.error('Missing scanner_config.json — copy from PI_Brain vault to repo root');
+  process.exit(1);
+}
+const SCANNER_CONFIG = JSON.parse(readFileSync(CONFIG_PATH, 'utf-8'));
+
 if (!supabaseUrl || !supabaseKey) { console.error('Missing Supabase env vars'); process.exit(1); }
 
 // Save native fetch before Playwright overrides it
@@ -168,6 +176,41 @@ function decodeEntities(str) {
     .replace(/&egrave;/g, "\u00E8");
 }
 
+// ─── Gmail body helpers ──────────────────────────────────────────────────────
+
+function decodeBase64Url(data) {
+  if (!data) return '';
+  return Buffer.from(data.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf-8');
+}
+
+function extractEmailBody(payload) {
+  if (!payload) return '';
+  // Simple non-multipart body
+  if (payload.body?.data) return decodeBase64Url(payload.body.data);
+  if (!payload.parts) return '';
+
+  let htmlPart = null, textPart = null;
+  for (const part of payload.parts) {
+    if (part.mimeType === 'text/plain' && part.body?.data) textPart = part;
+    if (part.mimeType === 'text/html'  && part.body?.data) htmlPart = part;
+    if (part.mimeType?.startsWith('multipart/')) {
+      const nested = extractEmailBody(part);
+      if (nested) return nested;
+    }
+  }
+  if (textPart) return decodeBase64Url(textPart.body.data);
+  if (htmlPart) {
+    const html = decodeBase64Url(htmlPart.body.data);
+    return html
+      .replace(/<style[\s\S]*?<\/style>/gi, '')
+      .replace(/<script[\s\S]*?<\/script>/gi, '')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
+  }
+  return '';
+}
+
 // ─── Supabase REST helpers ───────────────────────────────────────────────────
 
 const headers = { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` };
@@ -259,15 +302,67 @@ function isDuplicate(title, existingSet) {
   return false;
 }
 
-// Filter out directory/aggregation pages that aren't actual opportunities
+// Filter out directory/aggregation/news pages that aren't actual opportunities
 const JUNK_TITLE_PATTERNS = [
-  /\bdirectory\b/i, /\bgrants? list\b/i, /^home\s*[-–—]?/i, /\bfunding opportunities\b.*closing/i,
-  /\btop \d+ (?:grants?|funds?)\b/i, /\bavailable right now\b/i,
-  /\bclosing in (?:january|february|march|april|may|june|july|august|september|october|november|december)/i,
-  /\bbest film grants\b/i, /\bgrants? (?:&|and) funding opportunities\b/i,
-  /\bcurrently open to\b/i, /\b(?:grants?|funds?) for african filmmakers\s*[-–—]?\s*film/i,
+  // Existing list/directory patterns
+  /\bdirectory\b/i,
+  /\bgrants? list\b/i,
+  /^home\s*[-–—]?/i,
   /^home\b/i,
+  /\bfunding opportunities\b.*closing/i,
+  /\btop \d+ (?:grants?|funds?)\b/i,
+  /\bavailable right now\b/i,
+  /\bclosing in (?:january|february|march|april|may|june|july|august|september|october|november|december)/i,
+  /\bbest film grants\b/i,
+  /\bgrants? (?:&|and) funding opportunities\b/i,
+  /\bcurrently open to\b/i,
+  /\b(?:grants?|funds?) for african filmmakers\s*[-–—]?\s*film/i,
+
+  // Film/TV news articles masquerading as opportunities
+  /\bline.?up\b/i,                                          // "announces 2026 lineup"
+  /\bfilms? turning \d+\b/i,                                // "25 films turning 10"
+  /\b\d+ (?:african |best |must.see )?films?\b/i,           // "10 African films to watch"
+  /\bfilms? (?:and|&) (?:tv shows?|series|television)\b/i,  // "Films and TV Shows Releasing"
+  /\bfilms? (?:to watch|you (?:must|should)|worth)\b/i,
+  /\breleasing in \d{4}\b/i,                                // "releasing in 2026"
+  /\b(?:\d{4} )?(?:tv|ramadan|schedule)\b.*\bseries\b/i,   // TV/Ramadan schedules
+  /\bschedule\b.*\b(?:tv|series|show|season)\b/i,
+
+  // Film reviews
+  /\breview\s*[–—:]/i,                                      // "Title review –"
+  /[–—:]\s*review\b/i,                                      // "Review: Title"
+
+  // Oscar/festival race (news) vs open call (opportunity)
+  /\b(?:oscar|academy award)s?\s+(?:submission|entry|race|contender|campaign)\b/i,
+  /\b(?:race|compete|competing|shortlist) (?:for|at) the (?:oscar|academy|cannes|berlinale)\b/i,
+  /\b\d+ (?:arab|african|asian) films? (?:join|in) the race\b/i,
+
+  // Pure news/analysis that isn't actionable
+  /\bwho is (?:the |a )\b/i,                               // "Who is the Real Power"
+  /\bpower (?:ranking|list|index)\b/i,
+  /\bstrategic roadmap\b/i,
+  /\bbox office\b/i,
+  /\bopening weekend\b/i,
+  /\bwikipedia\b/i,
+  /^msn\b/i,
+  /^(?:login|sign in|gms login)\b/i,                        // Login pages
 ];
+
+// Words that signal an actionable opportunity (grants, labs, calls, fellowships etc.)
+// Applied only to broad web search results — org page results are already targeted.
+const OPPORTUNITY_SIGNALS = [
+  'grant', 'fund', 'fellowship', 'residency', 'lab', 'accelerator',
+  'call for', 'open call', 'apply', 'application', 'pitch forum',
+  'financing', 'rebate', 'incentive', 'co-production fund',
+  'development programme', 'development program',
+  'training', 'workshop', 'masterclass', 'commission fund',
+  'award fund', 'prize fund', 'bursary', 'stipend',
+];
+
+function hasOpportunitySignal(title, snippet) {
+  const text = `${title} ${snippet || ''}`.toLowerCase();
+  return OPPORTUNITY_SIGNALS.some(w => text.includes(w));
+}
 
 function isJunkTitle(title) {
   return JUNK_TITLE_PATTERNS.some(p => p.test(title));
@@ -466,8 +561,8 @@ Rules:
         'content-type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1024,
+        model: 'claude-sonnet-4-6',
+        max_tokens: 2048,
         messages: [{ role: 'user', content: prompt }],
       }),
       signal: AbortSignal.timeout(30000),
@@ -502,83 +597,68 @@ Rules:
   }
 }
 
-// ─── Source 1: RSS Feeds ─────────────────────────────────────────────────────
+// ─── Claude: extract leads from a Gmail email body ───────────────────────────
 
-const RSS_FEEDS = [
-  // ── Tier 1: Africa-focused film press ──
-  {
-    name: 'African Film Press',
-    url: 'https://africanfilmpress.com/articles/feed.xml',
-    type: 'news',
-  },
-  {
-    name: 'Sinema Focus',
-    url: 'https://www.sinemafocus.com/feed/',
-    type: 'news',
-  },
-  {
-    name: 'Africa is a Country',
-    url: 'https://africasacountry.com/feed',
-    type: 'news',
-    filterRelevant: true,
-  },
-  {
-    name: 'Premium Times Arts',
-    url: 'https://www.premiumtimesng.com/arts-entertainment/feed',
-    type: 'news',
-    filterRelevant: true,
-  },
-  {
-    name: 'Nollywood Reinvented',
-    url: 'http://feeds.feedburner.com/NollywoodReinvented',
-    type: 'news',
-  },
-  // ── Tier 2: International trade press (filter for Africa/relevance) ──
-  // NOTE: Cineuropa & Screen Daily RSS feeds are dead (404). Both still covered via Gmail senders.
-  {
-    name: 'Variety',
-    url: 'https://variety.com/feed/',
-    type: 'news',
-    filterRelevant: true,
-  },
-  {
-    name: 'Deadline',
-    url: 'https://deadline.com/feed/',
-    type: 'news',
-    filterRelevant: true,
-  },
-  {
-    name: 'IndieWire',
-    url: 'https://www.indiewire.com/feed/',
-    type: 'news',
-    filterRelevant: true,
-  },
-  {
-    name: 'The Guardian Film',
-    url: 'https://www.theguardian.com/film/rss',
-    type: 'news',
-    filterRelevant: true,
-  },
-  {
-    name: 'Filmmaker Magazine',
-    url: 'https://filmmakermagazine.com/feed/',
-    type: 'news',
-    filterRelevant: true,
-  },
-  // ── Tier 3: Producer/lab programme feeds ──
-  {
-    name: 'Big World Cinema (Medium)',
-    url: 'https://medium.com/feed/@bigworldcinema_30298',
-    type: 'news',
-  },
-  {
-    name: 'The British Blacklist',
-    url: 'https://thebritishblacklist.co.uk/feed/',
-    type: 'news',
-    filterRelevant: true,
-  },
-  // NOTE: Film Efiko (500) and Modern Ghana (403) removed — feeds dead as of 2026-03-31.
-];
+async function claudeExtractFromEmail(subject, from, body) {
+  if (!anthropicApiKey || !body || body.length < 80) return [];
+  const prompt = `Extract all film industry opportunities and news items from this email newsletter.
+
+From: ${from}
+Subject: ${subject}
+
+Email content:
+${body.slice(0, 5500)}
+
+Return ONLY a valid JSON array — no markdown, no explanation. Each object:
+{
+  "type": "opportunity" or "news",
+  "title": "specific, descriptive title",
+  "description": "2–3 sentence plain-English description of what this is",
+  "url": "direct apply/read-more URL if present, else null",
+  "deadline": "deadline date string, 'Rolling', or null",
+  "eligibility": "who can apply (opportunities only), else null",
+  "benefits": "what is offered/awarded (opportunities only), else null",
+  "category": "Funds & Grants | Labs & Fellowships | Festivals | Markets & Pitching | Training | Distribution | industry_news"
+}
+
+Rules:
+- Only include items relevant to African filmmakers or the African/global film industry
+- Opportunities: grants, labs, residencies, fellowships, festivals with open calls, pitching forums
+- News: industry announcements, box office, acquisitions, festival results, casting, distribution deals
+- Skip unsubscribe links, footers, generic promotional copy
+- Return [] if nothing relevant
+- Maximum 6 items per email`;
+
+  try {
+    const res = await nativeFetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': anthropicApiKey,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1024,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+      signal: AbortSignal.timeout(30000),
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    const raw = data.content?.[0]?.text?.trim() || '';
+    const jsonMatch = raw.match(/\[[\s\S]*\]/);
+    if (!jsonMatch) return [];
+    return JSON.parse(jsonMatch[0]);
+  } catch { return []; }
+}
+
+// ─── Source 1: RSS Feeds ─────────────────────────────────────────────────────
+// Source of truth: scanner_config.json → sources.rss (status: active)
+
+const RSS_FEEDS = SCANNER_CONFIG.sources.rss
+  .filter(f => f.status === 'active')
+  .map(f => ({ name: f.name, url: f.url, type: 'news', filterRelevant: f.filter ?? false }));
 
 async function fetchRSS(feed) {
   const items = [];
@@ -615,6 +695,11 @@ async function fetchRSS(feed) {
       const imageUrl = rawImageUrl ? decodeEntities(rawImageUrl) : null;
 
       if (title) {
+        // Skip items older than 7 days — RSS feeds sometimes serve stale archive content
+        if (pubDate) {
+          const ageMs = Date.now() - new Date(pubDate).getTime();
+          if (ageMs > 7 * 24 * 60 * 60 * 1000) continue;
+        }
         items.push({ title: decodeEntities(title), link, description, pubDate, imageUrl, source: feed.name, type: feed.type });
       }
     }
@@ -626,33 +711,11 @@ async function fetchRSS(feed) {
 }
 
 // ─── Source 2: Gmail newsletters ─────────────────────────────────────────────
+// Source of truth: scanner_config.json → sources.gmail (senders + subjects, status: active)
 
 const GMAIL_SENDERS = [
-  // Industry trade press
-  { query: 'from:cineuropa.org', name: 'Cineuropa' },
-  { query: 'from:screendaily.com', name: 'Screen Daily' },
-  { query: 'from:slated.com', name: 'Slated' },
-  { query: 'from:variety.com', name: 'Variety' },
-  { query: 'from:indiewire.com', name: 'IndieWire' },
-  // Platforms & festivals
-  { query: 'from:noreply@filmfreeway.com', name: 'FilmFreeway' },
-  { query: 'from:submittable.com', name: 'Submittable' },
-  { query: 'from:newsletters-noreply@linkedin.com subject:film OR subject:cinema OR subject:Africa', name: 'LinkedIn Film' },
-  // Funders & institutions
-  { query: 'from:bfi.org.uk', name: 'BFI' },
-  { query: 'from:europa-cinemas.org', name: 'Europa Cinemas' },
-  { query: 'from:realness.institute', name: 'Realness Institute' },
-  { query: 'from:berlinale.de OR from:talentpress.org', name: 'Berlinale / Talents' },
-  { query: 'from:iffr.com OR from:filmfestivalrotterdam.com', name: 'IFFR / Hubert Bals' },
-  { query: 'from:sundance.org OR from:sundanceinstitute.org', name: 'Sundance' },
-  { query: 'from:idfa.nl', name: 'IDFA' },
-  // Broad catch-all alerts
-  { query: 'subject:"call for" OR subject:"submission" OR subject:"deadline" from:(-game.co.za -gopro -parkrun -strava)', name: 'Festival Alerts' },
-  { query: 'subject:"open call" OR subject:"grant" (filmmaker OR cinema OR film) from:(-game.co.za -gopro -parkrun -strava)', name: 'Grant Alerts' },
-  // Sales agents, distributors & broad film industry inbox
-  { query: '(film OR cinema OR documentary OR festival OR screening OR distribution OR "sales agent") -from:notifications@ -from:noreply@ -from:no-reply@ -from:game.co.za -from:gopro -from:parkrun -from:strava -from:uber -from:takealot -category:promotions -category:social', name: 'Inbox Film Leads' },
-  { query: 'subject:"market" OR subject:"sales" OR subject:"acquisition" OR subject:"slate" OR subject:"premiere" (film OR cinema) -from:notifications@ -from:noreply@', name: 'Sales & Market Leads' },
-  { query: 'subject:"opportunity" OR subject:"fund" OR subject:"fellowship" OR subject:"residency" OR subject:"workshop" (Africa OR African OR filmmaker) -from:notifications@', name: 'Opportunity Inbox' },
+  ...SCANNER_CONFIG.sources.gmail.senders.filter(s => s.status === 'active'),
+  ...SCANNER_CONFIG.sources.gmail.subjects.filter(s => s.status === 'active'),
 ];
 
 // ─── Gmail REST API (replaces gws CLI) ──────────────────────────────────────
@@ -781,76 +844,78 @@ async function scanGmail() {
     console.log(`  ✓ ${sender.name}: ${messages.length} unread`);
 
     for (const msg of messages.slice(0, 3)) {
-      let meta = null;
+      let full = null;
 
       if (method === 'api') {
-        meta = await gmailApi(`messages/${msg.id}`, { format: 'metadata' });
+        full = await gmailApi(`messages/${msg.id}`, { format: 'full' });
       } else {
-        const metaRaw = gws(`gmail users messages get --params '{"userId":"me","id":"${msg.id}","format":"metadata"}'`);
-        meta = parseGwsJson(metaRaw);
+        const raw = gws(`gmail users messages get --params '{"userId":"me","id":"${msg.id}","format":"full"}'`);
+        full = parseGwsJson(raw);
       }
 
-      if (!meta || !meta.payload) continue;
+      if (!full || !full.payload) continue;
 
       const hdrs = {};
-      for (const h of meta.payload.headers || []) {
+      for (const h of full.payload.headers || []) {
         hdrs[h.name] = h.value;
       }
 
-      items.push({
-        title: hdrs['Subject'] || 'Untitled',
-        source: sender.name,
-        from: hdrs['From'] || '',
-        date: hdrs['Date'] || '',
-        messageId: msg.id,
-        type: 'email',
-      });
+      const subject = hdrs['Subject'] || 'Untitled';
+      const from    = hdrs['From'] || '';
+      const date    = hdrs['Date'] || '';
+
+      // Extract body text and parse leads with Claude
+      const body = extractEmailBody(full.payload);
+      if (body && body.length > 80) {
+        const leads = await claudeExtractFromEmail(subject, from, body);
+        for (const lead of leads) {
+          if (!lead.title || !lead.type) continue;
+          if (lead.type === 'opportunity') {
+            items.push({
+              title:   lead.title,
+              url:     lead.url || null,
+              snippet: lead.description || '',
+              source:  sender.name,
+              type:    'opportunity',
+              _emailDeadline:    lead.deadline || null,
+              _emailEligibility: lead.eligibility || null,
+              _emailBenefits:    lead.benefits || null,
+              _emailCategory:    lead.category || null,
+            });
+          } else if (lead.type === 'news') {
+            items.push({
+              title:       lead.title,
+              link:        lead.url || null,
+              description: lead.description || '',
+              source:      sender.name,
+              type:        'news',
+              pubDate:     date,
+            });
+          }
+        }
+        console.log(`    → ${sender.name} [${subject.slice(0,40)}]: ${leads.length} lead(s) extracted`);
+      } else {
+        // Fallback: surface as a raw email signal (body too short / no content)
+        items.push({
+          title:     subject,
+          source:    sender.name,
+          from,
+          date,
+          messageId: msg.id,
+          type:      'email_signal',
+        });
+      }
     }
   }
   return items;
 }
 
 // ─── Source 3: Web search for opportunities ──────────────────────────────────
+// Source of truth: scanner_config.json → sources.web_search.queries (status: active)
 
-const SEARCH_QUERIES = [
-  // General African film opportunities
-  'African film grants 2026 deadline',
-  'film fund Africa submission 2026',
-  'African filmmaker fellowship 2026',
-  'African cinema festival call for entries 2026',
-  'co-production fund Africa 2026',
-  'film lab emerging filmmaker Africa',
-  'African documentary fund open call',
-  'site:open-cities.com submissions accelerator',
-  'Open Cities accelerator filmmaker submissions 2026',
-  // Regional specificity
-  'South African film fund NFVF open call 2026',
-  'Nigerian film grant Nollywood submission 2026',
-  'East African film lab Kenya Uganda Tanzania 2026',
-  'North African cinema fund Morocco Tunisia Egypt 2026',
-  'Francophone African film fund appel candidatures 2026',
-  'West African film fund Ghana Senegal 2026',
-  // Type-specific
-  'African animation fund submission 2026',
-  'African women filmmaker grant 2026',
-  'African short film fund open call 2026',
-  'African post-production fund finishing 2026',
-  'African screenwriting residency lab 2026',
-  'African VR XR immersive storytelling fund',
-  'African film distribution fund cinema release',
-  // Major funders tracking
-  'site:realness.institute open call 2026',
-  'site:docubox.org open call filmmakers',
-  'site:idfa.nl bertha fund Africa',
-  'site:sundance.org collab Africa lab',
-  'site:iffr.com hubert bals fund open',
-  'site:berlinale.de world cinema fund application',
-  'site:bfi.org.uk international fund Africa',
-  'site:hot-docs.ca crosscurrents fund',
-  'site:tribecafilminstitute.org grant Africa',
-  'site:durbanfilmmart.com call submissions',
-  'site:ffrr.info fund Africa',
-];
+const SEARCH_QUERIES = SCANNER_CONFIG.sources.web_search.queries
+  .filter(q => q.status === 'active')
+  .map(q => q.q);
 
 async function webSearch(query) {
   // Use a simple web search approach via fetch
@@ -883,39 +948,11 @@ async function webSearch(query) {
 }
 
 // ─── Relevance filter ────────────────────────────────────────────────────────
+// Source of truth: scanner_config.json → relevance_keywords (all categories, lowercased)
 
-const RELEVANCE_KEYWORDS = [
-  // Countries & regions
-  'african', 'africa', 'south africa', 'nigeria', 'kenya', 'ghana', 'egypt',
-  'morocco', 'tunisia', 'senegal', 'ethiopia', 'tanzania', 'uganda', 'cameroon',
-  'zimbabwe', 'mozambique', 'rwanda', 'congo', 'ivory coast', 'mali', 'burkina',
-  'angola', 'botswana', 'namibia', 'zambia', 'malawi', 'madagascar', 'mauritius',
-  'algeria', 'libya', 'sudan', 'somalia', 'benin', 'togo', 'gabon', 'chad',
-  'nollywood', 'east africa', 'west africa', 'north africa', 'southern africa',
-  'francophone', 'lusophone', 'anglophone',
-  // Industry terms
-  'filmmaker', 'film fund', 'film grant', 'filmmaking', 'cinema', 'documentary',
-  'festival', 'call for entries', 'submission', 'deadline', 'screenplay',
-  'co-production', 'production fund', 'development fund', 'emerging talent',
-  'short film', 'feature film', 'animation', 'post-production',
-  'distribution', 'exhibition', 'screening', 'premiere',
-  'film policy', 'film commission', 'film incentive', 'film tax',
-  'streaming', 'content creator', 'showrunner',
-  // Major festivals
-  'sundance', 'berlinale', 'cannes', 'toronto', 'venice', 'locarno',
-  'durban', 'fespaco', 'zanzibar', 'marrakech', 'carthage', 'luxor',
-  'lagos film', 'joburg film', 'cape town film', 'nairobi film',
-  'afrikamera', 'afriff', 'amaa', 'africlap',
-  // Major funders & labs
-  'hubert bals', 'world cinema fund', 'bertha fund',
-  'realness', 'maisha', 'docubox', 'film lab',
-  'big world cinema', 'african producers accelerator', 'apa programme',
-  'hot docs', 'idfa', 'sheffield', 'cph:dox',
-  // Platforms
-  'netflix', 'showmax', 'multichoice', 'dstv', 'canal+', 'amazon',
-  'open cities', 'accelerator', 'emerging technologies',
-  'ai filmmaking', 'virtual production',
-];
+const RELEVANCE_KEYWORDS = Object.values(SCANNER_CONFIG.relevance_keywords)
+  .flat()
+  .map(k => k.toLowerCase());
 
 function isRelevant(text) {
   if (!text) return false;
@@ -928,25 +965,11 @@ function isRelevant(text) {
 }
 
 // ─── Source 4: Key organisation pages ────────────────────────────────────────
+// Source of truth: scanner_config.json → sources.org_pages (status: active)
 
-const KEY_ORG_PAGES = [
-  { name: 'Realness Institute', url: 'https://realness.institute', selector: 'open call|applications|submit|deadline' },
-  { name: 'Docubox', url: 'https://docubox.org', selector: 'open call|applications|submit|deadline' },
-  { name: 'Durban FilmMart', url: 'https://www.durbanfilmmart.co.za', selector: 'call for|submissions|apply|deadline' },
-  { name: 'IDFA Bertha Fund', url: 'https://www.idfa.nl/en/info/idfa-bertha-fund', selector: 'apply|deadline|submit|open' },
-  { name: 'Hubert Bals Fund', url: 'https://iffr.com/en/hubert-bals-fund', selector: 'apply|deadline|submit|open' },
-  { name: 'World Cinema Fund', url: 'https://www.berlinale.de/en/world-cinema-fund/', selector: 'apply|deadline|submit|open' },
-  { name: 'Hot Docs', url: 'https://www.hotdocs.ca/industry', selector: 'crosscurrents|apply|deadline|submit|fund' },
-  { name: 'FESPACO', url: 'https://fespaco.bf', selector: 'appel|candidatures|submit|deadline' },
-  { name: 'Maisha Film Lab', url: 'https://www.maishafilmlab.org', selector: 'apply|call|submit|deadline' },
-  { name: 'Open Cities Lab', url: 'https://open-cities.com', selector: 'accelerator|submissions|apply|deadline' },
-  { name: 'Big World Cinema', url: 'https://bigworldcinema.com', selector: 'accelerator|apply|call|programme|submit|deadline' },
-  { name: 'Gauteng Film Commission', url: 'https://www.gautengfilm.org.za', selector: 'open call|applications|submit|deadline|funding|grant' },
-  { name: 'Western Cape Film Commission', url: 'https://www.wesgro.co.za/film', selector: 'open call|applications|submit|deadline|funding|grant' },
-  { name: 'KwaZulu-Natal Film Commission', url: 'https://www.kwazulunatalfilm.co.za', selector: 'open call|applications|submit|deadline|funding|grant' },
-  { name: 'Uganda Communications Commission', url: 'https://www.ucc.co.ug', selector: 'open call|film|broadcast|deadline|submit|grant' },
-  { name: 'Uganda Film Festival', url: 'https://filmfreeway.com/UGANDAFILMFESTIVAL-1', selector: 'call for|submissions|apply|deadline|entries' },
-];
+const KEY_ORG_PAGES = SCANNER_CONFIG.sources.org_pages
+  .filter(p => p.status === 'active')
+  .map(p => ({ name: p.name, url: p.url, selector: p.keywords.join('|') }));
 
 function extractLinksFromHtml(html, page) {
   const items = [];
@@ -1045,6 +1068,32 @@ async function scanKeyPages(existingTitles) {
 //
 // For opportunities, it scrapes source pages for deadline, eligibility, format,
 // cost, and description — replacing the "To be confirmed" placeholders.
+
+// ─── Stale deadline cleanup ───────────────────────────────────────────────────
+// Marks pending opportunities as 'expired' when their deadline has clearly passed.
+
+async function flagExpiredPendingOpps() {
+  const pending = await supabaseGet('opportunities',
+    `select=id,title,"Next Deadline"&status=eq.pending`);
+  if (!pending.length) return;
+
+  const now = new Date();
+  let flagged = 0;
+  for (const opp of pending) {
+    const dl = opp['Next Deadline'];
+    if (!dl || dl === 'TBC' || dl === 'Rolling') continue;
+    // Parse common formats: "30 June 2026", "June 30, 2026", "2026-06-30"
+    const parsed = new Date(dl);
+    if (isNaN(parsed.getTime())) continue;
+    // Give a 3-day grace period in case deadline is "end of day"
+    if (parsed.getTime() + 3 * 24 * 60 * 60 * 1000 < now.getTime()) {
+      await supabaseUpdate('opportunities', opp.id, { status: 'expired' });
+      console.log(`  🗑  Expired: ${opp.title.slice(0, 60)} (deadline: ${dl})`);
+      flagged++;
+    }
+  }
+  if (flagged > 0) console.log(`   Flagged ${flagged} expired opportunity/ies`);
+}
 
 async function enrichWithPlaywright() {
   let chromium;
@@ -1284,15 +1333,31 @@ async function enrichWithPlaywright() {
       await page.goto(url, { waitUntil: 'commit', timeout: 15000 });
       await page.waitForTimeout(3000);
 
-      // Extract full page text via Playwright (handles JS-rendered sites)
+      // Extract full page text via Playwright — prefer article body selectors
       const pageText = await page.evaluate(() => {
-        const skipTags = new Set(['script', 'style', 'nav', 'footer', 'noscript']);
-        function extract(el) {
+        const skipTags = new Set(['script', 'style', 'nav', 'footer', 'noscript', 'aside', 'form', 'button', 'svg', 'iframe']);
+        function extractText(el) {
+          if (!el) return '';
           if (skipTags.has(el.tagName?.toLowerCase())) return '';
+          const cls = (el.className || '').toString().toLowerCase();
+          if (/\b(nav|menu|sidebar|footer|widget|cookie|banner|social|share|comment|signup|subscribe)\b/.test(cls)) return '';
           if (el.nodeType === 3) return el.textContent;
-          return Array.from(el.childNodes).map(extract).join(' ');
+          return Array.from(el.childNodes).map(extractText).join(' ');
         }
-        return extract(document.body).replace(/\s+/g, ' ').trim().slice(0, 6000);
+        // Try article-scoped selectors first (higher signal-to-noise)
+        const articleSelectors = [
+          '[class*="article-body"]', '[class*="entry-content"]', '[class*="post-content"]',
+          '[class*="article-content"]', '[class*="page-content"]', '[class*="main-content"]',
+          'article', 'main',
+        ];
+        for (const sel of articleSelectors) {
+          const el = document.querySelector(sel);
+          if (el) {
+            const text = extractText(el).replace(/\s+/g, ' ').trim();
+            if (text.length > 400) return text.slice(0, 7000);
+          }
+        }
+        return extractText(document.body).replace(/\s+/g, ' ').trim().slice(0, 7000);
       });
 
       // Bot/challenge page — skip
@@ -1377,17 +1442,30 @@ async function main() {
     }
   }
 
-  // 3. Scan Gmail (with dedup against DB titles + URLs)
+  // 3. Scan Gmail — reads full email bodies, extracts typed leads via Claude
   console.log('\n📧 Scanning Gmail...');
   try {
     const emailItems = await scanGmail();
-    results.emails = emailItems.filter(item => {
-      if (isDuplicate(item.title, oppTitles) || isDuplicate(item.title, newsTitles)) return false;
-      return true;
-    });
-    if (emailItems.length !== results.emails.length) {
-      console.log(`  ↳ Filtered ${emailItems.length - results.emails.length} duplicate email leads`);
+    let emailDups = 0;
+    for (const item of emailItems) {
+      if (isDuplicate(item.title, oppTitles) || isDuplicate(item.title, newsTitles)) {
+        emailDups++;
+        continue;
+      }
+      if (item.type === 'news') {
+        results.news.push(item);
+      } else if (item.type === 'opportunity') {
+        results.opportunities.push(item);
+      } else {
+        // email_signal fallback — surface in admin summary only
+        results.emails.push(item);
+      }
     }
+    if (emailDups > 0) console.log(`  ↳ Filtered ${emailDups} duplicate email leads`);
+    const emailNewsCount = emailItems.filter(i => i.type === 'news').length;
+    const emailOppCount  = emailItems.filter(i => i.type === 'opportunity').length;
+    if (emailNewsCount + emailOppCount > 0)
+      console.log(`  ↳ Routed ${emailNewsCount} news + ${emailOppCount} opp leads into main pipeline`);
   } catch (err) {
     console.log(`  ⚠ Gmail scan failed: ${err.message}`);
   }
@@ -1399,6 +1477,7 @@ async function main() {
       const items = await webSearch(query);
       for (const item of items) {
         if (isJunkTitle(item.title)) continue;
+        if (!hasOpportunitySignal(item.title, item.snippet)) continue;
         if (isDuplicate(item.title, oppTitles)) continue;
         if (isDuplicate(item.title, newsTitles)) continue;
         if (item.link && newsUrls.has(normalizeUrl(item.link))) continue;
@@ -1535,23 +1614,23 @@ async function main() {
         continue;
       }
 
-      // Step E: Build the record with scraped data replacing placeholders
+      // Step E: Build the record — page scrape takes priority, email extraction fills gaps
       const oppItem = {
         title: decodeEntities(item.title),
-        'What Is It?': scraped.description || decodeEntities(item.snippet) || 'Discovered via automated scan — needs review.',
+        'What Is It?': scraped.description || decodeEntities(item.snippet || item._emailBenefits || '') || 'Discovered via automated scan — needs review.',
         'For Films or Series?': scraped['For Films or Series?'] || 'TBC',
-        'What Do You Get If Selected?': scraped['What Do You Get If Selected?'] || 'TBC',
+        'What Do You Get If Selected?': scraped['What Do You Get If Selected?'] || item._emailBenefits || 'TBC',
         'Cost': scraped['Cost'] || 'TBC',
-        'Next Deadline': scraped['Next Deadline'] || 'TBC',
+        'Next Deadline': scraped['Next Deadline'] || item._emailDeadline || 'TBC',
         'Apply:': item.url || '',
-        'Who Can Apply / Eligibility': scraped['Who Can Apply / Eligibility'] || 'TBC',
+        'Who Can Apply / Eligibility': scraped['Who Can Apply / Eligibility'] || item._emailEligibility || 'TBC',
         'What to Submit': scraped['What to Submit'] || 'TBC',
         'Strongest Submission Tips': scraped['Strongest Submission Tips'] || '',
         'CALENDAR REMINDER:': scraped['CALENDAR REMINDER:'] || '',
         status: 'pending',
         votes: 0,
         application_status: 'open',
-        ...(scraped.category ? { category: scraped.category } : {}),
+        ...(scraped.category || item._emailCategory ? { category: scraped.category || item._emailCategory } : {}),
         ...(logo ? { logo } : {}),
         ...(ogImage ? { og_image_url: ogImage } : {}),
       };
@@ -1577,21 +1656,25 @@ async function main() {
     if (oppsSkipped404 > 0) console.log(`   ⚠ Skipped ${oppsSkipped404} dead URLs`);
   }
 
-  // 9. Playwright enrichment
-  // Always enrich when new news was inserted (content + images for pending articles)
-  // Full opportunity enrichment only with --enrich flag
-  if (!DRY_RUN && (newsInserted > 0 || ENRICH)) {
-    await enrichWithPlaywright();
+  // 9. Playwright enrichment + stale deadline cleanup
+  if (!DRY_RUN) {
+    console.log('\n🗑  Checking for expired pending opportunities...');
+    await flagExpiredPendingOpps();
+    // Always enrich when new news was inserted (content + images for pending articles)
+    // Full opportunity enrichment only with --enrich flag
+    if (newsInserted > 0 || oppsInserted > 0 || ENRICH) {
+      await enrichWithPlaywright();
+    }
   }
 
   // 10. Summary
   console.log('\n' + '─'.repeat(60));
   console.log(`📊 SCAN SUMMARY — ${today}`);
-  console.log(`   RSS news found:      ${results.news.length}`);
-  console.log(`   Email leads:         ${results.emails.length}`);
-  console.log(`   Web opp leads:       ${results.opportunities.length}`);
-  console.log(`   News inserted:       ${newsInserted}${newsSkipped404 ? ` (${newsSkipped404} dead URLs skipped)` : ''}`);
-  console.log(`   Opps inserted:       ${oppsInserted}${oppsSkipped404 ? ` (${oppsSkipped404} dead URLs skipped)` : ''}`);
+  console.log(`   News found (RSS + Gmail): ${results.news.length}`);
+  console.log(`   Opps found (web + Gmail): ${results.opportunities.length}`);
+  console.log(`   Email signals (raw):      ${results.emails.length}`);
+  console.log(`   News inserted:            ${newsInserted}${newsSkipped404 ? ` (${newsSkipped404} dead URLs skipped)` : ''}`);
+  console.log(`   Opps inserted:            ${oppsInserted}${oppsSkipped404 ? ` (${oppsSkipped404} dead URLs skipped)` : ''}`);
   console.log('─'.repeat(60));
 
   // 11. Send admin summary email
@@ -1603,7 +1686,7 @@ async function main() {
     if (oppsInserted > 0) emailLines.push(`<p><strong>${oppsInserted} new opportunity lead${oppsInserted > 1 ? 's' : ''}</strong> added as PENDING — <a href="${siteUrl}/admin">review in admin</a>.</p>`);
 
     if (results.emails.length > 0) {
-      emailLines.push('<p><strong>Unread industry emails:</strong></p><ul>');
+      emailLines.push('<p><strong>Email signals (no body extracted — check manually):</strong></p><ul>');
       for (const e of results.emails.slice(0, 10)) {
         emailLines.push(`<li>${e.source}: ${e.title}</li>`);
       }
