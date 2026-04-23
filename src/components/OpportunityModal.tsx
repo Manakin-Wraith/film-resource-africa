@@ -106,11 +106,11 @@ export default function OpportunityModal({ selectedOpp, onClose }: OpportunityMo
             dragConstraints={{ top: 0 }}
             dragElastic={0.2}
             onDragEnd={handleDragEnd}
-            style={isMobile ? { y: dragY } : undefined}
-            className={`w-full border border-white/20 overflow-hidden flex flex-col relative shadow-2xl ${
+            style={isMobile ? { y: dragY, background: 'var(--surface)' } : { background: 'var(--surface)' }}
+            className={`w-full overflow-hidden flex flex-col relative shadow-2xl ${
               isMobile
-                ? 'max-h-[95vh] rounded-t-[2rem] bg-[#09090b]'
-                : 'max-w-4xl max-h-[90vh] rounded-[2.5rem] glass-card bg-background/95'
+                ? 'max-h-[95vh] rounded-t-[2rem] border-t border-white/[0.12]'
+                : 'max-w-4xl max-h-[90vh] rounded-2xl border border-white/[0.12]'
             }`}
           >
             {/* Mobile drag handle */}
@@ -172,7 +172,7 @@ export default function OpportunityModal({ selectedOpp, onClose }: OpportunityMo
 
               {/* Header */}
               <div
-                className={`relative p-6 md:p-10 pb-5 md:pb-6 border-b border-white/10 ${selectedOpp.og_image_url ? '' : 'bg-gradient-to-b from-primary/10 to-transparent'}`}
+                className="relative p-6 md:p-10 pb-5 md:pb-6 border-b border-white/[0.08]"
                 onPointerDown={(e) => { if (isMobile) dragControls.start(e); }}
               >
                 {/* Org logo + Category badge */}
@@ -216,49 +216,41 @@ export default function OpportunityModal({ selectedOpp, onClose }: OpportunityMo
               {/* Content */}
               <div className="p-5 md:p-10 space-y-6 md:space-y-8">
 
-              {/* Key Info Pills */}
+              {/* Key info — editorial dateline rows */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {selectedOpp["Next Deadline"] && (
-                  <div className="flex items-start gap-3 bg-accent/10 border border-accent/20 rounded-2xl p-4">
-                    <div className="mt-0.5 p-2 bg-accent/20 rounded-xl">
-                      <Calendar size={18} className="text-accent" />
-                    </div>
+                  <div className="flex items-start gap-3 p-4 rounded-xl border border-white/[0.08]" style={{ background: 'var(--surface-raised)' }}>
+                    <Calendar size={16} className="text-accent mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-wider text-accent/80 mb-1">Deadline</p>
-                      <p className="text-sm font-medium text-foreground/90 leading-snug">{decodeHtmlEntities(selectedOpp["Next Deadline"])}</p>
+                      <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--foreground-tertiary)' }}>Deadline</p>
+                      <p className="text-sm font-semibold text-foreground leading-snug">{decodeHtmlEntities(selectedOpp["Next Deadline"])}</p>
                     </div>
                   </div>
                 )}
                 {selectedOpp["Cost"] && (
-                  <div className="flex items-start gap-3 bg-green-500/10 border border-green-500/20 rounded-2xl p-4">
-                    <div className="mt-0.5 p-2 bg-green-500/20 rounded-xl">
-                      <DollarSign size={18} className="text-green-400" />
-                    </div>
+                  <div className="flex items-start gap-3 p-4 rounded-xl border border-white/[0.08]" style={{ background: 'var(--surface-raised)' }}>
+                    <DollarSign size={16} className="text-success mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-wider text-green-400/80 mb-1">Cost</p>
-                      <p className="text-sm font-medium text-foreground/90 leading-snug">{decodeHtmlEntities(selectedOpp["Cost"])}</p>
+                      <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--foreground-tertiary)' }}>Cost</p>
+                      <p className="text-sm font-semibold text-foreground leading-snug">{decodeHtmlEntities(selectedOpp["Cost"])}</p>
                     </div>
                   </div>
                 )}
                 {selectedOpp["For Films or Series?"] && (
-                  <div className="flex items-start gap-3 bg-primary/10 border border-primary/20 rounded-2xl p-4">
-                    <div className="mt-0.5 p-2 bg-primary/20 rounded-xl">
-                      <FileText size={18} className="text-primary" />
-                    </div>
+                  <div className="flex items-start gap-3 p-4 rounded-xl border border-white/[0.08]" style={{ background: 'var(--surface-raised)' }}>
+                    <FileText size={16} className="text-primary mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-wider text-primary/80 mb-1">Format</p>
-                      <p className="text-sm font-medium text-foreground/90 leading-snug">{decodeHtmlEntities(selectedOpp["For Films or Series?"])}</p>
+                      <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--foreground-tertiary)' }}>Format</p>
+                      <p className="text-sm font-semibold text-foreground leading-snug">{decodeHtmlEntities(selectedOpp["For Films or Series?"])}</p>
                     </div>
                   </div>
                 )}
                 {selectedOpp["Who Can Apply / Eligibility"] && (
-                  <div className="flex items-start gap-3 bg-cyan-500/10 border border-cyan-500/20 rounded-2xl p-4">
-                    <div className="mt-0.5 p-2 bg-cyan-500/20 rounded-xl">
-                      <CheckCircle2 size={18} className="text-cyan-400" />
-                    </div>
+                  <div className="flex items-start gap-3 p-4 rounded-xl border border-white/[0.08]" style={{ background: 'var(--surface-raised)' }}>
+                    <CheckCircle2 size={16} className="text-primary mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-wider text-cyan-400/80 mb-1">Eligibility</p>
-                      <div className="text-sm font-medium text-foreground/90 leading-snug"><ModalMarkdown text={selectedOpp["Who Can Apply / Eligibility"]} /></div>
+                      <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--foreground-tertiary)' }}>Eligibility</p>
+                      <div className="text-sm font-semibold text-foreground leading-snug"><ModalMarkdown text={selectedOpp["Who Can Apply / Eligibility"]} /></div>
                     </div>
                   </div>
                 )}
@@ -267,22 +259,21 @@ export default function OpportunityModal({ selectedOpp, onClose }: OpportunityMo
               {/* What You Get + What to Submit */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {selectedOpp["What Do You Get If Selected?"] && (
-                  <section className="bg-gradient-to-br from-green-500/10 to-emerald-500/5 p-5 md:p-6 rounded-2xl border border-green-500/15">
-                    <h3 className="flex items-center gap-2.5 text-base font-bold font-heading mb-3 text-green-400">
-                      <Target size={20} /> What You Get
+                  <section className="p-5 rounded-xl border border-white/[0.08]" style={{ background: 'var(--surface-raised)' }}>
+                    <h3 className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--foreground-tertiary)' }}>
+                      <Target size={12} /> What You Get
                     </h3>
-                    <div className="text-sm leading-relaxed text-foreground/75">
+                    <div className="text-sm leading-relaxed" style={{ color: 'var(--foreground-secondary)' }}>
                       <ModalMarkdown text={selectedOpp["What Do You Get If Selected?"]} />
                     </div>
                   </section>
                 )}
-
                 {selectedOpp["What to Submit"] && (
-                  <section className="bg-gradient-to-br from-blue-500/10 to-indigo-500/5 p-5 md:p-6 rounded-2xl border border-blue-500/15">
-                    <h3 className="flex items-center gap-2.5 text-base font-bold font-heading mb-3 text-blue-400">
-                      <FileCheck size={20} /> What to Submit
+                  <section className="p-5 rounded-xl border border-white/[0.08]" style={{ background: 'var(--surface-raised)' }}>
+                    <h3 className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--foreground-tertiary)' }}>
+                      <FileCheck size={12} /> What to Submit
                     </h3>
-                    <div className="text-sm leading-relaxed text-foreground/75">
+                    <div className="text-sm leading-relaxed" style={{ color: 'var(--foreground-secondary)' }}>
                       <ModalMarkdown text={selectedOpp["What to Submit"]} />
                     </div>
                   </section>
@@ -291,23 +282,21 @@ export default function OpportunityModal({ selectedOpp, onClose }: OpportunityMo
 
               {/* Insider Tips */}
               {selectedOpp["Strongest Submission Tips"] && (
-                <section className="bg-gradient-to-br from-purple-500/10 to-violet-500/5 p-5 md:p-6 rounded-2xl border border-purple-500/15">
-                  <h3 className="flex items-center gap-2.5 text-base font-bold font-heading mb-3 text-purple-400">
-                    <Lightbulb size={20} /> Insider Tips
+                <section className="p-5 rounded-xl border border-white/[0.08]" style={{ background: 'var(--surface-raised)' }}>
+                  <h3 className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--foreground-tertiary)' }}>
+                    <Lightbulb size={12} /> Insider Tips
                   </h3>
-                  <div className="text-sm leading-relaxed text-foreground/75 italic">
-                    &ldquo;<ModalMarkdown text={selectedOpp["Strongest Submission Tips"]} />&rdquo;
+                  <div className="text-sm leading-relaxed italic" style={{ color: 'var(--foreground-secondary)' }}>
+                    <ModalMarkdown text={selectedOpp["Strongest Submission Tips"]} />
                   </div>
                 </section>
               )}
-              
+
               {/* Calendar Reminder */}
               {selectedOpp["CALENDAR REMINDER:"] && (
-                <div className="flex items-center gap-3 bg-accent/8 border border-accent/15 rounded-2xl px-5 py-4">
-                  <div className="p-2 bg-accent/20 rounded-xl shrink-0">
-                    <Clock size={18} className="text-accent" />
-                  </div>
-                  <p className="text-sm font-medium text-accent/90">
+                <div className="flex items-center gap-3 px-5 py-4 rounded-xl border border-white/[0.08]" style={{ background: 'var(--surface-raised)' }}>
+                  <Clock size={16} className="text-accent flex-shrink-0" />
+                  <p className="text-sm font-medium" style={{ color: 'var(--foreground-secondary)' }}>
                     {decodeHtmlEntities(selectedOpp["CALENDAR REMINDER:"])}
                   </p>
                 </div>
@@ -316,20 +305,22 @@ export default function OpportunityModal({ selectedOpp, onClose }: OpportunityMo
             </div>
             </div>
 
-            {/* Modal Footer */}
+            {/* Pinned Apply footer */}
             {selectedOpp["Apply:"] && (
-              <div className="p-5 md:p-8 pb-[calc(1.25rem+env(safe-area-inset-bottom))] md:pb-8 border-t border-white/10 bg-black/20 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6">
-                <p className="text-foreground/60 text-xs md:text-sm max-w-md hidden md:block">
-                  Always verify dates and eligibility on the official website before applying.
+              <div
+                className="flex flex-col md:flex-row items-center justify-between gap-3 px-5 md:px-8 py-4 border-t border-white/[0.08]"
+                style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}
+              >
+                <p className="text-xs hidden md:block" style={{ color: 'var(--foreground-tertiary)' }}>
+                  Verify dates and eligibility on the official website before applying.
                 </p>
-                <a 
+                <a
                   href={selectedOpp["Apply:"].startsWith('http') ? selectedOpp["Apply:"] : `https://${selectedOpp["Apply:"]}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full md:w-auto px-10 py-4 bg-primary hover:bg-blue-600 text-white rounded-2xl font-bold text-lg transition-all duration-300 flex items-center justify-center gap-3 shadow-xl shadow-primary/30 hover:-translate-y-1"
+                  className="w-full md:w-auto flex items-center justify-center gap-2 px-8 py-3.5 bg-primary hover:bg-blue-600 text-white font-bold text-sm rounded-xl transition-all min-h-[48px]"
                 >
-                  <span>Visit Official Website</span>
-                  <ExternalLink size={20} />
+                  Apply Now <ExternalLink size={15} />
                 </a>
               </div>
             )}

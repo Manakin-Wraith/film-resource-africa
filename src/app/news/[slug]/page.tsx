@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { getNewsArticle, getNews, getOpportunities } from '@/app/actions';
 import NewsletterCTA from '@/components/NewsletterCTA';
-import { ArrowLeft, ExternalLink, Calendar, Newspaper, AlertTriangle, Sparkles, Lightbulb, Star, Clapperboard } from 'lucide-react';
+import { Newspaper, AlertTriangle, Sparkles, Lightbulb, Star, Clapperboard } from 'lucide-react';
 import MarkdownBody from '@/components/MarkdownBody';
 import { decodeEntities, cleanText } from '@/lib/decodeEntities';
 import Breadcrumbs from '@/components/Breadcrumbs';
@@ -104,19 +104,15 @@ export default async function NewsArticlePage({ params }: { params: Promise<{ sl
   };
 
   return (
-    <main className="min-h-screen relative overflow-hidden">
-      <div className="absolute top-0 -left-64 w-96 h-96 bg-primary/20 rounded-full mix-blend-multiply filter blur-3xl opacity-50"></div>
-      <div className="absolute top-0 -right-4 w-96 h-96 bg-accent/20 rounded-full mix-blend-multiply filter blur-3xl opacity-50"></div>
-
-      {/* JSON-LD Structured Data */}
+    <main className="min-h-screen">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-
       <TrackNewsRead slug={slug} category={article.category} />
 
-      <div className="relative z-10 container mx-auto px-4 py-12 max-w-4xl">
+      <div className="container mx-auto px-4 py-10 max-w-3xl">
+
         {/* Breadcrumb */}
         <div className="mb-8">
           <Breadcrumbs items={[
@@ -126,68 +122,68 @@ export default async function NewsArticlePage({ params }: { params: Promise<{ sl
           ]} />
         </div>
 
-        {/* Article Header */}
-        <header className="mb-10 space-y-6">
-          <div className="flex items-center gap-4">
-            <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider border ${config.bg} ${config.color}`}>
-              <Icon size={14} />
+        {/* Article masthead */}
+        <header className="mb-8">
+          {/* Category rubric + date dateline */}
+          <div className="flex items-center gap-3 mb-4">
+            <span className={`editorial-label ${config.color}`}>
               {config.label}
             </span>
-            <span className="flex items-center gap-1.5 text-foreground/40 text-sm">
-              <Calendar size={14} />
+            <span className="text-[11px] font-medium" style={{ color: 'var(--foreground-tertiary)' }}>
               {formatDate(article.published_at)}
             </span>
           </div>
 
-          <h1 className="text-4xl md:text-5xl font-bold font-heading leading-tight">
+          {/* Horizontal rule — muted */}
+          <div className="h-px mb-6" style={{ background: 'var(--border)' }} />
+
+          <h1 className="text-[28px] md:text-[42px] font-extrabold font-heading leading-[1.08] tracking-tight text-foreground mb-5">
             {decodeEntities(article.title)}
           </h1>
 
-          <p className="text-xl text-foreground/60 leading-relaxed">
+          {/* Standfirst */}
+          <p className="text-[16px] md:text-[18px] leading-relaxed" style={{ color: 'var(--foreground-secondary)' }}>
             {cleanText(article.summary)}
           </p>
         </header>
 
-        {/* Featured Image */}
+        {/* Hero image */}
         {article.image_url && (
-          <div className="relative w-full h-64 md:h-96 rounded-[2rem] overflow-hidden mb-10 border border-white/10">
+          <div className="relative w-full h-56 md:h-[420px] overflow-hidden rounded-xl mb-8 border border-white/[0.08]">
             <Image
               src={article.image_url}
               alt={article.title}
               fill
-              sizes="(max-width: 768px) 100vw, 896px"
+              sizes="(max-width: 768px) 100vw, 768px"
               priority
               className="object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
           </div>
         )}
 
-        {/* Article Body */}
-        <article className="glass-card rounded-[2rem] p-8 md:p-12 border border-white/10 mb-12">
-          <div className="prose prose-invert prose-lg max-w-none">
-            {article.content ? (
+        {/* Article body */}
+        <article className="mb-10 border-t border-white/[0.08] pt-8">
+          <div className="prose prose-invert prose-base max-w-none">
+            {article.content && (
               <MarkdownBody content={decodeEntities(article.content)} />
-            ) : null}
+            )}
           </div>
 
-          {/* Source Attribution */}
+          {/* Source attribution */}
           {article.url && (
-            <div className="mt-10 pt-6 border-t border-white/5">
-              <p className="text-foreground/30 text-sm">
+            <div className="mt-8 pt-5 border-t border-white/[0.06]">
+              <p className="text-[12px]" style={{ color: 'var(--foreground-tertiary)' }}>
                 Source:{' '}
                 <TrackOutboundLink
                   href={article.url}
                   target="_blank"
                   rel="noopener noreferrer"
                   context="news_source"
-                  className="text-foreground/40 hover:text-foreground/60 underline underline-offset-2 transition-colors"
+                  className="underline underline-offset-2 hover:text-foreground/60 transition-colors"
                 >
                   {(() => {
-                    try {
-                      const domain = new URL(article.url).hostname.replace('www.', '');
-                      return domain;
-                    } catch { return 'Original article'; }
+                    try { return new URL(article.url).hostname.replace('www.', ''); }
+                    catch { return 'Original article'; }
                   })()}
                 </TrackOutboundLink>
               </p>
@@ -195,47 +191,52 @@ export default async function NewsArticlePage({ params }: { params: Promise<{ sl
           )}
         </article>
 
+        {/* Newsletter CTA */}
+        <div className="mb-12">
+          <NewsletterCTA
+            variant="banner"
+            heading="Get stories like this in your inbox"
+            subtext="Weekly deadline alerts, new opportunities, and industry insights for African filmmakers."
+          />
+        </div>
+
         {/* Related Opportunities */}
         {relatedOpps.length > 0 && (
           <section className="mb-12">
-            <h2 className="text-2xl font-bold font-heading mb-6">Related Opportunities</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="h-px mb-5" style={{ background: 'var(--border)' }} />
+            <h2 className="text-[11px] font-bold uppercase tracking-widest mb-4" style={{ color: 'var(--foreground-tertiary)' }}>
+              Related Opportunities
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {relatedOpps.map((opp) => (
                 <Link
                   key={opp.id}
-                  href={`/#directory`}
-                  className="glass-card rounded-[1.5rem] p-5 border border-white/10 hover:-translate-y-1 hover:shadow-[0_12px_24px_-8px_rgba(59,130,246,0.2)] transition-all group"
+                  href="/#directory"
+                  className="p-4 rounded-xl border border-white/[0.08] hover:border-white/[0.16] hover:-translate-y-0.5 transition-all group"
+                  style={{ background: 'var(--surface)' }}
                 >
-                  <h3 className="font-bold font-heading text-sm group-hover:text-primary transition-colors mb-2 leading-snug">
+                  <h3 className="text-[13px] font-bold font-heading text-foreground group-hover:text-primary transition-colors leading-snug mb-2">
                     {opp.title}
                   </h3>
-                  <div className="flex items-center gap-2">
-                    {opp.category && (
-                      <span className="text-xs text-foreground/50 bg-white/5 px-2 py-0.5 rounded-lg">
-                        {opp.category}
-                      </span>
-                    )}
-                  </div>
+                  {opp.category && (
+                    <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--foreground-tertiary)' }}>
+                      {opp.category}
+                    </span>
+                  )}
                 </Link>
               ))}
             </div>
           </section>
         )}
 
-        {/* Newsletter CTA */}
-        <section className="mb-12">
-          <NewsletterCTA
-            variant="banner"
-            heading="Get stories like this in your inbox"
-            subtext="Weekly deadline alerts, new opportunities, and industry insights for African filmmakers."
-          />
-        </section>
-
         {/* More News */}
         {otherNews.length > 0 && (
           <section>
-            <h2 className="text-2xl font-bold font-heading mb-6">More News</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="h-px mb-5" style={{ background: 'var(--border)' }} />
+            <h2 className="text-[11px] font-bold uppercase tracking-widest mb-4" style={{ color: 'var(--foreground-tertiary)' }}>
+              More News
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {otherNews.map((item) => {
                 const itemConfig = categoryConfig[item.category] || categoryConfig.industry_news;
                 const ItemIcon = itemConfig.icon;
@@ -243,13 +244,16 @@ export default async function NewsArticlePage({ params }: { params: Promise<{ sl
                   <Link
                     key={item.id}
                     href={item.slug ? `/news/${item.slug}` : '#'}
-                    className="glass-card rounded-[1.5rem] p-5 border border-white/10 hover:-translate-y-1 hover:shadow-[0_12px_24px_-8px_rgba(59,130,246,0.2)] transition-all group"
+                    className="p-4 rounded-xl border border-white/[0.08] hover:border-white/[0.16] hover:-translate-y-0.5 transition-all group"
+                    style={{ background: 'var(--surface)' }}
                   >
-                    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border ${itemConfig.bg} ${itemConfig.color} mb-3`}>
-                      <ItemIcon size={10} />
-                      {itemConfig.label}
-                    </span>
-                    <h3 className="font-bold font-heading text-sm group-hover:text-primary transition-colors leading-snug">
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <ItemIcon size={10} className={itemConfig.color} />
+                      <span className={`text-[10px] font-bold uppercase tracking-wider ${itemConfig.color}`}>
+                        {itemConfig.label}
+                      </span>
+                    </div>
+                    <h3 className="text-[13px] font-bold font-heading text-foreground group-hover:text-primary transition-colors leading-snug">
                       {decodeEntities(item.title)}
                     </h3>
                   </Link>
@@ -258,6 +262,7 @@ export default async function NewsArticlePage({ params }: { params: Promise<{ sl
             </div>
           </section>
         )}
+
       </div>
     </main>
   );
