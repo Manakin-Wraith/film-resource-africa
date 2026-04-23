@@ -71,7 +71,7 @@ export default function Header({ stats }: HeaderProps) {
           {/* Submit CTA — desktop only */}
           <Link
             href="/submit"
-            className="hidden md:flex items-center px-4 py-2 text-[13px] font-semibold bg-primary hover:bg-blue-600 text-white rounded-lg transition-all flex-shrink-0"
+            className="hidden md:flex items-center px-4 py-2 text-[13px] font-semibold border border-white/[0.2] text-foreground hover:bg-white/[0.06] rounded-lg transition-all flex-shrink-0"
           >
             Submit
           </Link>
