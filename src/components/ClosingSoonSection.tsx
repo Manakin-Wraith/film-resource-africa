@@ -12,7 +12,6 @@ import CardVisualHeader from './CardVisualHeader';
 /* ── Featured cover-story card ─────────────────────────────────────── */
 function FeaturedCard({ opp, onSelect }: { opp: Opportunity; onSelect: (o: Opportunity) => void }) {
   const deadline = opp.deadline_date ? formatDeadline(opp.deadline_date) : null;
-  const catStyle = getCategoryStyle(opp.category);
 
   const handleClick = () => {
     trackOpportunityClick(opp.title, opp.category || '', 'Closing Soon Featured');

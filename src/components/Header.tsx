@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -39,10 +40,12 @@ export default function Header({ stats }: HeaderProps) {
 
           {/* Publication wordmark */}
           <Link href="/" className="flex items-center gap-2.5 flex-shrink-0 group">
-            <img
+            <Image
               src="/icon.png"
               alt=""
-              className="w-6 h-6 object-contain opacity-90"
+              width={24}
+              height={24}
+              className="object-contain opacity-90"
             />
             <span className="font-heading font-bold text-[15px] tracking-tight text-foreground">
               Film Resource Africa
