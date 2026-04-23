@@ -7,13 +7,12 @@ import { getCategoryStyle } from '@/lib/categoryConfig';
 import { formatDeadline } from '@/lib/dateUtils';
 import { decodeHtmlEntities } from '@/lib/textUtils';
 import { trackOpportunityClick } from '@/lib/analytics';
+import CardVisualHeader from './CardVisualHeader';
 
 /* ── Featured cover-story card ─────────────────────────────────────── */
 function FeaturedCard({ opp, onSelect }: { opp: Opportunity; onSelect: (o: Opportunity) => void }) {
-  const hasImage = !!opp.og_image_url;
   const deadline = opp.deadline_date ? formatDeadline(opp.deadline_date) : null;
   const catStyle = getCategoryStyle(opp.category);
-  const CatIcon = catStyle.icon;
 
   const handleClick = () => {
     trackOpportunityClick(opp.title, opp.category || '', 'Closing Soon Featured');
@@ -26,49 +25,45 @@ function FeaturedCard({ opp, onSelect }: { opp: Opportunity; onSelect: (o: Oppor
       style={{ background: 'var(--surface)' }}
       onClick={handleClick}
     >
-      {/* Banner image */}
-      {hasImage && (
-        <div className="relative w-full aspect-[16/9] md:aspect-[21/9]">
-          <Image
-            src={opp.og_image_url!}
-            alt={opp.title}
-            fill
-            sizes="(max-width: 768px) 100vw, 1280px"
-            className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+      {/* Visual header — uses CardVisualHeader's 4-tier fallback:
+          og_image + logo pill → og_image alone → logo on gradient → pattern fallback */}
+      <div className="md:hidden">
+        {/* Mobile: standard card header height */}
+        <CardVisualHeader
+          logo={opp.logo}
+          ogImage={opp.og_image_url}
+          category={opp.category}
+          title={opp.title}
+          geoScope={opp.geo_scope}
+          countryIso={opp.country_iso}
+          countryName={opp.country_name}
+        />
+      </div>
+      <div className="hidden md:block">
+        {/* Desktop: override height for a wider editorial banner */}
+        <div className="[&>div]:!h-56">
+          <CardVisualHeader
+            logo={opp.logo}
+            ogImage={opp.og_image_url}
+            category={opp.category}
+            title={opp.title}
+            geoScope={opp.geo_scope}
+            countryIso={opp.country_iso}
+            countryName={opp.country_name}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#111113] via-[#111113]/20 to-transparent" />
         </div>
-      )}
+      </div>
 
       {/* Content */}
       <div className="p-6 md:p-8">
-        {/* Meta row */}
-        <div className="flex items-center gap-3 mb-3">
-          <span className="editorial-label flex items-center gap-1.5 text-foreground/45">
-            <CatIcon size={10} />
-            {catStyle.label}
-          </span>
-          {opp.logo && !hasImage && (
-            <div className="ml-auto w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center bg-white/5">
-              <Image
-                src={opp.logo}
-                alt=""
-                width={32}
-                height={32}
-                className="object-contain"
-              />
-            </div>
-          )}
-        </div>
-
         {/* Amber dateline */}
         {deadline && deadline.urgency !== 'passed' && (
-          <span className="editorial-dateline mb-4 block">
+          <span className="editorial-dateline mb-3 block">
             {opp['Next Deadline']
               ? `Deadline: ${opp['Next Deadline'].substring(0, 50)}`
               : `Deadline: ${deadline.dateFormatted}`}
             {deadline.urgency !== 'normal' && (
-              <span className="ml-2 text-[#ef4444] font-semibold text-[12px]">
+              <span className="ml-2 font-semibold text-[12px]" style={{ color: '#ef4444' }}>
                 — {deadline.countdownText}
               </span>
             )}
@@ -76,7 +71,7 @@ function FeaturedCard({ opp, onSelect }: { opp: Opportunity; onSelect: (o: Oppor
         )}
 
         {/* Title — display scale */}
-        <h3 className="text-[30px] leading-[1.08] md:text-[44px] font-extrabold font-heading text-foreground mb-4 group-hover:text-primary transition-colors">
+        <h3 className="text-[28px] leading-[1.08] md:text-[42px] font-extrabold font-heading text-foreground mb-4 group-hover:text-primary transition-colors">
           {opp.title}
         </h3>
 
@@ -131,33 +126,49 @@ function CompactCard({ opp, onSelect }: { opp: Opportunity; onSelect: (o: Opport
         trackOpportunityClick(opp.title, opp.category || '', 'Closing Soon Strip');
         onSelect(opp);
       }}
-      className="rounded-xl min-w-[264px] max-w-[300px] flex-shrink-0 snap-start cursor-pointer border border-white/[0.08] hover:border-white/[0.16] hover:-translate-y-0.5 transition-all group p-5"
+      className="rounded-xl min-w-[260px] max-w-[300px] flex-shrink-0 snap-start cursor-pointer border border-white/[0.08] hover:border-white/[0.16] hover:-translate-y-0.5 transition-all group overflow-hidden"
       style={{ background: 'var(--surface)' }}
     >
-      {/* Dateline */}
-      {deadline && deadline.urgency !== 'passed' && (
-        <span className="editorial-dateline text-[12px] mb-1 block">
-          {deadline.countdownText}
-        </span>
+      {/* Mini visual header — logo or category fallback */}
+      {opp.logo ? (
+        <div className={`h-14 flex items-center px-4 bg-gradient-to-br ${catStyle.headerGradient} border-b border-white/[0.05]`}>
+          <Image
+            src={opp.logo}
+            alt=""
+            width={72}
+            height={28}
+            className="object-contain max-h-[28px] opacity-80"
+          />
+        </div>
+      ) : (
+        <div className={`h-10 flex items-center px-4 gap-2 bg-gradient-to-br ${catStyle.headerGradient} border-b border-white/[0.05]`}>
+          <CatIcon size={14} className={catStyle.color} />
+          <span className={`text-[10px] font-bold uppercase tracking-wider ${catStyle.color}`}>
+            {catStyle.label}
+          </span>
+        </div>
       )}
 
-      {/* Category */}
-      <span className="editorial-label flex items-center gap-1 mb-2 text-foreground/40">
-        <CatIcon size={10} />
-        {catStyle.label}
-      </span>
+      <div className="p-4">
+        {/* Dateline */}
+        {deadline && deadline.urgency !== 'passed' && (
+          <span className="editorial-dateline text-[12px] mb-1 block">
+            {deadline.countdownText}
+          </span>
+        )}
 
-      {/* Title */}
-      <h4 className="text-[15px] font-bold font-heading text-foreground group-hover:text-primary transition-colors line-clamp-2 mb-3 leading-snug">
-        {opp.title}
-      </h4>
+        {/* Title */}
+        <h4 className="text-[14px] font-bold font-heading text-foreground group-hover:text-primary transition-colors line-clamp-2 mb-3 leading-snug">
+          {opp.title}
+        </h4>
 
-      {/* Deadline row */}
-      <div className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--foreground-tertiary)' }}>
-        <Calendar size={11} />
-        <span className="truncate">
-          {opp['Next Deadline']?.substring(0, 32) || 'Check website'}
-        </span>
+        {/* Deadline row */}
+        <div className="flex items-center gap-1.5 text-[11px]" style={{ color: 'var(--foreground-tertiary)' }}>
+          <Calendar size={10} />
+          <span className="truncate">
+            {opp['Next Deadline']?.substring(0, 32) || 'Check website'}
+          </span>
+        </div>
       </div>
     </div>
   );

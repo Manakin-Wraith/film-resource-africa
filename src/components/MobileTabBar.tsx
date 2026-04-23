@@ -50,9 +50,9 @@ export default function MobileTabBar() {
       }`}
     >
       <div
-        className="border-t border-white/[0.08]"
+        className="border-t border-white/[0.12]"
         style={{
-          background: 'var(--background)',
+          background: 'var(--surface)',
           paddingBottom: 'env(safe-area-inset-bottom)',
         }}
       >
