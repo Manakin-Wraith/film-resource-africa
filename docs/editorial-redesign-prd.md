@@ -1,6 +1,6 @@
 # FRA Editorial Redesign — Product Requirements Document
 
-**Version:** 1.0  
+**Version:** 1.1  
 **Date:** 2026-04-23  
 **Status:** In Progress  
 **Owner:** G. Mostert  
@@ -15,6 +15,8 @@ This redesign repositions FRA as a **curated publication** — type-led, grid-ba
 
 **Before:** Dark job board with a film grain overlay.  
 **After:** The publication of record for African film.
+
+**Critical constraint:** 50% of users are on mobile. Every design decision must work on mobile first. Desktop is an enhancement, not the baseline.
 
 ---
 
@@ -40,6 +42,18 @@ Draw from pan-African print traditions: Drum, The Continent, FESPACO poster desi
 ### 2.6 Timeless over trendy
 Glass morphism, blob gradients, and animated grain are trends. A strong typographic grid and restrained colour palette will look authoritative in five years. We are building the latter.
 
+### 2.7 Mobile-first, not mobile-adapted
+50% of users arrive on a phone. Design for the 4-column, thumb-driven, portrait experience first. Desktop is a progressive enhancement. Any component that doesn't work one-handed on mobile is not finished.
+
+**Mobile editorial rules:**
+- Touch targets minimum 44×44px — no exceptions
+- Primary action (Apply / Read) reachable without scrolling on first viewport
+- Carousels scroll horizontally with visible overflow (no hidden overflow that hides affordance)
+- No hover-dependent information — all content accessible without hover state
+- Bottom navigation is the primary nav on mobile (not burger menus)
+- Text never smaller than 14px on mobile; captions minimum 12px
+- Line length maximum 70 characters on mobile (prevents side-scroll reading)
+
 ---
 
 ## 3. Typography System
@@ -51,22 +65,23 @@ Glass morphism, blob gradients, and animated grain are trends. A strong typograp
 | Body / UI | Inter (font-sans) | Regular and medium weights |
 
 ### 3.2 Type Scale
-| Token | Size | Weight | Usage |
-|---|---|---|---|
-| `display-xl` | 80–96px | 800 | Hero headline only |
-| `display` | 56–72px | 700 | Section hero / cover story title |
-| `headline` | 32–40px | 700 | Section titles |
-| `rubric` | 11px, tracking-widest, uppercase | 600 | Section labels / column headers |
-| `subhead` | 20–24px | 600 | Card titles, article titles |
-| `body` | 16px | 400 | Article body, descriptions |
-| `caption` | 13px | 400 | Datelines, metadata, tags |
-| `label` | 11px | 600 | Badges, status chips |
+| Token | Desktop Size | Mobile Size | Weight | Usage |
+|---|---|---|---|---|
+| `display-xl` | 80–96px | 48–56px | 800 | Hero headline only |
+| `display` | 56–72px | 36–44px | 700 | Section hero / cover story title |
+| `headline` | 32–40px | 24–28px | 700 | Section titles |
+| `rubric` | 11px, tracking-widest, uppercase | 10px, tracking-widest, uppercase | 600 | Section labels / column headers |
+| `subhead` | 20–24px | 16–18px | 600 | Card titles, article titles |
+| `body` | 16px | 15px | 400 | Article body, descriptions |
+| `caption` | 13px | 12px | 400 | Datelines, metadata, tags |
+| `label` | 11px | 11px | 600 | Badges, status chips |
 
 ### 3.3 Hierarchy Rules
 - Maximum **three type sizes** visible in any single viewport.
 - Section rubrics always appear above section headlines, always uppercase, always `opacity-40`.
-- Card titles never exceed `text-xl` (20px).
+- Card titles never exceed `text-xl` (20px) desktop / `text-base` (16px) mobile.
 - Deadlines displayed as editorial **datelines** (`caption` size, amber, left-aligned) — not inside badge chips.
+- On mobile, hero `display-xl` scales down to 48px minimum — it should still feel large and editorial, not cramped.
 
 ---
 
@@ -102,18 +117,18 @@ Glass morphism, blob gradients, and animated grain are trends. A strong typograp
 ### 5.1 Grid
 - Desktop: 12-column grid, 1280px max-width, 24px gutters
 - Tablet: 8-column
-- Mobile: 4-column, 16px gutters
+- Mobile: 4-column, 16px gutters — single column by default, 2-column only when cards are compact enough to read at half-screen width
 
 ### 5.2 Spacing Scale
 Remove the current uniform `p-6 md:p-8` applied to every section. Introduce intentional variation:
 
-| Context | Spacing |
-|---|---|
-| Page top padding | `py-16 md:py-24` |
-| Between major sections | `mt-20 md:mt-28` |
-| Between subsections | `mt-10 md:mt-14` |
-| Section internal padding | `pt-6 pb-10` |
-| Card internal padding | `p-5` (compact) or `p-6` (standard) |
+| Context | Mobile | Desktop |
+|---|---|---|
+| Page top padding | `py-10` | `py-16 md:py-24` |
+| Between major sections | `mt-14` | `mt-20 md:mt-28` |
+| Between subsections | `mt-8` | `mt-10 md:mt-14` |
+| Section internal padding | `pt-5 pb-8` | `pt-6 pb-10` |
+| Card internal padding | `p-4` (compact) | `p-5` (compact) or `p-6` (standard) |
 
 ### 5.3 Section Anatomy
 Every section follows this structure:
@@ -121,18 +136,25 @@ Every section follows this structure:
 ```
 [Rule line — 1px, coloured]
 [Rubric label — 11px uppercase tracking-widest opacity-40]
-[Section headline — 32-40px bold]
-[Optional standfirst — 16px secondary text]
+[Section headline — 32-40px bold desktop / 24-28px mobile]
+[Optional standfirst — 16px secondary text, hidden on mobile if space is tight]
 [Content area — grid or list, defined per section]
 ```
 
 ### 5.4 Featured / Cover Story Treatment
 The single most important item in a section receives a **cover story card**:
 - Full section width (not fixed 360px)
-- Large title (`display` scale)
-- Image behind or beside at editorial proportions (16:9 or 3:2)
+- Large title (`display` scale desktop, 36px mobile minimum)
+- Image behind or beside at editorial proportions (16:9 or 3:2); stacked vertically on mobile
 - Deadline displayed prominently as a dateline, not a chip
-- "Apply Now" button at full primary blue
+- "Apply Now" button at full primary blue, full width on mobile (min-height: 48px)
+
+### 5.5 Mobile Touch & Thumb Zones
+- All interactive elements: minimum 44×44px touch target
+- Primary CTA buttons: full-width on mobile (`w-full`), height 48px minimum
+- Carousel scroll: `overflow-x-auto`, `scroll-snap-type: x mandatory`, show 1.2 cards to signal scroll affordance
+- Bottom safe area: account for `env(safe-area-inset-bottom)` on all bottom-fixed elements
+- Avoid placing key actions in top corners (thumb dead zone on large phones)
 
 ---
 
@@ -140,25 +162,25 @@ The single most important item in a section receives a **cover story card**:
 
 ### 6.1 Components to redesign (in priority order)
 
-| # | Component | Current State | Target State | Status |
-|---|---|---|---|---|
-| 1 | **Design tokens** | globals.css partial | Full token set + section anatomy | ⬜ Not started |
-| 2 | **Hero / Masthead** | Large gradient text, newsletter CTA | Masthead treatment, publication identity | ⬜ Not started |
-| 3 | **Section rubric** | Icon + title only | Rule + rubric label + headline + standfirst | ⬜ Not started |
-| 4 | **Closing Soon — featured card** | Same as all other cards | Cover story card, full-width, red rule, large deadline | ⬜ Not started |
-| 5 | **Closing Soon — section** | Horizontal carousel | Featured card (1st) + horizontal strip (rest) | ⬜ Not started |
-| 6 | **Opportunity card** | glass-card uniform | Clean dark surface, dateline deadline, no glow | ⬜ Not started |
-| 7 | **Just Added — section** | Horizontal carousel | 2-column grid, compact card variant | ⬜ Not started |
-| 8 | **Open Now — section** | Horizontal carousel | Horizontal carousel (kept, reduced decoration) | ⬜ Not started |
-| 9 | **New Wave — section** | Horizontal carousel | Editorial list (title + category + deadline per row) | ⬜ Not started |
-| 10 | **News card** | Amber-tinted glass card | Editorial article entry (image left/top, headline, dateline) | ⬜ Not started |
-| 11 | **News section** | Uniform card grid | Featured article (large) + secondary grid | ⬜ Not started |
-| 12 | **SponsorTicker** | Amber glow card | Clean masthead-strip treatment | ⬜ Not started |
-| 13 | **Header / Nav** | Glass panel | Masthead bar with publication wordmark | ⬜ Not started |
-| 14 | **MobileTabBar** | Dark glass | Clean dark bar, stronger active state | ⬜ Not started |
-| 15 | **OpportunityModal** | Glass panel | Editorial detail sheet — full content layout | ⬜ Not started |
-| 16 | **BrowseByCountry** | Card grid | Editorial map/index treatment | ⬜ Not started |
-| 17 | **Footer** | Minimal | Masthead footer with publication credit | ⬜ Not started |
+| # | Component | Current State | Target State | Mobile Priority | Status |
+|---|---|---|---|---|---|
+| 1 | **Design tokens** | globals.css partial | Full token set + section anatomy | Foundation | ⬜ Not started |
+| 2 | **MobileTabBar** | Dark glass | Clean dark bar, stronger active state, safe-area aware | P0 — 50% of users | ⬜ Not started |
+| 3 | **Hero / Masthead** | Large gradient text, newsletter CTA | Masthead treatment, publication identity | Stacked single-col | ⬜ Not started |
+| 4 | **Section rubric** | Icon + title only | Rule + rubric label + headline + standfirst | Same pattern, scaled | ⬜ Not started |
+| 5 | **Closing Soon — featured card** | Same as all other cards | Cover story card, full-width, red rule, large deadline | Full-width, image stacked | ⬜ Not started |
+| 6 | **Closing Soon — section** | Horizontal carousel | Featured card (1st) + horizontal strip (rest) | Snap carousel | ⬜ Not started |
+| 7 | **Opportunity card** | glass-card uniform | Clean dark surface, dateline deadline, no glow | Full-width card | ⬜ Not started |
+| 8 | **Just Added — section** | Horizontal carousel | 2-column grid desktop / single-col mobile | Single col mobile | ⬜ Not started |
+| 9 | **Open Now — section** | Horizontal carousel | Horizontal carousel (kept, reduced decoration) | Snap carousel | ⬜ Not started |
+| 10 | **New Wave — section** | Horizontal carousel | Editorial list (title + category + deadline per row) | Compact list rows | ⬜ Not started |
+| 11 | **News card** | Amber-tinted glass card | Editorial article entry (image left/top, headline, dateline) | Image top, stacked | ⬜ Not started |
+| 12 | **News section** | Uniform card grid | Featured article (large) + secondary grid | Full-width featured | ⬜ Not started |
+| 13 | **SponsorTicker** | Amber glow card | Clean masthead-strip treatment | Snap carousel | ⬜ Not started |
+| 14 | **Header / Nav** | Glass panel | Masthead bar with publication wordmark | Minimal wordmark only | ⬜ Not started |
+| 15 | **OpportunityModal** | Glass panel | Editorial detail sheet — full content layout | Full-screen sheet | ⬜ Not started |
+| 16 | **BrowseByCountry** | Card grid | Editorial map/index treatment | Vertical list | ⬜ Not started |
+| 17 | **Footer** | Minimal | Masthead footer with publication credit | Compact, above tab bar | ⬜ Not started |
 
 ### 6.2 Components NOT changing in this sprint
 - Admin UI (AdminClient.tsx) — functional, not public-facing
@@ -187,59 +209,59 @@ The single most important item in a section receives a **cover story card**:
 
 ### Phase 1 — Foundation *(Design tokens + global CSS)*
 **Goal:** Establish the design language without touching any component.
-- [ ] Remove blob gradient animations from `page.tsx`
-- [ ] Add full colour token set to `globals.css`
-- [ ] Define section anatomy CSS classes (`.section-rubric`, `.section-rule`, `.editorial-label`)
-- [ ] Define new spacing tokens
-- [ ] Remove `glass-card` usage from section wrappers (keep for modals only)
+- [x] Remove blob gradient animations from `page.tsx`
+- [x] Add full colour token set to `globals.css`
+- [x] Define section anatomy CSS classes (`.section-rubric`, `.section-rule`, `.editorial-label`, `.editorial-dateline`)
+- [x] Define new spacing tokens (mobile + desktop variants)
+- [x] Remove `glass-card` usage from section wrappers (kept for modals only)
 
 **Exit criteria:** Tokens defined. Section wrappers cleaned up. No visual regression beyond reduced gradient noise.
 
 ---
 
-### Phase 2 — Hero + Closing Soon *(The flagship moment)*
-**Goal:** One section that immediately demonstrates the editorial direction.
-- [ ] Redesign homepage hero as a masthead — publication name treatment, stronger typographic scale
+### Phase 2 — MobileTabBar + Hero + Closing Soon *(The flagship moment)*
+**Goal:** Fix the primary mobile navigation and deliver one section that immediately demonstrates the editorial direction.
+- [ ] **MobileTabBar** — clean dark bar, stronger active state, `env(safe-area-inset-bottom)` padding, 44px touch targets
+- [ ] Redesign homepage hero as a masthead — publication name treatment, stronger typographic scale, stacked on mobile
 - [ ] Implement section rubric pattern for "Closing Soon"
-- [ ] Build featured cover-story card for the #1 most urgent opportunity
+- [ ] Build featured cover-story card for the #1 most urgent opportunity (image stacked on mobile, full-width CTA)
 - [ ] Apply full-strength red rule and amber deadline dateline
-- [ ] Validate on mobile
+- [ ] Validate on mobile (iPhone SE width 375px minimum)
 
-**Exit criteria:** Hero + Closing Soon looks unmistakably editorial. Can be shown alongside the rest of the page without clash.
+**Exit criteria:** MobileTabBar is editorial. Hero + Closing Soon looks unmistakably editorial at 375px and 1280px.
 
 ---
 
 ### Phase 3 — Remaining Homepage Sections
 **Goal:** Extend the editorial language across all homepage sections.
-- [ ] Redesign Just Added → 2-column compact grid
-- [ ] Redesign Open Now → cleaned carousel (reduced decoration)
-- [ ] Redesign New Wave → editorial list format
-- [ ] Redesign News section → featured article + secondary grid
-- [ ] Redesign SponsorTicker → masthead strip
-- [ ] Redesign BrowseByCountry → editorial index
+- [ ] Redesign Just Added → 2-column grid desktop / single-column mobile
+- [ ] Redesign Open Now → cleaned carousel, snap scroll on mobile
+- [ ] Redesign New Wave → editorial list format, compact on mobile
+- [ ] Redesign News section → featured article + secondary grid (stacked on mobile)
+- [ ] Redesign SponsorTicker → masthead strip / snap carousel on mobile
+- [ ] Redesign BrowseByCountry → editorial index / vertical list on mobile
 
-**Exit criteria:** Homepage is cohesive. Every section has distinct layout. No two adjacent sections look the same.
+**Exit criteria:** Homepage is cohesive at all breakpoints. Every section has distinct layout. No two adjacent sections look the same.
 
 ---
 
 ### Phase 4 — Article + Opportunity Pages
 **Goal:** The detail views match the editorial quality of the homepage.
-- [ ] Redesign OpportunityModal → editorial detail sheet
+- [ ] OpportunityModal → full-screen sheet on mobile, editorial detail on desktop
 - [ ] Enhance `/news/[slug]` with editorial page layout (pull quotes, dateline, author credit)
 - [ ] Redesign news index page
 
-**Exit criteria:** Article and opportunity detail feel like magazine pages, not modal overlays.
+**Exit criteria:** Article and opportunity detail feel like magazine pages. Full-screen on mobile without horizontal overflow.
 
 ---
 
 ### Phase 5 — Navigation + Polish
 **Goal:** The chrome matches the content.
-- [ ] Redesign Header/Nav as masthead bar
-- [ ] Redesign MobileTabBar
+- [ ] Redesign Header/Nav as masthead bar (wordmark only on mobile)
 - [ ] Country pages (P2)
 - [ ] Community Spotlight page
-- [ ] Cross-browser + responsive QA
-- [ ] Accessibility audit (contrast, focus states)
+- [ ] Cross-browser + responsive QA (test at 375px, 390px, 428px, 768px, 1280px, 1440px)
+- [ ] Accessibility audit (contrast, focus states, touch target sizes)
 
 **Exit criteria:** Full site cohesive. Ship-ready.
 
@@ -258,7 +280,7 @@ These are reference points for the *feeling* to aim for — not to copy.
 | **Sight & Sound** | Publication authority, critical voice, film-specific visual grammar |
 | **Le Monde Diplomatique** | Dense but readable, editorial trust through typography |
 
-**What to avoid:** Linear gradients on every surface. Glassmorphism everywhere. Badge-heavy cards. Animated blob shadows. Anything that looks like a SaaS dashboard.
+**What to avoid:** Linear gradients on every surface. Glassmorphism everywhere. Badge-heavy cards. Animated blob shadows. Anything that looks like a SaaS dashboard. Hover-only interactions on mobile.
 
 ---
 
@@ -269,7 +291,9 @@ These are reference points for the *feeling* to aim for — not to copy.
 | Visual hierarchy | Can a new user identify the most urgent opportunity in <5 seconds without scrolling? |
 | Section differentiation | Do adjacent sections look visually distinct without reading the title? |
 | Editorial identity | Does a screenshot of FRA look like a publication or a directory? |
-| Mobile usability | Can all primary actions (read, apply, browse) be completed one-handed on mobile? |
+| Mobile usability | Can all primary actions (read, apply, browse) be completed one-handed on mobile at 375px? |
+| Mobile navigation | Is the MobileTabBar the clear primary nav — no ambiguity about how to move between sections? |
+| Touch targets | Zero interactive elements below 44px in any dimension on mobile |
 | Performance | No regression in Core Web Vitals (LCP, CLS) after redesign |
 | Engagement | Click-through rate on opportunities (tracked via existing analytics) improves post-launch |
 
@@ -281,6 +305,8 @@ These are reference points for the *feeling* to aim for — not to copy.
 - [ ] Light mode: is the editorial direction dark-only, or does it translate to a warm off-white light mode?
 - [ ] Film stills / editorial imagery: do we source/allow cover images for the featured card, or keep it type-and-logo?
 - [ ] Does the "New Wave: AI Filmmaking" section stay as a permanent section or become a rotating editorial theme?
+- [ ] MobileTabBar tabs: current tabs are Home / Browse / Saved / Submit. Do these map correctly to the editorial publication model, or should one tab become "Latest" (news feed)?
+- [ ] OpportunityModal on mobile: full-screen sheet (current direction) vs. navigating to a dedicated page route? A dedicated route is more shareable and better for SEO.
 
 ---
 
@@ -288,12 +314,12 @@ These are reference points for the *feeling* to aim for — not to copy.
 
 | Phase | Status | Started | Completed |
 |---|---|---|---|
-| Phase 1 — Foundation | ⬜ Not started | — | — |
-| Phase 2 — Hero + Closing Soon | ⬜ Not started | — | — |
+| Phase 1 — Foundation | ✅ Complete | 2026-04-23 | 2026-04-23 |
+| Phase 2 — MobileTabBar + Hero + Closing Soon | 🔄 In progress | 2026-04-23 | — |
 | Phase 3 — Homepage Sections | ⬜ Not started | — | — |
 | Phase 4 — Article + Detail Pages | ⬜ Not started | — | — |
 | Phase 5 — Nav + Polish | ⬜ Not started | — | — |
 
 ---
 
-*Last updated: 2026-04-23*
+*Last updated: 2026-04-23 — v1.1: Mobile-first constraint embedded throughout (50% mobile users). MobileTabBar moved from Phase 5 → Phase 2. Mobile type scale added. Touch target rules added. Mobile layout patterns added per section.*

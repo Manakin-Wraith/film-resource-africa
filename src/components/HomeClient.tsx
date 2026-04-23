@@ -58,14 +58,12 @@ export default function HomeClient({ closingSoon, openNow, newWave, justAdded, n
 
   return (
     <>
-      {/* Just Added Section — Blue/fresh theme */}
+      {/* Just Added Section */}
       {justAdded.length > 0 && (
         <section
           id="just-added"
-          className="relative rounded-3xl bg-gradient-to-b from-blue-500/[0.07] to-transparent border border-blue-500/10 p-6 md:p-8 -mx-4 md:mx-0 overflow-hidden"
+          className="mt-14 md:mt-20 pt-6 pb-10 border-t border-white/[0.08] -mx-4 md:mx-0 px-4 md:px-0"
         >
-          <div className="absolute inset-0 pattern-dots pointer-events-none"></div>
-          <div className="absolute top-0 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-[100px] -translate-y-1/2 -translate-x-1/3 pointer-events-none"></div>
           <OpportunityRow
             opportunities={justAdded}
             title="Just Added"
@@ -80,14 +78,12 @@ export default function HomeClient({ closingSoon, openNow, newWave, justAdded, n
         </section>
       )}
 
-      {/* Closing Soon Section — Red/urgent theme */}
+      {/* Closing Soon Section */}
       {closingSoon.length > 0 && (
         <section
           id="closing-soon"
-          className="relative rounded-3xl bg-gradient-to-b from-red-500/[0.07] to-transparent border border-red-500/10 p-6 md:p-8 -mx-4 md:mx-0 overflow-hidden"
+          className="mt-14 md:mt-20 pt-6 pb-10 border-t border-white/[0.08] -mx-4 md:mx-0 px-4 md:px-0"
         >
-          <div className="absolute inset-0 pattern-diamonds pointer-events-none"></div>
-          <div className="absolute top-0 right-0 w-64 h-64 bg-red-500/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
           <OpportunityRow
             opportunities={closingSoon}
             title="Closing Soon"
@@ -102,14 +98,12 @@ export default function HomeClient({ closingSoon, openNow, newWave, justAdded, n
         </section>
       )}
 
-      {/* Open Now Section — Green/go theme */}
+      {/* Open Now Section */}
       {openNow.length > 0 && (
         <section
           id="open-now"
-          className="relative rounded-3xl bg-gradient-to-b from-green-500/[0.07] to-transparent border border-green-500/10 p-6 md:p-8 -mx-4 md:mx-0 overflow-hidden"
+          className="mt-14 md:mt-20 pt-6 pb-10 border-t border-white/[0.08] -mx-4 md:mx-0 px-4 md:px-0"
         >
-          <div className="absolute inset-0 pattern-crosshatch pointer-events-none"></div>
-          <div className="absolute top-0 left-0 w-64 h-64 bg-green-500/10 rounded-full blur-[100px] -translate-y-1/2 -translate-x-1/3 pointer-events-none"></div>
           <OpportunityRow
             opportunities={openNow}
             title="Open Now"
@@ -124,14 +118,12 @@ export default function HomeClient({ closingSoon, openNow, newWave, justAdded, n
         </section>
       )}
 
-      {/* New Wave Section — Purple/innovation theme */}
+      {/* New Wave Section */}
       {newWave.length > 0 && (
         <section
           id="new-wave"
-          className="relative rounded-3xl bg-gradient-to-b from-purple-500/[0.07] to-transparent border border-purple-500/10 p-6 md:p-8 -mx-4 md:mx-0 overflow-hidden"
+          className="mt-14 md:mt-20 pt-6 pb-10 border-t border-white/[0.08] -mx-4 md:mx-0 px-4 md:px-0"
         >
-          <div className="absolute inset-0 pattern-circles pointer-events-none"></div>
-          <div className="absolute bottom-0 right-0 w-80 h-80 bg-purple-500/10 rounded-full blur-[120px] translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
           <OpportunityRow
             opportunities={newWave}
             title="The New Wave: AI Filmmaking"
@@ -150,21 +142,17 @@ export default function HomeClient({ closingSoon, openNow, newWave, justAdded, n
       {trailers.length > 0 && (
         <section
           id="now-screening"
-          className="relative rounded-3xl bg-gradient-to-b from-pink-500/[0.05] to-transparent border border-pink-500/10 p-6 md:p-8 -mx-4 md:mx-0 overflow-hidden"
+          className="mt-14 md:mt-20 pt-6 pb-10 border-t border-white/[0.08] -mx-4 md:mx-0 px-4 md:px-0"
         >
-          <div className="absolute inset-0 pattern-zigzag pointer-events-none"></div>
-          <div className="absolute top-0 right-1/4 w-80 h-64 bg-pink-500/8 rounded-full blur-[100px] -translate-y-1/2 pointer-events-none"></div>
           <NowScreeningSection trailers={trailers} />
         </section>
       )}
 
-      {/* News Section — Warm/amber theme */}
+      {/* News Section */}
       <section
         id="news"
-        className="relative rounded-3xl bg-gradient-to-b from-amber-500/[0.05] to-transparent border border-amber-500/10 p-6 md:p-8 -mx-4 md:mx-0 overflow-hidden"
+        className="mt-14 md:mt-20 pt-6 pb-10 border-t border-white/[0.08] -mx-4 md:mx-0 px-4 md:px-0"
       >
-        <div className="absolute inset-0 pattern-zigzag pointer-events-none"></div>
-        <div className="absolute top-0 left-1/2 w-80 h-64 bg-amber-500/8 rounded-full blur-[100px] -translate-y-1/2 -translate-x-1/2 pointer-events-none"></div>
         <NewsSection
           news={news}
           placements={placementsBySection('Latest News')}
