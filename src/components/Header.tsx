@@ -113,7 +113,7 @@ export default function Header({ stats }: HeaderProps) {
             <Link
               href="/submit"
               onClick={() => setMenuOpen(false)}
-              className="flex items-center justify-center mt-3 mb-2 py-3.5 text-sm font-semibold bg-primary text-white rounded-lg min-h-[48px] transition-all hover:bg-blue-600"
+              className="flex items-center justify-center mt-3 mb-2 py-3.5 text-sm font-semibold border border-white/[0.2] text-foreground hover:bg-white/[0.06] rounded-lg min-h-[48px] transition-all"
             >
               Submit an Opportunity
             </Link>

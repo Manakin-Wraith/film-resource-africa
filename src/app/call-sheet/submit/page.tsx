@@ -68,7 +68,7 @@ export default function SubmitCallSheetPage() {
           </div>
           <h1 className="text-4xl font-bold font-heading text-foreground mb-6">Listing Submitted!</h1>
           <p className="text-xl text-foreground/70 mb-10 leading-relaxed">
-            Thank you for posting on The Call Sheet. Our team will review your listing and publish it shortly. You'll receive an email when it goes live.
+            Thank you for posting on The Call Sheet. Our team will review your listing and publish it shortly. You&apos;ll receive an email when it goes live.
           </p>
           <Link
             href="/call-sheet"

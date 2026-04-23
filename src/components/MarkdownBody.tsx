@@ -83,7 +83,7 @@ function normaliseContent(raw: string): string {
 
 export default function MarkdownBody({ content }: { content: string }) {
   const pCount = useRef(0);
-  // Reset counter on each render
+  // eslint-disable-next-line react-hooks/refs
   pCount.current = 0;
 
   const normalisedContent = normaliseContent(sanitizeContent(content));

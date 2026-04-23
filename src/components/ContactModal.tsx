@@ -70,7 +70,7 @@ export default function ContactModal({ isOpen, onClose, inquiryType = 'general',
                 </div>
                 <div className="space-y-2">
                   <h3 className="text-2xl font-bold font-heading">Message Sent!</h3>
-                  <p className="text-foreground/60">We'll get back to you at your email soon.</p>
+                  <p className="text-foreground/60">We&apos;ll get back to you at your email soon.</p>
                 </div>
               </div>
             ) : (
@@ -79,7 +79,7 @@ export default function ContactModal({ isOpen, onClose, inquiryType = 'general',
                   <h2 className="text-3xl font-bold font-heading flex items-center gap-3">
                     <Mail className="text-primary" /> Get in Touch
                   </h2>
-                  <p className="text-foreground/60">Have a question or feedback? We'd love to hear from you.</p>
+                  <p className="text-foreground/60">Have a question or feedback? We&apos;d love to hear from you.</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-5">
