@@ -1,6 +1,6 @@
 # FRA Editorial Redesign — Product Requirements Document
 
-**Version:** 1.6  
+**Version:** 1.7  
 **Date:** 2026-04-23  
 **Status:** In Progress  
 **Owner:** G. Mostert  
@@ -277,13 +277,25 @@ The single most important item in a section receives a **cover story card**:
 
 ---
 
-### Phase 7 — Community Spotlight + Final QA
-**Goal:** Community Spotlight page editorial treatment, then full site QA pass.
-- [ ] `/community-spotlight` — editorial profile layout, remove glass/gradients
-- [ ] Cross-browser + responsive QA (375px, 390px, 428px, 768px, 1280px, 1440px)
-- [ ] Accessibility audit (contrast, focus states, touch target sizes)
+### Phase 7 — Community Spotlight + Secondary Pages
+**Goal:** Community Spotlight editorial treatment plus all secondary pages.
+- [x] `/community-spotlight` — editorial header (section-rule-accent + rubric), surface story cards, clean amber submit form
+- [x] `/call-sheet` — editorial header (section-rule-success + Crew Calls rubric), listing count; CallSheetClient: surface cards, clean filter tabs, category left-border accent preserved
+- [x] `/industry` — editorial header (section-rule-muted + Industry rubric), listing count; IndustryDirectoryClient: surface cards, surface-raised selects, gradient filter tabs removed
+- [x] `/rebate-calculator` — coming-soon page: 5 feature cards explaining the tool, DTIC status note, newsletter CTA
 
-**Exit criteria:** Full site cohesive. Ship-ready.
+**Exit criteria:** All public-facing pages on the editorial design system. ✅
+
+---
+
+### Phase 8 — Final QA
+**Goal:** Cross-breakpoint and accessibility audit before ship.
+- [ ] Responsive QA (375px, 390px, 428px, 768px, 1280px, 1440px) — all pages
+- [ ] Accessibility audit: contrast ratios, focus ring visibility, touch targets ≥44px
+- [ ] Check for any remaining `glass-card`, `backdrop-blur`, gradient h1 usage site-wide
+- [ ] Performance check — no LCP/CLS regressions
+
+**Exit criteria:** Full site cohesive and ship-ready.
 
 ---
 
@@ -340,8 +352,9 @@ These are reference points for the *feeling* to aim for — not to copy.
 | Phase 4 — Article + Detail Pages | ✅ Complete | 2026-04-23 | 2026-04-23 |
 | Phase 5 — Polish + Core Pages | ✅ Complete | 2026-04-23 | 2026-04-23 |
 | Phase 6 — Country Pages | ✅ Complete | 2026-04-23 | 2026-04-23 |
-| Phase 7 — Community Spotlight + Final QA | 🔄 In progress | 2026-04-23 | — |
+| Phase 7 — Community Spotlight + Secondary Pages | ✅ Complete | 2026-04-23 | 2026-04-23 |
+| Phase 8 — Final QA | 🔄 In progress | 2026-04-23 | — |
 
 ---
 
-*Last updated: 2026-04-23 — v1.6: Phase 6 complete. Phase 7 starting (Community Spotlight, responsive QA, accessibility audit).*
+*Last updated: 2026-04-23 — v1.7: Phase 7 complete. All public pages on the editorial design system. Phase 8 is final QA (responsive, accessibility, glass-card audit).*
