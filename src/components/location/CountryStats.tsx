@@ -7,7 +7,7 @@ interface CountryStatsProps {
 
 export default function CountryStats({ country }: CountryStatsProps) {
   return (
-    <section id="resources" className="glass-card rounded-[2rem] p-8 border border-white/10">
+    <section id="resources" className="rounded-xl p-6 border border-white/[0.08]" style={{ background: 'var(--surface)' }}>
       <h2 className="text-2xl font-bold font-heading mb-6">Industry at a Glance</h2>
 
       <div className="space-y-6">

@@ -30,7 +30,7 @@ export default function CountryOpportunities({ opportunities, countryName }: Cou
         <h2 className="text-2xl font-bold font-heading mb-6">
           Opportunities in {countryName}
         </h2>
-        <div className="glass-card rounded-[2rem] p-12 border border-white/10 text-center">
+        <div className="rounded-xl p-10 border border-white/[0.08] text-center" style={{ background: 'var(--surface)' }}>
           <p className="text-foreground/50 text-lg mb-4">
             We&apos;re building our {countryName} opportunities database.
           </p>
@@ -88,7 +88,8 @@ export default function CountryOpportunities({ opportunities, countryName }: Cou
           <div
             key={opp.id}
             id={`opp-${opp.id}`}
-            className="glass-card rounded-[1.5rem] p-6 border border-white/10 hover:-translate-y-1 hover:shadow-[0_12px_24px_-8px_rgba(59,130,246,0.15)] transition-all group"
+            className="rounded-xl p-5 border border-white/[0.08] hover:border-white/[0.16] transition-all group"
+            style={{ background: 'var(--surface)' }}
           >
             <div className="flex items-start justify-between gap-3 mb-3">
               <h3 className="font-bold font-heading text-base leading-snug group-hover:text-primary transition-colors">

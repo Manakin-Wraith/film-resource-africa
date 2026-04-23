@@ -68,7 +68,7 @@ export default function CountryDirectory({ listings, countryName }: CountryDirec
           <h2 className="text-2xl md:text-3xl font-bold font-heading">Film Services Directory</h2>
         </div>
 
-        <div className="glass-card rounded-[2rem] p-10 border border-white/10 text-center">
+        <div className="rounded-xl p-10 border border-white/[0.08] text-center" style={{ background: 'var(--surface)' }}>
           <Globe className="w-12 h-12 text-primary/30 mx-auto mb-4" />
           <h3 className="text-xl font-heading font-bold mb-2">No listings yet for {countryName}</h3>
           <p className="text-foreground/50 mb-6 max-w-md mx-auto">
@@ -120,8 +120,8 @@ export default function CountryDirectory({ listings, countryName }: CountryDirec
           onClick={() => setTypeFilter('all')}
           className={`flex items-center gap-1.5 px-4 py-2 min-h-[40px] rounded-xl font-semibold text-xs whitespace-nowrap transition-all duration-300 border ${
             typeFilter === 'all'
-              ? 'bg-gradient-to-r from-primary to-blue-600 text-white border-transparent shadow-lg'
-              : 'bg-white/5 hover:bg-white/10 border-white/10 text-foreground/70 hover:text-foreground'
+              ? 'border-white/[0.2] text-foreground'
+              : 'border-white/[0.08] hover:border-white/[0.16] text-foreground/60 hover:text-foreground'
           }`}
         >
           <LayoutGrid size={14} />
@@ -138,8 +138,8 @@ export default function CountryDirectory({ listings, countryName }: CountryDirec
               onClick={() => setTypeFilter(key)}
               className={`flex items-center gap-1.5 px-4 py-2 min-h-[40px] rounded-xl font-semibold text-xs whitespace-nowrap transition-all duration-300 border ${
                 typeFilter === key
-                  ? `bg-gradient-to-r ${dt.gradient} text-white border-transparent shadow-lg`
-                  : 'bg-white/5 hover:bg-white/10 border-white/10 text-foreground/70 hover:text-foreground'
+                  ? 'border-white/[0.2] text-foreground'
+                  : 'border-white/[0.08] hover:border-white/[0.16] text-foreground/60 hover:text-foreground'
               }`}
             >
               <Icon size={14} className={typeFilter === key ? 'text-white' : dt.color} />
@@ -181,7 +181,8 @@ export default function CountryDirectory({ listings, countryName }: CountryDirec
                 transition={{ duration: 0.3, type: 'spring', bounce: 0.3 }}
                 key={listing.id}
                 onClick={() => setSelected(listing)}
-                className="glass-card rounded-[1.5rem] p-5 flex flex-col hover:-translate-y-1 hover:shadow-[0_16px_32px_-10px_rgba(59,130,246,0.25)] transition-all duration-300 group cursor-pointer border border-white/10 overflow-hidden relative"
+                className="rounded-xl p-5 flex flex-col hover:border-white/[0.16] transition-all duration-200 group cursor-pointer border border-white/[0.08] overflow-hidden"
+                style={{ background: 'var(--surface)' }}
               >
                 {/* Badges */}
                 <div className="flex items-start justify-between mb-3">
@@ -269,7 +270,8 @@ export default function CountryDirectory({ listings, countryName }: CountryDirec
           {filteredData.length === 0 && (
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-              className="col-span-full text-center py-12 glass-card rounded-[2rem] border border-white/5"
+              className="col-span-full text-center py-12 rounded-xl border border-white/[0.06]"
+              style={{ background: 'var(--surface)' }}
             >
               <Search className="w-10 h-10 text-primary/50 mx-auto mb-3" />
               <h3 className="text-lg font-heading font-bold mb-1">No matches</h3>
@@ -280,7 +282,7 @@ export default function CountryDirectory({ listings, countryName }: CountryDirec
       </motion.div>
 
       {/* Suggest a listing CTA */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 glass-card rounded-2xl p-6 border border-white/10">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-xl p-5 border border-white/[0.08]" style={{ background: 'var(--surface)' }}>
         <div>
           <p className="font-bold font-heading text-sm">Know someone in {countryName}&apos;s film industry?</p>
           <p className="text-foreground/50 text-xs">Help grow the directory — add a company, crew member, or service.</p>

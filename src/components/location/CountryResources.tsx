@@ -42,7 +42,8 @@ export default function CountryResources({ resources, associations, countryName 
             return (
               <div
                 key={resource.name}
-                className="glass-card rounded-2xl p-5 border border-white/10 hover:-translate-y-0.5 hover:shadow-lg transition-all group"
+                className="rounded-xl p-5 border border-white/[0.08] hover:border-white/[0.16] transition-all group"
+              style={{ background: 'var(--surface)' }}
               >
                 <div className="flex items-start justify-between gap-3 mb-2">
                   <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider border ${config.bg} ${config.color}`}>

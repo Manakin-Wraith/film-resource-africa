@@ -34,7 +34,8 @@ export default function CountryFAQ({ countryName, faqs }: CountryFAQProps) {
         {faqs.map((faq, index) => (
           <details
             key={index}
-            className="glass-card rounded-2xl border border-white/10 group"
+            className="rounded-xl border border-white/[0.08] group"
+            style={{ background: 'var(--surface)' }}
             {...(index === 0 ? { open: true } : {})}
           >
             <summary className="px-6 py-5 cursor-pointer font-bold text-foreground/90 hover:text-primary transition-colors list-none flex items-center justify-between gap-4">

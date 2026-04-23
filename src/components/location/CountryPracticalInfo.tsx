@@ -17,7 +17,7 @@ export default function CountryPracticalInfo({ info, countryName }: CountryPract
   ];
 
   return (
-    <section aria-label={`Practical production information for ${countryName}`} className="glass-card rounded-[2rem] p-6 border border-white/10">
+    <section aria-label={`Practical production information for ${countryName}`} className="rounded-xl p-6 border border-white/[0.08]" style={{ background: 'var(--surface)' }}>
       <h3 className="flex items-center gap-2 text-lg font-bold font-heading mb-4">
         <div className="w-8 h-8 rounded-xl bg-blue-500/20 flex items-center justify-center border border-blue-500/20">
           <Info size={16} className="text-blue-400" />

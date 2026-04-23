@@ -162,7 +162,7 @@ export default async function CountryPage({ params }: PageProps) {
     : null;
 
   return (
-    <main className="min-h-screen relative overflow-hidden">
+    <main className="min-h-screen">
       {/* Structured Data */}
       <script
         type="application/ld+json"
@@ -188,7 +188,7 @@ export default async function CountryPage({ params }: PageProps) {
       )}
 
       {/* Breadcrumbs */}
-      <div className="relative z-10 container mx-auto px-4 pt-6">
+      <div className="container mx-auto px-4 pt-6">
         <Breadcrumbs
           items={[
             { name: 'Home', href: '/' },
@@ -202,7 +202,7 @@ export default async function CountryPage({ params }: PageProps) {
       <CountryHero country={countryData} opportunityCount={opportunities.length} />
 
       {/* Main content */}
-      <div className="relative z-10 container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-10">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left column — opportunities */}
           <div className="lg:col-span-2 space-y-12">
@@ -231,13 +231,13 @@ export default async function CountryPage({ params }: PageProps) {
             />
 
             {/* CTA to main directory */}
-            <div className="glass-card rounded-[2rem] p-8 border border-white/10 text-center">
-              <p className="text-foreground/60 mb-4">
+            <div className="rounded-xl p-6 border border-white/[0.08] text-center" style={{ background: 'var(--surface)' }}>
+              <p className="text-sm mb-4" style={{ color: 'var(--foreground-secondary)' }}>
                 Looking for opportunities beyond {countryData.name}?
               </p>
               <Link
                 href="/"
-                className="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-bold hover:bg-primary/90 transition-colors"
+                className="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-600 transition-colors text-sm"
               >
                 Browse All African Opportunities
               </Link>
@@ -262,19 +262,20 @@ export default async function CountryPage({ params }: PageProps) {
             />
 
             {/* Newsletter signup */}
-            <div className="glass-card rounded-[2rem] p-6 border border-white/10">
-              <h3 className="text-lg font-bold font-heading mb-2">
+            <div className="rounded-xl p-5 border border-white/[0.08]" style={{ background: 'var(--surface)' }}>
+              <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--foreground-tertiary)' }}>Stay Updated</p>
+              <h3 className="text-[15px] font-bold font-heading mb-1">
                 Get {countryData.name} Updates
               </h3>
-              <p className="text-sm text-foreground/50 mb-4">
-                Receive deadline alerts and new opportunities for {countryData.name}.
+              <p className="text-[13px] mb-4" style={{ color: 'var(--foreground-secondary)' }}>
+                Deadline alerts and new opportunities for {countryData.name}.
               </p>
               <NewsletterCTA variant="hero" />
             </div>
 
             {/* Link to other countries */}
-            <div className="glass-card rounded-[2rem] p-6 border border-white/10">
-              <h3 className="text-lg font-bold font-heading mb-4">Other Countries</h3>
+            <div className="rounded-xl p-5 border border-white/[0.08]" style={{ background: 'var(--surface)' }}>
+              <p className="text-[10px] font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--foreground-tertiary)' }}>Explore</p>
               <Link
                 href="/film-opportunities"
                 className="text-primary hover:text-blue-400 text-sm font-medium transition-colors"

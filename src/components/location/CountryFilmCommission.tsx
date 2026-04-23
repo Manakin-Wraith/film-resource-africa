@@ -11,7 +11,7 @@ export default function CountryFilmCommission({ commission, productionGuideUrl, 
   if (!commission) return null;
 
   return (
-    <section aria-label={`${countryName} film commission`} className="glass-card rounded-[2rem] p-6 border border-white/10">
+    <section aria-label={`${countryName} film commission`} className="rounded-xl p-6 border border-white/[0.08]" style={{ background: 'var(--surface)' }}>
       <h3 className="flex items-center gap-2 text-lg font-bold font-heading mb-4">
         <div className="w-8 h-8 rounded-xl bg-emerald-500/20 flex items-center justify-center border border-emerald-500/20">
           <Landmark size={16} className="text-emerald-400" />
