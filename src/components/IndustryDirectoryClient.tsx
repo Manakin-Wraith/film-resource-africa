@@ -65,8 +65,8 @@ export default function IndustryDirectoryClient({ initialData }: { initialData: 
             placeholder="Search companies, crew, services, schools..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-white/5 border border-white/10 rounded-2xl pl-13 pr-5 py-4 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-foreground placeholder:text-foreground/30 backdrop-blur-md"
-            style={{ paddingLeft: '3.25rem' }}
+            className="w-full border border-white/[0.12] rounded-xl pl-12 pr-5 py-3 focus:outline-none focus:border-primary/50 transition-colors text-foreground placeholder:text-foreground/30 text-sm"
+            style={{ background: 'var(--surface-raised)', paddingLeft: '3.25rem' }}
           />
           {search && (
             <button onClick={() => setSearch('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-foreground/40 hover:text-foreground transition-colors text-sm font-medium">
@@ -82,11 +82,12 @@ export default function IndustryDirectoryClient({ initialData }: { initialData: 
         <div className="flex md:flex-wrap md:justify-center gap-2 overflow-x-auto pb-2 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-thin snap-x snap-mandatory">
           <button
             onClick={() => setTypeFilter('all')}
-            className={`flex items-center gap-1.5 md:gap-2 px-4 md:px-5 py-2.5 min-h-[44px] rounded-xl font-semibold text-sm whitespace-nowrap snap-start flex-shrink-0 transition-all duration-300 border backdrop-blur-md ${
+            className={`flex items-center gap-1.5 md:gap-2 px-4 md:px-5 py-2.5 min-h-[44px] rounded-xl font-semibold text-sm whitespace-nowrap snap-start flex-shrink-0 transition-all border ${
               typeFilter === 'all'
-                ? 'bg-gradient-to-r from-primary to-blue-600 text-white border-transparent shadow-lg'
-                : 'bg-white/5 hover:bg-white/10 border-white/10 text-foreground/70 hover:text-foreground'
+                ? 'border-white/[0.2] text-foreground'
+                : 'border-white/[0.08] text-foreground/60 hover:border-white/[0.14] hover:text-foreground'
             }`}
+            style={typeFilter === 'all' ? { background: 'var(--surface-raised)' } : { background: 'var(--surface)' }}
           >
             <LayoutGrid size={16} className={typeFilter === 'all' ? 'text-white' : 'text-foreground/40'} />
             All
@@ -97,11 +98,12 @@ export default function IndustryDirectoryClient({ initialData }: { initialData: 
               <button
                 key={key}
                 onClick={() => setTypeFilter(key)}
-                className={`flex items-center gap-1.5 md:gap-2 px-4 md:px-5 py-2.5 min-h-[44px] rounded-xl font-semibold text-sm whitespace-nowrap snap-start flex-shrink-0 transition-all duration-300 border backdrop-blur-md ${
+                className={`flex items-center gap-1.5 md:gap-2 px-4 md:px-5 py-2.5 min-h-[44px] rounded-xl font-semibold text-sm whitespace-nowrap snap-start flex-shrink-0 transition-all border ${
                   typeFilter === key
-                    ? `bg-gradient-to-r ${dt.gradient} text-white border-transparent shadow-lg`
-                    : 'bg-white/5 hover:bg-white/10 border-white/10 text-foreground/70 hover:text-foreground'
+                    ? 'border-white/[0.2] text-foreground'
+                    : 'border-white/[0.08] text-foreground/60 hover:border-white/[0.14] hover:text-foreground'
                 }`}
+                style={typeFilter === key ? { background: 'var(--surface-raised)' } : { background: 'var(--surface)' }}
               >
                 <Icon size={16} className={typeFilter === key ? 'text-white' : dt.color} />
                 <span className="hidden md:inline">{dt.label}</span>
@@ -114,7 +116,8 @@ export default function IndustryDirectoryClient({ initialData }: { initialData: 
 
           <Link
             href="/industry/submit"
-            className="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 border backdrop-blur-md bg-accent/10 hover:bg-accent/20 border-accent/20 text-accent hover:scale-105 flex-shrink-0"
+            className="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-colors border border-white/[0.12] hover:border-white/[0.2] flex-shrink-0"
+            style={{ background: 'var(--surface)', color: 'var(--foreground-secondary)' }}
           >
             <Plus size={16} />
             <span>Add Listing</span>
@@ -127,7 +130,8 @@ export default function IndustryDirectoryClient({ initialData }: { initialData: 
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs font-medium text-foreground/70 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-primary/50"
+              className="border border-white/[0.12] rounded-xl px-3 py-2 text-xs font-medium focus:outline-none focus:border-primary/50 transition-colors"
+              style={{ background: 'var(--surface-raised)', color: 'var(--foreground-secondary)' }}
             >
               <option value="all">All Categories</option>
               {categories.map(c => <option key={c} value={c}>{c}</option>)}
@@ -138,7 +142,8 @@ export default function IndustryDirectoryClient({ initialData }: { initialData: 
             <select
               value={countryFilter}
               onChange={(e) => setCountryFilter(e.target.value)}
-              className="bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs font-medium text-foreground/70 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-primary/50"
+              className="border border-white/[0.12] rounded-xl px-3 py-2 text-xs font-medium focus:outline-none focus:border-primary/50 transition-colors"
+              style={{ background: 'var(--surface-raised)', color: 'var(--foreground-secondary)' }}
             >
               <option value="all">All Countries</option>
               {countries.map(c => <option key={c} value={c}>{c}</option>)}
@@ -165,7 +170,8 @@ export default function IndustryDirectoryClient({ initialData }: { initialData: 
                 transition={{ duration: 0.3, type: "spring", bounce: 0.3 }}
                 key={listing.id}
                 onClick={() => setSelected(listing)}
-                className={`glass-card rounded-[1.5rem] p-6 flex flex-col hover:-translate-y-1 hover:shadow-[0_16px_32px_-10px_rgba(59,130,246,0.25)] transition-all duration-300 group cursor-pointer border border-white/10 overflow-hidden relative`}
+                className="rounded-xl p-5 flex flex-col hover:border-white/[0.16] transition-all group cursor-pointer border border-white/[0.08] overflow-hidden"
+                style={{ background: 'var(--surface)' }}
               >
                 {/* Top row: badges */}
                 <div className="flex items-start justify-between mb-4">
@@ -252,14 +258,15 @@ export default function IndustryDirectoryClient({ initialData }: { initialData: 
           {filteredData.length === 0 && (
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-              className="col-span-full text-center py-24 glass-card rounded-[2rem] border border-white/5"
+              className="col-span-full text-center py-20 rounded-xl border border-white/[0.06]"
+              style={{ background: 'var(--surface)' }}
             >
               <Search className="w-12 h-12 text-primary/50 mx-auto mb-4" />
               <h3 className="text-xl font-heading font-bold mb-2">No listings found</h3>
               <p className="text-foreground/60 mb-6">Try adjusting your filters or search terms.</p>
               <Link
                 href="/industry/submit"
-                className="inline-flex items-center gap-2 bg-primary hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-2xl transition-all shadow-lg text-sm"
+                className="inline-flex items-center gap-2 bg-primary hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-xl transition-colors text-sm"
               >
                 <Plus size={16} /> Add the first listing
               </Link>

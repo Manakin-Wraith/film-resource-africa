@@ -28,20 +28,27 @@ export default async function IndustryDirectoryPage() {
   const listings = await getDirectoryListings();
 
   return (
-    <main className="min-h-screen relative overflow-hidden">
-      <div className="relative z-10 container mx-auto px-4 py-12 space-y-12 pt-32 md:pt-28">
+    <main className="min-h-screen">
+      <div className="container mx-auto px-4 py-10 space-y-10">
         <Breadcrumbs items={[{ name: 'Home', href: '/' }, { name: 'Industry Directory', href: '/industry' }]} />
         <ItemListJsonLd
           name="African Film Industry Directory"
           description="Production companies, crew, services, and training programs across Africa and the diaspora."
           items={listings.slice(0, 50).map((l) => ({ name: l.name, url: `/industry#listing-${l.id}` }))}
         />
-        {/* Hero */}
-        <header className="relative text-center space-y-4">
-          <h1 className="text-4xl md:text-6xl font-bold font-heading tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
-            Industry Directory
-          </h1>
-          <p className="text-lg opacity-80 max-w-2xl mx-auto">
+        {/* Editorial header */}
+        <header>
+          <div className="section-rule section-rule-muted" />
+          <span className="section-rubric">Industry</span>
+          <div className="flex items-baseline justify-between">
+            <h1 className="text-[26px] md:text-[38px] font-bold font-heading leading-tight text-foreground">
+              Industry Directory
+            </h1>
+            <span className="text-sm font-medium ml-4 flex-shrink-0" style={{ color: 'var(--foreground-tertiary)' }}>
+              {listings.length} listing{listings.length !== 1 ? 's' : ''}
+            </span>
+          </div>
+          <p className="mt-3 text-[15px] leading-relaxed max-w-2xl" style={{ color: 'var(--foreground-secondary)' }}>
             Production companies, crew, services, and training programs across Africa and the diaspora.
           </p>
         </header>

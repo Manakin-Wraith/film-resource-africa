@@ -50,8 +50,8 @@ export default function CallSheetClient({ initialData }: { initialData: CallShee
             placeholder="Search roles, productions, locations..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-white/5 border border-white/10 rounded-2xl pl-13 pr-5 py-4 focus:outline-none focus:ring-2 focus:ring-teal-500/50 transition-all text-foreground placeholder:text-foreground/30 backdrop-blur-md"
-            style={{ paddingLeft: '3.25rem' }}
+            className="w-full border border-white/[0.12] rounded-xl pl-12 pr-5 py-3 focus:outline-none focus:border-primary/50 transition-colors text-foreground placeholder:text-foreground/30 text-sm"
+            style={{ background: 'var(--surface-raised)', paddingLeft: '3.25rem' }}
           />
           {search && (
             <button
@@ -75,11 +75,12 @@ export default function CallSheetClient({ initialData }: { initialData: CallShee
             return (
               <button
                 key={f}
-                className={`flex items-center gap-1.5 md:gap-2 px-4 md:px-5 py-2.5 min-h-[44px] rounded-xl font-semibold text-sm whitespace-nowrap snap-start flex-shrink-0 transition-all duration-300 border backdrop-blur-md ${
+                className={`flex items-center gap-1.5 md:gap-2 px-4 md:px-5 py-2.5 min-h-[44px] rounded-xl font-semibold text-sm whitespace-nowrap snap-start flex-shrink-0 transition-all border ${
                   filter === f
-                    ? `bg-gradient-to-r ${activeGradient} text-white border-transparent shadow-lg`
-                    : 'bg-white/5 hover:bg-white/10 border-white/10 text-foreground/70 hover:text-foreground'
+                    ? 'border-white/[0.2] text-foreground'
+                    : 'border-white/[0.08] text-foreground/60 hover:border-white/[0.14] hover:text-foreground'
                 }`}
+                style={filter === f ? { background: 'var(--surface-raised)' } : { background: 'var(--surface)' }}
                 onClick={() => setFilter(f)}
               >
                 <Icon size={16} className={filter === f ? 'text-white' : (catStyle?.color || 'text-foreground/40')} />
@@ -93,7 +94,8 @@ export default function CallSheetClient({ initialData }: { initialData: CallShee
 
           <Link
             href="/call-sheet/submit"
-            className="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 border backdrop-blur-md bg-teal-500/10 hover:bg-teal-500/20 border-teal-500/20 text-teal-400 hover:scale-105 flex-shrink-0"
+            className="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-colors border border-white/[0.12] hover:border-white/[0.2] flex-shrink-0"
+            style={{ background: 'var(--surface)', color: 'var(--foreground-secondary)' }}
           >
             <Plus size={16} />
             <span>Post a Listing</span>
@@ -127,7 +129,8 @@ export default function CallSheetClient({ initialData }: { initialData: CallShee
                 transition={{ duration: 0.3, type: 'spring', bounce: 0.3 }}
                 key={listing.id}
                 onClick={() => setSelectedListing(listing)}
-                className={`glass-card rounded-[1.5rem] p-6 flex flex-col hover:-translate-y-1 hover:shadow-[0_16px_32px_-10px_rgba(13,148,136,0.25)] transition-all duration-300 group cursor-pointer border border-white/10 overflow-hidden relative border-l-[3px] ${catStyle.borderLeft}`}
+                className={`rounded-xl p-5 flex flex-col hover:border-white/[0.16] transition-all group cursor-pointer border border-white/[0.08] overflow-hidden border-l-[3px] ${catStyle.borderLeft}`}
+                style={{ background: 'var(--surface)' }}
               >
                 {/* Badges row */}
                 <div className="flex items-start justify-between mb-4 relative z-10">
@@ -193,14 +196,15 @@ export default function CallSheetClient({ initialData }: { initialData: CallShee
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="col-span-full text-center py-24 glass-card rounded-[2rem] border border-white/5"
+              className="col-span-full text-center py-20 rounded-xl border border-white/[0.06]"
+              style={{ background: 'var(--surface)' }}
             >
               <Search className="w-12 h-12 text-teal-500/50 mx-auto mb-4" />
               <h3 className="text-xl font-heading font-bold mb-2">No listings yet</h3>
               <p className="text-foreground/60 mb-6">Be the first to post — productions are looking for talent like you.</p>
               <Link
                 href="/call-sheet/submit"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 text-white font-bold transition-all hover:-translate-y-0.5 shadow-lg shadow-teal-500/20"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary hover:bg-blue-600 text-white font-bold transition-colors text-sm"
               >
                 <Plus size={18} />
                 Post a Listing

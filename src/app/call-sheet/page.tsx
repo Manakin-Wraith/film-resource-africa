@@ -28,22 +28,27 @@ export default async function CallSheetPage() {
   const listings = await getCallSheetListings();
 
   return (
-    <main className="min-h-screen relative overflow-hidden">
-      <div className="relative z-10 container mx-auto px-4 py-12 space-y-12">
+    <main className="min-h-screen">
+      <div className="container mx-auto px-4 py-10 space-y-10">
         <Breadcrumbs items={[{ name: 'Home', href: '/' }, { name: 'The Call Sheet', href: '/call-sheet' }]} />
         <ItemListJsonLd
           name="The Call Sheet — African Film Crew Calls"
           description="Paid crew calls, writing rooms, and co-production opportunities for African film productions."
           items={listings.slice(0, 50).map((l) => ({ name: l.title, url: `/call-sheet#listing-${l.id}` }))}
         />
-        {/* Hero */}
-        <header className="relative text-center space-y-5 py-6 -mx-4 px-4 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-teal-500/[0.05] to-transparent pointer-events-none rounded-3xl"></div>
-          <div className="absolute top-0 left-1/2 w-96 h-64 bg-teal-500/8 rounded-full blur-[120px] -translate-y-1/2 -translate-x-1/2 pointer-events-none"></div>
-          <h1 className="relative text-5xl md:text-7xl font-bold font-heading tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-cyan-400">
-            The Call Sheet
-          </h1>
-          <p className="relative text-xl opacity-80 max-w-2xl mx-auto">
+        {/* Editorial header */}
+        <header>
+          <div className="section-rule section-rule-success" />
+          <span className="section-rubric">Crew Calls</span>
+          <div className="flex items-baseline justify-between">
+            <h1 className="text-[26px] md:text-[38px] font-bold font-heading leading-tight text-foreground">
+              The Call Sheet
+            </h1>
+            <span className="text-sm font-medium ml-4 flex-shrink-0" style={{ color: 'var(--foreground-tertiary)' }}>
+              {listings.length} listing{listings.length !== 1 ? 's' : ''}
+            </span>
+          </div>
+          <p className="mt-3 text-[15px] leading-relaxed max-w-2xl" style={{ color: 'var(--foreground-secondary)' }}>
             Where African productions find their next key collaborator. Every listing is paid, verified, and approved.
           </p>
         </header>
