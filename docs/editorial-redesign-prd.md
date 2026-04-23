@@ -1,0 +1,299 @@
+# FRA Editorial Redesign — Product Requirements Document
+
+**Version:** 1.0  
+**Date:** 2026-04-23  
+**Status:** In Progress  
+**Owner:** G. Mostert  
+
+---
+
+## 1. Vision
+
+Film Resource Africa is the publication of record for African film opportunity. The current UI reads as a dark SaaS directory — glass morphism, uniform cards, low-opacity colour gradients. Nothing stands out. There is no visual hierarchy and no editorial identity.
+
+This redesign repositions FRA as a **curated publication** — type-led, grid-based, authoritative — drawing on the tradition of African editorial print design while remaining a modern, functional web product. The goal is not a cosmetic refresh. It is a design language change.
+
+**Before:** Dark job board with a film grain overlay.  
+**After:** The publication of record for African film.
+
+---
+
+## 2. Design Principles
+
+These principles govern every decision in this redesign. When in doubt, return here.
+
+### 2.1 Type leads, colour follows
+Typography carries hierarchy — size, weight, tracking, and line-height do the work. Colour is reserved for **meaning**: red for urgency, amber for deadlines, blue for action. Colour is never decorative.
+
+### 2.2 Ink-on-paper logic
+Treat the dark background as the page. Elements are placed with intent. White space is not empty — it signals curation. Not everything needs a border, a glow, or a gradient.
+
+### 2.3 Curated over comprehensive
+An editor chose what appears here. The design should feel like decisions were made. Featured placements, cover-story treatments, and editorial picks communicate authority. A directory that shows everything equally is a spreadsheet.
+
+### 2.4 Urgency is visual, not just labelled
+A deadline in 48 hours must *look* different from a rolling application. Status is not a badge — it is expressed through scale, colour temperature, and position on the page.
+
+### 2.5 African editorial identity
+Draw from pan-African print traditions: Drum, The Continent, FESPACO poster design, West African newspaper typography. FRA should feel native to the industry it serves, not like a Silicon Valley product with a diversity skin.
+
+### 2.6 Timeless over trendy
+Glass morphism, blob gradients, and animated grain are trends. A strong typographic grid and restrained colour palette will look authoritative in five years. We are building the latter.
+
+---
+
+## 3. Typography System
+
+### 3.1 Typefaces (existing — no new packages)
+| Role | Font | Notes |
+|---|---|---|
+| Display / Masthead | Outfit (font-heading) | Heavy weight, large scale |
+| Body / UI | Inter (font-sans) | Regular and medium weights |
+
+### 3.2 Type Scale
+| Token | Size | Weight | Usage |
+|---|---|---|---|
+| `display-xl` | 80–96px | 800 | Hero headline only |
+| `display` | 56–72px | 700 | Section hero / cover story title |
+| `headline` | 32–40px | 700 | Section titles |
+| `rubric` | 11px, tracking-widest, uppercase | 600 | Section labels / column headers |
+| `subhead` | 20–24px | 600 | Card titles, article titles |
+| `body` | 16px | 400 | Article body, descriptions |
+| `caption` | 13px | 400 | Datelines, metadata, tags |
+| `label` | 11px | 600 | Badges, status chips |
+
+### 3.3 Hierarchy Rules
+- Maximum **three type sizes** visible in any single viewport.
+- Section rubrics always appear above section headlines, always uppercase, always `opacity-40`.
+- Card titles never exceed `text-xl` (20px).
+- Deadlines displayed as editorial **datelines** (`caption` size, amber, left-aligned) — not inside badge chips.
+
+---
+
+## 4. Colour System
+
+### 4.1 Palette
+| Token | Value | Role |
+|---|---|---|
+| `background` | `#09090b` | Page canvas |
+| `surface` | `#111113` | Card / section background |
+| `surface-raised` | `#18181b` | Hover / elevated state |
+| `border` | `rgba(255,255,255,0.08)` | Structural borders |
+| `border-strong` | `rgba(255,255,255,0.16)` | Emphasis borders |
+| `foreground` | `#fafafa` | Primary text |
+| `foreground-secondary` | `rgba(250,250,250,0.55)` | Secondary text |
+| `foreground-tertiary` | `rgba(250,250,250,0.35)` | Captions, metadata |
+| `primary` | `#3b82f6` | Action, apply CTA, links |
+| `accent` | `#f59e0b` | Deadlines, featured, editorial picks |
+| `urgent` | `#ef4444` | Closing soon, critical deadlines |
+| `success` | `#22c55e` | Open / confirmed status |
+
+### 4.2 Colour Usage Rules
+- **Glass morphism gradients (`from-[colour]/[0.07]`) are removed entirely.** Sections are differentiated by layout and typography, not tinted backgrounds.
+- Accent (`#f59e0b`) used at **full saturation** for: deadline datelines, editorial pick markers, featured section rule lines.
+- Urgent (`#ef4444`) used at **full saturation** for: closing soon section rule, countdown text on critical deadlines.
+- Primary (`#3b82f6`) used at full saturation for: "Apply" buttons, links, active tab indicators.
+- Background gradients: maximum one subtle radial (`from-white/[0.02]`) per major section. No blob animations on content pages.
+
+---
+
+## 5. Layout System
+
+### 5.1 Grid
+- Desktop: 12-column grid, 1280px max-width, 24px gutters
+- Tablet: 8-column
+- Mobile: 4-column, 16px gutters
+
+### 5.2 Spacing Scale
+Remove the current uniform `p-6 md:p-8` applied to every section. Introduce intentional variation:
+
+| Context | Spacing |
+|---|---|
+| Page top padding | `py-16 md:py-24` |
+| Between major sections | `mt-20 md:mt-28` |
+| Between subsections | `mt-10 md:mt-14` |
+| Section internal padding | `pt-6 pb-10` |
+| Card internal padding | `p-5` (compact) or `p-6` (standard) |
+
+### 5.3 Section Anatomy
+Every section follows this structure:
+
+```
+[Rule line — 1px, coloured]
+[Rubric label — 11px uppercase tracking-widest opacity-40]
+[Section headline — 32-40px bold]
+[Optional standfirst — 16px secondary text]
+[Content area — grid or list, defined per section]
+```
+
+### 5.4 Featured / Cover Story Treatment
+The single most important item in a section receives a **cover story card**:
+- Full section width (not fixed 360px)
+- Large title (`display` scale)
+- Image behind or beside at editorial proportions (16:9 or 3:2)
+- Deadline displayed prominently as a dateline, not a chip
+- "Apply Now" button at full primary blue
+
+---
+
+## 6. Component Inventory
+
+### 6.1 Components to redesign (in priority order)
+
+| # | Component | Current State | Target State | Status |
+|---|---|---|---|---|
+| 1 | **Design tokens** | globals.css partial | Full token set + section anatomy | ⬜ Not started |
+| 2 | **Hero / Masthead** | Large gradient text, newsletter CTA | Masthead treatment, publication identity | ⬜ Not started |
+| 3 | **Section rubric** | Icon + title only | Rule + rubric label + headline + standfirst | ⬜ Not started |
+| 4 | **Closing Soon — featured card** | Same as all other cards | Cover story card, full-width, red rule, large deadline | ⬜ Not started |
+| 5 | **Closing Soon — section** | Horizontal carousel | Featured card (1st) + horizontal strip (rest) | ⬜ Not started |
+| 6 | **Opportunity card** | glass-card uniform | Clean dark surface, dateline deadline, no glow | ⬜ Not started |
+| 7 | **Just Added — section** | Horizontal carousel | 2-column grid, compact card variant | ⬜ Not started |
+| 8 | **Open Now — section** | Horizontal carousel | Horizontal carousel (kept, reduced decoration) | ⬜ Not started |
+| 9 | **New Wave — section** | Horizontal carousel | Editorial list (title + category + deadline per row) | ⬜ Not started |
+| 10 | **News card** | Amber-tinted glass card | Editorial article entry (image left/top, headline, dateline) | ⬜ Not started |
+| 11 | **News section** | Uniform card grid | Featured article (large) + secondary grid | ⬜ Not started |
+| 12 | **SponsorTicker** | Amber glow card | Clean masthead-strip treatment | ⬜ Not started |
+| 13 | **Header / Nav** | Glass panel | Masthead bar with publication wordmark | ⬜ Not started |
+| 14 | **MobileTabBar** | Dark glass | Clean dark bar, stronger active state | ⬜ Not started |
+| 15 | **OpportunityModal** | Glass panel | Editorial detail sheet — full content layout | ⬜ Not started |
+| 16 | **BrowseByCountry** | Card grid | Editorial map/index treatment | ⬜ Not started |
+| 17 | **Footer** | Minimal | Masthead footer with publication credit | ⬜ Not started |
+
+### 6.2 Components NOT changing in this sprint
+- Admin UI (AdminClient.tsx) — functional, not public-facing
+- Scanner / backend scripts
+- Auth / login page
+- Submit forms (submit, call-sheet, industry submit)
+- Rebate calculator
+
+---
+
+## 7. Page Scope
+
+| Page | Priority | Notes |
+|---|---|---|
+| `/` — Homepage | P0 | Primary target. All sections. |
+| `/news` — News index | P1 | Editorial article list |
+| `/news/[slug]` — Article | P1 | Already uses MarkdownBody — enhance with editorial layout |
+| `/film-opportunities/[country]` | P2 | Country page hero + opportunity list |
+| `/community-spotlight` | P2 | Spotlight feature — editorial profile layout |
+| `/call-sheet` | P3 | Functional page — light touch |
+| `/industry` | P3 | Directory — light touch |
+
+---
+
+## 8. Implementation Phases
+
+### Phase 1 — Foundation *(Design tokens + global CSS)*
+**Goal:** Establish the design language without touching any component.
+- [ ] Remove blob gradient animations from `page.tsx`
+- [ ] Add full colour token set to `globals.css`
+- [ ] Define section anatomy CSS classes (`.section-rubric`, `.section-rule`, `.editorial-label`)
+- [ ] Define new spacing tokens
+- [ ] Remove `glass-card` usage from section wrappers (keep for modals only)
+
+**Exit criteria:** Tokens defined. Section wrappers cleaned up. No visual regression beyond reduced gradient noise.
+
+---
+
+### Phase 2 — Hero + Closing Soon *(The flagship moment)*
+**Goal:** One section that immediately demonstrates the editorial direction.
+- [ ] Redesign homepage hero as a masthead — publication name treatment, stronger typographic scale
+- [ ] Implement section rubric pattern for "Closing Soon"
+- [ ] Build featured cover-story card for the #1 most urgent opportunity
+- [ ] Apply full-strength red rule and amber deadline dateline
+- [ ] Validate on mobile
+
+**Exit criteria:** Hero + Closing Soon looks unmistakably editorial. Can be shown alongside the rest of the page without clash.
+
+---
+
+### Phase 3 — Remaining Homepage Sections
+**Goal:** Extend the editorial language across all homepage sections.
+- [ ] Redesign Just Added → 2-column compact grid
+- [ ] Redesign Open Now → cleaned carousel (reduced decoration)
+- [ ] Redesign New Wave → editorial list format
+- [ ] Redesign News section → featured article + secondary grid
+- [ ] Redesign SponsorTicker → masthead strip
+- [ ] Redesign BrowseByCountry → editorial index
+
+**Exit criteria:** Homepage is cohesive. Every section has distinct layout. No two adjacent sections look the same.
+
+---
+
+### Phase 4 — Article + Opportunity Pages
+**Goal:** The detail views match the editorial quality of the homepage.
+- [ ] Redesign OpportunityModal → editorial detail sheet
+- [ ] Enhance `/news/[slug]` with editorial page layout (pull quotes, dateline, author credit)
+- [ ] Redesign news index page
+
+**Exit criteria:** Article and opportunity detail feel like magazine pages, not modal overlays.
+
+---
+
+### Phase 5 — Navigation + Polish
+**Goal:** The chrome matches the content.
+- [ ] Redesign Header/Nav as masthead bar
+- [ ] Redesign MobileTabBar
+- [ ] Country pages (P2)
+- [ ] Community Spotlight page
+- [ ] Cross-browser + responsive QA
+- [ ] Accessibility audit (contrast, focus states)
+
+**Exit criteria:** Full site cohesive. Ship-ready.
+
+---
+
+## 9. Design Reference Points
+
+These are reference points for the *feeling* to aim for — not to copy.
+
+| Reference | What to borrow |
+|---|---|
+| **The Continent** (African newspaper) | Column-based layout, strong headline hierarchy, authoritative tone |
+| **Filmmaker Magazine** | Editorial rubrics, type-led design, film industry specificity |
+| **Monocle** | Restrained colour, deliberate white space, masthead identity |
+| **FESPACO poster tradition** | Bold type, pan-African colour confidence, event urgency |
+| **Sight & Sound** | Publication authority, critical voice, film-specific visual grammar |
+| **Le Monde Diplomatique** | Dense but readable, editorial trust through typography |
+
+**What to avoid:** Linear gradients on every surface. Glassmorphism everywhere. Badge-heavy cards. Animated blob shadows. Anything that looks like a SaaS dashboard.
+
+---
+
+## 10. Success Metrics
+
+| Metric | How to measure |
+|---|---|
+| Visual hierarchy | Can a new user identify the most urgent opportunity in <5 seconds without scrolling? |
+| Section differentiation | Do adjacent sections look visually distinct without reading the title? |
+| Editorial identity | Does a screenshot of FRA look like a publication or a directory? |
+| Mobile usability | Can all primary actions (read, apply, browse) be completed one-handed on mobile? |
+| Performance | No regression in Core Web Vitals (LCP, CLS) after redesign |
+| Engagement | Click-through rate on opportunities (tracked via existing analytics) improves post-launch |
+
+---
+
+## 11. Open Questions
+
+- [ ] Do we introduce a condensed typeface for display/masthead use, or stay with Outfit? (Outfit Bold is good but not a true editorial condensed)
+- [ ] Light mode: is the editorial direction dark-only, or does it translate to a warm off-white light mode?
+- [ ] Film stills / editorial imagery: do we source/allow cover images for the featured card, or keep it type-and-logo?
+- [ ] Does the "New Wave: AI Filmmaking" section stay as a permanent section or become a rotating editorial theme?
+
+---
+
+## 12. Progress Tracker
+
+| Phase | Status | Started | Completed |
+|---|---|---|---|
+| Phase 1 — Foundation | ⬜ Not started | — | — |
+| Phase 2 — Hero + Closing Soon | ⬜ Not started | — | — |
+| Phase 3 — Homepage Sections | ⬜ Not started | — | — |
+| Phase 4 — Article + Detail Pages | ⬜ Not started | — | — |
+| Phase 5 — Nav + Polish | ⬜ Not started | — | — |
+
+---
+
+*Last updated: 2026-04-23*
