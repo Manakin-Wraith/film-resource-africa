@@ -41,15 +41,32 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen">
-      <div className="container mx-auto px-4 py-10 md:py-16">
-        <header className="text-center space-y-6 py-8 -mx-4 px-4">
-          <h1 className="text-5xl md:text-7xl font-bold font-heading tracking-tight text-foreground">
-            African Film Opportunities
-          </h1>
-          <p className="text-xl max-w-2xl mx-auto" style={{ color: 'var(--foreground-secondary)' }}>
-            A curated directory of global screenwriting labs, co-production funds, and pitch forums for African creators.
-          </p>
-          <NewsletterCTA variant="hero" />
+      <div className="container mx-auto px-4 pt-8 pb-0 md:pt-12">
+        {/* ── Masthead ────────────────────────────────────────────── */}
+        <header className="pb-10 md:pb-14">
+          {/* Top rule + rubric */}
+          <div className="border-t border-white/[0.16] pt-4 flex items-center justify-between mb-3">
+            <span className="section-rubric mb-0">Film Resource Africa</span>
+            <span className="section-rubric mb-0 hidden md:block">est. 2024</span>
+          </div>
+          {/* Accent rule */}
+          <div className="h-[2px] bg-accent mb-8 md:mb-10" />
+
+          {/* Headline + body — stacked on mobile, split on desktop */}
+          <div className="md:grid md:grid-cols-[1fr_320px] md:gap-16 md:items-end">
+            <h1 className="text-[52px] leading-[1.02] md:text-[88px] font-extrabold font-heading tracking-tight text-foreground mb-8 md:mb-0">
+              African Film<br />Opportunities.
+            </h1>
+            <div className="md:pb-1">
+              <p className="text-[15px] md:text-base leading-relaxed mb-6" style={{ color: 'var(--foreground-secondary)' }}>
+                Screenwriting labs, co-production funds, and pitch forums — curated for African creators worldwide.
+              </p>
+              <NewsletterCTA variant="hero" />
+            </div>
+          </div>
+
+          {/* Bottom rule */}
+          <div className="h-[1px] mt-10 md:mt-12" style={{ background: 'var(--border)' }} />
         </header>
 
         <SponsorTicker partners={partners} />

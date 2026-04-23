@@ -1,13 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { AlertTriangle, Clock, Sparkles, Plus } from 'lucide-react';
+import { Clock, Sparkles, Plus } from 'lucide-react';
 import { Opportunity, NewsItem, trackSponsoredClick } from '@/app/actions';
 import type { InquiryType, SponsoredPlacement } from '@/app/actions';
 import OpportunityRow from './OpportunityRow';
 import NewsSection from './NewsSection';
 import NowScreeningSection from './NowScreeningSection';
 import NewsletterShowcase from './NewsletterShowcase';
+import ClosingSoonSection from './ClosingSoonSection';
 import DirectoryClient from './DirectoryClient';
 import OpportunityModal from './OpportunityModal';
 import ContactModal from './ContactModal';
@@ -78,25 +79,8 @@ export default function HomeClient({ closingSoon, openNow, newWave, justAdded, n
         </section>
       )}
 
-      {/* Closing Soon Section */}
-      {closingSoon.length > 0 && (
-        <section
-          id="closing-soon"
-          className="mt-14 md:mt-20 pt-6 pb-10 border-t border-white/[0.08] -mx-4 md:mx-0 px-4 md:px-0"
-        >
-          <OpportunityRow
-            opportunities={closingSoon}
-            title="Closing Soon"
-            subtitle="Deadlines approaching — apply now or miss out"
-            icon={
-              <div className="w-10 h-10 rounded-2xl bg-red-500/20 flex items-center justify-center border border-red-500/20">
-                <AlertTriangle size={20} className="text-red-400" />
-              </div>
-            }
-            onSelect={setSelectedOpp}
-          />
-        </section>
-      )}
+      {/* Closing Soon — editorial featured section */}
+      <ClosingSoonSection opportunities={closingSoon} onSelect={setSelectedOpp} />
 
       {/* Open Now Section */}
       {openNow.length > 0 && (

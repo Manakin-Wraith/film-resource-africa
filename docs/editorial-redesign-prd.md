@@ -221,11 +221,11 @@ The single most important item in a section receives a **cover story card**:
 
 ### Phase 2 — MobileTabBar + Hero + Closing Soon *(The flagship moment)*
 **Goal:** Fix the primary mobile navigation and deliver one section that immediately demonstrates the editorial direction.
-- [ ] **MobileTabBar** — clean dark bar, stronger active state, `env(safe-area-inset-bottom)` padding, 44px touch targets
-- [ ] Redesign homepage hero as a masthead — publication name treatment, stronger typographic scale, stacked on mobile
-- [ ] Implement section rubric pattern for "Closing Soon"
-- [ ] Build featured cover-story card for the #1 most urgent opportunity (image stacked on mobile, full-width CTA)
-- [ ] Apply full-strength red rule and amber deadline dateline
+- [x] **MobileTabBar** — clean dark bar, stronger active state, `env(safe-area-inset-bottom)` padding, 44px touch targets
+- [x] Redesign homepage hero as masthead — rubric, 2px accent rule, 52/88px headline, split layout desktop
+- [x] Implement section rubric pattern for "Closing Soon" (red rule → rubric → headline)
+- [x] Build featured cover-story card for the #1 most urgent opportunity (image banner, full-width CTA on mobile)
+- [x] Apply full-strength red rule and amber deadline dateline
 - [ ] Validate on mobile (iPhone SE width 375px minimum)
 
 **Exit criteria:** MobileTabBar is editorial. Hero + Closing Soon looks unmistakably editorial at 375px and 1280px.
@@ -315,7 +315,7 @@ These are reference points for the *feeling* to aim for — not to copy.
 | Phase | Status | Started | Completed |
 |---|---|---|---|
 | Phase 1 — Foundation | ✅ Complete | 2026-04-23 | 2026-04-23 |
-| Phase 2 — MobileTabBar + Hero + Closing Soon | 🔄 In progress | 2026-04-23 | — |
+| Phase 2 — MobileTabBar + Hero + Closing Soon | ✅ Complete | 2026-04-23 | 2026-04-23 |
 | Phase 3 — Homepage Sections | ⬜ Not started | — | — |
 | Phase 4 — Article + Detail Pages | ⬜ Not started | — | — |
 | Phase 5 — Nav + Polish | ⬜ Not started | — | — |

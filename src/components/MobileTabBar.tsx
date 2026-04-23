@@ -21,7 +21,6 @@ export default function MobileTabBar() {
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      // Hide on scroll down, show on scroll up
       if (currentScrollY > lastScrollY && currentScrollY > 100) {
         setVisible(false);
       } else {
@@ -34,11 +33,15 @@ export default function MobileTabBar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
 
+  const hidden = pathname.startsWith('/admin') || pathname.startsWith('/login');
+
   const isActive = (href: string) => {
     if (href === '/') return pathname === '/';
     if (href.startsWith('/#')) return pathname === '/';
     return pathname.startsWith(href);
   };
+
+  if (hidden) return null;
 
   return (
     <nav
@@ -46,8 +49,14 @@ export default function MobileTabBar() {
         visible ? 'translate-y-0' : 'translate-y-full'
       }`}
     >
-      <div className="glass-panel backdrop-blur-xl border-t border-white/10 pb-[env(safe-area-inset-bottom)]">
-        <div className="flex items-center justify-around px-2 py-2">
+      <div
+        className="border-t border-white/[0.08]"
+        style={{
+          background: 'var(--background)',
+          paddingBottom: 'env(safe-area-inset-bottom)',
+        }}
+      >
+        <div className="flex items-center justify-around px-1 py-1">
           {tabs.map((tab) => {
             const active = isActive(tab.href);
             const Icon = tab.icon;
@@ -55,14 +64,23 @@ export default function MobileTabBar() {
               <Link
                 key={tab.href}
                 href={tab.href}
-                className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl min-w-[64px] transition-all duration-200 ${
+                className={`flex flex-col items-center gap-1 px-3 py-2.5 min-w-[60px] min-h-[52px] transition-all duration-200 ${
                   active
-                    ? 'text-primary'
-                    : 'text-foreground/40 active:text-foreground/70'
+                    ? 'text-foreground'
+                    : 'text-foreground/35 active:text-foreground/60'
                 }`}
               >
-                <Icon size={22} strokeWidth={active ? 2.5 : 1.5} />
-                <span className={`text-[10px] font-semibold ${active ? 'text-primary' : ''}`}>
+                <div className="relative">
+                  {active && (
+                    <span className="absolute -top-2 left-1/2 -translate-x-1/2 w-5 h-[2px] bg-primary rounded-full" />
+                  )}
+                  <Icon size={22} strokeWidth={active ? 2.5 : 1.5} />
+                </div>
+                <span
+                  className={`text-[10px] font-semibold tracking-wide ${
+                    active ? 'text-primary' : ''
+                  }`}
+                >
                   {tab.label}
                 </span>
               </Link>
