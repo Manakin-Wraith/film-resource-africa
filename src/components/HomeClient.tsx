@@ -73,7 +73,11 @@ export default function HomeClient({ closingSoon, openNow, newWave, justAdded, n
       <NewWaveSection opportunities={newWave} onSelect={setSelectedOpp} />
 
       {/* Now Screening — Trailers & First Looks */}
-      {trailers.length > 0 && <NowScreeningSection trailers={trailers} />}
+      {trailers.length > 0 && (
+        <div className="mt-14 md:mt-20">
+          <NowScreeningSection trailers={trailers} />
+        </div>
+      )}
 
       {/* News — featured + secondary grid */}
       <NewsSection
@@ -83,7 +87,9 @@ export default function HomeClient({ closingSoon, openNow, newWave, justAdded, n
       />
 
       {/* Newsletter Showcase CTA */}
-      <NewsletterShowcase />
+      <div className="mt-14 md:mt-20">
+        <NewsletterShowcase />
+      </div>
 
       {/* Browse by Country */}
       <BrowseByCountry countries={countriesWithCounts} />
