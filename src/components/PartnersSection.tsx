@@ -64,12 +64,9 @@ export default function PartnersSection() {
 
   return (
     <>
-      <section className="relative rounded-3xl bg-gradient-to-b from-white/[0.03] to-transparent border border-white/10 p-6 md:p-10 -mx-4 md:mx-0 overflow-hidden">
-        {/* Background glow */}
-        <div className="absolute top-0 left-1/2 w-96 h-64 bg-primary/5 rounded-full blur-[120px] -translate-y-1/2 -translate-x-1/2 pointer-events-none"></div>
-
+      <section className="rounded-3xl border border-white/[0.08] p-6 md:p-10 -mx-4 md:mx-0" style={{ background: 'var(--surface)' }}>
         {/* Header */}
-        <div className="relative text-center space-y-3 mb-10">
+        <div className="text-center space-y-3 mb-10">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-foreground/60 uppercase tracking-widest">
             <Handshake size={14} className="text-primary" />
             Ecosystem
@@ -83,7 +80,7 @@ export default function PartnersSection() {
         </div>
 
         {/* Category Grid */}
-        <div className="relative grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-10">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-10">
           {partnerCategories.map((cat) => {
             const colors = colorMap[cat.color];
             return (
@@ -106,7 +103,7 @@ export default function PartnersSection() {
         </div>
 
         {/* CTA */}
-        <div className="relative text-center space-y-4">
+        <div className="text-center space-y-4">
           <div className="inline-flex flex-col sm:flex-row items-center gap-3">
             <button
               onClick={() => openModal('partner')}

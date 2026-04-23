@@ -33,7 +33,8 @@ export default function SubmitComponent() {
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="max-w-2xl mx-auto glass-card rounded-[3rem] p-12 text-center border-green-500/20 shadow-[0_20px_60px_-15px_rgba(34,197,94,0.3)] mt-20"
+          className="max-w-2xl mx-auto rounded-2xl p-12 text-center border border-white/[0.08] mt-20"
+          style={{ background: 'var(--surface)' }}
         >
           <div className="w-24 h-24 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mx-auto mb-8 border border-green-500/30">
             <CheckCircle2 size={48} />
@@ -84,11 +85,9 @@ export default function SubmitComponent() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="glass-card rounded-[2.5rem] p-6 md:p-12 mb-20 shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
-
+        <form onSubmit={handleSubmit} className="rounded-2xl p-6 md:p-12 mb-20 border border-white/[0.08]" style={{ background: 'var(--surface)' }}>
           {/* Logo Upload Section */}
-          <div className="mb-10 flex flex-col md:flex-row items-start md:items-center gap-6 bg-white/5 p-6 rounded-3xl border border-white/10 relative z-10">
+          <div className="mb-10 flex flex-col md:flex-row items-start md:items-center gap-6 bg-white/5 p-6 rounded-2xl border border-white/[0.08]">
             <div className="w-24 h-24 bg-black/20 rounded-2xl border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-inner">
                {formData.logo ? (
                  <img src={formData.logo} className="w-full h-full object-contain" alt="Logo preview" />
@@ -127,7 +126,7 @@ export default function SubmitComponent() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8 relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8">
             {fields.map(field => (
               <div key={field.key} className={field.multiline ? 'col-span-1 md:col-span-2' : ''}>
                 <label className="block font-semibold mb-2 flex items-center gap-2">
@@ -156,7 +155,7 @@ export default function SubmitComponent() {
             ))}
           </div>
 
-          <div className="mt-12 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-6 relative z-10">
+          <div className="mt-12 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-6">
             <p className="text-sm opacity-60 text-center sm:text-left flex items-start gap-2 max-w-md">
               <AlertCircle size={18} className="flex-shrink-0 mt-0.5 text-accent" />
               Submissions are reviewed by our team to ensure accuracy and relevance entirely before publishing.
@@ -164,7 +163,7 @@ export default function SubmitComponent() {
             <button 
               type="submit" 
               disabled={isSubmitting}
-              className={`w-full sm:w-auto px-10 py-4 rounded-2xl bg-gradient-to-r from-primary to-blue-600 hover:to-blue-500 text-white font-bold text-lg transition-all shadow-xl shadow-primary/20 hover:-translate-y-1 hover:shadow-primary/40 flex items-center justify-center gap-3 ${isSubmitting ? 'opacity-70 cursor-not-allowed transform-none' : ''}`}
+              className={`w-full sm:w-auto px-10 py-4 rounded-2xl bg-primary hover:bg-blue-600 text-white font-bold text-lg transition-colors flex items-center justify-center gap-3 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
             >
               {isSubmitting ? 'Submitting...' : 'Submit Opportunity'}
             </button>

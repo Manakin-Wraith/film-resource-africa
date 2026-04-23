@@ -105,7 +105,8 @@ export function NewsGhostCard({ variant, sectionLabel, valueProp, slotsAvailable
     return (
       <div
         onClick={onClaim}
-        className="ghost-card-branded glass-card rounded-[1.5rem] border border-amber-500/20 hover:border-amber-500/40 hover:-translate-y-1 hover:shadow-[0_12px_30px_-10px_rgba(245,158,11,0.2)] transition-all duration-300 group flex flex-col overflow-hidden cursor-pointer"
+        className="ghost-card-branded rounded-xl border border-amber-500/20 hover:border-amber-500/40 transition-all duration-300 group flex flex-col overflow-hidden cursor-pointer"
+        style={{ background: 'var(--surface)' }}
       >
         {/* Shimmer image area */}
         <div className="relative w-full h-44 ghost-card-shimmer flex items-center justify-center overflow-hidden">
@@ -141,8 +142,8 @@ export function NewsGhostCard({ variant, sectionLabel, valueProp, slotsAvailable
   return (
     <div
       onClick={onClaim}
-      className="ghost-card-minimal glass-card rounded-[1.5rem] border-2 border-dashed border-white/10 hover:border-amber-500/30 hover:-translate-y-1 hover:shadow-[0_12px_30px_-10px_rgba(245,158,11,0.12)] transition-all duration-300 group flex flex-col items-center justify-center text-center cursor-pointer opacity-60 hover:opacity-100 overflow-hidden"
-      style={{ minHeight: 320 }}
+      className="ghost-card-minimal rounded-xl border-2 border-dashed border-white/10 hover:border-amber-500/30 transition-all duration-300 group flex flex-col items-center justify-center text-center cursor-pointer opacity-60 hover:opacity-100 overflow-hidden"
+      style={{ minHeight: 320, background: 'var(--surface)' }}
     >
       <div className="p-8 flex flex-col items-center justify-center flex-grow">
         <div className="w-14 h-14 rounded-2xl border-2 border-dashed border-white/15 group-hover:border-amber-500/40 flex items-center justify-center mb-5 transition-all duration-300 group-hover:bg-amber-500/5">

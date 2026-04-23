@@ -21,7 +21,7 @@ function PartnerCard({ partner }: { partner: Partner }) {
       target={partner.website ? '_blank' : undefined}
       rel="noopener noreferrer"
       onClick={() => trackSponsoredClick(null, String(partner.id), 'ticker', null)}
-      className={`group relative flex flex-col md:flex-row items-center gap-6 p-6 md:p-8 rounded-2xl border backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 ${
+      className={`group relative flex flex-col md:flex-row items-center gap-6 p-6 md:p-8 rounded-2xl border transition-all duration-300 hover:-translate-y-0.5 ${
         isSponsor
           ? 'sponsor-chip-shimmer bg-gradient-to-br from-amber-500/10 via-amber-600/5 to-yellow-500/5 border-amber-400/25 hover:border-amber-400/50 hover:shadow-[0_12px_40px_-10px_rgba(245,158,11,0.2)]'
           : 'partner-chip-glow bg-gradient-to-br from-blue-500/8 via-cyan-500/5 to-blue-600/5 border-blue-400/20 hover:border-blue-400/40 hover:shadow-[0_12px_40px_-10px_rgba(59,130,246,0.15)]'
@@ -117,7 +117,7 @@ function PartnerChip({ partner }: { partner: Partner }) {
       target={partner.website ? '_blank' : undefined}
       rel="noopener noreferrer"
       onClick={() => trackSponsoredClick(null, String(partner.id), 'ticker', null)}
-      className={`flex items-center gap-3.5 px-6 py-3.5 rounded-2xl border backdrop-blur-md whitespace-nowrap transition-all duration-300 hover:scale-[1.03] flex-shrink-0 group ${
+      className={`flex items-center gap-3.5 px-6 py-3.5 rounded-2xl border whitespace-nowrap transition-all duration-300 hover:scale-[1.03] flex-shrink-0 group ${
         isSponsor
           ? 'sponsor-chip-shimmer bg-gradient-to-r from-amber-500/10 to-yellow-500/5 border-amber-400/30 hover:border-amber-400/50'
           : 'partner-chip-glow bg-gradient-to-r from-blue-500/10 to-cyan-500/5 border-blue-400/20 hover:border-blue-400/40'

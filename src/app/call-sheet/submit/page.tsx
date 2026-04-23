@@ -61,7 +61,8 @@ export default function SubmitCallSheetPage() {
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="max-w-2xl mx-auto glass-card rounded-[3rem] p-12 text-center border-teal-500/20 shadow-[0_20px_60px_-15px_rgba(13,148,136,0.3)] mt-20"
+          className="max-w-2xl mx-auto rounded-2xl p-12 text-center border border-white/[0.08] mt-20"
+          style={{ background: 'var(--surface)' }}
         >
           <div className="w-24 h-24 bg-teal-500/20 text-teal-400 rounded-full flex items-center justify-center mx-auto mb-8 border border-teal-500/30">
             <CheckCircle2 size={48} />
@@ -89,7 +90,7 @@ export default function SubmitCallSheetPage() {
           <Link href="/call-sheet" className="inline-flex items-center gap-2 text-teal-400 hover:text-teal-300 font-medium mb-6 transition-colors self-start md:self-auto">
             <ArrowLeft size={18} /> Back to The Call Sheet
           </Link>
-          <h1 className="text-4xl md:text-5xl font-bold font-heading mb-4 text-balance bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-cyan-400">
+          <h1 className="text-4xl md:text-5xl font-bold font-heading mb-4 text-balance text-teal-400">
             Post a Listing
           </h1>
           <p className="text-lg text-foreground/60 max-w-2xl text-balance">
@@ -97,10 +98,8 @@ export default function SubmitCallSheetPage() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="glass-card rounded-[2.5rem] p-6 md:p-12 mb-20 shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-teal-500/5 rounded-full blur-3xl pointer-events-none"></div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8 relative z-10">
+        <form onSubmit={handleSubmit} className="rounded-2xl p-6 md:p-12 mb-20 border border-white/[0.08]" style={{ background: 'var(--surface)' }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8">
             {/* Role Title */}
             <div>
               <label className="block font-semibold mb-2 flex items-center gap-2">
@@ -351,7 +350,7 @@ export default function SubmitCallSheetPage() {
           </div>
 
           {/* Submit */}
-          <div className="mt-12 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-6 relative z-10">
+          <div className="mt-12 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-6">
             <p className="text-sm opacity-60 text-center sm:text-left flex items-start gap-2 max-w-md">
               <AlertCircle size={18} className="flex-shrink-0 mt-0.5 text-teal-400" />
               All listings are reviewed before publishing. Unpaid roles are not accepted.
@@ -359,7 +358,7 @@ export default function SubmitCallSheetPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`w-full sm:w-auto px-10 py-4 rounded-2xl bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white font-bold text-lg transition-all shadow-xl shadow-teal-500/20 hover:-translate-y-1 hover:shadow-teal-500/40 flex items-center justify-center gap-3 ${isSubmitting ? 'opacity-70 cursor-not-allowed transform-none' : ''}`}
+              className={`w-full sm:w-auto px-10 py-4 rounded-2xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-lg transition-colors flex items-center justify-center gap-3 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
             >
               {isSubmitting ? 'Submitting...' : 'Submit Listing'}
             </button>

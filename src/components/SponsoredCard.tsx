@@ -227,7 +227,7 @@ export function NewsSponsoredCard({
     const ctaText = placement.cta_text || 'Visit Website';
 
     return (
-      <div className="glass-card rounded-[1.5rem] border border-purple-500/20 hover:border-purple-500/40 hover:-translate-y-1 hover:shadow-[0_12px_30px_-10px_rgba(168,85,247,0.2)] transition-all duration-300 group flex flex-col overflow-hidden">
+      <div className="rounded-xl border border-purple-500/20 hover:border-purple-500/40 transition-all duration-300 group flex flex-col overflow-hidden" style={{ background: 'var(--surface)' }}>
         {/* Featured image or logo banner */}
         <div className="relative w-full h-44 overflow-hidden">
           {placement.partner_featured_image_url ? (
@@ -312,7 +312,8 @@ export function NewsSponsoredCard({
       return (
         <div
           onClick={() => onClaim(placement)}
-          className="ghost-card-branded glass-card rounded-[1.5rem] border border-amber-500/20 hover:border-amber-500/40 hover:-translate-y-1 hover:shadow-[0_12px_30px_-10px_rgba(245,158,11,0.2)] transition-all duration-300 group flex flex-col overflow-hidden cursor-pointer"
+          className="ghost-card-branded rounded-xl border border-amber-500/20 hover:border-amber-500/40 transition-all duration-300 group flex flex-col overflow-hidden cursor-pointer"
+          style={{ background: 'var(--surface)' }}
         >
           <div className="relative w-full h-44 ghost-card-shimmer flex items-center justify-center overflow-hidden">
             {placement.partner_logo_url ? (
@@ -356,8 +357,8 @@ export function NewsSponsoredCard({
     return (
       <div
         onClick={() => onClaim(placement)}
-        className="ghost-card-minimal glass-card rounded-[1.5rem] border-2 border-dashed border-amber-500/15 hover:border-amber-500/30 hover:-translate-y-1 hover:shadow-[0_12px_30px_-10px_rgba(245,158,11,0.12)] transition-all duration-300 group flex flex-col items-center justify-center text-center cursor-pointer opacity-70 hover:opacity-100 overflow-hidden"
-        style={{ minHeight: 320 }}
+        className="ghost-card-minimal rounded-xl border-2 border-dashed border-amber-500/15 hover:border-amber-500/30 transition-all duration-300 group flex flex-col items-center justify-center text-center cursor-pointer opacity-70 hover:opacity-100 overflow-hidden"
+        style={{ minHeight: 320, background: 'var(--surface)' }}
       >
         <div className="p-8 flex flex-col items-center justify-center flex-grow">
           {placement.partner_logo_url ? (
@@ -393,7 +394,8 @@ export function NewsSponsoredCard({
     return (
       <div
         onClick={() => onClaim(null)}
-        className="ghost-card-branded glass-card rounded-[1.5rem] border border-amber-500/20 hover:border-amber-500/40 hover:-translate-y-1 hover:shadow-[0_12px_30px_-10px_rgba(245,158,11,0.2)] transition-all duration-300 group flex flex-col overflow-hidden cursor-pointer"
+        className="ghost-card-branded rounded-xl border border-amber-500/20 hover:border-amber-500/40 transition-all duration-300 group flex flex-col overflow-hidden cursor-pointer"
+        style={{ background: 'var(--surface)' }}
       >
         <div className="relative w-full h-44 ghost-card-shimmer flex items-center justify-center overflow-hidden">
           <span className="text-[11px] font-bold uppercase tracking-[3px] text-amber-500/25">Your Logo</span>
@@ -425,13 +427,13 @@ export function NewsSponsoredCard({
   return (
     <div
       onClick={() => onClaim(null)}
-      className="relative glass-card rounded-[1.5rem] border border-amber-500/25 hover:border-amber-500/50 hover:-translate-y-1 hover:shadow-[0_16px_40px_-10px_rgba(245,158,11,0.25)] transition-all duration-300 group flex flex-col overflow-hidden cursor-pointer"
+      className="relative rounded-xl border border-amber-500/25 hover:border-amber-500/50 transition-all duration-300 group flex flex-col overflow-hidden cursor-pointer"
+      style={{ background: 'var(--surface)' }}
     >
       {/* Shimmer top banner */}
       <div className="relative w-full h-44 ghost-card-shimmer overflow-hidden flex items-center justify-center">
-        <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-amber-600/5 to-yellow-500/10"></div>
         <div className="relative flex flex-col items-center gap-3">
-          <div className="w-16 h-16 rounded-2xl bg-amber-500/15 border border-amber-400/30 flex items-center justify-center group-hover:scale-110 group-hover:bg-amber-500/25 transition-all duration-300 shadow-[0_0_20px_rgba(245,158,11,0.15)]">
+          <div className="w-16 h-16 rounded-2xl bg-amber-500/15 border border-amber-400/30 flex items-center justify-center group-hover:scale-110 group-hover:bg-amber-500/25 transition-all duration-300">
             <Plus size={28} className="text-amber-400" />
           </div>
           <span className="text-[11px] font-bold uppercase tracking-[4px] text-amber-400/50 group-hover:text-amber-400/80 transition-colors">
@@ -440,15 +442,15 @@ export function NewsSponsoredCard({
         </div>
       </div>
 
-      <div className="p-6 flex flex-col flex-grow bg-gradient-to-b from-transparent to-amber-500/[0.02]">
-        <h3 className="text-xl font-bold font-heading mb-2 bg-clip-text text-transparent bg-gradient-to-r from-amber-400 to-yellow-300 group-hover:from-amber-300 group-hover:to-yellow-200 transition-all">
+      <div className="p-6 flex flex-col flex-grow">
+        <h3 className="text-xl font-bold font-heading mb-2 text-amber-400">
           Get Your Brand Seen
         </h3>
         <p className="text-foreground/50 text-sm leading-relaxed mb-5">
           Reach thousands of African filmmakers, producers & creators right here — where they discover opportunities.
         </p>
         <div className="mt-auto">
-          <span className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-black text-sm font-bold group-hover:from-amber-400 group-hover:to-amber-500 group-hover:shadow-[0_0_20px_rgba(245,158,11,0.3)] transition-all duration-300">
+          <span className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-sm font-bold transition-colors">
             Become a Partner <ArrowRight size={14} />
           </span>
         </div>

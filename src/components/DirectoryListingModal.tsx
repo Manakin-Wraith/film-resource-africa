@@ -82,9 +82,9 @@ export default function DirectoryListingModal({ listing, onClose }: DirectoryLis
             dragConstraints={{ top: 0 }}
             dragElastic={0.2}
             onDragEnd={handleDragEnd}
-            style={isMobile ? { y: dragY } : undefined}
-            className={`w-full glass-card bg-background/95 border border-white/20 overflow-hidden flex flex-col relative shadow-2xl ${
-              isMobile ? 'max-h-[95vh] rounded-t-[2rem]' : 'max-w-3xl max-h-[90vh] rounded-[2.5rem]'
+            style={isMobile ? { y: dragY, background: 'var(--surface)' } : { background: 'var(--surface)' }}
+            className={`w-full border border-white/[0.08] overflow-hidden flex flex-col relative shadow-2xl ${
+              isMobile ? 'max-h-[95vh] rounded-t-2xl' : 'max-w-3xl max-h-[90vh] rounded-2xl'
             }`}
           >
             {isMobile && (
@@ -98,10 +98,10 @@ export default function DirectoryListingModal({ listing, onClose }: DirectoryLis
 
             {/* Floating action buttons — always visible */}
             <div className="absolute top-3 md:top-6 right-4 md:right-6 flex items-center gap-2 z-30">
-              <button onClick={handleShare} className="w-10 h-10 md:w-12 md:h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors border border-white/10 backdrop-blur-md" aria-label="Share">
+              <button onClick={handleShare} className="w-10 h-10 md:w-12 md:h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors border border-white/10" aria-label="Share">
                 <Share2 size={18} />
               </button>
-              <button onClick={onClose} className="w-10 h-10 md:w-12 md:h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors border border-white/10 backdrop-blur-md">
+              <button onClick={onClose} className="w-10 h-10 md:w-12 md:h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors border border-white/10">
                 <X size={20} className="md:w-6 md:h-6" />
               </button>
             </div>

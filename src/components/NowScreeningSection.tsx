@@ -75,7 +75,8 @@ export default function NowScreeningSection({ trailers }: NowScreeningSectionPro
             <Link
               key={item.id}
               href={href}
-              className="flex-shrink-0 w-[300px] md:w-[320px] glass-card rounded-[1.25rem] border border-pink-500/10 hover:border-pink-500/20 hover:-translate-y-1 hover:shadow-[0_12px_30px_-10px_rgba(236,72,153,0.2)] transition-all duration-300 group flex flex-col overflow-hidden"
+              className="flex-shrink-0 w-[300px] md:w-[320px] rounded-xl border border-white/[0.08] hover:border-pink-500/20 transition-all duration-300 group flex flex-col overflow-hidden"
+              style={{ background: 'var(--surface)' }}
             >
               {/* 16:9 thumbnail with play overlay */}
               <div className="relative w-full aspect-video overflow-hidden">

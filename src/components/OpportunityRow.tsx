@@ -70,7 +70,8 @@ export default function OpportunityRow({ opportunities, title, subtitle, icon, o
             <div
               key={opp.id}
               onClick={() => { trackOpportunityClick(opp.title, opp.category || '', title); onSelect(opp); }}
-              className={`glass-card rounded-[1.5rem] min-w-[320px] max-w-[360px] flex-shrink-0 snap-start cursor-pointer border border-white/10 hover:-translate-y-1 hover:shadow-[0_16px_32px_-10px_rgba(59,130,246,0.25)] transition-all duration-300 group flex flex-col border-l-[3px] ${catStyle.borderLeft} overflow-hidden`}
+              className={`rounded-xl min-w-[320px] max-w-[360px] flex-shrink-0 snap-start cursor-pointer border border-white/[0.08] hover:border-white/[0.16] transition-all duration-300 group flex flex-col border-l-[3px] ${catStyle.borderLeft} overflow-hidden`}
+              style={{ background: 'var(--surface)' }}
             >
               <CardVisualHeader
                 logo={opp.logo}

@@ -100,8 +100,8 @@ export default function DirectoryClient({ initialData }: { initialData: Opportun
             placeholder="Search opportunities, funds, labs, festivals..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-white/5 border border-white/10 rounded-2xl pl-13 pr-5 py-4 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-foreground placeholder:text-foreground/30 backdrop-blur-md"
-            style={{ paddingLeft: '3.25rem' }}
+            className="w-full border border-white/[0.12] rounded-xl pr-5 py-3 focus:outline-none focus:border-primary/50 transition-colors text-foreground placeholder:text-foreground/30 text-sm"
+            style={{ background: 'var(--surface-raised)', paddingLeft: '3.25rem' }}
           />
           {search && (
             <button
@@ -126,11 +126,12 @@ export default function DirectoryClient({ initialData }: { initialData: Opportun
             return (
               <button
                 key={f}
-                className={`flex items-center gap-1.5 md:gap-2 px-4 md:px-5 py-2.5 min-h-[44px] rounded-xl font-semibold text-sm whitespace-nowrap snap-start flex-shrink-0 transition-all duration-300 border backdrop-blur-md ${
-                  filter === f 
-                    ? `bg-gradient-to-r ${activeGradient} text-white border-transparent shadow-lg` 
-                    : 'bg-white/5 hover:bg-white/10 border-white/10 text-foreground/70 hover:text-foreground'
+                className={`flex items-center gap-1.5 md:gap-2 px-4 md:px-5 py-2.5 min-h-[44px] rounded-xl font-semibold text-sm whitespace-nowrap snap-start flex-shrink-0 transition-all border ${
+                  filter === f
+                    ? 'border-white/[0.2] text-foreground'
+                    : 'border-white/[0.08] text-foreground/60 hover:border-white/[0.14] hover:text-foreground'
                 }`}
+                style={filter === f ? { background: 'var(--surface-raised)' } : { background: 'var(--surface)' }}
                 onClick={() => {
                   setFilter(f);
                   setTimeout(() => {
@@ -149,7 +150,8 @@ export default function DirectoryClient({ initialData }: { initialData: Opportun
           
           <Link 
             href="/submit"
-            className="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 border backdrop-blur-md bg-accent/10 hover:bg-accent/20 border-accent/20 text-accent hover:scale-105 flex-shrink-0"
+            className="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-colors border border-white/[0.12] hover:border-white/[0.2] flex-shrink-0"
+            style={{ background: 'var(--surface)', color: 'var(--foreground-secondary)' }}
           >
             <Plus size={16} />
             <span>Submit</span>
@@ -185,7 +187,8 @@ export default function DirectoryClient({ initialData }: { initialData: Opportun
                 transition={{ duration: 0.3, type: "spring", bounce: 0.3 }}
                 key={opp.id}
                 onClick={() => setSelectedOpp(opp)}
-                className={`glass-card rounded-[1.5rem] flex flex-col hover:-translate-y-1 hover:shadow-[0_16px_32px_-10px_rgba(59,130,246,0.25)] transition-all duration-300 group cursor-pointer border border-white/10 overflow-hidden relative border-l-[3px] ${catStyle.borderLeft}`}
+                className={`rounded-xl flex flex-col hover:border-white/[0.16] transition-all duration-300 group cursor-pointer border border-white/[0.08] overflow-hidden relative border-l-[3px] ${catStyle.borderLeft}`}
+                style={{ background: 'var(--surface)' }}
               >
                 <CardVisualHeader
                   logo={opp.logo}
@@ -264,7 +267,8 @@ export default function DirectoryClient({ initialData }: { initialData: Opportun
           {filteredData.length === 0 && (
             <motion.div 
               initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-              className="col-span-full text-center py-24 glass-card rounded-[2rem] border border-white/5"
+              className="col-span-full text-center py-24 rounded-xl border border-white/[0.06]"
+              style={{ background: 'var(--surface)' }}
             >
               <Search className="w-12 h-12 text-primary/50 mx-auto mb-4" />
               <h3 className="text-xl font-heading font-bold mb-2">No matches found</h3>

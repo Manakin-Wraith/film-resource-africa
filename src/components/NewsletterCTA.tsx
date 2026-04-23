@@ -85,44 +85,41 @@ export default function NewsletterCTA({
 
   if (variant === 'banner') {
     return (
-      <div className="glass-card rounded-[2rem] p-8 md:p-10 border border-white/10 relative overflow-hidden">
-        <div className="absolute -top-20 -right-20 w-60 h-60 bg-accent/20 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-primary/20 rounded-full blur-3xl"></div>
-        <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
-          <div className="flex-grow text-center md:text-left">
-            <h3 className="text-2xl md:text-3xl font-bold font-heading mb-2">{heading}</h3>
-            <p className="text-foreground/60">{subtext}</p>
+      <div className="rounded-xl p-6 md:p-8 border border-white/[0.08]" style={{ background: 'var(--surface)' }}>
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+          <div className="flex-grow">
+            <h3 className="text-[20px] md:text-[24px] font-bold font-heading mb-1 text-foreground">{heading}</h3>
+            <p className="text-[14px]" style={{ color: 'var(--foreground-secondary)' }}>{subtext}</p>
           </div>
-          <form onSubmit={handleSubscribe} className="flex gap-3 w-full md:w-auto flex-shrink-0">
+          <form onSubmit={handleSubscribe} className="flex gap-2.5 w-full md:w-auto flex-shrink-0">
             <input
               type="email"
               required
               placeholder="your@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="flex-grow md:w-64 bg-white/5 border border-white/10 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-foreground placeholder:text-foreground/30"
+              className="flex-grow md:w-56 border border-white/[0.12] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary/50 transition-colors text-foreground placeholder:text-foreground/30"
+              style={{ background: 'var(--surface-raised)' }}
             />
             <button
               disabled={submitting || subscribed}
               type="submit"
-              className={`px-6 py-4 rounded-2xl font-bold transition-all flex items-center gap-2 shadow-lg whitespace-nowrap ${
-                subscribed
-                  ? 'bg-green-500 text-white'
-                  : 'bg-accent hover:bg-amber-600 text-white shadow-accent/30 hover:-translate-y-0.5'
+              className={`px-5 py-3 rounded-xl font-bold text-sm transition-colors flex items-center gap-2 whitespace-nowrap ${
+                subscribed ? 'bg-success text-white' : 'bg-primary hover:bg-blue-600 text-white'
               }`}
             >
               {submitting ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : subscribed ? (
-                <CheckCircle2 size={20} />
+                <CheckCircle2 size={16} />
               ) : (
-                <Send size={18} />
+                <Send size={15} />
               )}
             </button>
           </form>
         </div>
-        {error && <p className="text-red-400 text-xs mt-2 text-center">{error}</p>}
-        {subscribed && <p className="text-green-400 text-xs mt-2 text-center">Welcome aboard! Check your inbox.</p>}
+        {error && <p className="text-red-400 text-xs mt-3">{error}</p>}
+        {subscribed && <p className="text-sm mt-3 font-medium" style={{ color: 'var(--color-success)' }}>Welcome aboard! Check your inbox.</p>}
       </div>
     );
   }

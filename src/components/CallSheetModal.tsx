@@ -37,7 +37,8 @@ export default function CallSheetModal({ listing, onClose }: CallSheetModalProps
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: 'spring', bounce: 0.2 }}
             onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-2xl max-h-[85vh] overflow-y-auto glass-card rounded-[2rem] p-8 border border-white/10 shadow-2xl"
+            className="relative w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-2xl p-8 border border-white/[0.08] shadow-2xl"
+            style={{ background: 'var(--surface)' }}
           >
             {/* Close button */}
             <button
@@ -159,7 +160,7 @@ export default function CallSheetModal({ listing, onClose }: CallSheetModalProps
                 href={applyUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white font-bold text-lg transition-all shadow-xl shadow-teal-500/20 hover:-translate-y-0.5 hover:shadow-teal-500/30"
+                className="w-full flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-lg transition-colors"
               >
                 Apply Now
                 <ExternalLink size={18} />
