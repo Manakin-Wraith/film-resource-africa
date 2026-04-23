@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { Handshake, Crown, ExternalLink } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import { trackSponsoredClick } from '@/app/actions';
 import type { Partner } from '@/app/actions';
 
@@ -61,7 +62,22 @@ function PartnerCard({ partner }: { partner: Partner }) {
         </div>
 
         {partner.about && (
-          <p className="text-sm text-foreground/50 leading-relaxed mb-3 max-w-lg">{partner.about}</p>
+          <div className="text-sm text-foreground/50 leading-relaxed mb-3 max-w-lg prose-sm prose-invert">
+            <ReactMarkdown
+              components={{
+                p: ({ children }) => <p className="mb-1 last:mb-0">{children}</p>,
+                strong: ({ children }) => <strong className="font-semibold text-foreground/70">{children}</strong>,
+                em: ({ children }) => <em className="italic">{children}</em>,
+                a: ({ href, children }) => (
+                  <a href={href} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-foreground/70 transition-colors" onClick={e => e.stopPropagation()}>
+                    {children}
+                  </a>
+                ),
+              }}
+            >
+              {partner.about}
+            </ReactMarkdown>
+          </div>
         )}
 
         {services.length > 0 && (

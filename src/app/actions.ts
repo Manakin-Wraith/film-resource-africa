@@ -2,6 +2,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
+import { revalidatePath } from 'next/cache';
 import { buildWelcomeEmailHtml } from '@/lib/welcomeEmail';
 import type { Country } from '@/lib/countries';
 
@@ -1051,6 +1052,7 @@ export async function updatePartner(id: number, updates: Partial<Partner>): Prom
     }
   }
 
+  revalidatePath('/');
   return data;
 }
 
