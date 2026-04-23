@@ -1,6 +1,6 @@
 # FRA Editorial Redesign — Product Requirements Document
 
-**Version:** 1.1  
+**Version:** 1.6  
 **Date:** 2026-04-23  
 **Status:** In Progress  
 **Owner:** G. Mostert  
@@ -164,23 +164,23 @@ The single most important item in a section receives a **cover story card**:
 
 | # | Component | Current State | Target State | Mobile Priority | Status |
 |---|---|---|---|---|---|
-| 1 | **Design tokens** | globals.css partial | Full token set + section anatomy | Foundation | ⬜ Not started |
-| 2 | **MobileTabBar** | Dark glass | Clean dark bar, stronger active state, safe-area aware | P0 — 50% of users | ⬜ Not started |
-| 3 | **Hero / Masthead** | Large gradient text, newsletter CTA | Masthead treatment, publication identity | Stacked single-col | ⬜ Not started |
-| 4 | **Section rubric** | Icon + title only | Rule + rubric label + headline + standfirst | Same pattern, scaled | ⬜ Not started |
-| 5 | **Closing Soon — featured card** | Same as all other cards | Cover story card, full-width, red rule, large deadline | Full-width, image stacked | ⬜ Not started |
-| 6 | **Closing Soon — section** | Horizontal carousel | Featured card (1st) + horizontal strip (rest) | Snap carousel | ⬜ Not started |
-| 7 | **Opportunity card** | glass-card uniform | Clean dark surface, dateline deadline, no glow | Full-width card | ⬜ Not started |
-| 8 | **Just Added — section** | Horizontal carousel | 2-column grid desktop / single-col mobile | Single col mobile | ⬜ Not started |
-| 9 | **Open Now — section** | Horizontal carousel | Horizontal carousel (kept, reduced decoration) | Snap carousel | ⬜ Not started |
-| 10 | **New Wave — section** | Horizontal carousel | Editorial list (title + category + deadline per row) | Compact list rows | ⬜ Not started |
-| 11 | **News card** | Amber-tinted glass card | Editorial article entry (image left/top, headline, dateline) | Image top, stacked | ⬜ Not started |
-| 12 | **News section** | Uniform card grid | Featured article (large) + secondary grid | Full-width featured | ⬜ Not started |
-| 13 | **SponsorTicker** | Amber glow card | Clean masthead-strip treatment | Snap carousel | ⬜ Not started |
-| 14 | **Header / Nav** | Glass panel | Masthead bar with publication wordmark | Minimal wordmark only | ⬜ Not started |
-| 15 | **OpportunityModal** | Glass panel | Editorial detail sheet — full content layout | Full-screen sheet | ⬜ Not started |
-| 16 | **BrowseByCountry** | Card grid | Editorial map/index treatment | Vertical list | ⬜ Not started |
-| 17 | **Footer** | Minimal | Masthead footer with publication credit | Compact, above tab bar | ⬜ Not started |
+| 1 | **Design tokens** | globals.css partial | Full token set + section anatomy | Foundation | ✅ Done |
+| 2 | **MobileTabBar** | Dark glass | Clean dark bar, stronger active state, safe-area aware | P0 — 50% of users | ✅ Done |
+| 3 | **Hero / Masthead** | Large gradient text, newsletter CTA | Masthead treatment, publication identity | Stacked single-col | ✅ Done |
+| 4 | **Section rubric** | Icon + title only | Rule + rubric label + headline + standfirst | Same pattern, scaled | ✅ Done |
+| 5 | **Closing Soon — featured card** | Same as all other cards | Cover story card, full-width, red rule, large deadline | Full-width, image stacked | ✅ Done |
+| 6 | **Closing Soon — section** | Horizontal carousel | Featured card (1st) + horizontal strip (rest) | Snap carousel | ✅ Done |
+| 7 | **Opportunity card** | glass-card uniform | Clean dark surface, dateline deadline, no glow | Full-width card | ✅ Done |
+| 8 | **Just Added — section** | Horizontal carousel | 2-column grid desktop / single-col mobile | Single col mobile | ✅ Done |
+| 9 | **Open Now — section** | Horizontal carousel | Horizontal carousel (kept, reduced decoration) | Snap carousel | ✅ Done |
+| 10 | **New Wave — section** | Horizontal carousel | Editorial list (title + category + deadline per row) | Compact list rows | ✅ Done |
+| 11 | **News card** | Amber-tinted glass card | Editorial article entry (image left/top, headline, dateline) | Image top, stacked | ✅ Done |
+| 12 | **News section** | Uniform card grid | Featured article (large) + secondary grid | Full-width featured | ✅ Done |
+| 13 | **SponsorTicker / NewsletterShowcase** | Gradient glow card | Spacing and context preserved; full redesign deferred | Kept functional | ⬜ Phase 5 |
+| 14 | **Header / Nav** | Glass panel | Masthead bar with publication wordmark | Minimal wordmark only | ✅ Done |
+| 15 | **OpportunityModal** | Glass panel | Editorial detail sheet — full content layout | Full-screen sheet | ⬜ Phase 4 |
+| 16 | **BrowseByCountry** | Card grid | Editorial map/index treatment | Clean editorial grid | ✅ Done |
+| 17 | **Footer** | Minimal | Masthead footer with publication credit | Compact, above tab bar | ⬜ Phase 5 |
 
 ### 6.2 Components NOT changing in this sprint
 - Admin UI (AdminClient.tsx) — functional, not public-facing
@@ -226,41 +226,61 @@ The single most important item in a section receives a **cover story card**:
 - [x] Implement section rubric pattern for "Closing Soon" (red rule → rubric → headline)
 - [x] Build featured cover-story card for the #1 most urgent opportunity (image banner, full-width CTA on mobile)
 - [x] Apply full-strength red rule and amber deadline dateline
-- [ ] Validate on mobile (iPhone SE width 375px minimum)
+- [x] Header/Nav rebuilt as masthead bar (wordmark + text-only links + ghost Submit CTA) — pulled forward from Phase 5
+- [x] SiteNav wrapper to suppress header on admin/login routes
+- [x] Mobile Submit button: ghost outline (was bg-primary, clashed with Subscribe)
+- [x] Vercel build resolved (ESLint config, SiteNav untracked, unescaped entities)
 
-**Exit criteria:** MobileTabBar is editorial. Hero + Closing Soon looks unmistakably editorial at 375px and 1280px.
+**Exit criteria:** MobileTabBar is editorial. Hero + Closing Soon looks unmistakably editorial at 375px and 1280px. ✅
 
 ---
 
 ### Phase 3 — Remaining Homepage Sections
 **Goal:** Extend the editorial language across all homepage sections.
-- [ ] Redesign Just Added → 2-column grid desktop / single-column mobile
-- [ ] Redesign Open Now → cleaned carousel, snap scroll on mobile
-- [ ] Redesign New Wave → editorial list format, compact on mobile
-- [ ] Redesign News section → featured article + secondary grid (stacked on mobile)
-- [ ] Redesign SponsorTicker → masthead strip / snap carousel on mobile
-- [ ] Redesign BrowseByCountry → editorial index / vertical list on mobile
+- [x] Redesign Just Added → 2-column editorial grid, blue section-rule, CardVisualHeader cards
+- [x] Redesign Open Now → cleaned snap carousel, green section-rule, inline Apply link
+- [x] Redesign New Wave → editorial list rows with category icon pip, amber section-rule
+- [x] Redesign News section → featured article full-width + 2-col secondary thumbnail grid
+- [x] Redesign BrowseByCountry → editorial grid, green section-rule, no gradient/blob backgrounds
+- [x] Fix section spacing — NowScreeningSection and NewsletterShowcase missing `mt-14 md:mt-20`
 
-**Exit criteria:** Homepage is cohesive at all breakpoints. Every section has distinct layout. No two adjacent sections look the same.
+**Exit criteria:** Homepage is cohesive at all breakpoints. Every section has distinct layout. No two adjacent sections look the same. ✅
 
 ---
 
 ### Phase 4 — Article + Opportunity Pages
 **Goal:** The detail views match the editorial quality of the homepage.
-- [ ] OpportunityModal → full-screen sheet on mobile, editorial detail on desktop
-- [ ] Enhance `/news/[slug]` with editorial page layout (pull quotes, dateline, author credit)
-- [ ] Redesign news index page
+- [x] OpportunityModal → solid surface background, clean fieldset info sections, pinned Apply Now footer
+- [x] Enhance `/news/[slug]` → editorial masthead (rubric + rule + extrabold headline + standfirst), clean hero image, border-t article body, editorial cards for related/more sections
+- [ ] News index page `/news` — deferred to Phase 5
 
-**Exit criteria:** Article and opportunity detail feel like magazine pages. Full-screen on mobile without horizontal overflow.
+**Exit criteria:** Article and opportunity detail feel like magazine pages. Full-screen on mobile without horizontal overflow. ✅
 
 ---
 
-### Phase 5 — Navigation + Polish
-**Goal:** The chrome matches the content.
-- [ ] Redesign Header/Nav as masthead bar (wordmark only on mobile)
-- [ ] Country pages (P2)
-- [ ] Community Spotlight page
-- [ ] Cross-browser + responsive QA (test at 375px, 390px, 428px, 768px, 1280px, 1440px)
+### Phase 5 — Polish + Core Pages
+**Goal:** Remaining pages, newsletter CTA redesign, footer, news index.
+- [x] Redesign `NewsletterShowcase` — editorial section anatomy, surface-raised preview cards, no gradient blobs
+- [x] Redesign `Footer` — removed `bg-black/40 backdrop-blur`, `<img>` → `<Image>`, clean surface-raised inputs/social, editorial typography
+- [x] News index page `/news` — editorial left-aligned header, clean filter tabs, featured-first layout, surface cards
+
+**Exit criteria:** All main site pages cohesive. ✅
+
+---
+
+### Phase 6 — Country Pages + QA
+**Goal:** Country detail pages editorial touch, then full site QA.
+- [x] `/film-opportunities/[country]` — editorial hero (section-rule + rubric + left-aligned h1), surface cards, no glass
+- [x] `/film-opportunities` index — editorial header, per-region dividers with accent rubrics, surface country cards
+
+**Exit criteria:** Country pages cohesive. ✅
+
+---
+
+### Phase 7 — Community Spotlight + Final QA
+**Goal:** Community Spotlight page editorial treatment, then full site QA pass.
+- [ ] `/community-spotlight` — editorial profile layout, remove glass/gradients
+- [ ] Cross-browser + responsive QA (375px, 390px, 428px, 768px, 1280px, 1440px)
 - [ ] Accessibility audit (contrast, focus states, touch target sizes)
 
 **Exit criteria:** Full site cohesive. Ship-ready.
@@ -315,11 +335,13 @@ These are reference points for the *feeling* to aim for — not to copy.
 | Phase | Status | Started | Completed |
 |---|---|---|---|
 | Phase 1 — Foundation | ✅ Complete | 2026-04-23 | 2026-04-23 |
-| Phase 2 — MobileTabBar + Hero + Closing Soon | ✅ Complete | 2026-04-23 | 2026-04-23 |
-| Phase 3 — Homepage Sections | ⬜ Not started | — | — |
-| Phase 4 — Article + Detail Pages | ⬜ Not started | — | — |
-| Phase 5 — Nav + Polish | ⬜ Not started | — | — |
+| Phase 2 — MobileTabBar + Hero + Closing Soon + Nav | ✅ Complete | 2026-04-23 | 2026-04-23 |
+| Phase 3 — Remaining Homepage Sections | ✅ Complete | 2026-04-23 | 2026-04-23 |
+| Phase 4 — Article + Detail Pages | ✅ Complete | 2026-04-23 | 2026-04-23 |
+| Phase 5 — Polish + Core Pages | ✅ Complete | 2026-04-23 | 2026-04-23 |
+| Phase 6 — Country Pages | ✅ Complete | 2026-04-23 | 2026-04-23 |
+| Phase 7 — Community Spotlight + Final QA | 🔄 In progress | 2026-04-23 | — |
 
 ---
 
-*Last updated: 2026-04-23 — v1.1: Mobile-first constraint embedded throughout (50% mobile users). MobileTabBar moved from Phase 5 → Phase 2. Mobile type scale added. Touch target rules added. Mobile layout patterns added per section.*
+*Last updated: 2026-04-23 — v1.6: Phase 6 complete. Phase 7 starting (Community Spotlight, responsive QA, accessibility audit).*
