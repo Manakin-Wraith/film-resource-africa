@@ -25,10 +25,9 @@ function FeaturedCard({ opp, onSelect }: { opp: Opportunity; onSelect: (o: Oppor
       style={{ background: 'var(--surface)' }}
       onClick={handleClick}
     >
-      {/* Visual header — uses CardVisualHeader's 4-tier fallback:
-          og_image + logo pill → og_image alone → logo on gradient → pattern fallback */}
-      <div className="md:hidden">
-        {/* Mobile: standard card header height */}
+      {/* Visual header — 4-tier fallback: og_image → logo → gradient → pattern
+          Desktop gets taller via CSS without dual-mounting the component */}
+      <div className="md:[&>div]:!h-56">
         <CardVisualHeader
           logo={opp.logo}
           ogImage={opp.og_image_url}
@@ -38,20 +37,6 @@ function FeaturedCard({ opp, onSelect }: { opp: Opportunity; onSelect: (o: Oppor
           countryIso={opp.country_iso}
           countryName={opp.country_name}
         />
-      </div>
-      <div className="hidden md:block">
-        {/* Desktop: override height for a wider editorial banner */}
-        <div className="[&>div]:!h-56">
-          <CardVisualHeader
-            logo={opp.logo}
-            ogImage={opp.og_image_url}
-            category={opp.category}
-            title={opp.title}
-            geoScope={opp.geo_scope}
-            countryIso={opp.country_iso}
-            countryName={opp.country_name}
-          />
-        </div>
       </div>
 
       {/* Content */}
