@@ -11,8 +11,34 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const outfit = Outfit({ subsets: ['latin'], variable: '--font-outfit' });
 
 export const metadata: Metadata = {
-  title: 'African Film Opportunities Directory',
-  description: 'Global programmes for African writers and producers',
+  metadataBase: new URL('https://film-resource-africa.com'),
+  title: {
+    default: 'Film Resource Africa — African Film Opportunities Directory',
+    template: '%s | Film Resource Africa',
+  },
+  description: 'Discover grants, festivals, labs, and funding for African filmmakers. The most comprehensive directory of opportunities for writers, directors, and producers across the continent.',
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    siteName: 'Film Resource Africa',
+    title: 'Film Resource Africa — African Film Opportunities Directory',
+    description: 'Discover grants, festivals, labs, and funding for African filmmakers. The most comprehensive directory of opportunities for writers, directors, and producers across the continent.',
+    url: 'https://film-resource-africa.com',
+    images: [
+      {
+        url: '/African_continent_logo_for_linkedin_fbb39651bb.jpeg',
+        width: 1200,
+        height: 630,
+        alt: 'Film Resource Africa — African Film Opportunities',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Film Resource Africa — African Film Opportunities Directory',
+    description: 'Discover grants, festivals, labs, and funding for African filmmakers.',
+    images: ['/African_continent_logo_for_linkedin_fbb39651bb.jpeg'],
+  },
 };
 
 export default async function RootLayout({
