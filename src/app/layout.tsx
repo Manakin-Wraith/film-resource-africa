@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter, Outfit } from 'next/font/google';
+import { Analytics } from '@vercel/analytics/next';
 import './globals.css';
 import Footer from '@/components/Footer';
 import SiteNav from '@/components/SiteNav';
@@ -26,12 +27,13 @@ export default async function RootLayout({
       <body className={`${inter.variable} ${outfit.variable} font-sans antialiased text-foreground bg-background`}>
         <SiteNav stats={stats} />
         <div className="flex flex-col min-h-screen pt-[64px] pb-[72px] md:pb-0">
-          <div className="flex-grow">
+          <div className="grow">
             {children}
           </div>
           <Footer />
         </div>
         <MobileTabBar />
+        <Analytics />
       </body>
     </html>
   );
