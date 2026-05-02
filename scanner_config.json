@@ -1,0 +1,205 @@
+{
+  "_note": "Source of truth for scan_opportunities.mjs. Copy to film-directory repo root. status: active | pending | dead",
+  "_repo": "film-directory",
+  "version": "1.0",
+
+  "schedule": {
+    "cron": "0 6,18 * * *",
+    "timezone": "UTC",
+    "label": "8am + 8pm SAST"
+  },
+
+  "filters": {
+    "max_age_days": 90,
+    "min_keyword_matches": 2
+  },
+
+  "llm": {
+    "triage": {
+      "model": "claude-haiku-4-5-20251001",
+      "max_tokens": 150,
+      "input": "title + snippet",
+      "batch": true
+    },
+    "classify": {
+      "model": "claude-sonnet-4-6",
+      "max_tokens": 500,
+      "input": "full_page",
+      "batch": false
+    }
+  },
+
+  "relevance_keywords": {
+    "regions": [
+      "Africa", "African", "pan-African", "sub-Saharan",
+      "East Africa", "West Africa", "North Africa", "Southern Africa", "Francophone Africa",
+      "South Africa", "Nigeria", "Kenya", "Ethiopia", "Ghana", "Tanzania", "Uganda", "Rwanda",
+      "Senegal", "Ivory Coast", "Côte d'Ivoire", "Cameroon", "Zimbabwe", "Zambia", "Mozambique",
+      "Angola", "Namibia", "Botswana", "Malawi", "Madagascar", "Mali", "Burkina Faso", "Niger",
+      "Chad", "Sudan", "Egypt", "Morocco", "Tunisia", "Algeria", "Libya", "Somalia",
+      "DRC", "Congo", "Gabon", "Togo", "Benin", "Guinea", "Sierra Leone", "Liberia",
+      "Mauritania", "Eritrea", "Djibouti", "Comoros", "Mauritius", "Seychelles", "Cape Verde",
+      "Eswatini", "Lesotho", "Nollywood", "Jollywood"
+    ],
+    "industry": [
+      "film", "filmmaker", "cinema", "documentary", "feature", "short film",
+      "script", "screenplay", "screenwriter", "producer", "director",
+      "co-production", "post-production", "distribution", "exhibition",
+      "festival", "grant", "fund", "fellowship", "residency", "lab", "accelerator",
+      "pitch", "development", "commission", "submission", "call for entries", "open call",
+      "deadline", "application", "financing", "rebate", "incentive", "market",
+      "sales agent", "acquisition"
+    ],
+    "festivals": [
+      "FESPACO", "Durban", "DIFF", "Zanzibar", "ZIFF", "Berlinale", "Cannes",
+      "Sundance", "IDFA", "Hot Docs", "Sheffield", "IFFR", "Rotterdam",
+      "Tribeca", "NollywoodWeek", "AMVCA", "AFRIFF", "FIFTO"
+    ],
+    "funders": [
+      "NFVF", "Hubert Bals", "Realness", "Docubox", "Maisha", "British Council",
+      "BFI", "Bertha", "Catapult", "Chicken & Egg", "Firelight", "Ford Foundation",
+      "Doc Society", "World Cinema Fund", "Sørfond", "Visions Sud Est",
+      "Afrique Créative", "Ladima", "MultiChoice Talent Factory",
+      "Red Sea Fund", "VII Foundation", "CANEX", "Afreximbank"
+    ],
+    "platforms": [
+      "Netflix", "Showmax", "Canal+", "MultiChoice", "MNET",
+      "Amazon Prime", "Apple TV", "Disney+", "MUBI", "Afrostream"
+    ]
+  },
+
+  "sources": {
+
+    "rss": [
+      { "name": "African Film Press",    "url": "https://africanfilmpress.com/articles/feed.xml",            "tier": 1, "filter": false, "status": "active" },
+      { "name": "Sinema Focus",          "url": "https://sinemafocus.com/feed/",                             "tier": 1, "filter": false, "status": "active" },
+      { "name": "Africa is a Country",  "url": "https://africasacountry.com/feed",                          "tier": 1, "filter": true,  "status": "active" },
+      { "name": "Premium Times Arts",   "url": "https://premiumtimesng.com/arts-entertainment/feed",        "tier": 1, "filter": true,  "status": "active" },
+      { "name": "Nollywood Reinvented", "url": "https://feeds.feedburner.com/NollywoodReinvented",          "tier": 1, "filter": false, "status": "active" },
+      { "name": "Big World Cinema",     "url": "https://medium.com/feed/@bigworldcinema_30298",             "tier": 1, "filter": false, "status": "active" },
+      { "name": "The British Blacklist","url": "https://thebritishblacklist.co.uk/feed/",                   "tier": 1, "filter": true,  "status": "active" },
+      { "name": "Variety",              "url": "https://variety.com/feed/",                                 "tier": 2, "filter": true,  "status": "active" },
+      { "name": "Deadline",             "url": "https://deadline.com/feed/",                                "tier": 2, "filter": true,  "status": "active" },
+      { "name": "IndieWire",            "url": "https://indiewire.com/feed/",                               "tier": 2, "filter": true,  "status": "active" },
+      { "name": "The Guardian Film",    "url": "https://theguardian.com/film/rss",                         "tier": 2, "filter": true,  "status": "active" },
+      { "name": "Filmmaker Magazine",   "url": "https://filmmakermagazine.com/feed/",                       "tier": 2, "filter": true,  "status": "active" },
+
+      { "name": "Screen Africa",        "url": "https://screenafrica.com/feed/",                            "tier": 1, "filter": false, "status": "pending" },
+      { "name": "OkayAfrica",           "url": "https://okayafrica.com/feed/",                              "tier": 1, "filter": true,  "status": "pending" },
+      { "name": "The Continent",        "url": "https://thecontinent.org/feed",                             "tier": 1, "filter": true,  "status": "pending" },
+      { "name": "Mail & Guardian Arts", "url": "https://mg.co.za/section/arts-culture/feed/",              "tier": 1, "filter": true,  "status": "pending" },
+      { "name": "Realscreen",           "url": "https://realscreen.com/feed/",                              "tier": 2, "filter": true,  "status": "pending" },
+      { "name": "Film Independent",     "url": "https://filmindependent.org/feed/",                         "tier": 2, "filter": true,  "status": "pending" },
+      { "name": "Sundance Blog",        "url": "https://sundance.org/blog/feed/",                           "tier": 2, "filter": true,  "status": "pending" },
+
+      { "name": "Cineuropa",            "url": null, "tier": 2, "status": "dead", "dead_reason": "RSS 404 — covered via Gmail" },
+      { "name": "Screen Daily",         "url": null, "tier": 2, "status": "dead", "dead_reason": "RSS 404 — covered via Gmail" },
+      { "name": "Film Efiko",           "url": null, "tier": 1, "status": "dead", "dead_reason": "500 error — removed 2026-03-31" },
+      { "name": "Modern Ghana",         "url": null, "tier": 1, "status": "dead", "dead_reason": "403 error — removed 2026-03-31" }
+    ],
+
+    "gmail": {
+      "senders": [
+        { "name": "Cineuropa",        "query": "from:cineuropa.org",                                                              "status": "active" },
+        { "name": "Screen Daily",     "query": "from:screendaily.com",                                                            "status": "active" },
+        { "name": "Slated",           "query": "from:slated.com",                                                                 "status": "active" },
+        { "name": "Variety",          "query": "from:variety.com",                                                                "status": "active" },
+        { "name": "IndieWire",        "query": "from:indiewire.com",                                                              "status": "active" },
+        { "name": "FilmFreeway",      "query": "from:noreply@filmfreeway.com",                                                    "status": "active" },
+        { "name": "Submittable",      "query": "from:submittable.com",                                                            "status": "active" },
+        { "name": "BFI",              "query": "from:bfi.org.uk",                                                                 "status": "active" },
+        { "name": "Europa Cinemas",   "query": "from:europa-cinemas.org",                                                         "status": "active" },
+        { "name": "Realness",         "query": "from:realness.institute",                                                         "status": "active" },
+        { "name": "Berlinale",        "query": "from:berlinale.de OR from:talentpress.org",                                       "status": "active" },
+        { "name": "IFFR",             "query": "from:iffr.com OR from:filmfestivalrotterdam.com",                                 "status": "active" },
+        { "name": "Sundance",         "query": "from:sundance.org OR from:sundanceinstitute.org",                                 "status": "active" },
+        { "name": "IDFA",             "query": "from:idfa.nl",                                                                    "status": "active" },
+        { "name": "LinkedIn Film",    "query": "from:newsletters-noreply@linkedin.com subject:film OR subject:cinema OR subject:Africa", "status": "active" }
+      ],
+      "subjects": [
+        { "name": "Festival Alerts",  "query": "subject:\"call for\" OR \"submission\" OR \"deadline\"",                          "status": "active" },
+        { "name": "Grant Alerts",     "query": "subject:\"open call\" OR \"grant\" (filmmaker OR cinema OR film)",                "status": "active" },
+        { "name": "Opportunity Inbox","query": "subject:\"opportunity\" OR \"fund\" OR \"fellowship\" OR \"residency\" (Africa OR African)", "status": "active" },
+        { "name": "Inbox Film Leads", "query": "(film OR cinema OR documentary OR festival OR screening OR distribution OR \"sales agent\") -from:notifications@ -from:noreply@ -from:no-reply@ -from:game.co.za -from:gopro -from:parkrun -from:strava -from:uber -from:takealot -category:promotions -category:social", "status": "active" },
+        { "name": "Sales & Market Leads", "query": "subject:\"market\" OR subject:\"sales\" OR subject:\"acquisition\" OR subject:\"slate\" OR subject:\"premiere\" (film OR cinema) -from:notifications@ -from:noreply@", "status": "active" }
+      ],
+      "google_alerts": [
+        { "query": "\"open call\" African film 2026",                    "status": "pending" },
+        { "query": "\"grant\" documentary Africa filmmaker",             "status": "pending" },
+        { "query": "\"call for submissions\" film festival Africa",      "status": "pending" },
+        { "query": "\"co-production\" Africa fund deadline",             "status": "pending" },
+        { "query": "\"residency\" filmmaker Africa",                     "status": "pending" },
+        { "query": "\"fellowship\" cinema Africa 2026",                  "status": "pending" }
+      ]
+    },
+
+    "web_search": {
+      "engine": "duckduckgo",
+      "queries": [
+        { "q": "African film grants 2026 deadline",                        "status": "active" },
+        { "q": "film fund Africa submission 2026",                         "status": "active" },
+        { "q": "African filmmaker fellowship 2026",                        "status": "active" },
+        { "q": "African cinema festival call for entries 2026",            "status": "active" },
+        { "q": "co-production fund Africa 2026",                          "status": "active" },
+        { "q": "film lab emerging filmmaker Africa",                       "status": "active" },
+        { "q": "African documentary fund open call",                       "status": "active" },
+        { "q": "Open Cities accelerator filmmaker submissions 2026",       "status": "active" },
+        { "q": "NFVF open call 2026",                                     "status": "active" },
+        { "q": "Nollywood submission 2026",                               "status": "active" },
+        { "q": "Kenya Uganda Tanzania film 2026",                         "status": "active" },
+        { "q": "Morocco Tunisia Egypt film 2026",                         "status": "active" },
+        { "q": "appel candidatures film 2026",                            "status": "active" },
+        { "q": "Ghana Senegal film 2026",                                 "status": "active" },
+        { "q": "African animation fund 2026",                             "status": "active" },
+        { "q": "African women filmmaker grant 2026",                      "status": "active" },
+        { "q": "African short film fund 2026",                            "status": "active" },
+        { "q": "African post-production finishing fund 2026",             "status": "active" },
+        { "q": "African screenwriting residency 2026",                    "status": "active" },
+        { "q": "African VR XR immersive storytelling fund",               "status": "active" },
+        { "q": "African film distribution fund",                          "status": "active" },
+        { "q": "site:realness.institute open call 2026",                  "status": "active" },
+        { "q": "site:docubox.org open call",                              "status": "active" },
+        { "q": "site:idfa.nl bertha fund Africa",                         "status": "active" },
+        { "q": "site:sundance.org collab Africa",                         "status": "active" },
+        { "q": "site:iffr.com hubert bals fund",                          "status": "active" },
+        { "q": "site:berlinale.de world cinema fund",                     "status": "active" },
+        { "q": "site:bfi.org.uk international fund Africa",               "status": "active" },
+        { "q": "site:hot-docs.ca crosscurrents fund",                     "status": "active" },
+        { "q": "site:durbanfilmmart.com submissions",                     "status": "active" }
+      ]
+    },
+
+    "org_pages": [
+      { "name": "Realness Institute",          "url": "https://realness.institute",                          "keywords": ["open call","applications","submit","deadline"],          "status": "active" },
+      { "name": "Docubox",                     "url": "https://docubox.org",                                 "keywords": ["open call","applications","submit","deadline"],          "status": "active" },
+      { "name": "Durban FilmMart",             "url": "https://durbanfilmmart.co.za",                        "keywords": ["call for","submissions","apply","deadline"],             "status": "active" },
+      { "name": "IDFA Bertha Fund",            "url": "https://idfa.nl/en/info/idfa-bertha-fund",           "keywords": ["apply","deadline","submit","open"],                      "status": "active" },
+      { "name": "Hubert Bals Fund",            "url": "https://iffr.com/en/hubert-bals-fund",               "keywords": ["apply","deadline","submit","open"],                      "status": "active" },
+      { "name": "World Cinema Fund",           "url": "https://berlinale.de/en/world-cinema-fund/",         "keywords": ["apply","deadline","submit","open"],                      "status": "active" },
+      { "name": "Hot Docs",                    "url": "https://hotdocs.ca/industry",                        "keywords": ["crosscurrents","apply","deadline","fund"],               "status": "active" },
+      { "name": "FESPACO",                     "url": "https://fespaco.bf",                                  "keywords": ["appel","candidatures","submit","deadline"],              "status": "active" },
+      { "name": "Maisha Film Lab",             "url": "https://maishafilmlab.org",                          "keywords": ["apply","call","submit","deadline"],                      "status": "active" },
+      { "name": "Open Cities Lab",             "url": "https://open-cities.com",                            "keywords": ["accelerator","submissions","apply","deadline"],          "status": "active" },
+      { "name": "Big World Cinema",            "url": "https://bigworldcinema.com",                         "keywords": ["accelerator","apply","call","submit"],                   "status": "active" },
+      { "name": "Gauteng Film Commission",     "url": "https://gautengfilm.org.za",                         "keywords": ["open call","applications","funding","grant"],            "status": "active" },
+      { "name": "Wesgro Film",                 "url": "https://wesgro.co.za/film",                          "keywords": ["open call","applications","funding","grant"],            "status": "active" },
+      { "name": "KZN Film Commission",         "url": "https://kwazulunatalfilm.co.za",                     "keywords": ["open call","applications","funding","grant"],            "status": "active" },
+      { "name": "Uganda Comms Commission",     "url": "https://ucc.co.ug",                                  "keywords": ["open call","film","broadcast","grant"],                  "status": "active" },
+      { "name": "Uganda Film Festival",        "url": "https://filmfreeway.com/UgandaFilmFestival",         "keywords": ["call for","submissions","entries"],                      "status": "active" },
+
+      { "name": "Doc Society",                 "url": "https://docsociety.org",                             "keywords": ["open call","fund","apply","deadline"],                  "status": "pending" },
+      { "name": "Kenya Film Commission",       "url": "https://kenyafilmcommission.com",                   "keywords": ["open call","applications","funding","grant"],            "status": "pending" },
+      { "name": "Nigeria Film Corporation",    "url": "https://nfc.gov.ng",                                 "keywords": ["open call","applications","funding","grant"],            "status": "pending" },
+      { "name": "Rwanda Film Office",          "url": "https://rfo.rw",                                     "keywords": ["open call","applications","funding","grant"],            "status": "pending" },
+      { "name": "Morocco CCM",                 "url": "https://ccm.ma",                                     "keywords": ["appel","candidatures","apply","deadline"],               "status": "pending" },
+      { "name": "Ladima Foundation",           "url": "https://ladimafoundation.org",                       "keywords": ["open call","apply","fund","deadline"],                  "status": "pending" },
+      { "name": "MultiChoice Talent Factory",  "url": "https://multichoicetalentfactory.com",              "keywords": ["apply","call","programme","submit"],                     "status": "pending" },
+      { "name": "Ford Foundation JustFilms",   "url": "https://fordfoundation.org/work/just-films/",       "keywords": ["grant","apply","open","fund"],                           "status": "pending" },
+      { "name": "Catapult Film Fund",          "url": "https://catapultfilmfund.org",                       "keywords": ["grant","apply","open call","deadline"],                 "status": "pending" },
+      { "name": "Firelight Media",             "url": "https://firelightmedia.tv",                          "keywords": ["grant","apply","open call","deadline"],                 "status": "pending" },
+      { "name": "Chicken & Egg Pictures",      "url": "https://chickeneggpics.org",                         "keywords": ["grant","apply","open call","deadline"],                 "status": "pending" },
+      { "name": "Sørfond Norway",              "url": "https://norwegianfilminstitute.com",                 "keywords": ["open call","apply","fund","deadline"],                  "status": "pending" }
+    ]
+
+  }
+}

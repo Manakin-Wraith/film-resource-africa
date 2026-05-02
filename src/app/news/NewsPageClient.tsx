@@ -11,6 +11,7 @@ import { Newspaper, AlertTriangle, Sparkles, Lightbulb, ArrowRight, Star, Clappe
 import RelativeDate from '@/components/RelativeDate';
 import GeoIndicator from '@/components/GeoIndicator';
 import { decodeEntities, cleanText } from '@/lib/decodeEntities';
+import NewsImageFallback from '@/components/NewsImageFallback';
 
 const categoryConfig: Record<string, { label: string; icon: typeof Newspaper; color: string; bg: string }> = {
   industry_news: { label: 'Industry News', icon: Newspaper, color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20' },
@@ -104,7 +105,7 @@ export default function NewsPageClient({ news, placements = [] }: { news: NewsIt
               className="block rounded-xl border border-white/[0.08] hover:border-white/[0.16] transition-all group overflow-hidden mb-6"
               style={{ background: 'var(--surface)' }}
             >
-              {featured.image_url && (
+              {featured.image_url ? (
                 <div className={`relative w-full ${isTrailer ? 'h-64 md:h-80' : 'h-52 md:h-72'} overflow-hidden`}>
                   <Image
                     src={featured.image_url}
@@ -122,6 +123,8 @@ export default function NewsPageClient({ news, placements = [] }: { news: NewsIt
                     </div>
                   )}
                 </div>
+              ) : (
+                <NewsImageFallback category={featured.category} title={featured.title} className={isTrailer ? 'h-64 md:h-80' : 'h-40 md:h-52'} />
               )}
               <div className="p-5 md:p-6">
                 <div className="flex items-center gap-3 mb-3">
@@ -185,7 +188,7 @@ export default function NewsPageClient({ news, placements = [] }: { news: NewsIt
                   className="rounded-xl border border-white/[0.08] hover:border-white/[0.16] transition-all group flex flex-col overflow-hidden"
                   style={{ background: 'var(--surface)' }}
                 >
-                  {item.image_url && (
+                  {item.image_url ? (
                     <div className={`relative w-full ${isTrailer ? 'h-44' : 'h-36'} overflow-hidden`}>
                       <Image
                         src={item.image_url}
@@ -202,6 +205,8 @@ export default function NewsPageClient({ news, placements = [] }: { news: NewsIt
                         </div>
                       )}
                     </div>
+                  ) : (
+                    <NewsImageFallback category={item.category} title={item.title} className={isTrailer ? 'h-44' : 'h-36'} />
                   )}
                   <div className="p-4 flex flex-col flex-grow">
                     <div className="flex items-center gap-2 mb-2 flex-wrap">

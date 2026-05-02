@@ -89,29 +89,29 @@ async function sendEmail(to, subject, html) {
 // ─── Data fetching ───────────────────────────────────────────────────────────
 
 async function fetchClosingSoon() {
-  // Opportunities with application_status = 'closing_soon', ordered by deadline
+  const today = new Date().toISOString().split('T')[0];
   return supabaseGet(
     'opportunities',
-    'status=eq.approved&application_status=eq.closing_soon&order=deadline_date.asc&limit=5'
+    `status=eq.approved&application_status=eq.closing_soon&deadline_date=gte.${today}&order=deadline_date.asc&limit=5`
   );
 }
 
 async function fetchNewlyOpen() {
-  // Opportunities with application_status = 'open', most recent first
+  const today = new Date().toISOString().split('T')[0];
   return supabaseGet(
     'opportunities',
-    'status=eq.approved&application_status=eq.open&order=id.desc&limit=5'
+    `status=eq.approved&application_status=eq.open&or=(deadline_date.gte.${today},deadline_date.is.null)&order=id.desc&limit=5`
   );
 }
 
 async function fetchJustAdded() {
-  // Opportunities added in the last 14 days
   const twoWeeksAgo = new Date();
   twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
   const dateStr = twoWeeksAgo.toISOString();
+  const today = new Date().toISOString().split('T')[0];
   return supabaseGet(
     'opportunities',
-    `status=eq.approved&created_at=gte.${dateStr}&order=created_at.desc&limit=5`
+    `status=eq.approved&created_at=gte.${dateStr}&or=(deadline_date.gte.${today},deadline_date.is.null)&order=created_at.desc&limit=5`
   );
 }
 
@@ -436,7 +436,7 @@ function buildNewsletterHtml({ closingSoon, newlyOpen, justAdded, news, proTip, 
     for (const s of sponsors) {
       const sUrl = s.cta_url || s.website || siteUrl;
       const sName = escapeHtml(s.name);
-      const sAbout = escapeHtml(s.about || '').replace(/\n/g, '<br/>');
+      const sAbout = escapeHtml(s.about || '').replace(/\n/g, '<br/>').replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
       const sCta = escapeHtml(s.cta_text || 'Learn More');
       const sFeatured = s.featured_image_url;
       const sLogo = s.logo_url;
@@ -451,13 +451,6 @@ function buildNewsletterHtml({ closingSoon, newlyOpen, justAdded, news, proTip, 
           <tr>
             <td style="padding:8px 24px 0;">
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-radius:12px;overflow:hidden;border:1px solid #e8e8e8;">
-                ${sFeatured ? `<tr>
-                  <td>
-                    <a href="${escapeHtml(sUrl)}" style="text-decoration:none;">
-                      <img src="${escapeHtml(sFeatured)}" alt="${sName}" width="592" style="width:100%;height:auto;display:block;border-radius:12px 12px 0 0;" />
-                    </a>
-                  </td>
-                </tr>` : ''}
                 <tr>
                   <td style="padding:20px 24px;">
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
@@ -565,14 +558,14 @@ function buildNewsletterHtml({ closingSoon, newlyOpen, justAdded, news, proTip, 
             </td>
           </tr>
 
-          <!-- Sponsor banner (headline sponsors) -->
-          ${partnersSection}
-
           <!-- Divider -->
           <tr><td style="padding:0 24px;"><div style="border-top:1px solid #e8e8e8;"></div></td></tr>
 
           <!-- Dynamic sections -->
           ${sections}
+
+          <!-- Sponsors / Partners -->
+          ${partnersSection}
 
           <!-- CTA -->
           <tr>

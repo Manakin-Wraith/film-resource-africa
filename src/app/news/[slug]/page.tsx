@@ -8,6 +8,7 @@ import { Newspaper, AlertTriangle, Sparkles, Lightbulb, Star, Clapperboard } fro
 import MarkdownBody from '@/components/MarkdownBody';
 import { decodeEntities, cleanText } from '@/lib/decodeEntities';
 import Breadcrumbs from '@/components/Breadcrumbs';
+import NewsImageFallback from '@/components/NewsImageFallback';
 import TrackNewsRead from '@/components/TrackNewsRead';
 import TrackOutboundLink from '@/components/TrackOutboundLink';
 
@@ -148,8 +149,8 @@ export default async function NewsArticlePage({ params }: { params: Promise<{ sl
         </header>
 
         {/* Hero image */}
-        {article.image_url && (
-          <div className="relative w-full h-56 md:h-[420px] overflow-hidden rounded-xl mb-8 border border-white/[0.08]">
+        {article.image_url ? (
+          <div className="relative w-full h-56 md:h-[420px] overflow-hidden rounded-xl mb-8 border border-white/8">
             <Image
               src={article.image_url}
               alt={article.title}
@@ -158,6 +159,10 @@ export default async function NewsArticlePage({ params }: { params: Promise<{ sl
               priority
               className="object-cover"
             />
+          </div>
+        ) : (
+          <div className="rounded-xl mb-8 overflow-hidden border border-white/8">
+            <NewsImageFallback category={article.category} title={article.title} className="h-40 md:h-56" />
           </div>
         )}
 

@@ -14,6 +14,8 @@ import HomeClient from '@/components/HomeClient';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import SponsorTicker from '@/components/SponsorTicker';
 
+export const dynamic = 'force-dynamic';
+
 export default async function Home() {
   const [
     allOpportunities,

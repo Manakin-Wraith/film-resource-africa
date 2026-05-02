@@ -1,6 +1,6 @@
 # FRA Editorial Redesign — Product Requirements Document
 
-**Version:** 1.7  
+**Version:** 1.8  
 **Date:** 2026-04-23  
 **Status:** In Progress  
 **Owner:** G. Mostert  
@@ -290,9 +290,28 @@ The single most important item in a section receives a **cover story card**:
 
 ### Phase 8 — Final QA
 **Goal:** Cross-breakpoint and accessibility audit before ship.
+
+**Glass audit — complete (2026-04-23):**
+- [x] Site-wide grep for `glass-card`, `backdrop-blur-md` on content, `blur-3xl` blobs, gradient h1s
+- [x] `DirectoryClient.tsx` — glass-card cards + empty state, backdrop-blur search input, gradient filter tabs → surface system
+- [x] `DirectoryListingModal.tsx` — glass-card modal panel, backdrop-blur-md action buttons → surface, removed blur
+- [x] `NowScreeningSection.tsx` — glass-card trailer cards, pink hover shadow → surface
+- [x] `SponsorTicker.tsx` — backdrop-blur-md on PartnerCard and PartnerChip → removed (amber/blue partner branding retained)
+- [x] `SponsoredCard.tsx` — 5× glass-card instances, gradient h3, gradient CTA button → surface, solid amber
+- [x] `GhostCard.tsx` — 2× glass-card on NewsGhostCard variants → surface
+- [x] `OpportunityRow.tsx` — glass-card → surface (border-l-[3px] category accent preserved as semantic)
+- [x] `CallSheetModal.tsx` — glass-card panel, gradient Apply button → surface, solid teal
+- [x] `ContactModal.tsx` — glass-card panel, backdrop-blur-md scrim → surface, backdrop-blur-sm scrim
+- [x] `PartnersSection.tsx` — blur-[120px] blob, bg-gradient-to-b wrapper → surface card, no blob
+- [x] `NewsletterCTA.tsx` — banner variant glass-card + blur-3xl blobs → surface
+- [x] `submit/page.tsx` — glass-card form + success state, blur-3xl blob, gradient button → surface, solid primary
+- [x] `call-sheet/submit/page.tsx` — glass-card form + success state, blur-3xl blob, gradient h1, gradient button → surface, solid teal
+- [x] Exempted (out of scope): `AdminClient.tsx`, `login/page.tsx`, `rebate/RebateCalculator.tsx` (unused, page replaced)
+- [x] Acceptable (over images): `backdrop-blur-md` on `CardVisualHeader`, `GeoIndicator`, `OpportunityModal` image overlays, `SponsoredCard` logo-over-photo overlay
+
+**Remaining QA:**
 - [ ] Responsive QA (375px, 390px, 428px, 768px, 1280px, 1440px) — all pages
 - [ ] Accessibility audit: contrast ratios, focus ring visibility, touch targets ≥44px
-- [ ] Check for any remaining `glass-card`, `backdrop-blur`, gradient h1 usage site-wide
 - [ ] Performance check — no LCP/CLS regressions
 
 **Exit criteria:** Full site cohesive and ship-ready.
@@ -353,8 +372,8 @@ These are reference points for the *feeling* to aim for — not to copy.
 | Phase 5 — Polish + Core Pages | ✅ Complete | 2026-04-23 | 2026-04-23 |
 | Phase 6 — Country Pages | ✅ Complete | 2026-04-23 | 2026-04-23 |
 | Phase 7 — Community Spotlight + Secondary Pages | ✅ Complete | 2026-04-23 | 2026-04-23 |
-| Phase 8 — Final QA | 🔄 In progress | 2026-04-23 | — |
+| Phase 8 — Final QA (glass audit) | 🔄 In progress | 2026-04-23 | — |
 
 ---
 
-*Last updated: 2026-04-23 — v1.7: Phase 7 complete. All public pages on the editorial design system. Phase 8 is final QA (responsive, accessibility, glass-card audit).*
+*Last updated: 2026-04-23 — v1.8: Phase 8 glass audit complete. All public-facing components cleared of glass-card, backdrop-blur-md on content, blur-3xl blobs, and gradient h1/button patterns. Remaining Phase 8 work: responsive QA, accessibility audit, performance check.*

@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Film Resource Africa — Redesign Concept</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0907;
+    --bg-2:#141110;
+    --panel:#1a1614;
+    --panel-2:#221d1a;
+    --ink:#f6efe6;
+    --ink-mute:#b3a89d;
+    --ink-dim:#7a7269;
+    --line:rgba(246,239,230,0.08);
+    --line-strong:rgba(246,239,230,0.18);
+    --ochre:#e8b057;       /* signature warm */
+    --ember:#e5553a;       /* urgent */
+    --moss:#8bb56a;        /* open / go */
+    --indigo:#8a7dd1;      /* new wave */
+    --sand:#f1e2c4;
+  }
+  [data-theme="light"]{
+    --bg:#fbf6ee;
+    --bg-2:#f3ead9;
+    --panel:#ffffff;
+    --panel-2:#fbf6ee;
+    --ink:#1a1410;
+    --ink-mute:#4a433b;
+    --ink-dim:#7a7269;
+    --line:rgba(26,20,16,0.10);
+    --line-strong:rgba(26,20,16,0.22);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    line-height:1.55;
+    font-feature-settings:"ss01","ss02";
+  }
+  a{color:inherit;text-decoration:none}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  img{max-width:100%;display:block}
+  ::selection{background:var(--ochre);color:#1a1410}
+
+  /* Skip link for a11y */
+  .skip{position:absolute;left:-999px;top:-999px}
+  .skip:focus{left:16px;top:16px;background:var(--ochre);color:#1a1410;padding:10px 16px;border-radius:8px;z-index:100;font-weight:600}
+
+  .display{font-family:'Fraunces',serif;font-weight:600;letter-spacing:-0.02em}
+  .eyebrow{font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-mute);font-weight:600}
+
+  /* ===== Header ===== */
+  .topbar{
+    background:var(--bg);
+    border-bottom:1px solid var(--line);
+    position:sticky;top:0;z-index:30;
+    backdrop-filter:blur(12px);
+  }
+  .topbar-inner{
+    max-width:1400px;margin:0 auto;padding:14px 24px;
+    display:flex;align-items:center;gap:24px;
+  }
+  .brand{display:flex;align-items:center;gap:10px;font-family:'Fraunces',serif;font-weight:700;font-size:18px;letter-spacing:-0.01em}
+  .brand-mark{
+    width:32px;height:32px;border-radius:8px;
+    background:conic-gradient(from 210deg,var(--ember),var(--ochre),var(--sand),var(--ember));
+    position:relative;
+  }
+  .brand-mark::after{
+    content:"";position:absolute;inset:5px;border-radius:4px;background:var(--bg);
+  }
+  .brand-mark::before{
+    content:"";position:absolute;inset:11px;border-radius:2px;background:var(--ochre);
+  }
+  .global-search{
+    flex:1;max-width:520px;
+    display:flex;align-items:center;gap:10px;
+    background:var(--panel);border:1px solid var(--line);
+    padding:9px 14px;border-radius:10px;
+    transition:border-color .2s;
+  }
+  .global-search:focus-within{border-color:var(--ochre)}
+  .global-search input{
+    flex:1;background:none;border:none;color:var(--ink);font-size:14px;outline:none;
+    font-family:inherit;
+  }
+  .kbd{font-size:11px;color:var(--ink-dim);border:1px solid var(--line);border-radius:4px;padding:2px 6px}
+  .nav{display:flex;gap:4px}
+  .nav a{
+    padding:8px 12px;font-size:14px;color:var(--ink-mute);border-radius:8px;font-weight:500;
+  }
+  .nav a:hover{color:var(--ink);background:var(--panel)}
+  .nav a.active{color:var(--ink)}
+  .actions{display:flex;align-items:center;gap:8px}
+  .icon-btn{
+    width:38px;height:38px;border-radius:10px;background:var(--panel);border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;position:relative;
+  }
+  .icon-btn:hover{border-color:var(--line-strong)}
+  .bookmark-count{
+    position:absolute;top:-4px;right:-4px;background:var(--ember);color:white;
+    width:18px;height:18px;border-radius:9px;font-size:11px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .btn-primary{
+    background:var(--ochre);color:#1a1410;font-weight:600;
+    padding:10px 16px;border-radius:10px;font-size:14px;
+    transition:transform .1s, filter .2s;
+  }
+  .btn-primary:hover{filter:brightness(1.08)}
+  .btn-primary:active{transform:translateY(1px)}
+  .btn-ghost{
+    border:1px solid var(--line-strong);color:var(--ink);padding:10px 16px;border-radius:10px;font-size:14px;font-weight:500;
+  }
+  .btn-ghost:hover{background:var(--panel)}
+
+  /* ===== Hero ===== */
+  main{max-width:1400px;margin:0 auto;padding:40px 24px 80px}
+  .hero{
+    position:relative;padding:72px 0 56px;
+  }
+  .hero-grid{
+    display:grid;grid-template-columns:1.1fr 0.9fr;gap:56px;align-items:end;
+  }
+  .hero h1{
+    font-size:clamp(44px,6vw,84px);line-height:1.02;margin:0 0 24px;
+  }
+  .hero h1 em{
+    font-style:italic;font-weight:400;
+    background:linear-gradient(92deg,var(--ochre),var(--ember));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .hero-sub{font-size:18px;color:var(--ink-mute);max-width:540px;margin:0 0 32px}
+  .hero-ctas{display:flex;gap:12px;flex-wrap:wrap}
+
+  /* Match-me card */
+  .match-card{
+    background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:28px;
+    position:relative;overflow:hidden;
+  }
+  .match-card::before{
+    content:"";position:absolute;inset:0;
+    background:radial-gradient(circle at 80% 0%,rgba(232,176,87,.18),transparent 60%);
+    pointer-events:none;
+  }
+  .match-card .eyebrow{color:var(--ochre)}
+  .match-card h3{font-family:'Fraunces',serif;font-weight:600;font-size:26px;margin:8px 0 12px;letter-spacing:-0.01em}
+  .match-card p{color:var(--ink-mute);margin:0 0 20px;font-size:14px}
+  .chip-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;position:relative;z-index:1}
+  .chip{
+    padding:7px 12px;border-radius:999px;font-size:13px;
+    border:1px solid var(--line-strong);color:var(--ink-mute);background:transparent;
+    transition:all .15s;
+  }
+  .chip:hover{color:var(--ink);border-color:var(--ochre)}
+  .chip.on{background:var(--ochre);color:#1a1410;border-color:var(--ochre);font-weight:600}
+
+  /* ===== Stat strip ===== */
+  .stat-strip{
+    margin-top:48px;display:grid;grid-template-columns:repeat(4,1fr);gap:0;
+    border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  }
+  .stat{
+    padding:24px 24px 24px 0;border-right:1px solid var(--line);
+  }
+  .stat:last-child{border-right:none}
+  .stat .num{font-family:'Fraunces',serif;font-size:40px;font-weight:600;letter-spacing:-0.02em;line-height:1}
+  .stat .num span{color:var(--ochre)}
+  .stat .lbl{font-size:13px;color:var(--ink-mute);margin-top:6px}
+
+  /* ===== Section headers ===== */
+  .section{margin-top:80px}
+  .section-head{
+    display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:28px;
+    padding-bottom:16px;border-bottom:1px solid var(--line);
+  }
+  .section-title{font-family:'Fraunces',serif;font-size:34px;font-weight:600;letter-spacing:-0.02em;margin:0}
+  .section-kicker{font-size:14px;color:var(--ink-mute);margin-top:6px}
+  .see-all{color:var(--ink-mute);font-size:13px;display:flex;align-items:center;gap:6px;font-weight:500}
+  .see-all:hover{color:var(--ochre)}
+
+  /* ===== Directory layout ===== */
+  .directory{
+    display:grid;grid-template-columns:260px 1fr;gap:32px;
+  }
+  .filters{
+    position:sticky;top:88px;align-self:start;
+    border:1px solid var(--line);border-radius:16px;background:var(--panel);
+    padding:20px;
+  }
+  .filter-group{margin-bottom:24px}
+  .filter-group:last-child{margin-bottom:0}
+  .filter-label{font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-mute);font-weight:600;margin-bottom:12px}
+  .filter-list{display:flex;flex-direction:column;gap:6px}
+  .filter-item{
+    display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:8px;font-size:14px;color:var(--ink-mute);
+    cursor:pointer;transition:all .15s;
+  }
+  .filter-item:hover{background:var(--panel-2);color:var(--ink)}
+  .filter-item.active{background:rgba(232,176,87,0.12);color:var(--ochre);font-weight:500}
+  .filter-count{font-size:12px;color:var(--ink-dim)}
+  .filter-item.active .filter-count{color:var(--ochre);opacity:0.8}
+  .filter-slider{width:100%;margin-top:6px}
+
+  .results-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+  .results-count{font-size:14px;color:var(--ink-mute)}
+  .results-count strong{color:var(--ink);font-weight:600}
+  .sort-select{
+    background:var(--panel);border:1px solid var(--line);color:var(--ink);
+    padding:8px 12px;border-radius:8px;font-size:13px;font-family:inherit;
+  }
+
+  .cards-grid{
+    display:grid;grid-template-columns:repeat(2,1fr);gap:16px;
+  }
+  .opp-card{
+    position:relative;
+    background:var(--panel);border:1px solid var(--line);border-radius:16px;
+    padding:22px;transition:transform .15s, border-color .2s;
+    display:flex;flex-direction:column;gap:14px;
+  }
+  .opp-card:hover{border-color:var(--line-strong);transform:translateY(-2px)}
+  .opp-card.featured{
+    background:linear-gradient(135deg,rgba(232,176,87,0.08),rgba(229,85,58,0.05));
+    border-color:rgba(232,176,87,0.25);
+  }
+  .opp-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .opp-logo{
+    width:44px;height:44px;border-radius:10px;background:var(--panel-2);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    font-family:'Fraunces',serif;font-weight:700;font-size:18px;color:var(--ink);
+  }
+  .opp-logo.red{background:linear-gradient(135deg,#c0392b,#8b2517);color:#fff}
+  .opp-logo.gold{background:linear-gradient(135deg,#d4a84c,#8e6a1e);color:#1a1410}
+  .opp-logo.green{background:linear-gradient(135deg,#6a9454,#3e5a2e);color:#fff}
+  .opp-logo.blue{background:linear-gradient(135deg,#4a6b8a,#2a3b52);color:#fff}
+  .opp-logo.purple{background:linear-gradient(135deg,#8a7dd1,#4a4180);color:#fff}
+
+  .bookmark-btn{
+    width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+    color:var(--ink-mute);border:1px solid transparent;
+  }
+  .bookmark-btn:hover{color:var(--ink);border-color:var(--line)}
+  .bookmark-btn.saved{color:var(--ochre)}
+
+  .opp-title{font-family:'Fraunces',serif;font-size:20px;font-weight:600;letter-spacing:-0.01em;margin:0 0 4px;line-height:1.25}
+  .opp-org{font-size:13px;color:var(--ink-mute)}
+  .opp-desc{font-size:14px;color:var(--ink-mute);line-height:1.55;margin:0;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  }
+
+  .tag-row{display:flex;flex-wrap:wrap;gap:6px}
+  .tag{
+    font-size:11px;padding:4px 10px;border-radius:999px;
+    background:var(--panel-2);color:var(--ink-mute);font-weight:500;
+    display:flex;align-items:center;gap:4px;
+  }
+  .tag.type{background:rgba(138,125,209,0.14);color:#b8afe1}
+  .tag.free{background:rgba(139,181,106,0.14);color:var(--moss)}
+  .tag.elig{background:rgba(232,176,87,0.12);color:var(--ochre)}
+  .tag.region{background:rgba(246,239,230,0.06)}
+
+  .opp-foot{
+    display:flex;align-items:center;justify-content:space-between;
+    border-top:1px solid var(--line);padding-top:14px;margin-top:auto;gap:10px;
+  }
+  .deadline{display:flex;align-items:center;gap:10px;font-size:13px}
+  .deadline-pill{
+    padding:5px 10px;border-radius:999px;font-weight:600;font-size:12px;
+    background:rgba(229,85,58,0.14);color:var(--ember);
+  }
+  .deadline-pill.ok{background:rgba(139,181,106,0.14);color:var(--moss)}
+  .deadline-pill.warn{background:rgba(232,176,87,0.14);color:var(--ochre)}
+  .deadline-date{color:var(--ink-mute)}
+  .funding-amt{font-family:'Fraunces',serif;font-weight:600;font-size:15px;color:var(--sand)}
+
+  /* ===== Featured detail preview ===== */
+  .detail-preview{
+    margin-top:24px;
+    background:var(--panel);border:1px solid var(--line);border-radius:20px;overflow:hidden;
+    display:grid;grid-template-columns:1.3fr 1fr;
+  }
+  .detail-media{
+    aspect-ratio:4/3;background:
+      linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,0.7)),
+      radial-gradient(circle at 30% 40%,rgba(232,176,87,0.35),transparent 60%),
+      linear-gradient(135deg,#5a2415,#2a0e08);
+    position:relative;padding:32px;display:flex;flex-direction:column;justify-content:flex-end;
+  }
+  .detail-media::before{
+    content:"";position:absolute;top:24px;left:24px;right:24px;height:1px;
+    background:repeating-linear-gradient(90deg,var(--ochre) 0 10px,transparent 10px 20px);opacity:0.5;
+  }
+  .film-strip{
+    position:absolute;top:0;bottom:0;width:22px;
+    background:repeating-linear-gradient(180deg,#0b0907 0 14px,transparent 14px 28px),#1a1410;
+  }
+  .film-strip.left{left:0;border-right:1px solid rgba(255,255,255,0.08)}
+  .film-strip.right{right:0;border-left:1px solid rgba(255,255,255,0.08)}
+  .detail-media h3{
+    font-family:'Fraunces',serif;font-weight:700;font-size:42px;line-height:1.05;margin:0 0 10px;
+    color:#fff;position:relative;z-index:1;
+  }
+  .detail-media .by{color:rgba(255,255,255,0.75);font-size:14px;position:relative;z-index:1}
+  .countdown{
+    display:flex;gap:8px;margin-top:18px;position:relative;z-index:1;
+  }
+  .count-unit{
+    background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);backdrop-filter:blur(8px);
+    border-radius:10px;padding:8px 12px;text-align:center;min-width:56px;
+  }
+  .count-unit .n{font-family:'Fraunces',serif;font-weight:700;font-size:22px;color:#fff;line-height:1}
+  .count-unit .u{font-size:10px;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:0.12em;margin-top:4px}
+
+  .detail-body{padding:32px}
+  .detail-body h4{font-family:'Fraunces',serif;font-weight:600;font-size:15px;margin:0 0 12px;letter-spacing:-0.005em}
+  .elig-list{list-style:none;padding:0;margin:0 0 24px}
+  .elig-list li{
+    display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--ink-mute);margin-bottom:8px;
+  }
+  .elig-list li svg{flex-shrink:0;margin-top:2px}
+  .elig-list li.yes{color:var(--ink)}
+  .detail-meta{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+  .detail-meta div .k{font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:4px}
+  .detail-meta div .v{font-family:'Fraunces',serif;font-size:17px;font-weight:600}
+
+  /* ===== Spotlight ===== */
+  .spotlight-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:20px;
+  }
+  .spot-card{
+    background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden;
+    transition:transform .2s;
+  }
+  .spot-card:hover{transform:translateY(-3px)}
+  .spot-media{aspect-ratio:4/3;position:relative;overflow:hidden}
+  .spot-media::before{
+    content:"";position:absolute;inset:0;
+    background:linear-gradient(180deg,transparent 50%,rgba(11,9,7,0.92) 100%);
+    z-index:1;
+  }
+  .spot-media.a{background:linear-gradient(135deg,#4a2818,#1a0e08),radial-gradient(circle at 70% 30%,rgba(232,176,87,.3),transparent)}
+  .spot-media.b{background:linear-gradient(135deg,#2a3b52,#0e1a2a)}
+  .spot-media.c{background:linear-gradient(135deg,#3a5a3a,#0e1a0e)}
+  .spot-media .tag-over{position:absolute;top:14px;left:14px;z-index:2;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);padding:5px 10px;border-radius:999px;font-size:11px;color:#fff;font-weight:500;letter-spacing:0.06em}
+  .spot-body{padding:20px}
+  .spot-title{font-family:'Fraunces',serif;font-size:20px;font-weight:600;letter-spacing:-0.01em;margin:0 0 6px;line-height:1.25}
+  .spot-sub{font-size:13px;color:var(--ink-mute);margin-bottom:12px}
+  .spot-quote{font-size:14px;color:var(--ink);font-style:italic;line-height:1.55;margin:0;border-left:2px solid var(--ochre);padding-left:12px}
+
+  /* ===== Newsletter / CTA ===== */
+  .cta-band{
+    margin-top:80px;padding:56px;border-radius:24px;
+    background:
+      radial-gradient(circle at 10% 20%,rgba(229,85,58,0.2),transparent 50%),
+      radial-gradient(circle at 90% 80%,rgba(232,176,87,0.2),transparent 50%),
+      var(--panel);
+    border:1px solid var(--line);
+    display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;
+  }
+  .cta-band h3{font-family:'Fraunces',serif;font-size:36px;font-weight:600;letter-spacing:-0.02em;margin:0 0 12px;line-height:1.1}
+  .cta-band p{color:var(--ink-mute);margin:0 0 20px}
+  .email-form{display:flex;gap:10px}
+  .email-form input{
+    flex:1;background:var(--bg);border:1px solid var(--line-strong);color:var(--ink);
+    padding:14px 16px;border-radius:12px;font-family:inherit;font-size:14px;outline:none;
+  }
+  .email-form input:focus{border-color:var(--ochre)}
+  .benefit-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:14px}
+  .benefit-list li{display:flex;align-items:flex-start;gap:14px;font-size:15px;color:var(--ink-mute)}
+  .benefit-list li strong{color:var(--ink);display:block;margin-bottom:2px}
+  .benefit-list li .dot{width:8px;height:8px;border-radius:4px;background:var(--ochre);margin-top:8px;flex-shrink:0}
+
+  /* ===== Footer ===== */
+  footer{
+    margin-top:80px;padding:48px 24px 32px;border-top:1px solid var(--line);
+  }
+  .footer-inner{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:40px}
+  .footer h5{font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-mute);margin:0 0 12px;font-weight:600}
+  .footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+  .footer a{color:var(--ink-mute);font-size:14px}
+  .footer a:hover{color:var(--ink)}
+  .footer-tag{color:var(--ink-mute);font-size:14px;max-width:320px;margin:12px 0 0}
+  .footer-bottom{max-width:1400px;margin:40px auto 0;padding-top:24px;border-top:1px solid var(--line);display:flex;justify-content:space-between;font-size:12px;color:var(--ink-dim)}
+
+  /* ===== Annotation overlay ===== */
+  .notes-toggle{
+    position:fixed;bottom:20px;right:20px;z-index:40;
+    background:var(--ochre);color:#1a1410;font-weight:600;
+    padding:12px 18px;border-radius:999px;box-shadow:0 10px 30px rgba(229,85,58,0.25);font-size:13px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .notes-toggle:hover{filter:brightness(1.08)}
+  [data-notes="on"] .annotation{opacity:1;pointer-events:auto}
+  .annotation{
+    opacity:0;pointer-events:none;transition:opacity .2s;
+    position:absolute;background:var(--ember);color:#fff;
+    font-size:11px;font-weight:700;letter-spacing:0.04em;padding:5px 8px;border-radius:6px;
+    white-space:nowrap;z-index:10;text-transform:uppercase;
+    box-shadow:0 4px 12px rgba(229,85,58,0.4);
+  }
+  .annotation::after{
+    content:"";position:absolute;width:8px;height:8px;background:var(--ember);transform:rotate(45deg);
+    left:50%;margin-left:-4px;bottom:-4px;
+  }
+
+  /* Responsive */
+  @media (max-width: 1100px){
+    .hero-grid{grid-template-columns:1fr;gap:32px}
+    .directory{grid-template-columns:1fr}
+    .filters{position:static;top:auto}
+    .detail-preview{grid-template-columns:1fr}
+    .cta-band{grid-template-columns:1fr;padding:32px}
+    .spotlight-grid{grid-template-columns:1fr}
+    .footer-inner{grid-template-columns:1fr 1fr}
+    .stat-strip{grid-template-columns:repeat(2,1fr)}
+    .cards-grid{grid-template-columns:1fr}
+  }
+  @media (max-width:720px){
+    .nav,.global-search{display:none}
+    .hero{padding:40px 0 32px}
+    .section{margin-top:48px}
+    .section-title{font-size:26px}
+    .footer-inner{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body data-theme="dark">
+
+<a href="#main" class="skip">Skip to content</a>
+
+<!-- ===== Header ===== -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="#" class="brand">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span>Film Resource Africa</span>
+    </a>
+    <label class="global-search" aria-label="Search opportunities">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
+      <input type="text" placeholder="Search labs, funds, festivals, countries…" />
+      <span class="kbd">⌘K</span>
+    </label>
+    <nav class="nav" aria-label="Primary">
+      <a href="#" class="active">Directory</a>
+      <a href="#">News</a>
+      <a href="#">Call Sheet</a>
+      <a href="#">Industry</a>
+      <a href="#">Spotlight</a>
+    </nav>
+    <div class="actions">
+      <button class="icon-btn" aria-label="Saved opportunities" title="Saved (4)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+        <span class="bookmark-count">4</span>
+      </button>
+      <button class="icon-btn" id="theme-toggle" aria-label="Toggle theme" title="Toggle theme">
+        <svg id="theme-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>
+      </button>
+      <button class="btn-primary">Submit opportunity</button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- ===== Hero ===== -->
+<section class="hero">
+  <span class="annotation" style="top:40px;left:0">Enhancement 1 — editorial hero</span>
+  <div class="hero-grid">
+    <div>
+      <div class="eyebrow" style="margin-bottom:16px">Est. 2024 · Curated by filmmakers</div>
+      <h1 class="display">The stage is <em>Africa's</em>.<br/>The script is yours.</h1>
+      <p class="hero-sub">One home for the labs, funds, festivals and pitch forums that fund African stories — updated weekly, free to browse, built by creators.</p>
+      <div class="hero-ctas">
+        <button class="btn-primary">Find my opportunities →</button>
+        <button class="btn-ghost">Browse 98 open calls</button>
+      </div>
+    </div>
+    <aside class="match-card" aria-label="Personalized match">
+      <span class="annotation" style="top:-14px;right:20px">Enhancement 3 — Match-me quiz</span>
+      <div class="eyebrow">Match me to opportunities</div>
+      <h3>Tell us about your project in 30 seconds.</h3>
+      <p>We'll shortlist the funds, labs and festivals that fit your stage, region and story type — and email you when new ones open.</p>
+      <div class="chip-row" role="list">
+        <button class="chip on" role="listitem">Feature</button>
+        <button class="chip" role="listitem">Short</button>
+        <button class="chip" role="listitem">Series</button>
+        <button class="chip" role="listitem">Doc</button>
+        <button class="chip" role="listitem">Animation</button>
+      </div>
+      <div class="chip-row">
+        <button class="chip">Development</button>
+        <button class="chip on">Production</button>
+        <button class="chip">Post</button>
+        <button class="chip">Distribution</button>
+      </div>
+      <button class="btn-primary" style="width:100%">Get my shortlist →</button>
+    </aside>
+  </div>
+
+  <div class="stat-strip" aria-label="Site stats">
+    <span class="annotation" style="top:-14px;left:20px">Enhancement 2 — scale at a glance</span>
+    <div class="stat"><div class="num">98<span>+</span></div><div class="lbl">Open opportunities</div></div>
+    <div class="stat"><div class="num">$12<span>M</span></div><div class="lbl">In available funding</div></div>
+    <div class="stat"><div class="num">54</div><div class="lbl">Eligible countries</div></div>
+    <div class="stat"><div class="num">280<span>+</span></div><div class="lbl">Films funded through partners</div></div>
+  </div>
+</section>
+
+<!-- ===== Directory ===== -->
+<section class="section" id="directory">
+  <div class="section-head">
+    <div style="position:relative">
+      <span class="annotation" style="top:-8px;left:0">Enhancement 4 — persistent filter rail + smart sort</span>
+      <h2 class="section-title">Opportunities</h2>
+      <div class="section-kicker">Fresh, verified, and filterable by stage, region, and who you are.</div>
+    </div>
+    <a href="#" class="see-all">Compare selected (2) →</a>
+  </div>
+
+  <div class="directory">
+    <aside class="filters" aria-label="Filters">
+      <div class="filter-group">
+        <div class="filter-label">Type</div>
+        <div class="filter-list">
+          <button class="filter-item active">Labs & Fellowships <span class="filter-count">24</span></button>
+          <button class="filter-item">Funds & Grants <span class="filter-count">31</span></button>
+          <button class="filter-item">Festivals <span class="filter-count">28</span></button>
+          <button class="filter-item">Pitch Forums <span class="filter-count">15</span></button>
+        </div>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">Stage</div>
+        <div class="filter-list">
+          <button class="filter-item">Development <span class="filter-count">42</span></button>
+          <button class="filter-item active">Production <span class="filter-count">38</span></button>
+          <button class="filter-item">Post <span class="filter-count">19</span></button>
+        </div>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">Eligibility</div>
+        <div class="filter-list">
+          <button class="filter-item">Women filmmakers <span class="filter-count">22</span></button>
+          <button class="filter-item">LGBTQIAPN+ <span class="filter-count">11</span></button>
+          <button class="filter-item">Emerging / first feature <span class="filter-count">34</span></button>
+          <button class="filter-item">Pan-African <span class="filter-count">56</span></button>
+        </div>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">Deadline within</div>
+        <input type="range" min="7" max="180" value="30" class="filter-slider" />
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--ink-mute);margin-top:6px"><span>1 week</span><strong style="color:var(--ochre)">30 days</strong><span>6 mo</span></div>
+      </div>
+    </aside>
+
+    <div>
+      <div class="results-bar">
+        <div class="results-count"><strong>17</strong> opportunities match — <span style="color:var(--ochre)">4 close within 2 weeks</span></div>
+        <select class="sort-select" aria-label="Sort">
+          <option>Sort: Best match</option>
+          <option>Closing soonest</option>
+          <option>Largest award</option>
+          <option>Recently added</option>
+        </select>
+      </div>
+
+      <div class="cards-grid">
+
+        <!-- Card 1 -->
+        <article class="opp-card featured">
+          <div class="opp-head">
+            <div style="display:flex;gap:14px;align-items:flex-start">
+              <div class="opp-logo red">RS</div>
+              <div>
+                <h3 class="opp-title">Red Sea Souk — Production Fund 2026</h3>
+                <div class="opp-org">Red Sea International Film Festival</div>
+              </div>
+            </div>
+            <button class="bookmark-btn saved" aria-label="Saved" title="Saved">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+            </button>
+          </div>
+          <p class="opp-desc">Grants of up to $100K for feature films from Africa, Arab states, and Asian directors. Supports dev, prod and post.</p>
+          <div class="tag-row">
+            <span class="tag type">💰 Fund</span>
+            <span class="tag free">Free to apply</span>
+            <span class="tag elig">Pan-African</span>
+            <span class="tag region">🌍 International</span>
+          </div>
+          <div class="opp-foot">
+            <div class="deadline">
+              <span class="deadline-pill">11 days</span>
+              <span class="deadline-date">Closes May 1</span>
+            </div>
+            <div class="funding-amt">Up to $100K</div>
+          </div>
+        </article>
+
+        <!-- Card 2 -->
+        <article class="opp-card">
+          <div class="opp-head">
+            <div style="display:flex;gap:14px;align-items:flex-start">
+              <div class="opp-logo gold">VII</div>
+              <div>
+                <h3 class="opp-title">VII Foundation Film Lab</h3>
+                <div class="opp-org">The VII Foundation</div>
+              </div>
+            </div>
+            <button class="bookmark-btn" aria-label="Save">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+            </button>
+          </div>
+          <p class="opp-desc">Fully-funded fellowship for documentary filmmakers across Africa, Asia and Latin America. Mentorship + residency.</p>
+          <div class="tag-row">
+            <span class="tag type">🎓 Lab</span>
+            <span class="tag free">Fully funded</span>
+            <span class="tag elig">Emerging</span>
+            <span class="tag region">🌍 Global South</span>
+          </div>
+          <div class="opp-foot">
+            <div class="deadline">
+              <span class="deadline-pill warn">27 days</span>
+              <span class="deadline-date">Closes May 17</span>
+            </div>
+            <div class="funding-amt">Residency + stipend</div>
+          </div>
+        </article>
+
+        <!-- Card 3 -->
+        <article class="opp-card">
+          <div class="opp-head">
+            <div style="display:flex;gap:14px;align-items:flex-start">
+              <div class="opp-logo green">RE</div>
+              <div>
+                <h3 class="opp-title">Realness Residency — Feature Development</h3>
+                <div class="opp-org">Realness Institute · Johannesburg</div>
+              </div>
+            </div>
+            <button class="bookmark-btn" aria-label="Save">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+            </button>
+          </div>
+          <p class="opp-desc">7-week residency with pan-African screenwriters. Develop a feature script with industry mentors in South Africa.</p>
+          <div class="tag-row">
+            <span class="tag type">🎓 Lab</span>
+            <span class="tag free">Free</span>
+            <span class="tag elig">African residents</span>
+            <span class="tag region">🇿🇦 South Africa</span>
+          </div>
+          <div class="opp-foot">
+            <div class="deadline">
+              <span class="deadline-pill ok">62 days</span>
+              <span class="deadline-date">Closes Jun 21</span>
+            </div>
+            <div class="funding-amt">Full residency</div>
+          </div>
+        </article>
+
+        <!-- Card 4 -->
+        <article class="opp-card">
+          <div class="opp-head">
+            <div style="display:flex;gap:14px;align-items:flex-start">
+              <div class="opp-logo blue">DB</div>
+              <div>
+                <h3 class="opp-title">Durban FilmMart — Finance Forum</h3>
+                <div class="opp-org">DFM · Durban, South Africa</div>
+              </div>
+            </div>
+            <button class="bookmark-btn saved" aria-label="Saved" title="Saved">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+            </button>
+          </div>
+          <p class="opp-desc">Pitch your project to international financiers. One of Africa's most established co-production forums.</p>
+          <div class="tag-row">
+            <span class="tag type">🎤 Pitch forum</span>
+            <span class="tag free">Free</span>
+            <span class="tag elig">Feature & docs</span>
+            <span class="tag region">🇿🇦 Durban</span>
+          </div>
+          <div class="opp-foot">
+            <div class="deadline">
+              <span class="deadline-pill warn">24 days</span>
+              <span class="deadline-date">Closes May 14</span>
+            </div>
+            <div class="funding-amt">Market access</div>
+          </div>
+        </article>
+
+        <!-- Card 5 -->
+        <article class="opp-card">
+          <div class="opp-head">
+            <div style="display:flex;gap:14px;align-items:flex-start">
+              <div class="opp-logo purple">AI</div>
+              <div>
+                <h3 class="opp-title">New Wave — AI Filmmaking Grant</h3>
+                <div class="opp-org">Curious Refuge · New Wave Program</div>
+              </div>
+            </div>
+            <button class="bookmark-btn" aria-label="Save">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+            </button>
+          </div>
+          <p class="opp-desc">Grants & mentorship for AI-powered filmmakers. Open to creators experimenting with generative tools at any stage.</p>
+          <div class="tag-row">
+            <span class="tag type">💰 Grant</span>
+            <span class="tag free">Free</span>
+            <span class="tag elig">AI / Hybrid</span>
+            <span class="tag region">🌍 Global</span>
+          </div>
+          <div class="opp-foot">
+            <div class="deadline">
+              <span class="deadline-pill ok">48 days</span>
+              <span class="deadline-date">Closes Jun 7</span>
+            </div>
+            <div class="funding-amt">$25K + mentors</div>
+          </div>
+        </article>
+
+        <!-- Card 6 -->
+        <article class="opp-card">
+          <div class="opp-head">
+            <div style="display:flex;gap:14px;align-items:flex-start">
+              <div class="opp-logo" style="background:linear-gradient(135deg,#bb5533,#6a2a17);color:#fff">FE</div>
+              <div>
+                <h3 class="opp-title">FESPACO — Feature Competition 2027</h3>
+                <div class="opp-org">Ouagadougou, Burkina Faso</div>
+              </div>
+            </div>
+            <button class="bookmark-btn" aria-label="Save">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+            </button>
+          </div>
+          <p class="opp-desc">Africa's flagship film festival. Submissions open for the 2027 Étalon de Yennenga competition.</p>
+          <div class="tag-row">
+            <span class="tag type">🎬 Festival</span>
+            <span class="tag">$75 fee</span>
+            <span class="tag elig">African directors</span>
+            <span class="tag region">🇧🇫 Burkina Faso</span>
+          </div>
+          <div class="opp-foot">
+            <div class="deadline">
+              <span class="deadline-pill ok">118 days</span>
+              <span class="deadline-date">Closes Aug 16</span>
+            </div>
+            <div class="funding-amt">Festival berth</div>
+          </div>
+        </article>
+
+      </div>
+
+      <!-- ===== Detail preview ===== -->
+      <div class="detail-preview" style="position:relative">
+        <span class="annotation" style="top:-14px;left:20px">Enhancement 5 — Inline detail with eligibility check + countdown</span>
+        <div class="detail-media">
+          <div class="film-strip left" aria-hidden="true"></div>
+          <div class="film-strip right" aria-hidden="true"></div>
+          <div style="padding:0 24px">
+            <h3>Red Sea Souk<br/>Production Fund 2026</h3>
+            <div class="by">Red Sea International Film Festival · Jeddah, Saudi Arabia</div>
+            <div class="countdown" aria-label="Time remaining">
+              <div class="count-unit"><div class="n">11</div><div class="u">days</div></div>
+              <div class="count-unit"><div class="n">06</div><div class="u">hrs</div></div>
+              <div class="count-unit"><div class="n">42</div><div class="u">min</div></div>
+              <div class="count-unit"><div class="n">18</div><div class="u">sec</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="detail-body">
+          <div class="detail-meta">
+            <div><div class="k">Award</div><div class="v">Up to $100,000</div></div>
+            <div><div class="k">Stage</div><div class="v">Dev · Prod · Post</div></div>
+            <div><div class="k">Length</div><div class="v">Feature</div></div>
+            <div><div class="k">Format</div><div class="v">Fiction + Documentary</div></div>
+          </div>
+          <h4>Are you eligible?</h4>
+          <ul class="elig-list">
+            <li class="yes"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8bb56a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Director is from Africa, Arab states, or Asia</li>
+            <li class="yes"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8bb56a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Feature length (70+ minutes)</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7a7269" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4"/><circle cx="12" cy="16" r="1" fill="currentColor"/></svg>Script or treatment (8+ pages) — <em style="color:var(--ochre)">required</em></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7a7269" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4"/><circle cx="12" cy="16" r="1" fill="currentColor"/></svg>Attached producer with a prior credit</li>
+          </ul>
+          <div style="display:flex;gap:10px;margin-top:auto">
+            <button class="btn-primary">Apply on Red Sea →</button>
+            <button class="btn-ghost">Add to shortlist</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Spotlight ===== -->
+<section class="section" style="position:relative">
+  <span class="annotation" style="top:28px;left:0">Enhancement 6 — success stories surface proof</span>
+  <div class="section-head">
+    <div>
+      <h2 class="section-title">Funded here</h2>
+      <div class="section-kicker">Filmmakers on how they won — and where to aim next.</div>
+    </div>
+    <a href="#" class="see-all">All spotlights →</a>
+  </div>
+  <div class="spotlight-grid">
+    <article class="spot-card">
+      <div class="spot-media a"><span class="tag-over">LAB · REALNESS '25</span></div>
+      <div class="spot-body">
+        <h3 class="spot-title">Amina Khalid</h3>
+        <div class="spot-sub">Writer-director · Nairobi, Kenya</div>
+        <p class="spot-quote">"The residency gave me eight weeks to rewrite the film I'd been scared to write for five years."</p>
+      </div>
+    </article>
+    <article class="spot-card">
+      <div class="spot-media b"><span class="tag-over">FUND · RED SEA '24</span></div>
+      <div class="spot-body">
+        <h3 class="spot-title">Thabo Mokoena</h3>
+        <div class="spot-sub">Producer · Johannesburg</div>
+        <p class="spot-quote">"$85K closed our financing gap two weeks before the shoot. The pitch deck FRA linked was everything."</p>
+      </div>
+    </article>
+    <article class="spot-card">
+      <div class="spot-media c"><span class="tag-over">FESTIVAL · FESPACO '25</span></div>
+      <div class="spot-body">
+        <h3 class="spot-title">Chioma Eze</h3>
+        <div class="spot-sub">Director · Lagos, Nigeria</div>
+        <p class="spot-quote">"I found FESPACO through the countries page. Submitted cold. Won the short film jury prize."</p>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ===== CTA Band ===== -->
+<section class="cta-band" style="position:relative">
+  <span class="annotation" style="top:-14px;left:20px">Enhancement 7 — clearer digest value prop</span>
+  <div>
+    <h3>One email, every Sunday.<br/>The opportunities that closed, the ones opening.</h3>
+    <p>No spam, no listicles. Just what's new, what's closing, and which ones fit your work.</p>
+    <form class="email-form" onsubmit="event.preventDefault();">
+      <input type="email" placeholder="you@example.com" required />
+      <button type="submit" class="btn-primary">Subscribe</button>
+    </form>
+  </div>
+  <ul class="benefit-list">
+    <li><span class="dot"></span><div><strong>Personalized digest</strong>Only what matches your saved filters and shortlist.</div></li>
+    <li><span class="dot"></span><div><strong>Deadline reminders</strong>Get nudged 14, 7, and 2 days before your bookmarked calls close.</div></li>
+    <li><span class="dot"></span><div><strong>First-look briefings</strong>New funds and labs usually land here before social.</div></li>
+  </ul>
+</section>
+
+</main>
+
+<!-- ===== Footer ===== -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="brand" style="font-size:20px">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>Film Resource Africa</span>
+      </div>
+      <p class="footer-tag">The working directory for African filmmakers — labs, funds, festivals, pitch forums. Built by creators, free to use.</p>
+    </div>
+    <div>
+      <h5>Directory</h5>
+      <ul>
+        <li><a href="#">Labs</a></li>
+        <li><a href="#">Funds</a></li>
+        <li><a href="#">Festivals</a></li>
+        <li><a href="#">Pitch Forums</a></li>
+      </ul>
+    </div>
+    <div>
+      <h5>Community</h5>
+      <ul>
+        <li><a href="#">Spotlight</a></li>
+        <li><a href="#">Call Sheet</a></li>
+        <li><a href="#">Industry Directory</a></li>
+        <li><a href="#">Submit</a></li>
+      </ul>
+    </div>
+    <div>
+      <h5>About</h5>
+      <ul>
+        <li><a href="#">Mission</a></li>
+        <li><a href="#">Partners</a></li>
+        <li><a href="#">Press</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 Film Resource Africa</span>
+    <span>Made with ♥ in Johannesburg · Nairobi · Lagos</span>
+  </div>
+</footer>
+
+<button class="notes-toggle" id="notes-toggle" aria-pressed="true">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+  <span id="notes-label">Hide annotations</span>
+</button>
+
+<script>
+  // Theme toggle
+  const root = document.body;
+  const themeBtn = document.getElementById('theme-toggle');
+  const themeIcon = document.getElementById('theme-icon');
+  themeBtn.addEventListener('click', () => {
+    const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+    root.dataset.theme = next;
+    themeIcon.innerHTML = next === 'dark'
+      ? '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/>'
+      : '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>';
+  });
+
+  // Annotations toggle
+  root.dataset.notes = 'on';
+  const notesBtn = document.getElementById('notes-toggle');
+  const notesLabel = document.getElementById('notes-label');
+  notesBtn.addEventListener('click', () => {
+    const on = root.dataset.notes === 'on';
+    root.dataset.notes = on ? 'off' : 'on';
+    notesLabel.textContent = on ? 'Show annotations' : 'Hide annotations';
+    notesBtn.setAttribute('aria-pressed', String(!on));
+  });
+
+  // Chip toggle behavior in match card
+  document.querySelectorAll('.match-card .chip-row').forEach(row => {
+    row.addEventListener('click', (e) => {
+      const chip = e.target.closest('.chip');
+      if (!chip) return;
+      row.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+      chip.classList.add('on');
+    });
+  });
+
+  // Bookmark toggle
+  document.querySelectorAll('.bookmark-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      btn.classList.toggle('saved');
+      const svg = btn.querySelector('svg');
+      if (btn.classList.contains('saved')) {
+        svg.setAttribute('fill', 'currentColor');
+      } else {
+        svg.setAttribute('fill', 'none');
+      }
+    });
+  });
+
+  // Live countdown
+  const count = document.querySelector('.countdown');
+  if (count) {
+    const deadline = new Date(Date.now() + 11*24*3600*1000 + 6*3600*1000 + 42*60*1000);
+    const [d,h,m,s] = count.querySelectorAll('.n');
+    setInterval(() => {
+      const diff = deadline - new Date();
+      if (diff <= 0) return;
+      const days = Math.floor(diff/86400000);
+      const hrs = Math.floor((diff%86400000)/3600000);
+      const mins = Math.floor((diff%3600000)/60000);
+      const secs = Math.floor((diff%60000)/1000);
+      d.textContent = String(days).padStart(2,'0');
+      h.textContent = String(hrs).padStart(2,'0');
+      m.textContent = String(mins).padStart(2,'0');
+      s.textContent = String(secs).padStart(2,'0');
+    }, 1000);
+  }
+</script>
+
+</body>
+</html>

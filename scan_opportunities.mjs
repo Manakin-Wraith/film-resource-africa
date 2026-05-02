@@ -95,6 +95,20 @@ function extractDomain(url) {
   } catch { return null; }
 }
 
+// Returns true for URLs that are clearly news articles rather than application pages.
+// Date-based paths (/2026/04/) and /blog/ /news/ /article/ segments are strong indicators.
+// PDFs are excluded — they can be legitimate call-for-entries documents.
+function isNewsArticleUrl(url) {
+  if (!url) return false;
+  try {
+    const path = new URL(url).pathname.toLowerCase();
+    if (path.endsWith('.pdf')) return false;
+    if (/\/\d{4}\/\d{1,2}\//.test(path)) return true;        // /2026/04/ date paths
+    if (/\/(blog|news|article|articles|post|posts|story|stories|press-release|media-release)\//i.test(path)) return true;
+    return false;
+  } catch { return false; }
+}
+
 async function fetchLogoForUrl(url) {
   const domain = extractDomain(url);
   if (!domain) return null;
@@ -346,22 +360,53 @@ const JUNK_TITLE_PATTERNS = [
   /\bwikipedia\b/i,
   /^msn\b/i,
   /^(?:login|sign in|gms login)\b/i,                        // Login pages
+
+  // Grant/award result announcements — past tense, not open calls
+  /\b(?:wins?|won|bags?|bagged|lands?|secures?|secured|scoops?|clinch(?:es?)?)\b.{0,50}\b(?:grant|fund|award|fellowship|prize|bursary)\b/i,
+  /\b(?:awarded|receives?|received)\b.{0,50}\b(?:grant|fund|fellowship|prize|bursary)\b/i,
+  /\b(?:grant|fund|award|fellowship|prize)\b.{0,50}\b(?:goes? to|awarded to|received by|presented to|claimed by|won by)\b/i,
+  /\b(?:winner|recipient|awardee)s?\b.{0,30}\b(?:announced|revealed|named|selected)\b/i,
+
+  // Shortlist / selection result announcements
+  /\b(?:shortlist|longlist)(?:ed|s)?\b/i,                  // "shortlisted for HBF", "HBF longlist"
+  /\b\d+\s+(?:african\s+)?(?:films?|projects?|filmmakers?)\s+(?:selected|chosen|shortlisted|awarded)\b/i,
+  /\bannounces?\s+(?:its\s+|the\s+)?\d{4}\s+(?:grant|fund|fellow|lab|winner|selection|recipient)s?\b/i,
+
+  // Editorial, guide, listicle content
+  /\bhow\s+to\s+(?:apply|get|win|write|access|secure)\b/i, // advice articles
+  /\b(?:complete|ultimate|beginner|practical)\s+guide\b/i,
+  /\b\d+\s+(?:tips?|ways?|steps?)\s+(?:to|for)\s+(?:apply|get|win|write)\b/i,
+
+  // Interview / profile / opinion content
+  /^(?:interview|in\s+conversation|q\s*[&+]\s*a|profile|opinion|essay|analysis)\s*:/i,
+  /[–—:]\s*(?:an?\s+)?(?:interview|profile|conversation)\s+with\b/i,
 ];
 
-// Words that signal an actionable opportunity (grants, labs, calls, fellowships etc.)
-// Applied only to broad web search results — org page results are already targeted.
-const OPPORTUNITY_SIGNALS = [
-  'grant', 'fund', 'fellowship', 'residency', 'lab', 'accelerator',
-  'call for', 'open call', 'apply', 'application', 'pitch forum',
-  'financing', 'rebate', 'incentive', 'co-production fund',
+// Strong signals: present in actionable open-call language; one is sufficient.
+const OPPORTUNITY_SIGNALS_STRONG = [
+  'call for', 'open call', 'call for entries', 'call for submissions',
+  'apply now', 'apply by', 'applications open', 'applications now open',
+  'submit your', 'submit your film', 'open for submissions',
+  'pitch forum', 'co-production fund',
   'development programme', 'development program',
-  'training', 'workshop', 'masterclass', 'commission fund',
-  'award fund', 'prize fund', 'bursary', 'stipend',
+  'commission fund', 'award fund', 'prize fund', 'bursary', 'stipend',
+  'rebate', 'incentive',
+];
+
+// Weak signals: common in both news and open calls; require a strong signal alongside them.
+const OPPORTUNITY_SIGNALS_WEAK = [
+  'grant', 'fund', 'fellowship', 'residency', 'lab', 'accelerator',
+  'financing', 'application', 'apply', 'deadline',
+  'training', 'workshop', 'masterclass',
 ];
 
 function hasOpportunitySignal(title, snippet) {
   const text = `${title} ${snippet || ''}`.toLowerCase();
-  return OPPORTUNITY_SIGNALS.some(w => text.includes(w));
+  if (OPPORTUNITY_SIGNALS_STRONG.some(w => text.includes(w))) return true;
+  // Weak signals only count when paired with at least one other weak signal
+  // (e.g. "fellowship application" or "grant deadline" → likely actionable)
+  const weakHits = OPPORTUNITY_SIGNALS_WEAK.filter(w => text.includes(w));
+  return weakHits.length >= 2;
 }
 
 function isJunkTitle(title) {
@@ -1591,9 +1636,34 @@ async function main() {
         continue;
       }
 
+      // Step A.1: Platform domain gate — LinkedIn, YouTube etc. are never application pages.
+      // Their bot protection also means enrichOpportunityFromPage returns {} every time,
+      // bypassing the Claude _isActualOpportunity gate entirely.
+      const urlDomain = extractDomain(item.url);
+      if (urlDomain && (PLATFORM_DOMAINS.has(urlDomain) || PLATFORM_DOMAINS.has(urlDomain.replace(/^[^.]+\./, '')))) {
+        console.log(`  ✗ SKIP (platform domain — not an application page): ${item.title.slice(0, 55)}`);
+        continue;
+      }
+
+      // Step A.2: News article URL gate for web-search items.
+      // Date-path URLs (/2026/04/) and /blog/ /news/ paths are almost always news articles.
+      // Org-page links are already targeted so exempt from this check.
+      if (item.source === 'Web Search' && isNewsArticleUrl(item.url)) {
+        console.log(`  ✗ SKIP (news article URL from web search): ${item.title.slice(0, 55)}`);
+        continue;
+      }
+
       // Step B: Scrape page for real field data
       const scraped = await enrichOpportunityFromPage(item.url);
       const enrichedFields = Object.keys(scraped).filter(k => !k.startsWith('_')).length;
+
+      // Step B.1: Web search items that Claude couldn't verify (bot-blocked, timeout, etc.)
+      // are too risky to auto-insert without a verdict. Org-page items are trusted sources
+      // so we let them through even without enrichment.
+      if (item.source === 'Web Search' && enrichedFields === 0 && scraped._isActualOpportunity === undefined) {
+        console.log(`  ✗ SKIP (web search item — enrichment unavailable, no Claude verdict): ${item.title.slice(0, 55)}`);
+        continue;
+      }
 
       // Step C: Fetch logo and OG image
       const logo = item.url ? await fetchLogoForUrl(item.url) : null;
