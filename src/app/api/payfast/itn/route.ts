@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
         full_name: name,
         tier,
         billing_cycle: billingCycle,
-        status: 'pending',
+        status: 'active',
         joined_at: new Date().toISOString(),
         founding_member_lock: true,
         payfast_subscription_token: token,
@@ -129,14 +129,14 @@ export async function POST(req: NextRequest) {
       await resend.emails.send({
         from: 'FRA System <hello@film-resource-africa.com>',
         to: 'g.mostertpot@gmail.com',
-        subject: `New FRA member pending approval — ${name || email}`,
+        subject: `New FRA member joined — ${name || email}`,
         html: `
           <p><strong>Email:</strong> ${email}</p>
           <p><strong>Name:</strong> ${name || '—'}</p>
           <p><strong>Tier:</strong> ${tier} · ${billingCycle}</p>
           <p><strong>Amount:</strong> R${amount.toFixed(2)}</p>
           <p><strong>PayFast ID:</strong> ${pfId}</p>
-          <p><strong>Status:</strong> pending — flip to active in the admin dashboard.</p>
+          <p><strong>Status:</strong> active — reach out within 24 hours to welcome them.</p>
         `,
       });
     } catch {
