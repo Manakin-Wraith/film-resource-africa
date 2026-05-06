@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 
 interface HeaderProps {
   stats: {
@@ -14,11 +15,16 @@ interface HeaderProps {
   };
 }
 
-const navLinks = [
+type MemberSession = {
+  full_name: string;
+  username: string | null;
+  avatar_url: string | null;
+} | null;
+
+const NAV_LINKS_BASE = [
   { href: '/#directory', label: 'Directory' },
   { href: '/film-opportunities', label: 'Countries' },
   { href: '/news', label: 'News' },
-  { href: '/members', label: 'Members' },
   { href: '/call-sheet', label: 'Call Sheet' },
   { href: '/industry', label: 'Industry' },
   { href: '/rebate-calculator', label: 'Rebate' },
@@ -27,12 +33,50 @@ const navLinks = [
 
 export default function Header({ stats }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [member, setMember] = useState<MemberSession>(undefined as unknown as MemberSession);
   const pathname = usePathname();
+  const router = useRouter();
+
+  useEffect(() => {
+    const supabase = createSupabaseBrowserClient();
+
+    async function loadMember() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { setMember(null); return; }
+      const res = await fetch('/api/members/me');
+      const data = await res.json();
+      setMember(data);
+    }
+
+    loadMember();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      loadMember();
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  async function handleSignOut() {
+    const supabase = createSupabaseBrowserClient();
+    await supabase.auth.signOut();
+    setMember(null);
+    router.push('/');
+    router.refresh();
+  }
 
   const isActive = (href: string) => {
     if (href.startsWith('/#')) return pathname === '/';
     return pathname === href || (href !== '/' && pathname.startsWith(href));
   };
+
+  const firstName = member?.full_name?.split(' ')[0] ?? '';
+  const membersHref = member ? '/members/directory' : '/members';
+  const navLinks = [
+    ...NAV_LINKS_BASE.slice(0, 3),
+    { href: membersHref, label: 'Members' },
+    ...NAV_LINKS_BASE.slice(3),
+  ];
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50">
@@ -41,19 +85,13 @@ export default function Header({ stats }: HeaderProps) {
 
           {/* Publication wordmark */}
           <Link href="/" className="flex items-center gap-2.5 flex-shrink-0 group">
-            <Image
-              src="/icon.png"
-              alt=""
-              width={24}
-              height={24}
-              className="object-contain opacity-90"
-            />
+            <Image src="/icon.png" alt="" width={24} height={24} className="object-contain opacity-90" />
             <span className="font-heading font-bold text-[15px] tracking-tight text-foreground">
               Film Resource Africa
             </span>
           </Link>
 
-          {/* Desktop nav — text only, no icons */}
+          {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-0 flex-1">
             {navLinks.map(({ href, label }) => {
               const active = isActive(href);
@@ -72,15 +110,45 @@ export default function Header({ stats }: HeaderProps) {
             })}
           </div>
 
-          {/* Submit CTA — desktop only */}
-          <Link
-            href="/submit"
-            className="hidden md:flex items-center px-4 py-2 text-[13px] font-semibold border border-white/[0.2] text-foreground hover:bg-white/[0.06] rounded-lg transition-all flex-shrink-0"
-          >
-            Submit
-          </Link>
+          {/* Auth CTA — desktop only */}
+          <div className="hidden md:flex items-center gap-2 flex-shrink-0">
+            {member ? (
+              /* Logged-in state */
+              <div className="flex items-center gap-2">
+                <Link
+                  href={member.username ? `/members/${member.username}` : '/members/onboarding'}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors hover:bg-white/[0.06]"
+                >
+                  {member.avatar_url ? (
+                    <img src={member.avatar_url} alt="" className="w-7 h-7 rounded-full object-cover" style={{ border: '1px solid rgba(255,255,255,0.16)' }} />
+                  ) : (
+                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold"
+                      style={{ background: 'rgba(59,130,246,0.2)', border: '1px solid rgba(59,130,246,0.3)', color: '#93c5fd' }}>
+                      {firstName.charAt(0)}
+                    </div>
+                  )}
+                  <span className="text-[13px] font-semibold">{firstName}</span>
+                </Link>
+                <button
+                  onClick={handleSignOut}
+                  className="text-[12px] px-3 py-1.5 rounded-lg transition-colors hover:bg-white/[0.06]"
+                  style={{ color: 'var(--foreground-tertiary)' }}
+                >
+                  Sign out
+                </button>
+              </div>
+            ) : (
+              /* Logged-out state */
+              <Link
+                href="/login"
+                className="flex items-center px-4 py-2 text-[13px] font-semibold border border-white/[0.2] text-foreground hover:bg-white/[0.06] rounded-lg transition-all"
+              >
+                Member login
+              </Link>
+            )}
+          </div>
 
-          {/* Mobile: Menu toggle — icon only, no pill background */}
+          {/* Mobile menu toggle */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             className="md:hidden p-2 -mr-2 transition-colors"
@@ -92,14 +160,8 @@ export default function Header({ stats }: HeaderProps) {
         </div>
 
         {/* Mobile dropdown */}
-        <div
-          className={`md:hidden overflow-hidden transition-all duration-200 ${
-            menuOpen ? 'max-h-[480px] opacity-100' : 'max-h-0 opacity-0'
-          }`}
-        >
-          <div
-            className="border-t border-white/[0.06] container mx-auto px-4 py-2"
-          >
+        <div className={`md:hidden overflow-hidden transition-all duration-200 ${menuOpen ? 'max-h-[520px] opacity-100' : 'max-h-0 opacity-0'}`}>
+          <div className="border-t border-white/[0.06] container mx-auto px-4 py-2">
             {navLinks.map(({ href, label }) => (
               <Link
                 key={href}
@@ -111,13 +173,32 @@ export default function Header({ stats }: HeaderProps) {
                 {label}
               </Link>
             ))}
-            <Link
-              href="/submit"
-              onClick={() => setMenuOpen(false)}
-              className="flex items-center justify-center mt-3 mb-2 py-3.5 text-sm font-semibold border border-white/[0.2] text-foreground hover:bg-white/[0.06] rounded-lg min-h-[48px] transition-all"
-            >
-              Submit an Opportunity
-            </Link>
+            {member ? (
+              <div className="flex gap-2 mt-3 mb-2">
+                <Link
+                  href={member.username ? `/members/${member.username}` : '/members/onboarding'}
+                  onClick={() => setMenuOpen(false)}
+                  className="flex-1 flex items-center justify-center py-3.5 text-sm font-semibold border border-white/[0.2] text-foreground hover:bg-white/[0.06] rounded-lg min-h-[48px]"
+                >
+                  My profile
+                </Link>
+                <button
+                  onClick={() => { setMenuOpen(false); handleSignOut(); }}
+                  className="px-4 py-3.5 text-sm font-medium rounded-lg border border-white/[0.1] min-h-[48px]"
+                  style={{ color: 'var(--foreground-tertiary)' }}
+                >
+                  Sign out
+                </button>
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center justify-center mt-3 mb-2 py-3.5 text-sm font-semibold border border-white/[0.2] text-foreground hover:bg-white/[0.06] rounded-lg min-h-[48px] transition-all"
+              >
+                Member login
+              </Link>
+            )}
           </div>
         </div>
       </div>

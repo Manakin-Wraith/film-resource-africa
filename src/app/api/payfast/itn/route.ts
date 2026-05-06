@@ -122,7 +122,46 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    /* Notify admin via Resend (best-effort) */
+    /* Fetch onboarding token for welcome email link */
+    const { data: newMember } = await supabase
+      .from('members')
+      .select('id, onboarding_token')
+      .eq('email', email)
+      .maybeSingle();
+
+    const onboardingToken = newMember?.onboarding_token ?? null;
+    const onboardingUrl = onboardingToken
+      ? `https://film-resource-africa.com/members/onboarding?token=${onboardingToken}`
+      : 'https://film-resource-africa.com/members';
+
+    /* Welcome email to new member */
+    if (!existing && onboardingToken) {
+      try {
+        const { Resend } = await import('resend');
+        const resend = new Resend(process.env.RESEND_API_KEY);
+        await resend.emails.send({
+          from: 'Film Resource Africa <hello@film-resource-africa.com>',
+          to: email,
+          subject: `Welcome to Film Resource Africa — set up your profile`,
+          html: `
+            <p>Hi ${name || 'there'},</p>
+            <p>You're in. Your founding member spot is confirmed and your price is locked for life.</p>
+            <p>Next step — set up your profile so the industry can find you:</p>
+            <p><a href="${onboardingUrl}" style="display:inline-block;padding:14px 24px;background:#3b82f6;color:#fff;font-weight:700;border-radius:10px;text-decoration:none;">Complete your profile →</a></p>
+            ${tier === 'individual' ? '<p>You\'ll also review and accept your membership agreement (MOU) as part of this step.</p>' : ''}
+            <p>Your profile will be live on the FRA Members Directory as soon as it\'s complete.</p>
+            <p>I\'ll be in touch personally within 24 hours.</p>
+            <p>— Gerhard<br/>Film Resource Africa</p>
+            <hr style="border:none;border-top:1px solid #eee;margin:24px 0"/>
+            <p style="font-size:12px;color:#999;">This link is unique to you — don\'t share it. If you have questions, reply to this email or contact hello@film-resource-africa.com</p>
+          `,
+        });
+      } catch {
+        /* Non-fatal */
+      }
+    }
+
+    /* Admin notification */
     try {
       const { Resend } = await import('resend');
       const resend = new Resend(process.env.RESEND_API_KEY);
@@ -136,7 +175,7 @@ export async function POST(req: NextRequest) {
           <p><strong>Tier:</strong> ${tier} · ${billingCycle}</p>
           <p><strong>Amount:</strong> R${amount.toFixed(2)}</p>
           <p><strong>PayFast ID:</strong> ${pfId}</p>
-          <p><strong>Status:</strong> active — reach out within 24 hours to welcome them.</p>
+          <p><strong>Status:</strong> active — welcome email with onboarding link sent to member.</p>
         `,
       });
     } catch {

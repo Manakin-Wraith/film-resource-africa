@@ -1,7 +1,9 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { Lock, ChevronRight } from 'lucide-react';
+import { redirect } from 'next/navigation';
 import { getFoundingMemberCount } from '@/app/actions';
+import { getSessionUser } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -68,7 +70,7 @@ const PAYFAST_LINKS = {
 
 function TierComparison() {
   return (
-    <section className="mt-14 md:mt-20">
+    <section id="pricing" className="mt-14 md:mt-20">
       <div className="section-rule section-rule-accent" />
       <span className="section-rubric">Choose your tier</span>
 
@@ -391,10 +393,10 @@ function DirectoryTease() {
             Join to see and be found by producers, funders, and collaborators across Africa.
           </p>
           <Link
-            href="/members/join"
+            href="/members#pricing"
             className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-blue-600 text-white font-bold text-sm rounded-xl transition-colors"
           >
-            Join to see the room
+            Choose your tier
           </Link>
         </div>
       </div>
@@ -404,7 +406,12 @@ function DirectoryTease() {
 
 /* ── Page ─────────────────────────────────────────────────────────── */
 export default async function MembersPage() {
-  const foundingCount = await getFoundingMemberCount();
+  const [foundingCount, sessionUser] = await Promise.all([
+    getFoundingMemberCount(),
+    getSessionUser(),
+  ]);
+
+  if (sessionUser?.email) redirect('/members/directory');
 
   return (
     <main className="min-h-screen">

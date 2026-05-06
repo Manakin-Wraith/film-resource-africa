@@ -13,7 +13,7 @@ export default async function AdminPage() {
   const isAdmin = cookieStore.get('admin_auth')?.value === 'true';
 
   if (!isAdmin) {
-    redirect('/login');
+    redirect('/admin/login');
   }
 
   let opportunities: Awaited<ReturnType<typeof getAllOpportunities>> = [];
@@ -46,7 +46,7 @@ export default async function AdminPage() {
             const { cookies } = await import('next/headers');
             const store = await cookies();
             store.delete('admin_auth');
-            redirect('/login');
+            redirect('/admin/login');
           }}>
             <button type="submit" className="px-4 py-2 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-lg transition-colors font-medium">
               Logout
