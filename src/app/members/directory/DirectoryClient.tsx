@@ -5,7 +5,7 @@ import Link from 'next/link';
 
 export type DirectoryMember = {
   id: string;
-  username: string;
+  username: string | null;
   full_name: string;
   tagline: string | null;
   tier: 'individual' | 'business';
@@ -38,6 +38,7 @@ function joinedShort(joinedAt: string) {
 /* ── Member card ─────────────────────────────────────────────────────── */
 function MemberCard({ m, wide }: { m: DirectoryMember; wide?: boolean }) {
   const isBiz = m.tier === 'business';
+  const hasProfile = !!m.username;
   const name = isBiz ? (m.company_name ?? m.full_name) : m.full_name;
   const tagline = isBiz ? m.company_tagline : m.tagline;
   const disciplines = (isBiz ? m.company_specialisms : m.disciplines) ?? [];
@@ -45,128 +46,153 @@ function MemberCard({ m, wide }: { m: DirectoryMember; wide?: boolean }) {
   const avail = m.availability ?? 'available';
   const dotColor = AVAIL_COLOR[avail] ?? '#22c55e';
 
-  return (
-    <Link href={`/members/${m.username}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', height: '100%' }}>
-      <div
-        className="fra-card"
-        style={{
-          flex: 1,
-          background: 'var(--surface)',
-          border: `1px solid rgba(255,255,255,0.08)`,
-          borderRadius: '12px',
-          padding: wide ? '22px' : '18px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '12px',
-          position: 'relative',
-          cursor: 'pointer',
-        }}
-        data-biz={isBiz ? '' : undefined}
-      >
-        {/* Founding mark */}
-        {m.founding_member_lock && (
-          <span style={{
-            position: 'absolute', top: 10, left: 10,
-            fontSize: '12px', color: '#f59e0b', lineHeight: 1, pointerEvents: 'none',
-          }}>★</span>
-        )}
+  const cardInner = (
+    <div
+      className={`fra-card${hasProfile ? '' : ' fra-card--incomplete'}`}
+      style={{
+        flex: 1,
+        background: 'var(--surface)',
+        border: `1px solid rgba(255,255,255,${hasProfile ? '0.08' : '0.05'})`,
+        borderRadius: '12px',
+        padding: wide ? '22px' : '18px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '12px',
+        position: 'relative',
+        cursor: hasProfile ? 'pointer' : 'default',
+        opacity: hasProfile ? 1 : 0.6,
+      }}
+      data-biz={isBiz ? '' : undefined}
+    >
+      {/* Founding mark */}
+      {m.founding_member_lock && (
+        <span style={{
+          position: 'absolute', top: 10, left: 10,
+          fontSize: '12px', color: '#f59e0b', lineHeight: 1, pointerEvents: 'none',
+        }}>★</span>
+      )}
 
-        {/* Top row: avatar · badges */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <div style={{
-            width: 48, height: 48, flexShrink: 0,
-            borderRadius: isBiz ? '10px' : '999px',
-            overflow: 'hidden',
-            border: `1px solid ${isBiz ? 'rgba(245,158,11,0.2)' : 'rgba(59,130,246,0.2)'}`,
-            background: isBiz ? 'rgba(245,158,11,0.08)' : 'rgba(59,130,246,0.08)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            {photoUrl
-              ? <img src={photoUrl} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              : <span style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '20px', color: isBiz ? '#fcd34d' : '#93c5fd' }}>
-                  {name.charAt(0)}
-                </span>
-            }
-          </div>
+      {/* "Setting up profile" badge — top right when incomplete */}
+      {!hasProfile && (
+        <span style={{
+          position: 'absolute', top: 10, right: 10,
+          fontSize: '9px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em',
+          padding: '2px 7px', borderRadius: '5px',
+          background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
+          color: 'rgba(250,250,250,0.3)', fontFamily: 'var(--font-mono, monospace)',
+          pointerEvents: 'none',
+        }}>Setting up</span>
+      )}
 
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <span style={{
-              fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em',
-              padding: '2px 8px', borderRadius: '6px',
-              background: isBiz ? 'rgba(245,158,11,0.1)' : 'rgba(59,130,246,0.1)',
-              border: `1px solid ${isBiz ? 'rgba(245,158,11,0.25)' : 'rgba(59,130,246,0.25)'}`,
-              color: isBiz ? '#fcd34d' : '#93c5fd',
-              fontFamily: 'var(--font-mono, monospace)',
-            }}>
-              {isBiz ? 'Business' : 'Individual'}
-            </span>
-            {!isBiz && (
-              <span style={{ width: 8, height: 8, borderRadius: '999px', background: dotColor, display: 'inline-block', flexShrink: 0 }} />
-            )}
-          </div>
+      {/* Top row: avatar · badges */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div style={{
+          width: 48, height: 48, flexShrink: 0,
+          borderRadius: isBiz ? '10px' : '999px',
+          overflow: 'hidden',
+          border: `1px solid ${isBiz ? 'rgba(245,158,11,0.2)' : 'rgba(59,130,246,0.2)'}`,
+          background: isBiz ? 'rgba(245,158,11,0.08)' : 'rgba(59,130,246,0.08)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          {photoUrl
+            ? <img src={photoUrl} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            : <span style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '20px', color: isBiz ? '#fcd34d' : '#93c5fd' }}>
+                {name.charAt(0)}
+              </span>
+          }
         </div>
 
-        {/* Name + tagline */}
-        <div>
-          <div style={{
-            fontFamily: 'var(--font-heading)', fontWeight: 700,
-            fontSize: wide ? '21px' : '18px', lineHeight: 1.1,
-          }}>{name}</div>
-          {tagline && (
-            <div style={{
-              fontSize: '12px', fontStyle: 'italic', color: 'rgba(250,250,250,0.55)',
-              marginTop: '4px', overflow: 'hidden', textOverflow: 'ellipsis',
-              whiteSpace: wide ? 'normal' : 'nowrap',
-            }}>{tagline}</div>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginLeft: hasProfile ? 0 : '64px' }}>
+          <span style={{
+            fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em',
+            padding: '2px 8px', borderRadius: '6px',
+            background: isBiz ? 'rgba(245,158,11,0.1)' : 'rgba(59,130,246,0.1)',
+            border: `1px solid ${isBiz ? 'rgba(245,158,11,0.25)' : 'rgba(59,130,246,0.25)'}`,
+            color: isBiz ? '#fcd34d' : '#93c5fd',
+            fontFamily: 'var(--font-mono, monospace)',
+          }}>
+            {isBiz ? 'Business' : 'Individual'}
+          </span>
+          {!isBiz && hasProfile && (
+            <span style={{ width: 8, height: 8, borderRadius: '999px', background: dotColor, display: 'inline-block', flexShrink: 0 }} />
           )}
         </div>
+      </div>
 
-        {/* Discipline pills */}
-        {disciplines.length > 0 && (
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
-            {disciplines.slice(0, 3).map((d, i) => (
-              <span key={i} style={{
-                fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em',
-                padding: '3px 8px', borderRadius: '6px',
-                background: isBiz ? 'rgba(245,158,11,0.07)' : 'rgba(59,130,246,0.07)',
-                border: `1px solid ${isBiz ? 'rgba(245,158,11,0.15)' : 'rgba(59,130,246,0.15)'}`,
-                color: isBiz ? 'rgba(252,211,77,0.75)' : 'rgba(147,197,253,0.75)',
-              }}>{d}</span>
-            ))}
-            {disciplines.length > 3 && (
-              <span style={{
-                fontSize: '11px', fontWeight: 600, padding: '3px 8px', borderRadius: '6px',
-                border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(250,250,250,0.35)',
-              }}>+{disciplines.length - 3}</span>
-            )}
+      {/* Name + tagline */}
+      <div>
+        <div style={{
+          fontFamily: 'var(--font-heading)', fontWeight: 700,
+          fontSize: wide ? '21px' : '18px', lineHeight: 1.1,
+        }}>{name}</div>
+        {tagline ? (
+          <div style={{
+            fontSize: '12px', fontStyle: 'italic', color: 'rgba(250,250,250,0.55)',
+            marginTop: '4px', overflow: 'hidden', textOverflow: 'ellipsis',
+            whiteSpace: wide ? 'normal' : 'nowrap',
+          }}>{tagline}</div>
+        ) : !hasProfile && (
+          <div style={{ fontSize: '12px', color: 'rgba(250,250,250,0.25)', marginTop: '4px', fontStyle: 'italic' }}>
+            Profile coming soon
           </div>
         )}
+      </div>
 
-        {/* Footer */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', paddingTop: '4px' }}>
+      {/* Discipline pills */}
+      {disciplines.length > 0 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+          {disciplines.slice(0, 3).map((d, i) => (
+            <span key={i} style={{
+              fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em',
+              padding: '3px 8px', borderRadius: '6px',
+              background: isBiz ? 'rgba(245,158,11,0.07)' : 'rgba(59,130,246,0.07)',
+              border: `1px solid ${isBiz ? 'rgba(245,158,11,0.15)' : 'rgba(59,130,246,0.15)'}`,
+              color: isBiz ? 'rgba(252,211,77,0.75)' : 'rgba(147,197,253,0.75)',
+            }}>{d}</span>
+          ))}
+          {disciplines.length > 3 && (
+            <span style={{
+              fontSize: '11px', fontWeight: 600, padding: '3px 8px', borderRadius: '6px',
+              border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(250,250,250,0.35)',
+            }}>+{disciplines.length - 3}</span>
+          )}
+        </div>
+      )}
+
+      {/* Footer */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', paddingTop: '4px' }}>
+        <span style={{
+          fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.08em',
+          color: 'rgba(250,250,250,0.3)', fontFamily: 'var(--font-mono, monospace)',
+        }}>
+          {[m.location_city, m.country].filter(Boolean).join(', ')}
+        </span>
+        {isBiz ? (
+          <span style={{ fontSize: '11px', display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#86efac' }}>
+            <span style={{ width: 6, height: 6, borderRadius: '999px', background: '#22c55e', display: 'inline-block' }} />
+            Open to projects
+          </span>
+        ) : (
           <span style={{
             fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.08em',
             color: 'rgba(250,250,250,0.3)', fontFamily: 'var(--font-mono, monospace)',
           }}>
-            {[m.location_city, m.country].filter(Boolean).join(', ')}
+            Since {joinedShort(m.joined_at)}
           </span>
-          {isBiz ? (
-            <span style={{ fontSize: '11px', display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#86efac' }}>
-              <span style={{ width: 6, height: 6, borderRadius: '999px', background: '#22c55e', display: 'inline-block' }} />
-              Open to projects
-            </span>
-          ) : (
-            <span style={{
-              fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.08em',
-              color: 'rgba(250,250,250,0.3)', fontFamily: 'var(--font-mono, monospace)',
-            }}>
-              Since {joinedShort(m.joined_at)}
-            </span>
-          )}
-        </div>
+        )}
       </div>
-    </Link>
+    </div>
   );
+
+  if (hasProfile) {
+    return (
+      <Link href={`/members/${m.username}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', height: '100%' }}>
+        {cardInner}
+      </Link>
+    );
+  }
+
+  return <div style={{ display: 'flex', height: '100%' }}>{cardInner}</div>;
 }
 
 /* ── Skeleton card ───────────────────────────────────────────────────── */
@@ -644,6 +670,7 @@ export default function DirectoryClient({ members }: { members: DirectoryMember[
         .fra-card { transition: border-color 0.15s, background 0.15s; }
         .fra-card:hover { border-color: rgba(255,255,255,0.18) !important; background: var(--surface-raised) !important; }
         .fra-card[data-biz]:hover { border-color: rgba(245,158,11,0.25) !important; }
+        .fra-card--incomplete:hover { border-color: rgba(255,255,255,0.05) !important; background: var(--surface) !important; }
 
         @media (max-width: 1024px) {
           .fra-row { grid-template-columns: 1fr 1fr !important; }
