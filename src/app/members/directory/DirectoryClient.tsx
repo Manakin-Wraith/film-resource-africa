@@ -72,18 +72,6 @@ function MemberCard({ m, wide }: { m: DirectoryMember; wide?: boolean }) {
         }}>★</span>
       )}
 
-      {/* "Setting up profile" badge — top right when incomplete */}
-      {!hasProfile && (
-        <span style={{
-          position: 'absolute', top: 10, right: 10,
-          fontSize: '9px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em',
-          padding: '2px 7px', borderRadius: '5px',
-          background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
-          color: 'rgba(250,250,250,0.3)', fontFamily: 'var(--font-mono, monospace)',
-          pointerEvents: 'none',
-        }}>Setting up</span>
-      )}
-
       {/* Top row: avatar · badges */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div style={{
@@ -102,20 +90,30 @@ function MemberCard({ m, wide }: { m: DirectoryMember; wide?: boolean }) {
           }
         </div>
 
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginLeft: hasProfile ? 0 : '64px' }}>
-          <span style={{
-            fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em',
-            padding: '2px 8px', borderRadius: '6px',
-            background: isBiz ? 'rgba(245,158,11,0.1)' : 'rgba(59,130,246,0.1)',
-            border: `1px solid ${isBiz ? 'rgba(245,158,11,0.25)' : 'rgba(59,130,246,0.25)'}`,
-            color: isBiz ? '#fcd34d' : '#93c5fd',
-            fontFamily: 'var(--font-mono, monospace)',
-          }}>
-            {isBiz ? 'Business' : 'Individual'}
-          </span>
-          {!isBiz && hasProfile && (
-            <span style={{ width: 8, height: 8, borderRadius: '999px', background: dotColor, display: 'inline-block', flexShrink: 0 }} />
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '5px' }}>
+          {!hasProfile && (
+            <span style={{
+              fontSize: '9px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em',
+              padding: '2px 7px', borderRadius: '5px',
+              background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
+              color: 'rgba(250,250,250,0.3)', fontFamily: 'var(--font-mono, monospace)',
+            }}>Setting up</span>
           )}
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <span style={{
+              fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em',
+              padding: '2px 8px', borderRadius: '6px',
+              background: isBiz ? 'rgba(245,158,11,0.1)' : 'rgba(59,130,246,0.1)',
+              border: `1px solid ${isBiz ? 'rgba(245,158,11,0.25)' : 'rgba(59,130,246,0.25)'}`,
+              color: isBiz ? '#fcd34d' : '#93c5fd',
+              fontFamily: 'var(--font-mono, monospace)',
+            }}>
+              {isBiz ? 'Business' : 'Individual'}
+            </span>
+            {!isBiz && hasProfile && (
+              <span style={{ width: 8, height: 8, borderRadius: '999px', background: dotColor, display: 'inline-block', flexShrink: 0 }} />
+            )}
+          </div>
         </div>
       </div>
 
