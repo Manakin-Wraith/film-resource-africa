@@ -1429,3 +1429,17 @@ export async function getCountryOpportunities(countryId: string): Promise<Opport
     return [];
   }
 }
+
+export async function getFoundingMemberCount(): Promise<number> {
+  try {
+    const { count, error } = await supabase
+      .from('members')
+      .select('*', { count: 'exact', head: true })
+      .eq('founding_member_lock', true)
+      .eq('status', 'active');
+    if (error) throw error;
+    return count ?? 0;
+  } catch {
+    return 0;
+  }
+}

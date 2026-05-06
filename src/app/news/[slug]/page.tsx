@@ -167,7 +167,7 @@ export default async function NewsArticlePage({ params }: { params: Promise<{ sl
         )}
 
         {/* Article body */}
-        <article className="mb-10 border-t border-white/[0.08] pt-8">
+        <article className="mb-10 border-t border-white/8 pt-8">
           <div className="prose prose-invert prose-base max-w-none">
             {article.content && (
               <MarkdownBody content={decodeEntities(article.content)} />
@@ -176,7 +176,7 @@ export default async function NewsArticlePage({ params }: { params: Promise<{ sl
 
           {/* Source attribution */}
           {article.url && (
-            <div className="mt-8 pt-5 border-t border-white/[0.06]">
+            <div className="mt-8 pt-5 border-t border-white/6">
               <p className="text-[12px]" style={{ color: 'var(--foreground-tertiary)' }}>
                 Source:{' '}
                 <TrackOutboundLink
@@ -217,7 +217,7 @@ export default async function NewsArticlePage({ params }: { params: Promise<{ sl
                 <Link
                   key={opp.id}
                   href="/#directory"
-                  className="p-4 rounded-xl border border-white/[0.08] hover:border-white/[0.16] hover:-translate-y-0.5 transition-all group"
+                  className="p-4 rounded-xl border border-white/8 hover:border-white/16 hover:-translate-y-0.5 transition-all group"
                   style={{ background: 'var(--surface)' }}
                 >
                   <h3 className="text-[13px] font-bold font-heading text-foreground group-hover:text-primary transition-colors leading-snug mb-2">
@@ -249,7 +249,7 @@ export default async function NewsArticlePage({ params }: { params: Promise<{ sl
                   <Link
                     key={item.id}
                     href={item.slug ? `/news/${item.slug}` : '#'}
-                    className="p-4 rounded-xl border border-white/[0.08] hover:border-white/[0.16] hover:-translate-y-0.5 transition-all group"
+                    className="p-4 rounded-xl border border-white/8 hover:border-white/16 hover:-translate-y-0.5 transition-all group"
                     style={{ background: 'var(--surface)' }}
                   >
                     <div className="flex items-center gap-1.5 mb-2">

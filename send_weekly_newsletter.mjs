@@ -39,8 +39,21 @@ const args = process.argv.slice(2);
 const DRY_RUN = args.includes('--dry-run');
 const PREVIEW = args.includes('--preview');
 const RESEND_TO_NEW = args.includes('--resend-to-new');
+const TEST_SEND_EMAIL = (args.find(a => a.startsWith('--test-send=')) || '').split('=')[1] || null;
 const FROM_EMAIL = 'Film Resource Africa <hello@film-resource-africa.com>';
 const SEND_DELAY_MS = 600; // Resend free tier: ~2/sec
+
+// ─── One-off featured content (manually curated per edition) ─────────────────
+
+const ITC_OPPORTUNITY = {
+  title: 'ITC Film Mentorship Positions — 11 Paid Roles Available',
+  organisation: 'International Trade Centre · Youth & Trade Programme',
+  description: 'Paid mentorship & plenary positions ($30–45/hr) across writing, budgeting, pitch deck development, marketing & distribution, pitching, vertical series, AI for film, and co-productions. Remote + in-person sessions in Kampala.',
+  deadline: '9 May 2026 (extended)',
+  rate: '$30–45/hr',
+  applyEmail: 'youthandtrade@intracen.org',
+  docUrl: 'https://docs.google.com/document/d/1rd9sb79VnYs-3cm6ahIeg-8DHuVdQbmz1qfk0FRCNKQ/edit?tab=t.0',
+};
 
 // ─── Supabase REST helpers ───────────────────────────────────────────────────
 
@@ -173,6 +186,13 @@ async function fetchPartners() {
   return supabaseGet('partners', 'status=eq.approved&order=sort_order.asc&limit=10');
 }
 
+async function fetchIndustryListings() {
+  return supabaseGet(
+    'directory_listings',
+    'status=eq.approved&order=created_at.desc&limit=5&select=id,name,category,description,country,city,website'
+  );
+}
+
 async function fetchSubscribers() {
   return supabaseGet('newsletter_subscriptions', 'select=id,email,unsubscribe_token&unsubscribed=eq.false&order=created_at.asc');
 }
@@ -264,7 +284,118 @@ function buildSectionHeading(title, subtitle) {
     </tr>`;
 }
 
-function buildNewsletterHtml({ closingSoon, newlyOpen, justAdded, news, proTip, weekLabel, callSheetListings, communitySpotlights, partners, episodeNumber }) {
+function buildITCFeaturedCard(itc, siteUrl) {
+  const docUrl = trackUrl(itc.docUrl, 'itc_featured');
+  const mailtoUrl = `mailto:${itc.applyEmail}?subject=Expression%20of%20Interest%20%E2%80%94%20ITC%20Film%20Mentorship`;
+  return `
+    <tr>
+      <td style="padding:24px 16px 0;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+          style="background:#eef4ff;border:1px solid #b8d0f8;border-radius:10px;overflow:hidden;">
+          <tr>
+            <td style="padding:16px 20px 6px;">
+              <span style="display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#2f6be8;background:#d6e6ff;padding:3px 10px;border-radius:4px;">
+                Featured Opportunity · ITC
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:4px 20px 0;">
+              <a href="${escapeHtml(docUrl)}" style="color:#1a3a6e;font-weight:700;font-size:16px;text-decoration:none;line-height:1.4;">
+                ${escapeHtml(itc.title)}
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:4px 20px 0;">
+              <span style="font-size:12px;color:#5574a6;font-weight:600;">${escapeHtml(itc.organisation)}</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:8px 20px 0;">
+              <p style="margin:0;font-size:13px;color:#2a3a5c;line-height:1.6;">${escapeHtml(itc.description)}</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:10px 20px 4px;">
+              <span style="font-size:12px;color:#2f6be8;font-weight:600;">&#128197; Deadline: ${escapeHtml(itc.deadline)}</span>
+              <span style="font-size:12px;color:#5574a6;margin-left:12px;">&#128181; ${escapeHtml(itc.rate)}</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:6px 20px 10px;">
+              <p style="margin:0;padding:10px 14px;background:#fdf3f3;border-left:3px solid #eb5757;border-radius:0 6px 6px 0;font-size:12px;color:#5c2b2b;line-height:1.6;">
+                <strong>&#9888;&#65039; Organisations only</strong> — individual applications are not accepted directly by ITC.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:4px 20px 10px;">
+              <p style="margin:0;padding:10px 14px;background:#f0f7ff;border-left:3px solid #2f6be8;border-radius:0 6px 6px 0;font-size:12px;color:#1a3a6e;line-height:1.6;">
+                <strong>&#127775; Individual filmmaker?</strong> FRA can submit on your behalf as an organisational applicant — a benefit for FRA members.
+                <a href="mailto:hello@film-resource-africa.com?subject=FRA%20Membership%20%E2%80%94%20ITC%20Application%20Support" style="color:#2f6be8;font-weight:600;text-decoration:none;white-space:nowrap;">Get in touch &rarr;</a>
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:4px 20px 18px;">
+              <a href="${escapeHtml(docUrl)}"
+                style="display:inline-block;background:#2f6be8;color:#ffffff;font-weight:600;font-size:13px;text-decoration:none;padding:8px 18px;border-radius:6px;margin-right:8px;">
+                View all positions &rarr;
+              </a>
+              <a href="${escapeHtml(mailtoUrl)}"
+                style="display:inline-block;color:#2f6be8;font-weight:600;font-size:13px;text-decoration:none;padding:8px 0;">
+                Email to apply
+              </a>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>`;
+}
+
+function buildIndustryListingsSection(listings, siteUrl) {
+  if (!listings || listings.length === 0) return '';
+  let rows = '';
+  for (const listing of listings) {
+    const name = escapeHtml(listing.name || '');
+    const cat = escapeHtml(listing.category || '');
+    const location = [listing.city, listing.country].filter(Boolean).map(escapeHtml).join(', ');
+    const desc = escapeHtml(truncate(listing.description, 110));
+    const url = listing.website
+      ? trackUrl(listing.website, 'industry_directory')
+      : trackUrl(`${siteUrl}/directory`, 'industry_directory');
+    rows += `
+      <tr>
+        <td style="padding:12px 16px;border-bottom:1px solid #f0f0f0;">
+          <a href="${escapeHtml(url)}" style="color:#37352f;font-weight:600;font-size:15px;text-decoration:none;">${name}</a>
+          ${cat ? `<span style="display:inline-block;margin-left:8px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:#9b9a97;background:#f7f6f3;padding:2px 7px;border-radius:4px;">${cat}</span>` : ''}
+          ${location ? `<br/><span style="color:#9b9a97;font-size:12px;">&#127759; ${location}</span>` : ''}
+          ${desc ? `<br/><span style="color:#787774;font-size:13px;line-height:1.5;">${desc}</span>` : ''}
+        </td>
+      </tr>`;
+  }
+  return `
+    ${buildSectionHeading('From the Industry Directory', 'New & notable companies, services & training on FRA')}
+    <tr>
+      <td style="padding:0 16px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+          style="border:1px solid #e8e8e8;border-radius:8px;overflow:hidden;">
+          ${rows}
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:8px 16px 0;" align="center">
+        <a href="${trackUrl(`${siteUrl}/directory`, 'directory_cta')}"
+          style="color:#2f80ed;font-size:13px;font-weight:600;text-decoration:none;">
+          Browse the full Industry Directory &rarr;
+        </a>
+      </td>
+    </tr>`;
+}
+
+function buildNewsletterHtml({ closingSoon, newlyOpen, justAdded, news, proTip, weekLabel, callSheetListings, communitySpotlights, partners, episodeNumber, itcOpportunity, industryListings }) {
   // Deduplicate: if an opp appears in closingSoon, don't show it again in newlyOpen or justAdded
   const closingIds = new Set(closingSoon.map(o => o.id));
   const openIds = new Set(newlyOpen.map(o => o.id));
@@ -272,6 +403,11 @@ function buildNewsletterHtml({ closingSoon, newlyOpen, justAdded, news, proTip, 
   const filteredAdded = justAdded.filter(o => !closingIds.has(o.id) && !openIds.has(o.id));
 
   let sections = '';
+
+  // ── Featured: ITC Opportunity ──
+  if (itcOpportunity) {
+    sections += buildITCFeaturedCard(itcOpportunity, siteUrl);
+  }
 
   // ── Section 1: Closing Soon ──
   if (closingSoon.length > 0) {
@@ -338,6 +474,9 @@ function buildNewsletterHtml({ closingSoon, newlyOpen, justAdded, news, proTip, 
     }
     sections += '</table></td></tr>';
   }
+
+  // ── Section 4b: Industry Directory ──
+  sections += buildIndustryListingsSection(industryListings, siteUrl);
 
   // ── Section 5: Pro Tip ──
   if (proTip) {
@@ -605,8 +744,18 @@ function buildNewsletterHtml({ closingSoon, newlyOpen, justAdded, news, proTip, 
 
 // ─── Plain text fallback generator ───────────────────────────────────────────
 
-function buildPlainText({ closingSoon, newlyOpen, justAdded, news, proTip, weekLabel, callSheetListings }) {
+function buildPlainText({ closingSoon, newlyOpen, justAdded, news, proTip, weekLabel, callSheetListings, itcOpportunity, industryListings }) {
   let text = `FILM RESOURCE AFRICA — Weekly Opportunities Digest\nWeek of ${weekLabel}\n\n`;
+
+  if (itcOpportunity) {
+    text += `--- FEATURED OPPORTUNITY · ITC ---\n\n`;
+    text += `${itcOpportunity.title}\n`;
+    text += `${itcOpportunity.organisation}\n`;
+    text += `${itcOpportunity.description}\n`;
+    text += `Rate: ${itcOpportunity.rate} | Deadline: ${itcOpportunity.deadline}\n`;
+    text += `View positions: ${itcOpportunity.docUrl}\n`;
+    text += `Apply: ${itcOpportunity.applyEmail}\n\n`;
+  }
 
   if (closingSoon.length > 0) {
     text += '--- DEADLINES CLOSING SOON ---\n\n';
@@ -643,6 +792,16 @@ function buildPlainText({ closingSoon, newlyOpen, justAdded, news, proTip, weekL
       text += `* ${item.title}\n`;
     }
     text += '\n';
+  }
+
+  if (industryListings && industryListings.length > 0) {
+    text += '--- FROM THE INDUSTRY DIRECTORY ---\n\n';
+    for (const l of industryListings) {
+      const location = [l.city, l.country].filter(Boolean).join(', ');
+      text += `* ${l.name}${l.category ? ` (${l.category})` : ''}${location ? ` — ${location}` : ''}\n`;
+      if (l.website) text += `  ${l.website}\n`;
+    }
+    text += `\nBrowse directory: ${siteUrl}/directory\n\n`;
   }
 
   if (proTip) {
@@ -769,7 +928,7 @@ async function main() {
     'newsletters',
     `edition_date=gte.${new Date(new Date().setDate(new Date().getDate() - new Date().getDay())).toISOString().split('T')[0]}&status=eq.sent&limit=1`
   );
-  if (existing.length > 0 && !DRY_RUN && !PREVIEW) {
+  if (existing.length > 0 && !DRY_RUN && !PREVIEW && !TEST_SEND_EMAIL) {
     console.log('\nNewsletter already sent this week. Skipping.');
     console.log(`  Sent: ${existing[0].sent_at}`);
     console.log(`  Subject: ${existing[0].subject}`);
@@ -783,7 +942,7 @@ async function main() {
 
   // 3. Fetch content from Supabase
   console.log('Fetching content...');
-  const [closingSoon, newlyOpen, justAdded, news, proTip, callSheetListings, communitySpotlights, partners] = await Promise.all([
+  const [closingSoon, newlyOpen, justAdded, news, proTip, callSheetListings, communitySpotlights, partners, industryListings] = await Promise.all([
     fetchClosingSoon(),
     fetchNewlyOpen(),
     fetchJustAdded(),
@@ -792,6 +951,7 @@ async function main() {
     fetchCallSheetListings(),
     fetchCommunitySpotlights(),
     fetchPartners(),
+    fetchIndustryListings(),
   ]);
 
   console.log(`  Closing soon: ${closingSoon.length}`);
@@ -802,9 +962,11 @@ async function main() {
   console.log(`  Call sheet: ${callSheetListings.length}`);
   console.log(`  Community spotlights: ${communitySpotlights.length}`);
   console.log(`  Partners: ${partners.length}`);
+  console.log(`  Industry listings: ${industryListings.length}`);
+  console.log(`  ITC featured: yes`);
 
   // 3. Generate newsletter HTML
-  const data = { closingSoon, newlyOpen, justAdded, news, proTip, weekLabel, callSheetListings, communitySpotlights, partners, episodeNumber };
+  const data = { closingSoon, newlyOpen, justAdded, news, proTip, weekLabel, callSheetListings, communitySpotlights, partners, episodeNumber, itcOpportunity: ITC_OPPORTUNITY, industryListings };
   const html = buildNewsletterHtml(data);
   const plainText = buildPlainText(data);
   // Dynamic subject line — lead with the hook, not just stats
@@ -826,34 +988,44 @@ async function main() {
   console.log(`\nSubject: ${subject}`);
   console.log(`HTML size: ${(html.length / 1024).toFixed(1)} KB`);
 
-  // 4. Fetch subscribers
-  const subscribers = await fetchSubscribers();
-  console.log(`Subscribers: ${subscribers.length}`);
-
-  if (subscribers.length === 0) {
-    console.log('No subscribers found. Exiting.');
-    return;
+  // 4. Fetch subscribers (or use single test address)
+  let subscribers;
+  if (TEST_SEND_EMAIL) {
+    console.log(`\n--- TEST SEND — sending only to ${TEST_SEND_EMAIL} ---`);
+    subscribers = [{ email: TEST_SEND_EMAIL, unsubscribe_token: null, id: 'test' }];
+  } else {
+    subscribers = await fetchSubscribers();
+    console.log(`Subscribers: ${subscribers.length}`);
+    if (subscribers.length === 0) {
+      console.log('No subscribers found. Exiting.');
+      return;
+    }
   }
 
-  // 5. Store newsletter in Supabase
-  const [newsletter] = await supabasePost('newsletters', {
-    subject,
-    body_html: html,
-    body_plain: plainText,
-    edition_date: new Date().toISOString().split('T')[0],
-    status: DRY_RUN ? 'draft' : 'sending',
-    recipient_count: subscribers.length,
-    metadata: {
-      closing_soon_count: closingSoon.length,
-      open_count: newlyOpen.length,
-      just_added_count: justAdded.length,
-      news_count: news.length,
-      pro_tip_id: proTip?.id || null,
-      week_id: weekId,
-    },
-  });
-
-  console.log(`\nNewsletter stored: ${newsletter.id}`);
+  // 5. Store newsletter in Supabase (skip for test sends)
+  let newsletter;
+  if (TEST_SEND_EMAIL) {
+    newsletter = { id: 'test-preview', subject, body_html: html, body_plain: plainText };
+    console.log('\n--- TEST SEND — skipping DB storage ---');
+  } else {
+    [newsletter] = await supabasePost('newsletters', {
+      subject,
+      body_html: html,
+      body_plain: plainText,
+      edition_date: new Date().toISOString().split('T')[0],
+      status: DRY_RUN ? 'draft' : 'sending',
+      recipient_count: subscribers.length,
+      metadata: {
+        closing_soon_count: closingSoon.length,
+        open_count: newlyOpen.length,
+        just_added_count: justAdded.length,
+        news_count: news.length,
+        pro_tip_id: proTip?.id || null,
+        week_id: weekId,
+      },
+    });
+    console.log(`\nNewsletter stored: ${newsletter.id}`);
+  }
 
   if (DRY_RUN) {
     console.log('\n--- DRY RUN — not sending emails ---');
@@ -864,7 +1036,7 @@ async function main() {
     return;
   }
 
-  // 6. Send to all subscribers (with per-subscriber click tracking)
+  // 6. Send to subscribers (with per-subscriber click tracking)
   //    - Replace {{NEWSLETTER_ID}} once in the template
   //    - Pre-insert a newsletter_sends record to get the send_id
   //    - Replace {{SEND_ID}} per-subscriber so every link tracks back to them
@@ -876,34 +1048,44 @@ async function main() {
 
   for (const sub of subscribers) {
     try {
-      // Pre-insert send record to get its ID for tracking links
-      const [sendRecord] = await supabasePost('newsletter_sends', {
-        newsletter_id: newsletter.id,
-        subscriber_email: sub.email,
-        status: 'pending',
-      });
+      let personalHtml;
+      let sendRecordId = null;
 
-      // Personalise HTML with this subscriber's send ID and unsubscribe link
-      const unsubscribeUrl = sub.unsubscribe_token
-        ? `${siteUrl}/api/unsubscribe?token=${sub.unsubscribe_token}`
-        : `${siteUrl}`;
-      const personalHtml = htmlWithNid
-        .replace(/\{\{SEND_ID\}\}/g, sendRecord.id)
-        .replace(/\{\{UNSUBSCRIBE_URL\}\}/g, unsubscribeUrl);
+      if (TEST_SEND_EMAIL) {
+        // Test send: no DB record, placeholder tracking IDs
+        personalHtml = htmlWithNid
+          .replace(/\{\{SEND_ID\}\}/g, 'test-send')
+          .replace(/\{\{UNSUBSCRIBE_URL\}\}/g, `${siteUrl}/api/unsubscribe`);
+      } else {
+        // Pre-insert send record to get its ID for tracking links
+        const [sendRecord] = await supabasePost('newsletter_sends', {
+          newsletter_id: newsletter.id,
+          subscriber_email: sub.email,
+          status: 'pending',
+        });
+        sendRecordId = sendRecord.id;
+
+        const unsubscribeUrl = sub.unsubscribe_token
+          ? `${siteUrl}/api/unsubscribe?token=${sub.unsubscribe_token}`
+          : `${siteUrl}`;
+        personalHtml = htmlWithNid
+          .replace(/\{\{SEND_ID\}\}/g, sendRecord.id)
+          .replace(/\{\{UNSUBSCRIBE_URL\}\}/g, unsubscribeUrl);
+      }
 
       const result = await sendEmail(sub.email, subject, personalHtml);
 
-      // Update send record with success
-      await supabasePatch('newsletter_sends', `id=eq.${sendRecord.id}`, {
-        status: 'sent',
-        resend_message_id: result.id || null,
-        sent_at: new Date().toISOString(),
-      });
+      if (!TEST_SEND_EMAIL && sendRecordId) {
+        await supabasePatch('newsletter_sends', `id=eq.${sendRecordId}`, {
+          status: 'sent',
+          resend_message_id: result.id || null,
+          sent_at: new Date().toISOString(),
+        });
+      }
 
       sent++;
       console.log(`  ✅ ${sub.email}`);
 
-      // Rate limit delay
       if (sent < subscribers.length) {
         await new Promise(r => setTimeout(r, SEND_DELAY_MS));
       }
@@ -911,33 +1093,39 @@ async function main() {
       failed++;
       console.error(`  ❌ ${sub.email}: ${err.message}`);
 
-      // Log failure
-      try {
-        await supabasePost('newsletter_sends', {
-          newsletter_id: newsletter.id,
-          subscriber_email: sub.email,
-          status: 'failed',
-          error_message: err.message,
-        });
-      } catch (_) { /* silent */ }
+      if (!TEST_SEND_EMAIL) {
+        try {
+          await supabasePost('newsletter_sends', {
+            newsletter_id: newsletter.id,
+            subscriber_email: sub.email,
+            status: 'failed',
+            error_message: err.message,
+          });
+        } catch (_) { /* silent */ }
+      }
     }
   }
 
-  // 7. Update newsletter status
-  const finalStatus = failed === subscribers.length ? 'failed' : 'sent';
-  await supabasePatch('newsletters', `id=eq.${newsletter.id}`, {
-    status: finalStatus,
-    sent_at: new Date().toISOString(),
-    recipient_count: sent,
-  });
-
-  // 8. Summary
-  console.log(`\n=== Done ===`);
-  console.log(`  Sent: ${sent}`);
-  console.log(`  Failed: ${failed}`);
-  console.log(`  Total subscribers: ${subscribers.length}`);
-  console.log(`  Newsletter ID: ${newsletter.id}`);
-  console.log(`  Status: ${finalStatus}`);
+  // 7. Update newsletter status (skip for test sends)
+  if (!TEST_SEND_EMAIL) {
+    const finalStatus = failed === subscribers.length ? 'failed' : 'sent';
+    await supabasePatch('newsletters', `id=eq.${newsletter.id}`, {
+      status: finalStatus,
+      sent_at: new Date().toISOString(),
+      recipient_count: sent,
+    });
+    console.log(`\n=== Done ===`);
+    console.log(`  Sent: ${sent}`);
+    console.log(`  Failed: ${failed}`);
+    console.log(`  Total subscribers: ${subscribers.length}`);
+    console.log(`  Newsletter ID: ${newsletter.id}`);
+    console.log(`  Status: ${finalStatus}`);
+  } else {
+    console.log(`\n=== Test Send Done ===`);
+    console.log(`  Sent to: ${TEST_SEND_EMAIL}`);
+    console.log(`  Result: ${sent === 1 ? 'SUCCESS ✅' : 'FAILED ❌'}`);
+    console.log(`  Run without --test-send= to send to all subscribers.`);
+  }
 }
 
 main().catch(err => {

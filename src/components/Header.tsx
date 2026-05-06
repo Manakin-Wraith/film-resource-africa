@@ -18,6 +18,7 @@ const navLinks = [
   { href: '/#directory', label: 'Directory' },
   { href: '/film-opportunities', label: 'Countries' },
   { href: '/news', label: 'News' },
+  { href: '/members', label: 'Members' },
   { href: '/call-sheet', label: 'Call Sheet' },
   { href: '/industry', label: 'Industry' },
   { href: '/rebate-calculator', label: 'Rebate' },

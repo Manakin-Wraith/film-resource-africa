@@ -65,7 +65,7 @@ export default async function FilmOpportunitiesIndexPage() {
             <h1 className="text-[26px] md:text-[38px] font-bold font-heading leading-tight text-foreground">
               Film Opportunities Across Africa
             </h1>
-            <span className="text-sm font-medium ml-4 flex-shrink-0" style={{ color: 'var(--foreground-tertiary)' }}>
+            <span className="text-sm font-medium ml-4 shrink-0" style={{ color: 'var(--foreground-tertiary)' }}>
               {totalCountries} countries
             </span>
           </div>
@@ -100,12 +100,12 @@ export default async function FilmOpportunitiesIndexPage() {
                   <Link
                     key={country.slug}
                     href={`/film-opportunities/${country.slug}`}
-                    className="rounded-xl p-4 border border-white/[0.08] hover:border-white/[0.16] transition-all group flex flex-col"
+                    className="rounded-xl p-4 border border-white/8 hover:border-white/16 transition-all group flex flex-col"
                     style={{ background: 'var(--surface)' }}
                   >
                     {/* Flag + name */}
                     <div className="flex items-center gap-2.5 mb-2">
-                      <span className="text-2xl leading-none flex-shrink-0">{getFlagEmoji(country.iso_code)}</span>
+                      <span className="text-2xl leading-none shrink-0">{getFlagEmoji(country.iso_code)}</span>
                       <div className="min-w-0">
                         <h3 className="font-bold text-[14px] font-heading text-foreground group-hover:text-primary transition-colors leading-snug truncate">
                           {country.name}
@@ -119,7 +119,7 @@ export default async function FilmOpportunitiesIndexPage() {
 
                     {/* Intro snippet — only if present and interesting */}
                     {country.intro_text && opportunity_count > 0 && (
-                      <p className="text-[12px] leading-relaxed line-clamp-2 mb-3 flex-grow" style={{ color: 'var(--foreground-secondary)' }}>
+                      <p className="text-[12px] leading-relaxed line-clamp-2 mb-3 grow" style={{ color: 'var(--foreground-secondary)' }}>
                         {country.intro_text.slice(0, 110)}
                         {(country.intro_text.length) > 110 ? '…' : ''}
                       </p>
@@ -132,7 +132,7 @@ export default async function FilmOpportunitiesIndexPage() {
                       </span>
                       <ArrowRight
                         size={14}
-                        className="text-foreground/30 group-hover:text-primary group-hover:translate-x-0.5 transition-all flex-shrink-0"
+                        className="text-foreground/30 group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0"
                       />
                     </div>
                   </Link>

@@ -44,7 +44,7 @@ export default async function IndustryDirectoryPage() {
             <h1 className="text-[26px] md:text-[38px] font-bold font-heading leading-tight text-foreground">
               Industry Directory
             </h1>
-            <span className="text-sm font-medium ml-4 flex-shrink-0" style={{ color: 'var(--foreground-tertiary)' }}>
+            <span className="text-sm font-medium ml-4 shrink-0" style={{ color: 'var(--foreground-tertiary)' }}>
               {listings.length} listing{listings.length !== 1 ? 's' : ''}
             </span>
           </div>

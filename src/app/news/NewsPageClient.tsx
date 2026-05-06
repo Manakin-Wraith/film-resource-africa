@@ -53,7 +53,7 @@ export default function NewsPageClient({ news, placements = [] }: { news: NewsIt
             <h1 className="text-[26px] md:text-[38px] font-bold font-heading leading-tight text-foreground">
               From the Industry
             </h1>
-            <span className="text-sm font-medium ml-4 flex-shrink-0" style={{ color: 'var(--foreground-tertiary)' }}>
+            <span className="text-sm font-medium ml-4 shrink-0" style={{ color: 'var(--foreground-tertiary)' }}>
               {news.length} articles
             </span>
           </div>
@@ -72,8 +72,8 @@ export default function NewsPageClient({ news, placements = [] }: { news: NewsIt
                 onClick={() => setActiveFilter(tab.key)}
                 className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[13px] font-semibold border transition-all ${
                   isActive
-                    ? 'border-white/[0.2] text-foreground'
-                    : 'border-white/[0.08] hover:border-white/[0.14] hover:text-foreground'
+                    ? 'border-white/20 text-foreground'
+                    : 'border-white/8 hover:border-white/14 hover:text-foreground'
                 }`}
                 style={isActive ? { background: 'var(--surface-raised)', color: 'var(--foreground)' } : { background: 'var(--surface)', color: 'var(--foreground-secondary)' }}
               >
@@ -102,7 +102,7 @@ export default function NewsPageClient({ news, placements = [] }: { news: NewsIt
           return (
             <Link
               href={href}
-              className="block rounded-xl border border-white/[0.08] hover:border-white/[0.16] transition-all group overflow-hidden mb-6"
+              className="block rounded-xl border border-white/8 hover:border-white/16 transition-all group overflow-hidden mb-6"
               style={{ background: 'var(--surface)' }}
             >
               {featured.image_url ? (
@@ -185,7 +185,7 @@ export default function NewsPageClient({ news, placements = [] }: { news: NewsIt
                 <Link
                   key={item.id}
                   href={href}
-                  className="rounded-xl border border-white/[0.08] hover:border-white/[0.16] transition-all group flex flex-col overflow-hidden"
+                  className="rounded-xl border border-white/8 hover:border-white/16 transition-all group flex flex-col overflow-hidden"
                   style={{ background: 'var(--surface)' }}
                 >
                   {item.image_url ? (
@@ -208,7 +208,7 @@ export default function NewsPageClient({ news, placements = [] }: { news: NewsIt
                   ) : (
                     <NewsImageFallback category={item.category} title={item.title} className={isTrailer ? 'h-44' : 'h-36'} />
                   )}
-                  <div className="p-4 flex flex-col flex-grow">
+                  <div className="p-4 flex flex-col grow">
                     <div className="flex items-center gap-2 mb-2 flex-wrap">
                       <span className={`editorial-label ${config.color}`}>
                         <Icon size={10} className="inline mr-1" />
@@ -222,7 +222,7 @@ export default function NewsPageClient({ news, placements = [] }: { news: NewsIt
                     <h2 className="text-[15px] font-bold font-heading leading-snug text-foreground group-hover:text-primary transition-colors mb-2 line-clamp-2">
                       {decodeEntities(item.title)}
                     </h2>
-                    <p className="text-[13px] leading-relaxed flex-grow line-clamp-2 mb-3" style={{ color: 'var(--foreground-secondary)' }}>
+                    <p className="text-[13px] leading-relaxed grow line-clamp-2 mb-3" style={{ color: 'var(--foreground-secondary)' }}>
                       {cleanText(item.summary)}
                     </p>
                     <span className="inline-flex items-center gap-1.5 text-primary text-[12px] font-semibold mt-auto group-hover:gap-2.5 transition-all">
