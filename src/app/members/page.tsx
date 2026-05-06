@@ -58,6 +58,14 @@ function FoundingCounter({ count }: { count: number }) {
 }
 
 /* ── Tier comparison ──────────────────────────────────────────────── */
+
+const PAYFAST_LINKS = {
+  individualMonthly: process.env.PAYFAST_INDIVIDUAL_MONTHLY_URL ?? '#',
+  individualAnnual:  process.env.PAYFAST_INDIVIDUAL_ANNUAL_URL  ?? '#',
+  businessMonthly:   process.env.PAYFAST_BUSINESS_MONTHLY_URL   ?? '#',
+  businessAnnual:    process.env.PAYFAST_BUSINESS_ANNUAL_URL    ?? '#',
+};
+
 function TierComparison() {
   return (
     <section className="mt-14 md:mt-20">
@@ -65,7 +73,8 @@ function TierComparison() {
       <span className="section-rubric">Choose your tier</span>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-6">
-        {/* Individual */}
+
+        {/* ── Individual ── */}
         <div
           className="rounded-xl border border-white/8 p-7 flex flex-col gap-5"
           style={{ background: 'var(--surface)' }}
@@ -73,9 +82,6 @@ function TierComparison() {
           <div className="flex items-center justify-between">
             <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase tracking-wider border bg-blue-500/10 border-blue-500/20 text-blue-400">
               Individual
-            </span>
-            <span className="font-heading font-bold text-[22px] text-foreground">
-              R99<span className="text-[13px] font-medium ml-0.5" style={{ color: 'var(--foreground-tertiary)' }}>/mo</span>
             </span>
           </div>
 
@@ -101,15 +107,30 @@ function TierComparison() {
             ))}
           </ul>
 
-          <Link
-            href="/members/join"
-            className="flex items-center justify-center gap-2 px-6 py-3.5 bg-primary hover:bg-blue-600 text-white font-bold text-sm rounded-xl transition-colors min-h-[48px]"
+          {/* Annual CTA — primary */}
+          <a
+            href={PAYFAST_LINKS.individualAnnual}
+            className="flex items-center justify-between gap-3 px-5 py-4 bg-primary hover:bg-blue-600 text-white font-bold text-sm rounded-xl transition-colors min-h-[56px]"
           >
-            Become a member
-          </Link>
+            <span>Annual — R990/yr</span>
+            <span className="flex items-center gap-2">
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-white/20">2 months free</span>
+              <ChevronRight size={16} />
+            </span>
+          </a>
+
+          {/* Monthly CTA — secondary */}
+          <a
+            href={PAYFAST_LINKS.individualMonthly}
+            className="flex items-center justify-between gap-3 px-5 py-3.5 font-semibold text-sm rounded-xl transition-colors min-h-[48px] border border-white/[0.12] hover:bg-white/[0.04]"
+            style={{ color: 'var(--foreground-secondary)' }}
+          >
+            <span>Monthly — R99/mo</span>
+            <ChevronRight size={15} style={{ color: 'var(--foreground-tertiary)' }} />
+          </a>
         </div>
 
-        {/* Business */}
+        {/* ── Business ── */}
         <div
           className="rounded-xl border border-amber-500/30 p-7 flex flex-col gap-5 relative overflow-hidden"
           style={{
@@ -119,9 +140,6 @@ function TierComparison() {
           <div className="flex items-center justify-between">
             <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase tracking-wider border bg-amber-500/10 border-amber-500/20 text-amber-400">
               Business
-            </span>
-            <span className="font-heading font-bold text-[22px] text-foreground">
-              R225<span className="text-[13px] font-medium ml-0.5" style={{ color: 'var(--foreground-tertiary)' }}>/mo</span>
             </span>
           </div>
 
@@ -147,13 +165,30 @@ function TierComparison() {
             ))}
           </ul>
 
-          <Link
-            href="/members/join?tier=business"
-            className="flex items-center justify-center gap-2 px-6 py-3.5 font-bold text-sm rounded-xl transition-colors min-h-[48px] border border-amber-500/40 text-amber-400 hover:bg-amber-500/10"
+          {/* Annual CTA — primary */}
+          <a
+            href={PAYFAST_LINKS.businessAnnual}
+            className="flex items-center justify-between gap-3 px-5 py-4 font-bold text-sm rounded-xl transition-colors min-h-[56px] border border-amber-500/40 hover:bg-amber-500/10"
+            style={{ color: '#f59e0b' }}
           >
-            Join as a business
-          </Link>
+            <span>Annual — R2,250/yr</span>
+            <span className="flex items-center gap-2">
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-amber-500/20">2 months free</span>
+              <ChevronRight size={16} />
+            </span>
+          </a>
+
+          {/* Monthly CTA — secondary */}
+          <a
+            href={PAYFAST_LINKS.businessMonthly}
+            className="flex items-center justify-between gap-3 px-5 py-3.5 font-semibold text-sm rounded-xl transition-colors min-h-[48px] border border-white/[0.08] hover:bg-white/[0.04]"
+            style={{ color: 'var(--foreground-secondary)' }}
+          >
+            <span>Monthly — R225/mo</span>
+            <ChevronRight size={15} style={{ color: 'var(--foreground-tertiary)' }} />
+          </a>
         </div>
+
       </div>
     </section>
   );
