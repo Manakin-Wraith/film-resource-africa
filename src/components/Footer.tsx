@@ -158,6 +158,11 @@ export default function Footer() {
                 <p className="text-[11px]" style={{ color: 'var(--foreground-tertiary)' }}>
                   © {new Date().getFullYear()} Film Resource Africa
                 </p>
+                <div className="flex items-center justify-center md:justify-end gap-3 pt-1">
+                  <Link href="/terms" className="text-[11px] transition-colors hover:text-foreground" style={{ color: 'var(--foreground-tertiary)' }}>Terms</Link>
+                  <span className="text-[11px]" style={{ color: 'var(--foreground-tertiary)' }}>·</span>
+                  <Link href="/privacy" className="text-[11px] transition-colors hover:text-foreground" style={{ color: 'var(--foreground-tertiary)' }}>Privacy</Link>
+                </div>
               </div>
             </div>
 
