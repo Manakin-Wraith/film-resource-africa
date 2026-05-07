@@ -96,6 +96,11 @@ export async function POST(req: NextRequest) {
         payfast_subscription_token: token,
         notes: `PayFast ITN — ${pfId}`,
       });
+
+      /* Pre-create the Supabase Auth user so their first login sends a magic
+         link rather than a "Confirm Your Signup" email. email_confirm: true
+         skips the confirmation step since we already verified payment. */
+      await supabase.auth.admin.createUser({ email, email_confirm: true });
     }
 
     /* Record payment row */
