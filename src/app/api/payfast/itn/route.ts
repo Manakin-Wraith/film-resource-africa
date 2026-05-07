@@ -10,6 +10,18 @@ const supabase = createClient(
 const PAYFAST_MERCHANT_ID = process.env.PAYFAST_MERCHANT_ID ?? '';
 const PAYFAST_PASSPHRASE  = process.env.PAYFAST_PASSPHRASE  ?? '';
 
+/* Match PHP urlencode() — encodes ! ' ( ) * ~ which encodeURIComponent skips */
+function phpUrlencode(str: string): string {
+  return encodeURIComponent(str)
+    .replace(/!/g,  '%21')
+    .replace(/'/g,  '%27')
+    .replace(/\(/g, '%28')
+    .replace(/\)/g, '%29')
+    .replace(/\*/g, '%2A')
+    .replace(/~/g,  '%7E')
+    .replace(/%20/g, '+');
+}
+
 /* Validate PayFast ITN signature per their docs */
 function validateSignature(params: Record<string, string>): boolean {
   const { signature, ...rest } = params;
@@ -17,14 +29,19 @@ function validateSignature(params: Record<string, string>): boolean {
   const sorted = Object.keys(rest)
     .sort()
     .filter((k) => rest[k] !== '')
-    .map((k) => `${k}=${encodeURIComponent(rest[k]).replace(/%20/g, '+')}`)
+    .map((k) => `${k}=${phpUrlencode(rest[k].trim())}`)
     .join('&');
 
   const withPassphrase = PAYFAST_PASSPHRASE
-    ? `${sorted}&passphrase=${encodeURIComponent(PAYFAST_PASSPHRASE).replace(/%20/g, '+')}`
+    ? `${sorted}&passphrase=${phpUrlencode(PAYFAST_PASSPHRASE.trim())}`
     : sorted;
 
   const expected = createHash('md5').update(withPassphrase).digest('hex');
+
+  if (expected !== signature) {
+    console.error('[PayFast ITN] Signature mismatch — computed:', expected, '| received:', signature);
+  }
+
   return expected === signature;
 }
 
@@ -46,9 +63,11 @@ export async function POST(req: NextRequest) {
 
   /* ── Signature check ── */
   if (PAYFAST_MERCHANT_ID && params.merchant_id !== PAYFAST_MERCHANT_ID) {
+    console.error('[PayFast ITN] Merchant ID mismatch — received:', params.merchant_id, '| expected:', PAYFAST_MERCHANT_ID);
     return new NextResponse('Merchant ID mismatch', { status: 400 });
   }
   if (PAYFAST_PASSPHRASE && !validateSignature(params)) {
+    console.error('[PayFast ITN] Rejected — email:', params.email_address, '| passphrase configured:', !!PAYFAST_PASSPHRASE);
     return new NextResponse('Invalid signature', { status: 400 });
   }
 
