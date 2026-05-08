@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useRef } from 'react';
 import Link from 'next/link';
+import { toAbsoluteUrl } from '@/lib/mediaUrls';
 
 export type DirectoryMember = {
   id: string;
@@ -42,7 +43,7 @@ function MemberCard({ m, wide }: { m: DirectoryMember; wide?: boolean }) {
   const name = isBiz ? (m.company_name ?? m.full_name) : m.full_name;
   const tagline = isBiz ? m.company_tagline : m.tagline;
   const disciplines = (isBiz ? m.company_specialisms : m.disciplines) ?? [];
-  const photoUrl = isBiz ? m.company_logo_url : m.avatar_url;
+  const photoUrl = toAbsoluteUrl(isBiz ? m.company_logo_url : m.avatar_url);
   const avail = m.availability ?? 'available';
   const dotColor = AVAIL_COLOR[avail] ?? '#22c55e';
 
@@ -77,17 +78,23 @@ function MemberCard({ m, wide }: { m: DirectoryMember; wide?: boolean }) {
         <div style={{
           width: 48, height: 48, flexShrink: 0,
           borderRadius: isBiz ? '10px' : '999px',
-          overflow: 'hidden',
+          overflow: 'hidden', position: 'relative',
           border: `1px solid ${isBiz ? 'rgba(245,158,11,0.2)' : 'rgba(59,130,246,0.2)'}`,
           background: isBiz ? 'rgba(245,158,11,0.08)' : 'rgba(59,130,246,0.08)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
-          {photoUrl
-            ? <img src={photoUrl} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            : <span style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '20px', color: isBiz ? '#fcd34d' : '#93c5fd' }}>
-                {name.charAt(0)}
-              </span>
-          }
+          <span style={{
+            position: 'absolute', fontFamily: 'var(--font-heading)', fontWeight: 700,
+            fontSize: '20px', color: isBiz ? '#fcd34d' : '#93c5fd',
+          }}>{name.charAt(0)}</span>
+          {photoUrl && (
+            <img
+              src={photoUrl}
+              alt={name}
+              style={{ position: 'relative', width: '100%', height: '100%', objectFit: 'cover' }}
+              onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+            />
+          )}
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '5px' }}>

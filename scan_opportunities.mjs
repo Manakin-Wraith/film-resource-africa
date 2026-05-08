@@ -523,6 +523,166 @@ async function validateUrl(url) {
   } catch { return false; }
 }
 
+// ─── Regex-based opportunity field extraction (no AI required) ───────────────
+//
+// Extracts structured fields from page text using pattern matching.
+// Works as a fallback when no ANTHROPIC_API_KEY is available, and as a
+// supplement to Claude enrichment (fills gaps Claude misses).
+
+function regexExtractFields(pageText) {
+  const text = pageText || '';
+  const lower = text.toLowerCase();
+  const result = {};
+
+  // ── Deadline extraction ──
+  // Look for date patterns near deadline-related keywords
+  const deadlineSection = text.match(/(?:deadline|closing date|due date|submit by|apply by|applications? close|closes?)[:\s—–-]*([^\n.]{5,80})/i);
+  if (deadlineSection) {
+    const dateStr = deadlineSection[1].trim();
+    // Validate it looks like a date (has a month name or date-like pattern)
+    if (/(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|\d{1,2}[\s/.-]\d{1,2}[\s/.-]\d{2,4}|\d{4}[-/]\d{2})/i.test(dateStr)) {
+      result['Next Deadline'] = dateStr.replace(/[.;,]+$/, '').slice(0, 60);
+    }
+  }
+  // Fallback: standalone date near "deadline" word (within 200 chars)
+  if (!result['Next Deadline']) {
+    const deadlineBlock = text.match(/deadline[\s\S]{0,200}/i);
+    if (deadlineBlock) {
+      const dateMatch = deadlineBlock[0].match(/(\d{1,2}\s+(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{4})/i)
+        || deadlineBlock[0].match(/((?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4})/i)
+        || deadlineBlock[0].match(/(\d{4}[-/]\d{2}[-/]\d{2})/);
+      if (dateMatch) result['Next Deadline'] = dateMatch[1];
+    }
+  }
+  // Rolling deadline detection
+  if (!result['Next Deadline'] && /\b(rolling|ongoing|no deadline|open[-\s]?ended|year[-\s]?round)\b/i.test(text)) {
+    result['Next Deadline'] = 'Rolling';
+  }
+
+  // ── Eligibility extraction ──
+  const eligPatterns = [
+    /(?:who can apply|eligibility|eligible|requirements?|open to)[:\s—–-]*((?:[^\n]{10,200}\n?){1,3})/i,
+    /(?:applicants? (?:must|should|need to))[:\s]*((?:[^\n]{10,200}\n?){1,2})/i,
+    /(?:this (?:call|fund|grant|programme|program|fellowship|residency) is (?:open )?(?:to|for))[:\s]*((?:[^\n]{10,150}\n?){1,2})/i,
+  ];
+  for (const pat of eligPatterns) {
+    const m = text.match(pat);
+    if (m && m[1].trim().length > 15) {
+      result['Who Can Apply / Eligibility'] = m[1].trim().replace(/\s{2,}/g, ' ').slice(0, 300);
+      break;
+    }
+  }
+
+  // ── Benefits / what you get extraction ──
+  const benefitPatterns = [
+    /(?:what (?:you|participants?|fellows?|grantees?) (?:will )?(?:get|receive)|benefits?|prize|award|funding amount|grant (?:amount|value)|support includes?)[:\s—–-]*((?:[^\n]{10,200}\n?){1,3})/i,
+    /(?:selected (?:projects?|filmmakers?|participants?) (?:will )?receive)[:\s]*((?:[^\n]{10,200}\n?){1,2})/i,
+    /(?:up to|total of|worth|valued at)\s*([€$£¥₦R]?\s*[\d,.]+\s*(?:k|m|million|thousand|USD|EUR|GBP|ZAR|NGN)?)/i,
+  ];
+  for (const pat of benefitPatterns) {
+    const m = text.match(pat);
+    if (m && m[1].trim().length > 5) {
+      result['What Do You Get If Selected?'] = m[1].trim().replace(/\s{2,}/g, ' ').slice(0, 300);
+      break;
+    }
+  }
+  // Supplement: find currency amounts as benefits hint
+  if (!result['What Do You Get If Selected?']) {
+    const amountMatch = text.match(/([€$£¥₦R]\s*[\d,.]+(?:\s*(?:k|m|million|thousand|USD|EUR|GBP|ZAR|NGN))?)/i);
+    if (amountMatch && /fund|grant|prize|award|support|fellowship/i.test(lower)) {
+      result['What Do You Get If Selected?'] = `Funding: ${amountMatch[1]}`;
+    }
+  }
+
+  // ── Cost extraction ──
+  if (/\b(no (?:entry |submission |application )?fee|free (?:to apply|of charge|submission)|fee[\s:-]*free|no cost)\b/i.test(text)) {
+    result['Cost'] = 'Free';
+  } else {
+    const feeMatch = text.match(/(?:(?:entry|submission|application|registration)\s*fee)[:\s—–-]*((?:[€$£¥₦R]?\s*[\d,.]+[^\n]{0,50})|free)/i);
+    if (feeMatch) {
+      result['Cost'] = feeMatch[1].trim().slice(0, 80);
+    }
+  }
+
+  // ── Format / type of work ──
+  const formatKeywords = {
+    'Feature Films': /\b(feature[- ]?film|feature[- ]?length|full[- ]?length film)\b/i,
+    'Short Films': /\b(short film|short[- ]form)\b/i,
+    'Documentary': /\b(documentary|docu(?:mentary|series|drama)?)\b/i,
+    'Animation': /\b(animat(?:ion|ed))\b/i,
+    'Series': /\b(tv series|web series|television|episodic)\b/i,
+    'All Formats': /\b(all (?:genres?|formats?|types?)|any format|any genre)\b/i,
+  };
+  const detectedFormats = [];
+  for (const [label, regex] of Object.entries(formatKeywords)) {
+    if (regex.test(text)) detectedFormats.push(label);
+  }
+  if (detectedFormats.length > 0) {
+    result['For Films or Series?'] = detectedFormats.length > 2 ? 'All Formats' : detectedFormats.join(' / ');
+  }
+
+  // ── What to submit ──
+  const submitPatterns = [
+    /(?:required (?:materials?|documents?)|submission (?:requirements?|materials?|guidelines?))[:\s—–-]*((?:[^\n]{10,200}\n?){1,4})/i,
+    /(?:please (?:submit|send|provide|include))[:\s]*((?:[^\n]{10,150}\n?){1,3})/i,
+    /(?:application (?:must|should) include)[:\s]*((?:[^\n]{10,200}\n?){1,3})/i,
+    /(?:what to submit)[:\s—–-]*((?:[^\n]{10,200}\n?){1,4})/i,
+  ];
+  for (const pat of submitPatterns) {
+    const m = text.match(pat);
+    if (m && m[1].trim().length > 15) {
+      const candidate = m[1].trim().replace(/\s{2,}/g, ' ').slice(0, 400);
+      // Quality check: reject nav-like text (too many capitalized words in sequence)
+      const words = candidate.split(/\s+/);
+      const capWords = words.filter(w => /^[A-Z]/.test(w)).length;
+      if (capWords / words.length > 0.7 && words.length > 10) continue; // Likely nav
+      result['What to Submit'] = candidate;
+      break;
+    }
+  }
+
+  // ── Description (first substantial paragraph about the programme) ──
+  const descPatterns = [
+    /(?:about (?:the )?(?:programme|program|fund|grant|fellowship|residency|lab|call))[:\s—–-]*((?:[^\n]{30,300}\n?){1,3})/i,
+    /(?:(?:this|the) (?:programme|program|fund|grant|fellowship|residency|lab|initiative|scheme))\s+((?:is|supports?|provides?|offers?|aims?|seeks?)[^\n]{20,250})/i,
+  ];
+  for (const pat of descPatterns) {
+    const m = text.match(pat);
+    if (m && m[1].trim().length > 30) {
+      result.description = m[1].trim().replace(/\s{2,}/g, ' ').slice(0, 400);
+      break;
+    }
+  }
+
+  // ── Category inference ──
+  if (/\b(festival|film festival|submit your film|call for entries|screening)\b/i.test(text)) {
+    result.category = 'Festivals';
+  } else if (/\b(lab|fellowship|residency|incubator|talent|mentorship)\b/i.test(text)) {
+    result.category = 'Labs & Fellowships';
+  } else if (/\b(market|pitch|pitching forum|co-?production|slate)\b/i.test(text)) {
+    result.category = 'Markets & Pitching';
+  } else if (/\b(training|workshop|masterclass|course|skill)\b/i.test(text)) {
+    result.category = 'Training';
+  } else if (/\b(distribution|sales agent|acquisition|theatrical release)\b/i.test(text)) {
+    result.category = 'Distribution';
+  } else if (/\b(grant|fund|financing|bursary|subsidy|rebate|incentive)\b/i.test(text)) {
+    result.category = 'Funds & Grants';
+  }
+
+  // ── Determine if this is an actual opportunity page ──
+  const oppSignals = ['apply', 'submit', 'deadline', 'eligib', 'open call', 'call for',
+    'application', 'grant', 'fund', 'fellowship', 'residency', 'lab', 'programme', 'program'];
+  const signalCount = oppSignals.filter(s => lower.includes(s)).length;
+  if (signalCount >= 3) {
+    result._isActualOpportunity = true;
+  } else if (signalCount <= 1 && text.length > 500) {
+    // Long page with almost no opportunity language — likely not actionable
+    result._isActualOpportunity = false;
+  }
+
+  return result;
+}
+
 // ─── Claude API enrichment ───────────────────────────────────────────────────
 
 const anthropicApiKey = env.ANTHROPIC_API_KEY;
@@ -551,18 +711,28 @@ async function enrichOpportunityFromPage(url) {
       return {};
     }
 
-    // Use Claude if API key available, otherwise fall back to geo-detection only
-    if (anthropicApiKey) {
-      return await claudeEnrichFields(pageText, url);
-    }
-
-    // Fallback: geo signals only
+    // Always run regex extraction (fast, no API needed)
+    const regexFields = regexExtractFields(pageText);
     const country = detectCountry(pageText);
     const scope = detectGeoScope(pageText);
-    return {
+    const geoFields = {
       ...(country ? { _detectedCountry: country } : {}),
       ...(scope ? { _geoScope: scope } : {}),
     };
+
+    // Use Claude if API key available — merge with regex (Claude takes priority, regex fills gaps)
+    if (anthropicApiKey) {
+      const claudeFields = await claudeEnrichFields(pageText, url);
+      // Merge: Claude wins where it has data, regex fills remaining gaps
+      const merged = { ...regexFields, ...geoFields };
+      for (const [key, val] of Object.entries(claudeFields)) {
+        if (val && val !== 'TBC') merged[key] = val;
+      }
+      return merged;
+    }
+
+    // No Claude: regex extraction + geo signals
+    return { ...regexFields, ...geoFields };
   } catch {
     return {};
   }
@@ -1411,10 +1581,20 @@ async function enrichWithPlaywright() {
         continue;
       }
 
-      // Use Claude to extract all fields from the rendered page text
-      const enriched = anthropicApiKey
-        ? await claudeEnrichFields(pageText, url)
-        : {};
+      // Always run regex extraction (works without AI)
+      const regexFields = regexExtractFields(pageText);
+
+      // If Claude is available, merge (Claude takes priority); otherwise regex-only
+      let enriched;
+      if (anthropicApiKey) {
+        const claudeFields = await claudeEnrichFields(pageText, url);
+        enriched = { ...regexFields };
+        for (const [key, val] of Object.entries(claudeFields)) {
+          if (val && val !== 'TBC') enriched[key] = val;
+        }
+      } else {
+        enriched = regexFields;
+      }
 
       const placeholder = v => !v || v === 'To be confirmed' || v === 'TBC';
       const updates = {};
@@ -1657,11 +1837,11 @@ async function main() {
       const scraped = await enrichOpportunityFromPage(item.url);
       const enrichedFields = Object.keys(scraped).filter(k => !k.startsWith('_')).length;
 
-      // Step B.1: Web search items that Claude couldn't verify (bot-blocked, timeout, etc.)
-      // are too risky to auto-insert without a verdict. Org-page items are trusted sources
-      // so we let them through even without enrichment.
+      // Step B.1: Web search items with no enrichment data at all (bot-blocked, timeout, etc.)
+      // are too risky to auto-insert. Org-page items are trusted sources so pass through.
+      // Now that regexExtractFields runs, enrichedFields > 0 means regex found real data.
       if (item.source === 'Web Search' && enrichedFields === 0 && scraped._isActualOpportunity === undefined) {
-        console.log(`  ✗ SKIP (web search item — enrichment unavailable, no Claude verdict): ${item.title.slice(0, 55)}`);
+        console.log(`  ✗ SKIP (web search item — no fields extracted from page): ${item.title.slice(0, 55)}`);
         continue;
       }
 

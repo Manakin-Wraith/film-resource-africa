@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { MemberProfile, Credit, Recognition } from './page';
+import { toAbsoluteUrl, looksLikeImageUrl } from '@/lib/mediaUrls';
 
 function memberNumber(id: string) {
   return id.replace(/-/g, '').slice(0, 4).toUpperCase();
@@ -35,6 +36,8 @@ function CreditRow({ credit }: { credit: Credit }) {
 export default function BusinessProfile({ member, isOwner, isLoggedIn }: { member: MemberProfile; isOwner: boolean; isLoggedIn: boolean }) {
   const credits: Credit[] = Array.isArray(member.credits) ? member.credits : [];
   const recognition: Recognition[] = Array.isArray(member.recognition) ? member.recognition : [];
+  const logoSrc = looksLikeImageUrl(member.company_logo_url) ? toAbsoluteUrl(member.company_logo_url) : null;
+  const coverSrc = looksLikeImageUrl(member.cover_url) ? toAbsoluteUrl(member.cover_url) : null;
   const specialisms = member.company_specialisms ?? [];
   const companyName = member.company_name ?? member.full_name;
   const mailSubject = encodeURIComponent(`Inbound via FRA — ${companyName}`);
@@ -74,10 +77,10 @@ export default function BusinessProfile({ member, isOwner, isLoggedIn }: { membe
       <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '32px 24px 80px' }}>
 
         {/* Optional cover */}
-        {member.cover_url && (
+        {coverSrc && (
           <div style={{ marginBottom: '-64px' }}>
             <div style={{ height: '220px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.08)', overflow: 'hidden' }}>
-              <img src={member.cover_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src={coverSrc} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
           </div>
         )}
@@ -88,7 +91,7 @@ export default function BusinessProfile({ member, isOwner, isLoggedIn }: { membe
           background: 'linear-gradient(180deg, rgba(245,158,11,0.06), transparent 60%), var(--surface)',
           border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '28px',
           display: 'grid', gridTemplateColumns: '96px 1fr auto', gap: '24px', alignItems: 'center',
-          marginTop: member.cover_url ? 0 : '0',
+          marginTop: coverSrc ? 0 : '0',
         }}
           className="biz-band"
         >
@@ -98,8 +101,8 @@ export default function BusinessProfile({ member, isOwner, isLoggedIn }: { membe
             border: '1px solid rgba(255,255,255,0.16)', background: 'var(--surface-raised)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            {member.company_logo_url
-              ? <img src={member.company_logo_url} alt={companyName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            {logoSrc
+              ? <img src={logoSrc} alt={companyName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               : <span style={{ fontSize: '32px', fontFamily: 'var(--font-heading)', fontWeight: 700, color: 'rgba(250,250,250,0.15)' }}>
                   {companyName.charAt(0)}
                 </span>

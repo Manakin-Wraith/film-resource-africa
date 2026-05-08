@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { MemberProfile, Credit } from './page';
+import { toAbsoluteUrl, toEmbedUrl, looksLikeImageUrl } from '@/lib/mediaUrls';
 
 const AVAILABILITY_LABEL: Record<string, string> = {
   available: 'Available for work',
@@ -74,6 +75,9 @@ export default function IndividualProfile({ member, isOwner, isLoggedIn }: { mem
   const mailSubject = encodeURIComponent(`Inbound — ${member.full_name} (via FRA)`);
   const mailBody = encodeURIComponent(`I'd like to get in touch with ${member.full_name} about ...`);
   const credits: Credit[] = Array.isArray(member.credits) ? member.credits : [];
+  const avatarSrc = looksLikeImageUrl(member.avatar_url) ? toAbsoluteUrl(member.avatar_url) : null;
+  const coverSrc = looksLikeImageUrl(member.cover_url) ? toAbsoluteUrl(member.cover_url) : null;
+  const reelEmbed = toEmbedUrl(member.reel_url);
 
   return (
     <>
@@ -119,13 +123,13 @@ export default function IndividualProfile({ member, isOwner, isLoggedIn }: { mem
       <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '32px 24px 80px' }}>
 
         {/* Cover (optional) */}
-        {member.cover_url ? (
+        {coverSrc ? (
           <div style={{ marginBottom: '-64px', position: 'relative' }}>
             <div style={{
               height: '220px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.08)',
               overflow: 'hidden', position: 'relative',
             }}>
-              <img src={member.cover_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src={coverSrc} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
           </div>
         ) : null}
@@ -145,8 +149,8 @@ export default function IndividualProfile({ member, isOwner, isLoggedIn }: { mem
             width: '160px', height: '160px', borderRadius: '16px', overflow: 'hidden',
             border: '1px solid rgba(255,255,255,0.16)', background: 'var(--surface-raised)', flexShrink: 0,
           }}>
-            {member.avatar_url
-              ? <img src={member.avatar_url} alt={member.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            {avatarSrc
+              ? <img src={avatarSrc} alt={member.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '48px', fontFamily: 'var(--font-heading)', fontWeight: 700, color: 'rgba(250,250,250,0.1)' }}>
                   {member.full_name.charAt(0)}
                 </div>
@@ -256,7 +260,7 @@ export default function IndividualProfile({ member, isOwner, isLoggedIn }: { mem
             )}
 
             {/* Reel */}
-            {member.reel_url && (
+            {reelEmbed && (
               <div style={{ marginTop: '48px' }}>
                 <div className="section-rule section-rule-primary" />
                 <div className="section-rubric">Reel</div>
@@ -265,7 +269,7 @@ export default function IndividualProfile({ member, isOwner, isLoggedIn }: { mem
                   aspectRatio: '16/9', position: 'relative',
                 }}>
                   <iframe
-                    src={member.reel_url}
+                    src={reelEmbed}
                     style={{ width: '100%', height: '100%', border: 'none' }}
                     allow="autoplay; fullscreen; picture-in-picture"
                     allowFullScreen

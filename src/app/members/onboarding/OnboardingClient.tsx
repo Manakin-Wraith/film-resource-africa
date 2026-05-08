@@ -299,7 +299,7 @@ export default function OnboardingClient({ memberId, token, fullName, email, tie
             </div>
 
             <div>
-              <label style={labelStyle}>Headshot / {tier === 'business' ? 'Logo' : 'Avatar'} URL <span style={{ color: 'rgba(250,250,250,0.3)', textTransform: 'none', letterSpacing: 0 }}>— paste a direct image URL (Dropbox, Drive, etc.)</span></label>
+              <label style={labelStyle}>Headshot / {tier === 'business' ? 'Logo' : 'Avatar'} URL <span style={{ color: 'rgba(250,250,250,0.3)', textTransform: 'none', letterSpacing: 0 }}>— must be a direct image link ending in .jpg / .png / .webp (not your website)</span></label>
               <input style={inputStyle} value={tier === 'business' ? form.company_logo_url : form.avatar_url} onChange={e => tier === 'business' ? set('company_logo_url', e.target.value) : set('avatar_url', e.target.value)} placeholder="https://…" />
             </div>
 
@@ -331,8 +331,8 @@ export default function OnboardingClient({ memberId, token, fullName, email, tie
                   <input style={inputStyle} value={form.guilds} onChange={e => set('guilds', e.target.value)} placeholder="WGSA, DGNSA…" />
                 </div>
                 <div>
-                  <label style={labelStyle}>Reel URL <span style={{ color: 'rgba(250,250,250,0.3)', textTransform: 'none', letterSpacing: 0 }}>— Vimeo or YouTube embed URL</span></label>
-                  <input style={inputStyle} value={form.reel_url} onChange={e => set('reel_url', e.target.value)} placeholder="https://player.vimeo.com/video/…" />
+                  <label style={labelStyle}>Reel URL <span style={{ color: 'rgba(250,250,250,0.3)', textTransform: 'none', letterSpacing: 0 }}>— paste any YouTube or Vimeo link (we&rsquo;ll convert it to embed)</span></label>
+                  <input style={inputStyle} value={form.reel_url} onChange={e => set('reel_url', e.target.value)} placeholder="https://www.youtube.com/watch?v=… or https://vimeo.com/…" />
                 </div>
               </>
             )}
