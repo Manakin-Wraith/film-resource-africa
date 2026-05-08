@@ -11,25 +11,41 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 const MAX_BYTES = 8 * 1024 * 1024; // 8 MB
 
 export async function POST(req: NextRequest) {
-  const sessionUser = await getSessionUser();
-  if (!sessionUser?.email) {
-    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-  }
-
-  const { data: member } = await supabase
-    .from('members')
-    .select('id')
-    .eq('email', sessionUser.email.toLowerCase())
-    .eq('status', 'active')
-    .maybeSingle();
-
-  if (!member) {
-    return NextResponse.json({ error: 'Member not found' }, { status: 404 });
-  }
-
   const formData = await req.formData();
   const file = formData.get('file') as File | null;
   const type = formData.get('type') as string | null;
+  const onboardingToken = formData.get('onboarding_token') as string | null;
+
+  /* Authorize: either an active session, or a valid onboarding token. */
+  let memberId: string | null = null;
+
+  if (onboardingToken) {
+    const { data: m } = await supabase
+      .from('members')
+      .select('id')
+      .eq('onboarding_token', onboardingToken)
+      .eq('status', 'active')
+      .maybeSingle();
+    memberId = m?.id ?? null;
+    if (!memberId) {
+      return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
+    }
+  } else {
+    const sessionUser = await getSessionUser();
+    if (!sessionUser?.email) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    }
+    const { data: m } = await supabase
+      .from('members')
+      .select('id')
+      .eq('email', sessionUser.email.toLowerCase())
+      .eq('status', 'active')
+      .maybeSingle();
+    memberId = m?.id ?? null;
+    if (!memberId) {
+      return NextResponse.json({ error: 'Member not found' }, { status: 404 });
+    }
+  }
 
   if (!file) return NextResponse.json({ error: 'No file provided' }, { status: 400 });
   if (type !== 'avatar' && type !== 'cover') {
@@ -43,16 +59,16 @@ export async function POST(req: NextRequest) {
   }
 
   const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
-  const path = `${member.id}/${type}/${Date.now()}.${ext}`;
+  const path = `${memberId}/${type}/${Date.now()}.${ext}`;
   const buffer = Buffer.from(await file.arrayBuffer());
 
   /* Delete any existing images for this slot to avoid orphaned files */
   const { data: existing } = await supabase.storage
     .from('member-images')
-    .list(`${member.id}/${type}`);
+    .list(`${memberId}/${type}`);
 
   if (existing?.length) {
-    const toDelete = existing.map(f => `${member.id}/${type}/${f.name}`);
+    const toDelete = existing.map(f => `${memberId}/${type}/${f.name}`);
     await supabase.storage.from('member-images').remove(toDelete);
   }
 

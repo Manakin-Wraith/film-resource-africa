@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import ImageUpload from '@/app/members/_components/ImageUpload';
 
 const MOU_TEXT = `MEMORANDUM OF UNDERSTANDING
 Film Resource Africa (FRA) — Individual Member Agreement
@@ -298,15 +299,22 @@ export default function OnboardingClient({ memberId, token, fullName, email, tie
               </div>
             </div>
 
-            <div>
-              <label style={labelStyle}>Headshot / {tier === 'business' ? 'Logo' : 'Avatar'} URL <span style={{ color: 'rgba(250,250,250,0.3)', textTransform: 'none', letterSpacing: 0 }}>— must be a direct image link ending in .jpg / .png / .webp (not your website)</span></label>
-              <input style={inputStyle} value={tier === 'business' ? form.company_logo_url : form.avatar_url} onChange={e => tier === 'business' ? set('company_logo_url', e.target.value) : set('avatar_url', e.target.value)} placeholder="https://…" />
-            </div>
+            <ImageUpload
+              label={tier === 'business' ? 'Logo' : 'Headshot'}
+              value={tier === 'business' ? form.company_logo_url : form.avatar_url}
+              onChange={url => tier === 'business' ? set('company_logo_url', url) : set('avatar_url', url)}
+              shape={tier === 'business' ? 'rect' : 'circle'}
+              uploadToken={token}
+            />
 
-            <div>
-              <label style={labelStyle}>Cover image URL <span style={{ color: 'rgba(250,250,250,0.3)', textTransform: 'none', letterSpacing: 0 }}>— optional, 1600 × 440</span></label>
-              <input style={inputStyle} value={form.cover_url} onChange={e => set('cover_url', e.target.value)} placeholder="https://… (optional)" />
-            </div>
+            <ImageUpload
+              label="Cover image"
+              hint="— optional, 1600×440"
+              value={form.cover_url}
+              onChange={url => set('cover_url', url)}
+              shape="wide"
+              uploadToken={token}
+            />
 
             {tier === 'individual' && (
               <>
