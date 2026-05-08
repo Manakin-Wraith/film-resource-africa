@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
 
     const { data: existing } = await supabase
       .from('members')
-      .select('id, status')
+      .select('id, status, payfast_subscription_token')
       .eq('email', email)
       .maybeSingle();
 
@@ -97,7 +97,7 @@ export async function POST(req: NextRequest) {
       await supabase
         .from('members')
         .update({
-          payfast_subscription_token: token ?? existing,
+          payfast_subscription_token: token ?? existing.payfast_subscription_token,
           next_payment_due_at: nextDue.toISOString(),
           status: 'active',
         })
