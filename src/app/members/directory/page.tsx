@@ -26,7 +26,7 @@ export default async function MembersDirectoryPage() {
       id, username, full_name, tagline, tier, availability,
       disciplines, location_city, country, joined_at, founding_member_lock,
       avatar_url, company_name, company_tagline, company_founded_year,
-      company_logo_url, company_specialisms
+      company_logo_url, company_specialisms, logo_backdrop
     `)
     .eq('status', 'active')
     .order('joined_at', { ascending: true });

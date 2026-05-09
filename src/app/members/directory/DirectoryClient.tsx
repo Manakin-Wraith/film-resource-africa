@@ -18,6 +18,7 @@ export type DirectoryMember = {
   company_founded_year: number | null;
   company_logo_url: string | null;
   avatar_url: string | null;
+  logo_backdrop: boolean;
   location_city: string | null;
   country: string | null;
   joined_at: string;
@@ -80,7 +81,8 @@ function MemberCard({ m, wide }: { m: DirectoryMember; wide?: boolean }) {
           borderRadius: isBiz ? '10px' : '999px',
           overflow: 'hidden', position: 'relative',
           border: `1px solid ${isBiz ? 'rgba(245,158,11,0.2)' : 'rgba(59,130,246,0.2)'}`,
-          background: isBiz ? 'rgba(245,158,11,0.08)' : 'rgba(59,130,246,0.08)',
+          background: m.logo_backdrop ? '#f5f5f5' : (isBiz ? 'rgba(245,158,11,0.08)' : 'rgba(59,130,246,0.08)'),
+          padding: m.logo_backdrop && photoUrl ? '6px' : 0,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
           <span style={{
@@ -91,7 +93,10 @@ function MemberCard({ m, wide }: { m: DirectoryMember; wide?: boolean }) {
             <img
               src={photoUrl}
               alt={name}
-              style={{ position: 'relative', width: '100%', height: '100%', objectFit: 'cover' }}
+              style={{
+                position: 'relative', width: '100%', height: '100%',
+                objectFit: m.logo_backdrop ? 'contain' : 'cover',
+              }}
               onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
             />
           )}

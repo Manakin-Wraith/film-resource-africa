@@ -131,7 +131,7 @@ export default function IndividualProfile({ member, isOwner, isLoggedIn }: { mem
               height: '220px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.08)',
               overflow: 'hidden', position: 'relative',
               /* Subtle tint backdrop for dark/wordmark covers that vanish on the page bg. */
-              background: member.cover_backdrop ? 'rgba(255,255,255,0.06)' : undefined,
+              background: member.cover_backdrop ? '#f5f5f5' : undefined,
             }}>
               <img
                 src={coverSrc}
@@ -159,7 +159,7 @@ export default function IndividualProfile({ member, isOwner, isLoggedIn }: { mem
           <div style={{
             width: '160px', height: '160px', borderRadius: '16px', overflow: 'hidden',
             border: '1px solid rgba(255,255,255,0.16)',
-            background: member.logo_backdrop ? 'rgba(255,255,255,0.06)' : 'var(--surface-raised)',
+            background: member.logo_backdrop ? '#f5f5f5' : 'var(--surface-raised)',
             flexShrink: 0,
             padding: member.logo_backdrop ? '12%' : 0,
             display: 'flex', alignItems: 'center', justifyContent: 'center',

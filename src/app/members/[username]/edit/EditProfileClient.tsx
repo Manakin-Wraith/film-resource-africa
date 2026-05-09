@@ -219,8 +219,8 @@ export default function EditProfileClient({ member }: { member: MemberProfile })
                 shape={isBusiness ? 'rect' : 'circle'}
               />
               <BackdropToggle
-                label={isBusiness ? 'Show logo on subtle tint backdrop' : 'Show headshot on subtle tint backdrop'}
-                hint="Use this if your image is dark or transparent and disappears on the page background."
+                label={isBusiness ? 'Logo backdrop' : 'Headshot backdrop'}
+                hint="Place the image on a light card. Use this if your logo is dark or transparent and disappears on the page background."
                 checked={logoBackdrop}
                 onChange={setLogoBackdrop}
               />
@@ -234,8 +234,8 @@ export default function EditProfileClient({ member }: { member: MemberProfile })
                 shape="wide"
               />
               <BackdropToggle
-                label="Show banner on subtle tint backdrop"
-                hint="Use this if your banner is a dark logo or wordmark on a transparent background."
+                label="Banner backdrop"
+                hint="Place the banner on a light card. Use this if your banner is a dark logo or wordmark on a transparent background."
                 checked={coverBackdrop}
                 onChange={setCoverBackdrop}
               />
@@ -463,22 +463,28 @@ function BackdropToggle({
   label: string; hint: string; checked: boolean; onChange: (v: boolean) => void;
 }) {
   return (
-    <label style={{
-      display: 'flex', alignItems: 'flex-start', gap: '10px',
+    <div style={{
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '14px',
       marginTop: '10px', padding: '10px 12px',
       borderRadius: '10px', background: 'rgba(255,255,255,0.03)',
-      border: '1px solid rgba(255,255,255,0.08)', cursor: 'pointer',
+      border: '1px solid rgba(255,255,255,0.08)',
     }}>
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={e => onChange(e.target.checked)}
-        style={{ marginTop: '2px', width: '16px', height: '16px', accentColor: '#3b82f6', flexShrink: 0 }}
-      />
-      <span style={{ display: 'block' }}>
+      <span style={{ display: 'block', flex: 1, minWidth: 0 }}>
         <span style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(250,250,250,0.85)' }}>{label}</span>
         <span style={{ display: 'block', fontSize: '11px', color: 'rgba(250,250,250,0.45)', marginTop: '2px' }}>{hint}</span>
       </span>
-    </label>
+      <select
+        value={checked ? 'light' : 'off'}
+        onChange={e => onChange(e.target.value === 'light')}
+        style={{
+          padding: '7px 10px', borderRadius: '8px', fontSize: '12px', fontWeight: 600,
+          border: '1px solid rgba(255,255,255,0.14)', background: 'rgba(255,255,255,0.04)',
+          color: 'var(--foreground)', fontFamily: 'inherit', cursor: 'pointer',
+        }}
+      >
+        <option value="off">Off</option>
+        <option value="light">Light backdrop</option>
+      </select>
+    </div>
   );
 }
