@@ -79,8 +79,18 @@ export default function BusinessProfile({ member, isOwner, isLoggedIn }: { membe
         {/* Optional cover */}
         {coverSrc && (
           <div style={{ marginBottom: '-64px' }}>
-            <div style={{ height: '220px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.08)', overflow: 'hidden' }}>
-              <img src={coverSrc} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <div style={{
+              height: '220px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.08)', overflow: 'hidden',
+              background: member.cover_backdrop ? '#f5f5f5' : undefined,
+            }}>
+              <img
+                src={coverSrc}
+                alt=""
+                style={{
+                  width: '100%', height: '100%',
+                  objectFit: member.cover_backdrop ? 'contain' : 'cover',
+                }}
+              />
             </div>
           </div>
         )}
@@ -98,11 +108,20 @@ export default function BusinessProfile({ member, isOwner, isLoggedIn }: { membe
           {/* Logo */}
           <div style={{
             width: '96px', height: '96px', borderRadius: '12px', overflow: 'hidden',
-            border: '1px solid rgba(255,255,255,0.16)', background: 'var(--surface-raised)',
+            border: '1px solid rgba(255,255,255,0.16)',
+            background: member.logo_backdrop ? '#f5f5f5' : 'var(--surface-raised)',
+            padding: member.logo_backdrop ? '12%' : 0,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
             {logoSrc
-              ? <img src={logoSrc} alt={companyName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ? <img
+                  src={logoSrc}
+                  alt={companyName}
+                  style={{
+                    width: '100%', height: '100%',
+                    objectFit: member.logo_backdrop ? 'contain' : 'cover',
+                  }}
+                />
               : <span style={{ fontSize: '32px', fontFamily: 'var(--font-heading)', fontWeight: 700, color: 'rgba(250,250,250,0.15)' }}>
                   {companyName.charAt(0)}
                 </span>
