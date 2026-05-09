@@ -143,7 +143,7 @@ export default function SubmitDirectoryListingPage() {
                     onClick={() => { setDirectoryType(key); setFormData(prev => ({ ...prev, category: '' })); }}
                     className={`flex flex-col items-center gap-2 p-4 rounded-xl border transition-all ${
                       directoryType === key
-                        ? `bg-gradient-to-br ${dt.bg} ${dt.border} ring-2 ring-primary/50`
+                        ? `bg-linear-to-br ${dt.bg} ${dt.border} ring-2 ring-primary/50`
                         : 'bg-white/5 border-white/10 hover:bg-white/10'
                     }`}
                   >
@@ -228,14 +228,14 @@ export default function SubmitDirectoryListingPage() {
               <label className={labelClass}>Logo / Image</label>
               <div className="flex items-start gap-4">
                 {/* Preview */}
-                <div className="w-20 h-20 rounded-xl border border-white/10 bg-white/5 flex items-center justify-center overflow-hidden flex-shrink-0">
+                <div className="w-20 h-20 rounded-xl border border-white/10 bg-white/5 flex items-center justify-center overflow-hidden shrink-0">
                   {logoPreview ? (
                     <img src={logoPreview} alt="Logo preview" className="w-full h-full object-cover" />
                   ) : (
                     <ImageIcon size={24} className="text-foreground/20" />
                   )}
                 </div>
-                <div className="flex-grow space-y-2">
+                <div className="grow space-y-2">
                   <input
                     ref={fileInputRef}
                     type="file"

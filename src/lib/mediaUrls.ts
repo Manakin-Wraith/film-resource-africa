@@ -54,10 +54,32 @@ export function toAbsoluteUrl(raw: string | null | undefined): string | null {
   return `https://${trimmed}`;
 }
 
+export type ReelHost = 'youtube' | 'vimeo' | 'drive' | 'unknown';
+
 /**
- * Convert a YouTube/Vimeo URL to an embeddable iframe src.
+ * Detect which reel host a URL belongs to. Used by the render layer to decide
+ * between iframe embed (known hosts) and external-link fallback (unknown).
+ */
+export function detectReelHost(raw: string | null | undefined): ReelHost {
+  const url = toAbsoluteUrl(raw);
+  if (!url) return 'unknown';
+  try {
+    const u = new URL(url);
+    const host = u.hostname.replace(/^www\./, '').toLowerCase();
+    if (host === 'youtube.com' || host === 'm.youtube.com' || host === 'youtube-nocookie.com' || host === 'youtu.be') return 'youtube';
+    if (host === 'vimeo.com' || host === 'player.vimeo.com') return 'vimeo';
+    if (host === 'drive.google.com') return 'drive';
+    return 'unknown';
+  } catch {
+    return 'unknown';
+  }
+}
+
+/**
+ * Convert a YouTube/Vimeo/Drive URL to an embeddable iframe src.
  * - YouTube `watch?v=ID`, `youtu.be/ID`, `shorts/ID`  →  `youtube.com/embed/ID`
  * - Vimeo   `vimeo.com/ID`                            →  `player.vimeo.com/video/ID`
+ * - Drive   `drive.google.com/file/d/ID/view`         →  `drive.google.com/file/d/ID/preview`
  * Already-embed URLs are returned unchanged. Unknown hosts pass through.
  */
 export function toEmbedUrl(raw: string | null | undefined): string | null {
@@ -89,6 +111,12 @@ export function toEmbedUrl(raw: string | null | undefined): string | null {
       if (/^\d+$/.test(id)) return `https://player.vimeo.com/video/${id}`;
     }
     if (host === 'player.vimeo.com') return url;
+
+    /* Google Drive — file/d/{ID}/view → /preview (idempotent) */
+    if (host === 'drive.google.com') {
+      const m = u.pathname.match(/^\/file\/d\/([^/]+)/);
+      if (m) return `https://drive.google.com/file/d/${m[1]}/preview`;
+    }
 
     return url;
   } catch {

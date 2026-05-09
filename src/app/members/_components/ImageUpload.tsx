@@ -1,13 +1,17 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const labelStyle: React.CSSProperties = {
   display: 'block', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase',
   letterSpacing: '0.08em', color: 'rgba(250,250,250,0.45)', marginBottom: '6px',
 };
 
+const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+const MAX_BYTES = 8 * 1024 * 1024; // 8 MB — keep in sync with /api/members/upload-image
+
 type Shape = 'circle' | 'rect' | 'wide';
+type Toast = { kind: 'success' | 'error'; message: string } | null;
 
 export default function ImageUpload({
   label,
@@ -17,6 +21,7 @@ export default function ImageUpload({
   shape,
   aspectRatio,
   uploadToken,
+  prefilled,
 }: {
   label: string;
   hint?: string;
@@ -26,29 +31,60 @@ export default function ImageUpload({
   aspectRatio?: string;
   /** Onboarding token — sent when there is no session yet. */
   uploadToken?: string;
+  /** True when the current value came from a directory_listings prefill. */
+  prefilled?: boolean;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
   const [dragOver, setDragOver] = useState(false);
+  const [toast, setToast] = useState<Toast>(null);
+
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 3500);
+    return () => clearTimeout(t);
+  }, [toast]);
 
   const type = shape === 'wide' ? 'cover' : 'avatar';
 
+  function reject(reason: string) {
+    setUploadError(reason);
+    setToast({ kind: 'error', message: reason });
+  }
+
   async function upload(file: File) {
+    /* Pre-flight client validation — surface failures immediately. */
+    if (!ALLOWED_MIME.includes(file.type)) {
+      reject('Only JPEG, PNG, WebP or GIF images are allowed');
+      return;
+    }
+    if (file.size > MAX_BYTES) {
+      const mb = (file.size / 1024 / 1024).toFixed(1);
+      reject(`File is ${mb} MB — max is 8 MB. Try compressing first.`);
+      return;
+    }
+
     setUploading(true);
     setUploadError('');
-    const fd = new FormData();
-    fd.append('file', file);
-    fd.append('type', type);
-    if (uploadToken) fd.append('onboarding_token', uploadToken);
-    const res = await fetch('/api/members/upload-image', { method: 'POST', body: fd });
-    const json = await res.json();
-    if (!res.ok) {
-      setUploadError(json.error ?? 'Upload failed');
-    } else {
-      onChange(json.url);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('type', type);
+      if (uploadToken) fd.append('onboarding_token', uploadToken);
+      const res = await fetch('/api/members/upload-image', { method: 'POST', body: fd });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        reject(json.error ?? `Upload failed (${res.status})`);
+      } else {
+        onChange(json.url);
+        setToast({ kind: 'success', message: shape === 'wide' ? 'Cover uploaded' : 'Image uploaded' });
+      }
+    } catch (e) {
+      reject(e instanceof Error ? `Upload failed: ${e.message}` : 'Upload failed — check your connection');
+    } finally {
+      setUploading(false);
     }
-    setUploading(false);
   }
 
   function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -88,6 +124,18 @@ export default function ImageUpload({
       <label style={labelStyle}>
         {label}
         {hint && <span style={{ textTransform: 'none', letterSpacing: 0, color: 'rgba(250,250,250,0.25)', marginLeft: '6px' }}>{hint}</span>}
+        {prefilled && value && (
+          <span style={{
+            display: 'inline-block', marginLeft: '8px',
+            padding: '2px 8px', borderRadius: '999px',
+            fontSize: '10px', fontWeight: 700, letterSpacing: '0.04em',
+            background: 'rgba(34,197,94,0.12)', color: '#86efac',
+            border: '1px solid rgba(34,197,94,0.3)',
+            textTransform: 'none',
+          }}>
+            ✓ already on file
+          </span>
+        )}
       </label>
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px', flexWrap: shape === 'wide' ? 'wrap' : undefined }}>
         <div
@@ -153,6 +201,25 @@ export default function ImageUpload({
         style={{ display: 'none' }}
         onChange={onFileChange}
       />
+      {toast && (
+        <div
+          role="status"
+          aria-live="polite"
+          style={{
+            marginTop: '8px',
+            padding: '8px 12px',
+            borderRadius: '8px',
+            fontSize: '12px',
+            fontWeight: 600,
+            background: toast.kind === 'success' ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.12)',
+            border: `1px solid ${toast.kind === 'success' ? 'rgba(34,197,94,0.35)' : 'rgba(239,68,68,0.35)'}`,
+            color: toast.kind === 'success' ? '#86efac' : '#fca5a5',
+            display: 'inline-block',
+          }}
+        >
+          {toast.kind === 'success' ? '✓ ' : '⚠ '}{toast.message}
+        </div>
+      )}
     </div>
   );
 }

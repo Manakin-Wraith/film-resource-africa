@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ImageUpload from '@/app/members/_components/ImageUpload';
 
@@ -101,9 +101,46 @@ export default function OnboardingClient({ memberId, token, fullName, email, tie
     company_logo_url: '',
   });
 
+  /* Tracks which fields were populated from a directory_listings prefill
+   * (Item 4, 2026-05-08 sprint). Pill clears as soon as the user edits. */
+  const [prefilled, setPrefilled] = useState<Partial<Record<keyof FormData, boolean>>>({});
+
   function set(field: keyof FormData, value: string) {
     setForm(prev => ({ ...prev, [field]: value }));
+    if (prefilled[field]) {
+      setPrefilled(prev => ({ ...prev, [field]: false }));
+    }
   }
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`/api/members/onboarding/prefill?token=${encodeURIComponent(token)}`);
+        if (!res.ok) return;
+        const json = await res.json();
+        const p = json.prefill;
+        if (!p || cancelled) return;
+        setForm(prev => {
+          /* Only fill empty fields — never overwrite anything the user has typed. */
+          const next = { ...prev };
+          const filled: Partial<Record<keyof FormData, boolean>> = {};
+          const logoField: keyof FormData = tier === 'business' ? 'company_logo_url' : 'avatar_url';
+          if (p.logo_url && !next[logoField]) { next[logoField] = p.logo_url; filled[logoField] = true; }
+          if (p.bio && tier === 'individual' && !next.bio) { next.bio = p.bio; filled.bio = true; }
+          if (p.bio && tier === 'business' && !next.company_description) { next.company_description = p.bio; filled.company_description = true; }
+          if (p.country && !next.country) { next.country = p.country; filled.country = true; }
+          if (p.city && !next.location_city) { next.location_city = p.city; filled.location_city = true; }
+          if (p.website && !next.website) { next.website = p.website; filled.website = true; }
+          setPrefilled(filled);
+          return next;
+        });
+      } catch {
+        /* Prefill is best-effort — silent failure is fine. */
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [token, tier]);
 
   async function checkUsername(val: string) {
     if (!val || val.length < 3) { setUsernameAvailable(null); return; }
@@ -131,6 +168,19 @@ export default function OnboardingClient({ memberId, token, fullName, email, tie
       setSubmitting(false);
     }
   }
+
+  const PrefillPill = ({ field }: { field: keyof FormData }) => prefilled[field] ? (
+    <span style={{
+      display: 'inline-block', marginLeft: '8px',
+      padding: '2px 8px', borderRadius: '999px',
+      fontSize: '10px', fontWeight: 700, letterSpacing: '0.04em',
+      background: 'rgba(34,197,94,0.12)', color: '#86efac',
+      border: '1px solid rgba(34,197,94,0.3)',
+      textTransform: 'none',
+    }}>
+      ✓ already on file
+    </span>
+  ) : null;
 
   const inputStyle: React.CSSProperties = {
     width: '100%', padding: '12px 14px', borderRadius: '10px',
@@ -253,7 +303,7 @@ export default function OnboardingClient({ memberId, token, fullName, email, tie
             </div>
 
             <div>
-              <label style={labelStyle}>{tier === 'business' ? 'About the company' : 'Bio'} <span style={{ color: 'rgba(250,250,250,0.3)', textTransform: 'none', letterSpacing: 0 }}>— 2–4 paragraphs, separate with a blank line</span></label>
+              <label style={labelStyle}>{tier === 'business' ? 'About the company' : 'Bio'} <span style={{ color: 'rgba(250,250,250,0.3)', textTransform: 'none', letterSpacing: 0 }}>— 2–4 paragraphs, separate with a blank line</span><PrefillPill field={tier === 'business' ? 'company_description' : 'bio'} /></label>
               <textarea
                 style={{ ...inputStyle, minHeight: '160px', resize: 'vertical' }}
                 value={tier === 'business' ? form.company_description : form.bio}
@@ -290,11 +340,11 @@ export default function OnboardingClient({ memberId, token, fullName, email, tie
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
-                <label style={labelStyle}>City</label>
+                <label style={labelStyle}>City<PrefillPill field="location_city" /></label>
                 <input style={inputStyle} value={form.location_city} onChange={e => set('location_city', e.target.value)} placeholder="Nairobi" />
               </div>
               <div>
-                <label style={labelStyle}>Country</label>
+                <label style={labelStyle}>Country<PrefillPill field="country" /></label>
                 <input style={inputStyle} value={form.country} onChange={e => set('country', e.target.value)} placeholder="Kenya" />
               </div>
             </div>
@@ -305,6 +355,7 @@ export default function OnboardingClient({ memberId, token, fullName, email, tie
               onChange={url => tier === 'business' ? set('company_logo_url', url) : set('avatar_url', url)}
               shape={tier === 'business' ? 'rect' : 'circle'}
               uploadToken={token}
+              prefilled={tier === 'business' ? prefilled.company_logo_url : prefilled.avatar_url}
             />
 
             <ImageUpload
@@ -339,14 +390,14 @@ export default function OnboardingClient({ memberId, token, fullName, email, tie
                   <input style={inputStyle} value={form.guilds} onChange={e => set('guilds', e.target.value)} placeholder="WGSA, DGNSA…" />
                 </div>
                 <div>
-                  <label style={labelStyle}>Reel URL <span style={{ color: 'rgba(250,250,250,0.3)', textTransform: 'none', letterSpacing: 0 }}>— paste any YouTube or Vimeo link (we&rsquo;ll convert it to embed)</span></label>
-                  <input style={inputStyle} value={form.reel_url} onChange={e => set('reel_url', e.target.value)} placeholder="https://www.youtube.com/watch?v=… or https://vimeo.com/…" />
+                  <label style={labelStyle}>Reel URL <span style={{ color: 'rgba(250,250,250,0.3)', textTransform: 'none', letterSpacing: 0 }}>— paste a YouTube, Vimeo or Google Drive link (we&rsquo;ll convert it to embed)</span></label>
+                  <input style={inputStyle} value={form.reel_url} onChange={e => set('reel_url', e.target.value)} placeholder="https://www.youtube.com/watch?v=… , https://vimeo.com/… , or https://drive.google.com/file/d/…" />
                 </div>
               </>
             )}
 
             <div>
-              <label style={labelStyle}>Website</label>
+              <label style={labelStyle}>Website<PrefillPill field="website" /></label>
               <input style={inputStyle} value={form.website} onChange={e => set('website', e.target.value)} placeholder="https://yoursite.com" />
             </div>
 

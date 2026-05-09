@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { MemberProfile, Credit } from './page';
-import { toAbsoluteUrl, toEmbedUrl, looksLikeImageUrl } from '@/lib/mediaUrls';
+import { toAbsoluteUrl, toEmbedUrl, looksLikeImageUrl, detectReelHost } from '@/lib/mediaUrls';
 
 const AVAILABILITY_LABEL: Record<string, string> = {
   available: 'Available for work',
@@ -78,6 +78,8 @@ export default function IndividualProfile({ member, isOwner, isLoggedIn }: { mem
   const avatarSrc = looksLikeImageUrl(member.avatar_url) ? toAbsoluteUrl(member.avatar_url) : null;
   const coverSrc = looksLikeImageUrl(member.cover_url) ? toAbsoluteUrl(member.cover_url) : null;
   const reelEmbed = toEmbedUrl(member.reel_url);
+  const reelHost = detectReelHost(member.reel_url);
+  const reelExternal = reelHost === 'unknown' ? toAbsoluteUrl(member.reel_url) : null;
 
   return (
     <>
@@ -260,7 +262,7 @@ export default function IndividualProfile({ member, isOwner, isLoggedIn }: { mem
             )}
 
             {/* Reel */}
-            {reelEmbed && (
+            {reelEmbed && reelHost !== 'unknown' && (
               <div style={{ marginTop: '48px' }}>
                 <div className="section-rule section-rule-primary" />
                 <div className="section-rubric">Reel</div>
@@ -274,6 +276,23 @@ export default function IndividualProfile({ member, isOwner, isLoggedIn }: { mem
                     allow="autoplay; fullscreen; picture-in-picture"
                     allowFullScreen
                   />
+                </div>
+              </div>
+            )}
+            {reelExternal && (
+              <div style={{ marginTop: '48px' }}>
+                <div className="section-rule section-rule-primary" />
+                <div className="section-rubric">Reel</div>
+                <div style={{
+                  borderRadius: '16px', border: '1px solid rgba(255,255,255,0.08)',
+                  padding: '20px', background: 'rgba(255,255,255,0.03)',
+                  fontSize: '13px', color: 'rgba(250,250,250,0.7)',
+                }}>
+                  This reel can&apos;t be embedded inline.{' '}
+                  <a href={reelExternal} target="_blank" rel="noopener noreferrer"
+                     style={{ color: '#93c5fd', textDecoration: 'underline' }}>
+                    Open reel in new tab ↗
+                  </a>
                 </div>
               </div>
             )}

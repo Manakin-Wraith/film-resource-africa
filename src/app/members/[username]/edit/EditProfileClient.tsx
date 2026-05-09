@@ -272,8 +272,8 @@ export default function EditProfileClient({ member }: { member: MemberProfile })
                 <input style={inputStyle} value={website} onChange={e => setWebsite(e.target.value)} placeholder="https://yoursite.com" />
               </div>
               <div>
-                <label style={labelStyle}>Reel URL <span style={{ textTransform: 'none', letterSpacing: 0, color: 'rgba(250,250,250,0.25)' }}>— paste any YouTube or Vimeo link</span></label>
-                <input style={inputStyle} value={reelUrl} onChange={e => setReelUrl(e.target.value)} placeholder="https://www.youtube.com/watch?v=… or https://vimeo.com/…" />
+                <label style={labelStyle}>Reel URL <span style={{ textTransform: 'none', letterSpacing: 0, color: 'rgba(250,250,250,0.25)' }}>— paste a YouTube, Vimeo or Google Drive link</span></label>
+                <input style={inputStyle} value={reelUrl} onChange={e => setReelUrl(e.target.value)} placeholder="https://www.youtube.com/watch?v=… , https://vimeo.com/… , or https://drive.google.com/file/d/…" />
               </div>
             </div>
           </div>
