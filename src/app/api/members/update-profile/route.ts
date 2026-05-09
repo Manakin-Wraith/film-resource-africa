@@ -28,13 +28,15 @@ export async function POST(req: NextRequest) {
   const isBusiness = member.tier === 'business';
 
   const update: Record<string, unknown> = {
-    tagline:       body.tagline ?? null,
-    cover_url:     body.cover_url || null,
-    website:       body.website || null,
-    location_city: body.location_city || null,
-    country:       body.country || null,
-    credits:       Array.isArray(body.credits) ? body.credits : [],
-    updated_at:    new Date().toISOString(),
+    tagline:        body.tagline ?? null,
+    cover_url:      body.cover_url || null,
+    cover_backdrop: Boolean(body.cover_backdrop),
+    logo_backdrop:  Boolean(body.logo_backdrop),
+    website:        body.website || null,
+    location_city:  body.location_city || null,
+    country:        body.country || null,
+    credits:        Array.isArray(body.credits) ? body.credits : [],
+    updated_at:     new Date().toISOString(),
   };
 
   if (isBusiness) {

@@ -34,6 +34,8 @@ export type MemberProfile = {
   bio: string | null;
   avatar_url: string | null;
   cover_url: string | null;
+  cover_backdrop: boolean;
+  logo_backdrop: boolean;
   tier: 'individual' | 'business';
   status: string;
   availability: 'available' | 'busy' | 'selective';

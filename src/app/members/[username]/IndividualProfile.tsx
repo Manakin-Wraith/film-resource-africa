@@ -130,8 +130,17 @@ export default function IndividualProfile({ member, isOwner, isLoggedIn }: { mem
             <div style={{
               height: '220px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.08)',
               overflow: 'hidden', position: 'relative',
+              /* Subtle tint backdrop for dark/wordmark covers that vanish on the page bg. */
+              background: member.cover_backdrop ? 'rgba(255,255,255,0.06)' : undefined,
             }}>
-              <img src={coverSrc} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img
+                src={coverSrc}
+                alt=""
+                style={{
+                  width: '100%', height: '100%',
+                  objectFit: member.cover_backdrop ? 'contain' : 'cover',
+                }}
+              />
             </div>
           </div>
         ) : null}
@@ -149,10 +158,21 @@ export default function IndividualProfile({ member, isOwner, isLoggedIn }: { mem
           {/* Avatar */}
           <div style={{
             width: '160px', height: '160px', borderRadius: '16px', overflow: 'hidden',
-            border: '1px solid rgba(255,255,255,0.16)', background: 'var(--surface-raised)', flexShrink: 0,
+            border: '1px solid rgba(255,255,255,0.16)',
+            background: member.logo_backdrop ? 'rgba(255,255,255,0.06)' : 'var(--surface-raised)',
+            flexShrink: 0,
+            padding: member.logo_backdrop ? '12%' : 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
             {avatarSrc
-              ? <img src={avatarSrc} alt={member.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ? <img
+                  src={avatarSrc}
+                  alt={member.full_name}
+                  style={{
+                    width: '100%', height: '100%',
+                    objectFit: member.logo_backdrop ? 'contain' : 'cover',
+                  }}
+                />
               : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '48px', fontFamily: 'var(--font-heading)', fontWeight: 700, color: 'rgba(250,250,250,0.1)' }}>
                   {member.full_name.charAt(0)}
                 </div>

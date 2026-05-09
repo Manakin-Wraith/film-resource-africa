@@ -36,6 +36,8 @@ export default function EditProfileClient({ member }: { member: MemberProfile })
   const [bio, setBio] = useState(isBusiness ? (member.company_description ?? '') : (member.bio ?? ''));
   const [avatarUrl, setAvatarUrl] = useState(isBusiness ? (member.company_logo_url ?? '') : (member.avatar_url ?? ''));
   const [coverUrl, setCoverUrl] = useState(member.cover_url ?? '');
+  const [coverBackdrop, setCoverBackdrop] = useState<boolean>(member.cover_backdrop ?? false);
+  const [logoBackdrop, setLogoBackdrop] = useState<boolean>(member.logo_backdrop ?? false);
   const [availability, setAvailability] = useState(member.availability ?? 'available');
   const [disciplines, setDisciplines] = useState((member.disciplines ?? []).join(', '));
   const [languages, setLanguages] = useState((member.languages ?? []).join(', '));
@@ -85,6 +87,8 @@ export default function EditProfileClient({ member }: { member: MemberProfile })
       bio,
       avatar_url: avatarUrl,
       cover_url: coverUrl,
+      cover_backdrop: coverBackdrop,
+      logo_backdrop: logoBackdrop,
       website,
       location_city: locationCity,
       country,
@@ -207,19 +211,35 @@ export default function EditProfileClient({ member }: { member: MemberProfile })
           <div className="section-rule section-rule-muted" />
           <p style={sectionHeadStyle}>Images</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            <ImageUpload
-              label={isBusiness ? 'Logo' : 'Headshot'}
-              value={avatarUrl}
-              onChange={setAvatarUrl}
-              shape={isBusiness ? 'rect' : 'circle'}
-            />
-            <ImageUpload
-              label="Cover image"
-              hint="— optional, 1600×440"
-              value={coverUrl}
-              onChange={setCoverUrl}
-              shape="wide"
-            />
+            <div>
+              <ImageUpload
+                label={isBusiness ? 'Logo' : 'Headshot'}
+                value={avatarUrl}
+                onChange={setAvatarUrl}
+                shape={isBusiness ? 'rect' : 'circle'}
+              />
+              <BackdropToggle
+                label={isBusiness ? 'Show logo on subtle tint backdrop' : 'Show headshot on subtle tint backdrop'}
+                hint="Use this if your image is dark or transparent and disappears on the page background."
+                checked={logoBackdrop}
+                onChange={setLogoBackdrop}
+              />
+            </div>
+            <div>
+              <ImageUpload
+                label="Cover image"
+                hint="— optional, 1600×440"
+                value={coverUrl}
+                onChange={setCoverUrl}
+                shape="wide"
+              />
+              <BackdropToggle
+                label="Show banner on subtle tint backdrop"
+                hint="Use this if your banner is a dark logo or wordmark on a transparent background."
+                checked={coverBackdrop}
+                onChange={setCoverBackdrop}
+              />
+            </div>
           </div>
         </div>
 
@@ -434,5 +454,31 @@ export default function EditProfileClient({ member }: { member: MemberProfile })
 
       </div>
     </main>
+  );
+}
+
+function BackdropToggle({
+  label, hint, checked, onChange,
+}: {
+  label: string; hint: string; checked: boolean; onChange: (v: boolean) => void;
+}) {
+  return (
+    <label style={{
+      display: 'flex', alignItems: 'flex-start', gap: '10px',
+      marginTop: '10px', padding: '10px 12px',
+      borderRadius: '10px', background: 'rgba(255,255,255,0.03)',
+      border: '1px solid rgba(255,255,255,0.08)', cursor: 'pointer',
+    }}>
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={e => onChange(e.target.checked)}
+        style={{ marginTop: '2px', width: '16px', height: '16px', accentColor: '#3b82f6', flexShrink: 0 }}
+      />
+      <span style={{ display: 'block' }}>
+        <span style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(250,250,250,0.85)' }}>{label}</span>
+        <span style={{ display: 'block', fontSize: '11px', color: 'rgba(250,250,250,0.45)', marginTop: '2px' }}>{hint}</span>
+      </span>
+    </label>
   );
 }
