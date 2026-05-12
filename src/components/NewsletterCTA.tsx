@@ -49,8 +49,8 @@ export default function NewsletterCTA({
 
   if (variant === 'hero') {
     return (
-      <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto w-full">
-        <div className="relative flex-grow">
+      <form onSubmit={handleSubscribe} className="flex flex-col gap-2.5 w-full">
+        <div className="relative w-full">
           <Bell size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-foreground/30" />
           <input
             type="email"
@@ -58,13 +58,13 @@ export default function NewsletterCTA({
             placeholder="Get weekly deadline alerts..."
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full bg-white/5 border border-white/10 rounded-2xl pl-11 pr-5 py-4 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-foreground placeholder:text-foreground/40"
+            className="w-full bg-white/5 border border-white/10 rounded-2xl pl-11 pr-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-foreground placeholder:text-foreground/40"
           />
         </div>
         <button
           disabled={submitting || subscribed}
           type="submit"
-          className={`px-8 py-4 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 shadow-lg whitespace-nowrap ${
+          className={`w-full px-6 py-3.5 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-lg whitespace-nowrap ${
             subscribed
               ? 'bg-green-500 text-white'
               : 'bg-primary hover:bg-blue-600 text-white shadow-primary/30 hover:-translate-y-0.5'
