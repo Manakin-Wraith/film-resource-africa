@@ -45,14 +45,17 @@ const SEND_DELAY_MS = 600; // Resend free tier: ~2/sec
 
 // ─── One-off featured content (manually curated per edition) ─────────────────
 
-const ITC_OPPORTUNITY = {
-  title: 'ITC Film Mentorship Positions — 11 Paid Roles Available',
-  organisation: 'International Trade Centre · Youth & Trade Programme',
-  description: 'Paid mentorship & plenary positions ($30–45/hr) across writing, budgeting, pitch deck development, marketing & distribution, pitching, vertical series, AI for film, and co-productions. Remote + in-person sessions in Kampala.',
-  deadline: '9 May 2026 (extended)',
-  rate: '$30–45/hr',
-  applyEmail: 'youthandtrade@intracen.org',
-  docUrl: 'https://docs.google.com/document/d/1rd9sb79VnYs-3cm6ahIeg-8DHuVdQbmz1qfk0FRCNKQ/edit?tab=t.0',
+const ITC_OPPORTUNITY = null; // Expired 9 May 2026
+
+const FEATURED_MEMBER = {
+  name: 'Harold Hölscher',
+  username: 'harold-holscher',
+  avatarUrl: 'https://rcgynwcttgvqcnbyfhiz.supabase.co/storage/v1/object/public/member-images/bac620a4-ce5c-4551-9026-7e4c34ce39be/avatar/1778664195460.jpg',
+  disciplines: 'Writer / Director / Development Producer',
+  location: 'Johannesburg, South Africa',
+  bio: 'Harold Hölscher burst onto the scene when his short film <em>IBALI</em> swept the NTVA Stone Awards. His debut feature <strong>THE SOUL COLLECTOR</strong> earned 23 international awards and premiered at Fantasia before landing on Netflix and Amazon/Apple TV. He directed three episodes of Netflix\'s <strong>LUDIK</strong> — which hit #1 on Netflix Africa — followed by Showmax\'s <em>HARTKLOP</em>, <em>Savage Beauty</em> Season 2, and <em>Fatal Seduction</em> Season 2 for Netflix. He\'s one of FRA\'s early founding members.',
+  website: 'https://www.haroldholscher.com/',
+  reelUrl: 'https://www.youtube.com/watch?v=khkgma2s1tc&t=1s',
 };
 
 // ─── Supabase REST helpers ───────────────────────────────────────────────────
@@ -354,6 +357,48 @@ function buildITCFeaturedCard(itc, siteUrl) {
     </tr>`;
 }
 
+function buildMemberSpotlightCard(member) {
+  if (!member) return '';
+  const profileUrl = trackUrl(`${siteUrl}/m/${member.username}`, 'member_spotlight');
+  const avatarHtml = member.avatarUrl
+    ? `<td style="vertical-align:middle;padding-right:14px;">
+        <img src="${escapeHtml(member.avatarUrl)}" alt="${escapeHtml(member.name)}" width="64" height="64" style="width:64px;height:64px;border-radius:50%;object-fit:cover;display:block;" />
+       </td>`
+    : '';
+  let buttons = `<a href="${escapeHtml(profileUrl)}" style="display:inline-block;background:#37352f;color:#ffffff;font-weight:600;font-size:13px;text-decoration:none;padding:9px 22px;border-radius:6px;margin-right:8px;">View profile &rarr;</a>`;
+  if (member.reelUrl) {
+    buttons += `\n<a href="${escapeHtml(trackUrl(member.reelUrl, 'member_reel'))}" style="display:inline-block;background:#ffffff;color:#37352f;border:1px solid #d6d4cc;font-weight:600;font-size:13px;text-decoration:none;padding:8px 20px;border-radius:6px;">Watch reel</a>`;
+  }
+  if (member.website) {
+    buttons += `\n<a href="${escapeHtml(trackUrl(member.website, 'member_website'))}" style="display:inline-block;color:#2f80ed;font-weight:600;font-size:13px;text-decoration:none;padding:8px 12px;">Website &rarr;</a>`;
+  }
+  return `
+    <tr>
+      <td style="padding:8px 24px 0;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e8e8e8;border-radius:12px;overflow:hidden;background:#fafaf8;">
+          <tr><td style="padding:20px 22px 6px;">
+            <p style="margin:0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#9b9a97;">Founding Member Spotlight</p>
+          </td></tr>
+          <tr><td style="padding:8px 22px 4px;">
+            <table role="presentation" cellpadding="0" cellspacing="0"><tr>
+              ${avatarHtml}
+              <td style="vertical-align:middle;">
+                <a href="${escapeHtml(profileUrl)}" style="color:#37352f;text-decoration:none;font-size:20px;font-weight:700;">${escapeHtml(member.name)}</a>
+                <p style="margin:4px 0 0;font-size:13px;color:#787774;">${escapeHtml(member.disciplines)} &middot; ${escapeHtml(member.location)}</p>
+              </td>
+            </tr></table>
+          </td></tr>
+          <tr><td style="padding:14px 22px 4px;">
+            <p style="margin:0;font-size:14px;line-height:1.6;color:#37352f;">${member.bio}</p>
+          </td></tr>
+          <tr><td style="padding:14px 22px 20px;">
+            ${buttons}
+          </td></tr>
+        </table>
+      </td>
+    </tr>`;
+}
+
 function buildIndustryListingsSection(listings, siteUrl) {
   if (!listings || listings.length === 0) return '';
   let rows = '';
@@ -395,7 +440,7 @@ function buildIndustryListingsSection(listings, siteUrl) {
     </tr>`;
 }
 
-function buildNewsletterHtml({ closingSoon, newlyOpen, justAdded, news, proTip, weekLabel, callSheetListings, communitySpotlights, partners, episodeNumber, itcOpportunity, industryListings }) {
+function buildNewsletterHtml({ closingSoon, newlyOpen, justAdded, news, proTip, weekLabel, callSheetListings, communitySpotlights, partners, episodeNumber, itcOpportunity, industryListings, featuredMember }) {
   // Deduplicate: if an opp appears in closingSoon, don't show it again in newlyOpen or justAdded
   const closingIds = new Set(closingSoon.map(o => o.id));
   const openIds = new Set(newlyOpen.map(o => o.id));
@@ -403,6 +448,11 @@ function buildNewsletterHtml({ closingSoon, newlyOpen, justAdded, news, proTip, 
   const filteredAdded = justAdded.filter(o => !closingIds.has(o.id) && !openIds.has(o.id));
 
   let sections = '';
+
+  // ── Featured: Member Spotlight ──
+  if (featuredMember) {
+    sections += buildMemberSpotlightCard(featuredMember);
+  }
 
   // ── Featured: ITC Opportunity ──
   if (itcOpportunity) {
@@ -963,15 +1013,18 @@ async function main() {
   console.log(`  Community spotlights: ${communitySpotlights.length}`);
   console.log(`  Partners: ${partners.length}`);
   console.log(`  Industry listings: ${industryListings.length}`);
-  console.log(`  ITC featured: yes`);
+  console.log(`  ITC featured: ${ITC_OPPORTUNITY ? 'yes' : 'no'}`);
+  console.log(`  Member spotlight: ${FEATURED_MEMBER ? FEATURED_MEMBER.name : 'none'}`);
 
   // 3. Generate newsletter HTML
-  const data = { closingSoon, newlyOpen, justAdded, news, proTip, weekLabel, callSheetListings, communitySpotlights, partners, episodeNumber, itcOpportunity: ITC_OPPORTUNITY, industryListings };
+  const data = { closingSoon, newlyOpen, justAdded, news, proTip, weekLabel, callSheetListings, communitySpotlights, partners, episodeNumber, itcOpportunity: ITC_OPPORTUNITY, industryListings, featuredMember: FEATURED_MEMBER };
   const html = buildNewsletterHtml(data);
   const plainText = buildPlainText(data);
-  // Dynamic subject line — lead with the hook, not just stats
+  // Dynamic subject line — lead with member spotlight when present
   let subject;
-  if (news.length > 0 && news[0].title) {
+  if (FEATURED_MEMBER) {
+    subject = `FRA Weekly — ${weekLabel} · Founding Member Spotlight: ${FEATURED_MEMBER.name}`;
+  } else if (news.length > 0 && news[0].title) {
     const shortTitle = news[0].title.length > 50 ? news[0].title.slice(0, 47).replace(/\s+\S*$/, '') + '...' : news[0].title;
     subject = `FRA Weekly: ${shortTitle}`;
   } else if (closingSoon.length > 0) {
