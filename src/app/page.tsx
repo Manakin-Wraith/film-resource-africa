@@ -67,8 +67,6 @@ export default async function Home() {
             </div>
           </div>
 
-          {/* Bottom rule */}
-          <div className="h-px mt-10 md:mt-12" style={{ background: 'var(--border)' }} />
         </header>
 
         <SponsorTicker partners={partners} />

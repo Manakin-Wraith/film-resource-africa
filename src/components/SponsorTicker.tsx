@@ -39,7 +39,7 @@ export default function SponsorTicker({ partners = [] }: SponsorTickerProps) {
   const useCarousel = partners.length >= 4;
 
   return (
-    <div className="relative border-y border-white/8 py-5">
+    <div className="relative py-5">
       <div className="flex items-center gap-6 flex-wrap md:flex-nowrap">
         <h2 className="text-[10px] font-semibold text-foreground/40 uppercase tracking-[0.2em] whitespace-nowrap flex-shrink-0">
           In partnership with
