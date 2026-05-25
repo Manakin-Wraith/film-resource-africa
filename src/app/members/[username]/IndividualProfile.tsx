@@ -161,7 +161,7 @@ export default function IndividualProfile({ member, isOwner, isLoggedIn }: { mem
             border: '1px solid rgba(255,255,255,0.16)',
             background: member.logo_backdrop ? '#f5f5f5' : 'var(--surface-raised)',
             flexShrink: 0,
-            padding: member.logo_backdrop ? '12%' : 0,
+            padding: member.logo_backdrop ? '18px' : 0,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
             {avatarSrc

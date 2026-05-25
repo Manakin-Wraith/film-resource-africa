@@ -149,7 +149,7 @@ export default async function MemberShowcasePage(
                 style={{
                   width: '140px', height: '140px',
                   background: m.logo_backdrop ? '#f5f5f5' : 'var(--surface-raised)',
-                  padding: m.logo_backdrop ? '12%' : 0,
+                  padding: m.logo_backdrop ? '16px' : 0,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}
               >
