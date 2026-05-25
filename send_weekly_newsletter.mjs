@@ -48,14 +48,14 @@ const SEND_DELAY_MS = 600; // Resend free tier: ~2/sec
 const ITC_OPPORTUNITY = null; // Expired 9 May 2026
 
 const FEATURED_MEMBER = {
-  name: 'Harold Hölscher',
-  username: 'harold-holscher',
-  avatarUrl: 'https://rcgynwcttgvqcnbyfhiz.supabase.co/storage/v1/object/public/member-images/bac620a4-ce5c-4551-9026-7e4c34ce39be/avatar/1778664195460.jpg',
-  disciplines: 'Writer / Director / Development Producer',
+  name: 'The Ergo Company',
+  username: 'dumi-gumbi',
+  avatarUrl: 'https://rcgynwcttgvqcnbyfhiz.supabase.co/storage/v1/object/public/directory-logos/logos/ergo-square-1779694265253.png',
+  disciplines: 'Production Company · Feature Films',
   location: 'Johannesburg, South Africa',
-  bio: 'Harold Hölscher burst onto the scene when his short film <em>IBALI</em> swept the NTVA Stone Awards. His debut feature <strong>THE SOUL COLLECTOR</strong> earned 23 international awards and premiered at Fantasia before landing on Netflix and Amazon/Apple TV. He directed three episodes of Netflix\'s <strong>LUDIK</strong> — which hit #1 on Netflix Africa — followed by Showmax\'s <em>HARTKLOP</em>, <em>Savage Beauty</em> Season 2, and <em>Fatal Seduction</em> Season 2 for Netflix. He\'s one of FRA\'s early founding members.',
-  website: 'https://www.haroldholscher.com/',
-  reelUrl: 'https://www.youtube.com/watch?v=khkgma2s1tc&t=1s',
+  bio: 'For over a decade, <strong>The Ergo Company</strong> has stood at the forefront of South African cinema — proving that local stories can achieve global resonance without compromising commercial viability. Led by industry veterans <strong>Dumi Gumbi</strong> and <strong>Cati Weinek</strong>, with a combined 40+ years across development, production and international sales. Their slate includes <em>Mrs. Right Guy</em> (2016), the breakout horror <em>The Tokoloshe</em> (2018) — which played 14 international festivals — the record-breaking animation <em>Headspace</em> (2023), South Africa\'s highest-grossing film of that year, and <em>Old Righteous Blues</em>, South Africa\'s official 2024 Oscars submission. They\'re founding members of FRA.',
+  website: 'https://theergocompany.com',
+  reelUrl: null,
 };
 
 // ─── Supabase REST helpers ───────────────────────────────────────────────────
@@ -362,7 +362,7 @@ function buildMemberSpotlightCard(member) {
   const profileUrl = trackUrl(`${siteUrl}/m/${member.username}`, 'member_spotlight');
   const avatarHtml = member.avatarUrl
     ? `<td style="vertical-align:middle;padding-right:14px;">
-        <img src="${escapeHtml(member.avatarUrl)}" alt="${escapeHtml(member.name)}" width="64" height="64" style="width:64px;height:64px;border-radius:50%;object-fit:cover;display:block;" />
+        <img src="${escapeHtml(member.avatarUrl)}" alt="${escapeHtml(member.name)}" width="64" height="64" style="width:64px;height:64px;border-radius:8px;object-fit:contain;background:#ffffff;display:block;" />
        </td>`
     : '';
   let buttons = `<a href="${escapeHtml(profileUrl)}" style="display:inline-block;background:#37352f;color:#ffffff;font-weight:600;font-size:13px;text-decoration:none;padding:9px 22px;border-radius:6px;margin-right:8px;">View profile &rarr;</a>`;
