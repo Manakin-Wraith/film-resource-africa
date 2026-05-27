@@ -27,11 +27,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
   }
 
-  // Honeypot — bots fill hidden fields. Trim to avoid extensions/autofill
-  // accidentally injecting whitespace and tripping the trap for real users.
-  if (typeof body.honeypot === 'string' && body.honeypot.trim() !== '') {
-    return NextResponse.json({ error: 'Rejected' }, { status: 400 });
-  }
+  const honeypotTripped = typeof body.honeypot === 'string' && body.honeypot.trim() !== '';
 
   const answers = body.answers ?? {};
   const missing = validateIntake(answers);
@@ -40,6 +36,18 @@ export async function POST(req: NextRequest) {
   }
   if (str(answers, 25) !== 'Yes') {
     return NextResponse.json({ error: 'Consent (Q25) is required to submit.' }, { status: 422 });
+  }
+
+  // Honeypot is advisory, not blocking: a submission that passes full validation
+  // (all 25 required answers + consent) is almost certainly a real human whose
+  // browser/extension autofilled the hidden field — not a bot, which would skip
+  // the required questions and have been bounced by the 422 above. Log it for
+  // visibility instead of rejecting and locking the user out.
+  if (honeypotTripped) {
+    console.warn('[PRS submit] honeypot tripped on a fully-valid submission (likely autofill, allowing)', {
+      email: (body.email ?? '').toLowerCase().trim(),
+      honeypotLength: body.honeypot!.trim().length,
+    });
   }
 
   // Determine identity: a logged-in active member submits as a member (exempt
