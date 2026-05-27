@@ -16,14 +16,14 @@ function PartnerChip({ partner }: { partner: Partner }) {
       target={partner.website ? '_blank' : undefined}
       rel="noopener noreferrer"
       onClick={() => trackSponsoredClick(null, String(partner.id), 'ticker', null)}
-      className="flex items-center gap-2.5 whitespace-nowrap flex-shrink-0 group opacity-70 hover:opacity-100 transition-opacity duration-200"
+      className="flex items-center gap-2.5 whitespace-nowrap shrink-0 group opacity-70 hover:opacity-100 transition-opacity duration-200"
     >
       <Image
         src={partner.logo_url}
         alt={partner.name}
         width={32}
         height={32}
-        className="w-8 h-8 object-contain flex-shrink-0"
+        className="w-8 h-8 object-contain shrink-0"
       />
       <span className="font-medium text-sm text-foreground/80 group-hover:text-foreground transition-colors">
         {partner.name}
@@ -41,14 +41,14 @@ export default function SponsorTicker({ partners = [] }: SponsorTickerProps) {
   return (
     <div className="relative py-5">
       <div className="flex items-center gap-6 flex-wrap md:flex-nowrap">
-        <h2 className="text-[10px] font-semibold text-foreground/40 uppercase tracking-[0.2em] whitespace-nowrap flex-shrink-0">
+        <h2 className="text-[10px] font-semibold text-foreground/40 uppercase tracking-[0.2em] whitespace-nowrap shrink-0">
           In partnership with
         </h2>
         <div className="flex-1 min-w-0 relative">
           {useCarousel ? (
             <>
-              <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
-              <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
+              <div className="absolute left-0 top-0 bottom-0 w-12 bg-linear-to-r from-background to-transparent z-10 pointer-events-none" />
+              <div className="absolute right-0 top-0 bottom-0 w-12 bg-linear-to-l from-background to-transparent z-10 pointer-events-none" />
               <div className="group overflow-hidden">
                 <div className="flex items-center gap-10 animate-ticker group-hover:[animation-play-state:paused]">
                   {partners.map((p) => <PartnerChip key={`a-${p.id}`} partner={p} />)}

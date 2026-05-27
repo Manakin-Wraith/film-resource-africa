@@ -75,6 +75,7 @@ export default function Header({ stats }: HeaderProps) {
   const navLinks = [
     ...NAV_LINKS_BASE.slice(0, 3),
     { href: membersHref, label: 'Members' },
+    { href: '/tech-pulse', label: 'Tech-Pulse' },
     ...NAV_LINKS_BASE.slice(3),
   ];
 
@@ -112,6 +113,15 @@ export default function Header({ stats }: HeaderProps) {
 
           {/* Auth CTA — desktop only */}
           <div className="hidden md:flex items-center gap-2 flex-shrink-0">
+            <Link
+              href="/assess"
+              className={`flex items-center px-3.5 py-2 text-[13px] font-semibold rounded-lg transition-colors whitespace-nowrap ${
+                isActive('/assess') ? 'text-primary' : ''
+              }`}
+              style={isActive('/assess') ? undefined : { color: 'var(--primary)' }}
+            >
+              Assess Your Project
+            </Link>
             {member ? (
               /* Logged-in state */
               <div className="flex items-center gap-2">
@@ -162,6 +172,14 @@ export default function Header({ stats }: HeaderProps) {
         {/* Mobile dropdown */}
         <div className={`md:hidden overflow-hidden transition-all duration-200 ${menuOpen ? 'max-h-[520px] opacity-100' : 'max-h-0 opacity-0'}`}>
           <div className="border-t border-white/[0.06] container mx-auto px-4 py-2">
+            <Link
+              href="/assess"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center py-3.5 text-sm font-semibold border-b border-white/[0.06] transition-colors min-h-[44px]"
+              style={{ color: 'var(--primary)' }}
+            >
+              Assess Your Project
+            </Link>
             {navLinks.map(({ href, label }) => (
               <Link
                 key={href}

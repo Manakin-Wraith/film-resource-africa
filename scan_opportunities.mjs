@@ -284,8 +284,16 @@ const STOPWORDS = new Set(['the','and','for','from','with','this','that','are','
   'when','where','which','while','your','open','new','now','film','films','2026','2025','call',
   'award','awards','edition','announces','announced','applications']);
 
+function stripSiteSuffix(title) {
+  // Remove trailing " - sitename.com" / " | Site Name" patterns added by page <title> tags
+  return title
+    .replace(/\s*[-–—|]\s*[a-z0-9-]+\.(com|org|net|co|io|tv|africa|ng|za|ke|uk)\b.*$/i, '')
+    .replace(/\s*[-–—|]\s*[A-Z][\w\s&]+$/, m => m.length < 30 ? '' : m)
+    .trim();
+}
+
 function extractKeywords(text) {
-  return text.toLowerCase()
+  return stripSiteSuffix(text).toLowerCase()
     .replace(/[^a-z0-9\s]/g, ' ')
     .split(/\s+/)
     .filter(w => w.length >= 3 && !STOPWORDS.has(w));
