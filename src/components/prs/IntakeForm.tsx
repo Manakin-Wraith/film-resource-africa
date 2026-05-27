@@ -232,7 +232,9 @@ export default function IntakeForm() {
             data-1p-ignore="true"
             data-form-type="other"
             value={honeypot} onChange={(e) => setHoneypot(e.target.value)}
-            style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, opacity: 0 }}
+            // display:none is skipped by password managers / autofill far more
+            // reliably than off-screen positioning, which still trips real users.
+            style={{ display: 'none' }}
           />
         </div>
       )}
