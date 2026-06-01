@@ -1,7 +1,7 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowRight, ArrowLeft, Send, Check } from 'lucide-react';
 import { SECTIONS, wordCount, type Question, type IntakeAnswers } from '@/lib/prs/questions';
 
@@ -131,6 +131,28 @@ export default function IntakeForm() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Re-assessment: ?project=<token> prefills from a prior diagnosis the member owns.
+  const searchParams = useSearchParams();
+  const reassessToken = searchParams.get('project');
+  const [reassessTitle, setReassessTitle] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!reassessToken) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`/api/assess/load?token=${encodeURIComponent(reassessToken)}`);
+        if (!res.ok || cancelled) return;
+        const data = await res.json();
+        if (cancelled || !data?.answers) return;
+        // Merge onto the blank template so any newly-added questions stay initialised.
+        setAnswers((prev) => ({ ...prev, ...(data.answers as IntakeAnswers) }));
+        setReassessTitle(typeof data.project_title === 'string' ? data.project_title : null);
+      } catch { /* prefill is best-effort */ }
+    })();
+    return () => { cancelled = true; };
+  }, [reassessToken]);
+
   const total = SECTIONS.length;
   const section = step >= 1 && step <= total ? SECTIONS[step - 1] : null;
   const sectionIdx = step - 1;
@@ -145,7 +167,7 @@ export default function IntakeForm() {
       const res = await fetch('/api/assess/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, answers, honeypot }),
+        body: JSON.stringify({ email, answers, honeypot, reassessToken: reassessToken ?? undefined }),
       });
       const data = await res.json();
       if (res.status === 409 && data.token) {
@@ -165,7 +187,20 @@ export default function IntakeForm() {
       <div className="prs-container prs-intake-shell">
         <div className="section-rule section-rule-primary" />
         <div className="section-rubric">FRA Project Readiness Score · v1</div>
-        <h1 className="intake-section-title" style={{ marginTop: 8 }}>A diagnosis of your film project.</h1>
+        {reassessToken && (
+          <div
+            style={{
+              marginTop: 12, marginBottom: 4, borderRadius: 12, padding: '12px 16px',
+              border: '1px solid rgba(59,130,246,0.3)', background: 'rgba(59,130,246,0.08)',
+              fontSize: 14, color: 'var(--foreground-secondary)',
+            }}
+          >
+            Re-assessing{reassessTitle ? <> <strong style={{ color: 'var(--foreground)' }}>{reassessTitle}</strong></> : ' your project'} — your previous answers are pre-filled. Update them for a fresh diagnosis; it becomes the new current version of this project.
+          </div>
+        )}
+        <h1 className="intake-section-title" style={{ marginTop: 8 }}>
+          {reassessToken ? 'Re-assess your film project.' : 'A diagnosis of your film project.'}
+        </h1>
         <p className="intake-section-sub" style={{ marginTop: 16, fontSize: 17 }}>
           Twenty-five questions, seven sections, about ten minutes. In return: a written diagnostic, scored
           across concept, market, commercial logic, South African alignment, and execution readiness — plus

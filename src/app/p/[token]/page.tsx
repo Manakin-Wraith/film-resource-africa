@@ -92,11 +92,11 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
     return <ReportFree project={project} diagnosis={a.diagnosis} stale={stale} meta={meta} />;
   }
 
-  // Build journal from all of this member's diagnoses, newest first.
+  // Build journal from all versions of THIS project (same project_group), newest first.
   const { data: rows } = await serviceClient
     .from('assessments')
     .select('token, tier, score, submitted_at')
-    .eq('member_id', a.member_id)
+    .eq('project_group', a.project_group)
     .order('submitted_at', { ascending: false });
 
   const journal: JournalEntry[] = (rows ?? []).map((r) => ({

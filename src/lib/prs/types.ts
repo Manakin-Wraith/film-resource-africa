@@ -97,6 +97,7 @@ export interface Assessment {
   score: number | null;
   diagnosis: Diagnosis | null;
   visibility: 'private' | 'members' | 'public';
+  project_group: string;
   submitted_at: string;
   scored_at: string | null;
   created_at: string;

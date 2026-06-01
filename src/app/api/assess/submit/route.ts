@@ -20,7 +20,7 @@ function str(answers: IntakeAnswers, id: number): string {
 }
 
 export async function POST(req: NextRequest) {
-  let body: { email?: string; answers?: IntakeAnswers; honeypot?: string };
+  let body: { email?: string; answers?: IntakeAnswers; honeypot?: string; reassessToken?: string };
   try {
     body = await req.json();
   } catch {
@@ -89,6 +89,23 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // Re-assessment: if the caller owns the source project, the new diagnosis joins
+  // that project_group as a fresh version and inherits its visibility. Otherwise a
+  // brand-new project (DB default generates a fresh project_group; visibility=private).
+  let projectGroup: string | undefined;
+  let inheritedVisibility: string | undefined;
+  if (memberId && body.reassessToken) {
+    const { data: source } = await serviceClient
+      .from('assessments')
+      .select('project_group, visibility, member_id')
+      .eq('token', body.reassessToken)
+      .maybeSingle();
+    if (source && source.member_id === memberId) {
+      projectGroup = source.project_group as string;
+      inheritedVisibility = source.visibility as string;
+    }
+  }
+
   const token = genToken();
   const { error } = await serviceClient.from('assessments').insert({
     token,
@@ -100,6 +117,8 @@ export async function POST(req: NextRequest) {
     country: str(answers, 13) || null,
     intake_data: answers,
     status: 'pending',
+    ...(projectGroup ? { project_group: projectGroup } : {}),
+    ...(inheritedVisibility ? { visibility: inheritedVisibility } : {}),
   });
 
   if (error) {

@@ -587,7 +587,9 @@ export type ProjectVisibility = 'private' | 'members' | 'public';
 
 /** Safe, marketplace-facing projection of an assessment. No numeric score, no diagnosis. */
 export interface ProjectCard {
-  token: string;
+  token: string;              // the CURRENT (latest scored) version's token
+  group: string;              // project_group — stable project identity
+  versions: number;          // how many diagnoses exist for this project (in view scope)
   title: string;
   format: string | null;
   genre: string | null;
@@ -634,7 +636,7 @@ export async function getMemberProjects(
 
   const { data, error } = await supabase
     .from('assessments')
-    .select('token, project_title, format, genre, country, tier, visibility, intake_data, submitted_at, status')
+    .select('token, project_group, project_title, format, genre, country, tier, visibility, intake_data, submitted_at, status')
     .eq('member_id', memberId)
     .eq('status', 'scored')
     .in('visibility', allowed)
@@ -642,10 +644,22 @@ export async function getMemberProjects(
 
   if (error || !data) return [];
 
-  return data.map((r) => {
+  // One card per project_group — the newest scored version is current; the rest
+  // are counted as prior diagnoses (the project's journal).
+  const byGroup = new Map<string, { row: typeof data[number]; versions: number }>();
+  for (const r of data) {
+    const g = r.project_group as string;
+    const seen = byGroup.get(g);
+    if (seen) seen.versions += 1;
+    else byGroup.set(g, { row: r, versions: 1 }); // first seen = newest (desc order)
+  }
+
+  return Array.from(byGroup.values()).map(({ row: r, versions }) => {
     const intake = (r.intake_data as Record<string, unknown> | null) ?? null;
     return {
       token: r.token as string,
+      group: r.project_group as string,
+      versions,
       title: (r.project_title as string) || 'Untitled project',
       format: (r.format as string | null) ?? null,
       genre: (r.genre as string | null) ?? null,
@@ -675,7 +689,7 @@ export interface PublicProjectCard extends ProjectCard {
 export async function getPublicProjects(): Promise<PublicProjectCard[]> {
   const { data, error } = await supabase
     .from('assessments')
-    .select('token, project_title, format, genre, country, tier, visibility, intake_data, submitted_at, status, member_id, members(full_name, username, avatar_url)')
+    .select('token, project_group, project_title, format, genre, country, tier, visibility, intake_data, submitted_at, status, member_id, members(full_name, username, avatar_url)')
     .eq('status', 'scored')
     .eq('visibility', 'public')
     .not('member_id', 'is', null)
@@ -683,11 +697,22 @@ export async function getPublicProjects(): Promise<PublicProjectCard[]> {
 
   if (error || !data) return [];
 
-  return data.map((r) => {
+  // One card per project_group (newest public version).
+  const byGroup = new Map<string, { row: typeof data[number]; versions: number }>();
+  for (const r of data) {
+    const g = r.project_group as string;
+    const seen = byGroup.get(g);
+    if (seen) seen.versions += 1;
+    else byGroup.set(g, { row: r, versions: 1 });
+  }
+
+  return Array.from(byGroup.values()).map(({ row: r, versions }) => {
     const intake = (r.intake_data as Record<string, unknown> | null) ?? null;
     const m = (r.members ?? null) as { full_name?: string; username?: string; avatar_url?: string } | null;
     return {
       token: r.token as string,
+      group: r.project_group as string,
+      versions,
       title: (r.project_title as string) || 'Untitled project',
       format: (r.format as string | null) ?? null,
       genre: (r.genre as string | null) ?? null,
@@ -713,7 +738,7 @@ export async function getPublicProjects(): Promise<PublicProjectCard[]> {
 export async function getPublicProjectByToken(token: string): Promise<PublicProjectCard | null> {
   const { data: r, error } = await supabase
     .from('assessments')
-    .select('token, project_title, format, genre, country, tier, visibility, intake_data, submitted_at, status, member_id, members(full_name, username, avatar_url)')
+    .select('token, project_group, project_title, format, genre, country, tier, visibility, intake_data, submitted_at, status, member_id, members(full_name, username, avatar_url)')
     .eq('token', token)
     .eq('status', 'scored')
     .eq('visibility', 'public')
@@ -726,6 +751,8 @@ export async function getPublicProjectByToken(token: string): Promise<PublicProj
   const m = (r.members ?? null) as { full_name?: string; username?: string; avatar_url?: string } | null;
   return {
     token: r.token as string,
+    group: r.project_group as string,
+    versions: 1,
     title: (r.project_title as string) || 'Untitled project',
     format: (r.format as string | null) ?? null,
     genre: (r.genre as string | null) ?? null,
@@ -742,7 +769,27 @@ export async function getPublicProjectByToken(token: string): Promise<PublicProj
   };
 }
 
-/** Owner-gated: change a project's visibility. Returns the new visibility. */
+/**
+ * Owner-gated lookup: resolve the project_group of a token the caller owns.
+ * Throws NOT_A_MEMBER / NOT_FOUND / NOT_OWNER.
+ */
+async function ownedProjectGroup(token: string): Promise<{ member: CurrentMember; group: string }> {
+  const member = await getCurrentMember();
+  if (!member) throw new Error('NOT_A_MEMBER');
+  const { data: row, error } = await supabase
+    .from('assessments')
+    .select('member_id, project_group')
+    .eq('token', token)
+    .maybeSingle();
+  if (error || !row) throw new Error('NOT_FOUND');
+  if (row.member_id !== member.id) throw new Error('NOT_OWNER');
+  return { member, group: row.project_group as string };
+}
+
+/**
+ * Owner-gated: change a project's visibility. Visibility is project-level, so this
+ * updates every version (row) in the project_group. Returns the new visibility.
+ */
 export async function setProjectVisibility(
   token: string,
   visibility: ProjectVisibility
@@ -750,27 +797,91 @@ export async function setProjectVisibility(
   if (!['private', 'members', 'public'].includes(visibility)) {
     throw new Error('INVALID_VISIBILITY');
   }
-  const member = await getCurrentMember();
-  if (!member) throw new Error('NOT_A_MEMBER');
-
-  const { data: row, error: fetchErr } = await supabase
-    .from('assessments')
-    .select('member_id, status')
-    .eq('token', token)
-    .maybeSingle();
-  if (fetchErr || !row) throw new Error('NOT_FOUND');
-  if (row.member_id !== member.id) throw new Error('NOT_OWNER');
-  if (row.status !== 'scored') throw new Error('NOT_SCORED');
+  const { member, group } = await ownedProjectGroup(token);
 
   const { error } = await supabase
     .from('assessments')
     .update({ visibility })
+    .eq('member_id', member.id)
+    .eq('project_group', group);
+  if (error) throw new Error(error.message);
+
+  if (member.username) revalidatePath(`/members/${member.username}`);
+  revalidatePath('/projects');
+  return { visibility };
+}
+
+/** Card-facing fields a member may edit without re-scoring. */
+export interface ProjectDetailFields {
+  title?: string;
+  format?: string | null;
+  genre?: string | null;
+  country?: string | null;
+  stage?: string | null;     // intake Q9
+  logline?: string | null;   // intake Q7
+  seeking?: string[];        // intake Q22
+}
+
+/**
+ * Owner-gated: edit a project's display fields on the CURRENT version (the token
+ * shown). Patches assessment columns + the relevant intake_data keys. Does not
+ * touch the score/diagnosis — substantive changes go through re-assessment.
+ */
+export async function updateProjectDetails(
+  token: string,
+  fields: ProjectDetailFields
+): Promise<{ ok: true }> {
+  const { member } = await ownedProjectGroup(token);
+
+  const { data: row, error: fetchErr } = await supabase
+    .from('assessments')
+    .select('intake_data')
+    .eq('token', token)
+    .maybeSingle();
+  if (fetchErr || !row) throw new Error('NOT_FOUND');
+
+  const intake = { ...((row.intake_data as Record<string, unknown> | null) ?? {}) };
+  if (fields.logline !== undefined) intake['7'] = fields.logline ?? '';
+  if (fields.stage !== undefined) intake['9'] = fields.stage ?? '';
+  if (fields.seeking !== undefined) intake['22'] = fields.seeking;
+
+  const patch: Record<string, unknown> = { intake_data: intake };
+  if (fields.title !== undefined) patch.project_title = fields.title?.trim() || 'Untitled project';
+  if (fields.format !== undefined) patch.format = fields.format;
+  if (fields.genre !== undefined) patch.genre = fields.genre;
+  if (fields.country !== undefined) patch.country = fields.country;
+
+  const { error } = await supabase
+    .from('assessments')
+    .update(patch)
     .eq('token', token)
     .eq('member_id', member.id);
   if (error) throw new Error(error.message);
 
   if (member.username) revalidatePath(`/members/${member.username}`);
-  return { visibility };
+  revalidatePath('/projects');
+  revalidatePath(`/projects/${token}`);
+  return { ok: true };
+}
+
+/**
+ * Owner-gated: permanently delete a project and ALL its versions/diagnoses.
+ * Irreversible. Returns the number of assessment rows removed.
+ */
+export async function deleteProject(token: string): Promise<{ deleted: number }> {
+  const { member, group } = await ownedProjectGroup(token);
+
+  const { data, error } = await supabase
+    .from('assessments')
+    .delete()
+    .eq('member_id', member.id)
+    .eq('project_group', group)
+    .select('token');
+  if (error) throw new Error(error.message);
+
+  if (member.username) revalidatePath(`/members/${member.username}`);
+  revalidatePath('/projects');
+  return { deleted: data?.length ?? 0 };
 }
 
 export async function updateOpportunity(id: number, updatedFields: Partial<Opportunity>) {

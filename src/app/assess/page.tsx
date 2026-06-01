@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import IntakeForm from '@/components/prs/IntakeForm';
 
 export const metadata: Metadata = {
@@ -15,7 +16,9 @@ export const metadata: Metadata = {
 export default function AssessPage() {
   return (
     <div className="prs-root">
-      <IntakeForm />
+      <Suspense fallback={null}>
+        <IntakeForm />
+      </Suspense>
     </div>
   );
 }
