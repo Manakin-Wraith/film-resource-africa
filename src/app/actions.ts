@@ -705,6 +705,43 @@ export async function getPublicProjects(): Promise<PublicProjectCard[]> {
   });
 }
 
+/**
+ * A single public project by token, for the /projects/[token] detail page.
+ * Returns null unless the project is public + scored (private/members 404 to the
+ * public). Safe columns only — no score/diagnosis.
+ */
+export async function getPublicProjectByToken(token: string): Promise<PublicProjectCard | null> {
+  const { data: r, error } = await supabase
+    .from('assessments')
+    .select('token, project_title, format, genre, country, tier, visibility, intake_data, submitted_at, status, member_id, members(full_name, username, avatar_url)')
+    .eq('token', token)
+    .eq('status', 'scored')
+    .eq('visibility', 'public')
+    .not('member_id', 'is', null)
+    .maybeSingle();
+
+  if (error || !r) return null;
+
+  const intake = (r.intake_data as Record<string, unknown> | null) ?? null;
+  const m = (r.members ?? null) as { full_name?: string; username?: string; avatar_url?: string } | null;
+  return {
+    token: r.token as string,
+    title: (r.project_title as string) || 'Untitled project',
+    format: (r.format as string | null) ?? null,
+    genre: (r.genre as string | null) ?? null,
+    country: (r.country as string | null) ?? null,
+    stage: intakeStr(intake, 9),
+    logline: intakeStr(intake, 7),
+    seeking: intakeArr(intake, 22),
+    tier: (r.tier as ProjectCard['tier']) ?? null,
+    visibility: (r.visibility as ProjectVisibility) ?? 'public',
+    submitted_at: r.submitted_at as string,
+    member_name: m?.full_name ?? null,
+    member_username: m?.username ?? null,
+    member_avatar: m?.avatar_url ?? null,
+  };
+}
+
 /** Owner-gated: change a project's visibility. Returns the new visibility. */
 export async function setProjectVisibility(
   token: string,

@@ -13,7 +13,7 @@ const TIER_BADGE: Record<NonNullable<PublicProjectCard['tier']>, { label: string
 function ProjectCard({ p }: { p: PublicProjectCard }) {
   const badge = p.tier ? TIER_BADGE[p.tier] : null;
   const meta = [p.format, p.genre, p.stage].filter(Boolean).join(' · ');
-  const href = p.member_username ? `/members/${p.member_username}` : undefined;
+  const href = `/projects/${p.token}`;
 
   const body = (
     <div
