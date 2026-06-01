@@ -5,6 +5,7 @@ import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo, useDrag
 import { Calendar, DollarSign, FileText, ExternalLink, X, Info, Target, FileCheck, CheckCircle2, AlertCircle, Share2, Clock, AlertTriangle, Lightbulb } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Opportunity } from '@/app/actions';
 import { getCategoryStyle } from '@/lib/categoryConfig';
 import { decodeHtmlEntities } from '@/lib/textUtils';
@@ -204,6 +205,20 @@ export default function OpportunityModal({ selectedOpp, onClose }: OpportunityMo
                 <h2 className="text-xl md:text-4xl font-bold font-heading leading-tight pr-24 md:pr-28 mb-4 md:mb-5">
                   {selectedOpp.title}
                 </h2>
+
+                {selectedOpp.member_name && (
+                  <p className="text-[13px] mb-4 flex items-center gap-1.5" style={{ color: 'var(--foreground-tertiary)' }}>
+                    <span className="inline-block w-1 h-1 rounded-full bg-primary" />
+                    Added by{' '}
+                    {selectedOpp.member_username ? (
+                      <Link href={`/members/${selectedOpp.member_username}`} className="font-medium text-primary hover:underline">
+                        {selectedOpp.member_name}
+                      </Link>
+                    ) : (
+                      <span className="font-medium text-foreground/70">{selectedOpp.member_name}</span>
+                    )}
+                  </p>
+                )}
 
                 {/* About — immediately under title */}
                 {selectedOpp["What Is It?"] && (

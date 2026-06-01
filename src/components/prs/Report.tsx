@@ -1,12 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import Link from 'next/link';
 import {
   Check, Calendar, User, Film, AlertTriangle, RefreshCw, Send, ArrowRight,
+  Lock, Users, Globe, EyeOff,
 } from 'lucide-react';
 import type { Diagnosis, PrsTier } from '@/lib/prs/types';
 import { TIER_LABELS, TIER_CLASS } from '@/lib/prs/types';
+import { setProjectVisibility, type ProjectVisibility } from '@/app/actions';
 
 export interface ProjectHead {
   title: string;
@@ -168,13 +170,15 @@ export function ReportFree({
           <div className="section-rubric">The full report</div>
           <h2 className="section-heading">What member access adds.</h2>
           <p className="prs-prose-secondary" style={{ maxWidth: '56ch', marginBottom: 28 }}>
-            Your free diagnosis is complete. The member report extends it with named funders, deadlines, and
-            specific moves — not blurred paywall previews, just a different document.
+            Your free diagnosis is complete. Membership extends it with named funders, deadlines, and
+            specific moves — and lets you save this project and share it with partners and funders. Not blurred
+            paywall previews, just a different document.
           </p>
 
           <div className="tease-card">
             <ul className="tease-list">
               {[
+                ['Showcase this project', "List it on the public Projects directory — its logline, format, and what you're seeking, in front of producers, funders, and co-pro partners across the continent. Your score and diagnosis stay private."],
                 ['Pathway-scoped scoring', 'Your project against two SA funding lanes — primary and secondary, with a numeric verdict on each.'],
                 ['Named funders, programs, and deadlines', "Three live opportunities matched to your project, sorted by deadline. Updated weekly by FRA's scanner."],
                 ['Three concrete moves for this quarter', 'Each with a named program, deadline, and a contact you can be introduced to.'],
@@ -225,11 +229,132 @@ function gradientFor(band: 'primary' | 'amber' | 'green') {
   }[band];
 }
 
+const VIS_CHOICES: { value: ProjectVisibility; label: string; sub: string; Icon: typeof Lock }[] = [
+  { value: 'private', label: 'Private', sub: 'Only you', Icon: Lock },
+  { value: 'members', label: 'Members', sub: 'FRA members', Icon: Users },
+  { value: 'public', label: 'Public', sub: 'Anyone', Icon: Globe },
+];
+
+const VIS_STATUS: Record<ProjectVisibility, string> = {
+  private: 'Only you can see this. It isn’t listed anywhere — your diagnosis stays in your journal.',
+  members: 'Visible as a pitch card to logged-in FRA members. Your score and diagnosis stay private.',
+  public: 'Live on your profile and the public Projects directory. Your score and diagnosis stay private — only the pitch card (logline, format, readiness tier) is shown.',
+};
+
+function NextStepsPanel({
+  token, username, initialVisibility,
+}: {
+  token: string; username: string | null; initialVisibility: ProjectVisibility;
+}) {
+  const [visibility, setVisibility] = useState<ProjectVisibility>(initialVisibility);
+  const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+
+  function change(next: ProjectVisibility) {
+    if (next === visibility || pending) return;
+    const prev = visibility;
+    setVisibility(next);
+    setError(null);
+    startTransition(async () => {
+      try {
+        await setProjectVisibility(token, next);
+      } catch {
+        setVisibility(prev);
+        setError('Couldn’t update visibility — please try again.');
+      }
+    });
+  }
+
+  return (
+    <div
+      style={{
+        marginTop: 40, marginBottom: 8, borderRadius: 18, padding: '26px 24px',
+        border: '1px solid rgba(255,255,255,0.1)',
+        background: 'linear-gradient(180deg, rgba(59,130,246,0.07), transparent 70%), rgba(255,255,255,0.02)',
+      }}
+    >
+      <div className="section-rubric" style={{ marginBottom: 6 }}>What’s next</div>
+      <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: 22, lineHeight: 1.15, margin: 0 }}>
+        Share your project
+      </h3>
+      <p style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--foreground-secondary)', marginTop: 8, maxWidth: 560 }}>
+        This diagnosis is saved to your journal automatically. Choose who can discover this project as a pitch card —
+        your private score and diagnosis are never shown to anyone but you.
+      </p>
+
+      {/* Visibility segmented control */}
+      <div
+        role="radiogroup"
+        aria-label="Project visibility"
+        style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginTop: 18, maxWidth: 460 }}
+      >
+        {VIS_CHOICES.map(({ value, label, sub, Icon }) => {
+          const active = value === visibility;
+          return (
+            <button
+              key={value}
+              type="button"
+              role="radio"
+              aria-checked={active}
+              onClick={() => change(value)}
+              disabled={pending}
+              style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5,
+                padding: '12px 8px', borderRadius: 12, cursor: pending ? 'default' : 'pointer',
+                border: active ? '1px solid rgba(59,130,246,0.6)' : '1px solid rgba(255,255,255,0.1)',
+                background: active ? 'rgba(59,130,246,0.14)' : 'rgba(255,255,255,0.02)',
+                color: active ? '#fff' : 'var(--foreground-secondary)',
+                transition: 'background 0.15s, border-color 0.15s',
+              }}
+            >
+              <Icon size={16} />
+              <span style={{ fontSize: 13, fontWeight: 700 }}>{label}</span>
+              <span style={{ fontSize: 11, color: 'var(--foreground-tertiary)' }}>{sub}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      <p style={{ fontSize: 12.5, lineHeight: 1.55, color: 'var(--foreground-tertiary)', marginTop: 12, maxWidth: 560 }}>
+        {pending ? 'Saving…' : VIS_STATUS[visibility]}
+      </p>
+      {error && <p style={{ fontSize: 12.5, color: '#ef4444', marginTop: 4 }}>{error}</p>}
+
+      {/* Action links */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 18, alignItems: 'center', marginTop: 20 }}>
+        {username && (
+          <Link href={`/members/${username}`} className="prs-link-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            View on your profile <ArrowRight size={13} />
+          </Link>
+        )}
+        <Link href="/projects" className="prs-link-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          Browse all projects <ArrowRight size={13} />
+        </Link>
+        {visibility !== 'private' && (
+          <button
+            type="button"
+            onClick={() => change('private')}
+            disabled={pending}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6, marginLeft: 'auto',
+              background: 'none', border: 'none', padding: 0, cursor: pending ? 'default' : 'pointer',
+              fontSize: 13, color: 'var(--foreground-tertiary)',
+            }}
+          >
+            <EyeOff size={13} /> Remove from listings
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function ReportMember({
-  project, diagnosis, stale, meta, journal, token,
+  project, diagnosis, stale, meta, journal, token, username, visibility,
 }: {
   project: ProjectHead; diagnosis: Diagnosis; stale: boolean; meta: FootMeta;
   journal: JournalEntry[]; token: string;
+  username: string | null; visibility: ProjectVisibility;
 }) {
   const d = diagnosis;
   const [requested, setRequested] = useState<Record<string, boolean>>({});
@@ -455,6 +580,8 @@ export function ReportMember({
             );
           })}
         </Section>
+
+        <NextStepsPanel token={token} username={username} initialVisibility={visibility} />
 
         <FootMetaRow meta={meta} />
       </div>

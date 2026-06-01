@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 import { getSessionUser } from '@/lib/supabase/server';
 import IndividualProfile from './IndividualProfile';
 import BusinessProfile from './BusinessProfile';
+import { getMemberProjects, type ProjectCard } from '@/app/actions';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -97,7 +98,18 @@ export default async function MemberProfilePage(
   const isOwner = !!sessionUser?.email && sessionUser.email.toLowerCase() === m.email.toLowerCase();
   const isLoggedIn = !!sessionUser?.email;
 
+  // Is the *viewer* an active member? (controls 'members'-visibility projects).
+  // The owner is always an active member; otherwise look up the viewer's email.
+  let viewerIsMember = isOwner;
+  if (!viewerIsMember && sessionUser?.email) {
+    const { data: viewer } = await supabase
+      .from('members').select('id').eq('email', sessionUser.email.toLowerCase()).eq('status', 'active').maybeSingle();
+    viewerIsMember = !!viewer;
+  }
+
+  const projects: ProjectCard[] = await getMemberProjects(m.id, { isOwner, isMember: viewerIsMember });
+
   return m.tier === 'business'
-    ? <BusinessProfile member={m} isOwner={isOwner} isLoggedIn={isLoggedIn} />
-    : <IndividualProfile member={m} isOwner={isOwner} isLoggedIn={isLoggedIn} />;
+    ? <BusinessProfile member={m} isOwner={isOwner} isLoggedIn={isLoggedIn} projects={projects} />
+    : <IndividualProfile member={m} isOwner={isOwner} isLoggedIn={isLoggedIn} projects={projects} />;
 }

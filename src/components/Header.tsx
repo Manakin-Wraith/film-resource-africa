@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Menu, X } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Menu, X, ChevronDown } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { directoryCategories } from '@/lib/directoryConfig';
 
 interface HeaderProps {
   stats: {
@@ -21,14 +22,20 @@ type MemberSession = {
   avatar_url: string | null;
 } | null;
 
+// Flat top-level links (Directory is rendered separately as a dropdown parent).
 const NAV_LINKS_BASE = [
-  { href: '/#directory', label: 'Directory' },
-  { href: '/film-opportunities', label: 'Countries' },
   { href: '/news', label: 'News' },
   { href: '/call-sheet', label: 'Call Sheet' },
   { href: '/industry', label: 'Industry' },
   { href: '/rebate-calculator', label: 'Rebate' },
   { href: '/community-spotlight', label: 'Spotlight' },
+];
+
+// Directory dropdown children: the 7 public categories + By Country.
+const DIRECTORY_CHILDREN = [
+  ...directoryCategories.map((c) => ({ href: `/directory?cat=${c.slug}`, label: c.label })),
+  { href: '/film-opportunities', label: 'By Country' },
+  { href: '/projects', label: 'Projects in Development' },
 ];
 
 export default function Header({ stats }: HeaderProps) {
@@ -73,11 +80,12 @@ export default function Header({ stats }: HeaderProps) {
   const firstName = member?.full_name?.split(' ')[0] ?? '';
   const membersHref = member ? '/members/directory' : '/members';
   const navLinks = [
-    ...NAV_LINKS_BASE.slice(0, 3),
+    NAV_LINKS_BASE[0], // News
     { href: membersHref, label: 'Members' },
     { href: '/tech-pulse', label: 'Tech-Pulse' },
-    ...NAV_LINKS_BASE.slice(3),
+    ...NAV_LINKS_BASE.slice(1),
   ];
+  const directoryActive = pathname.startsWith('/directory') || pathname.startsWith('/film-opportunities') || pathname.startsWith('/projects');
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50">
@@ -94,6 +102,7 @@ export default function Header({ stats }: HeaderProps) {
 
           {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-0 flex-1">
+            <DirectoryDropdown active={directoryActive} />
             {navLinks.map(({ href, label }) => {
               const active = isActive(href);
               return (
@@ -180,6 +189,27 @@ export default function Header({ stats }: HeaderProps) {
             >
               Assess Your Project
             </Link>
+
+            {/* Directory group */}
+            <Link
+              href="/directory"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center py-3.5 text-sm font-semibold border-b border-white/[0.06] transition-colors min-h-[44px] text-foreground"
+            >
+              Directory
+            </Link>
+            {DIRECTORY_CHILDREN.map(({ href, label }) => (
+              <Link
+                key={href}
+                href={href}
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center pl-4 py-3 text-[13px] font-medium border-b border-white/[0.06] transition-colors hover:text-foreground min-h-[40px]"
+                style={{ color: 'var(--foreground-tertiary)' }}
+              >
+                {label}
+              </Link>
+            ))}
+
             {navLinks.map(({ href, label }) => (
               <Link
                 key={href}
@@ -221,5 +251,77 @@ export default function Header({ stats }: HeaderProps) {
         </div>
       </div>
     </header>
+  );
+}
+
+function DirectoryDropdown({ active }: { active: boolean }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function onDoc(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false);
+    }
+    document.addEventListener('mousedown', onDoc);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDoc);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      className="relative"
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+    >
+      <Link
+        href="/directory"
+        aria-haspopup="true"
+        aria-expanded={open}
+        className={`flex items-center gap-1 px-3.5 py-2 text-[13px] font-medium transition-colors whitespace-nowrap ${
+          active ? 'text-foreground font-semibold' : 'hover:text-foreground'
+        }`}
+        style={active ? undefined : { color: 'var(--foreground-secondary)' }}
+        onClick={() => setOpen(false)}
+      >
+        Directory
+        <ChevronDown size={14} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
+      </Link>
+
+      {open && (
+        <div
+          className="absolute top-full left-0 pt-1 z-50"
+          role="menu"
+        >
+          <div
+            className="min-w-[220px] rounded-xl border border-white/[0.1] p-1.5 shadow-xl"
+            style={{ background: 'var(--surface)' }}
+          >
+            {DIRECTORY_CHILDREN.map(({ href, label }, i) => (
+              <div key={href}>
+                {i === directoryCategories.length && (
+                  <div className="my-1 h-px bg-white/[0.08]" />
+                )}
+                <Link
+                  href={href}
+                  role="menuitem"
+                  onClick={() => setOpen(false)}
+                  className="block px-3 py-2 rounded-lg text-[13px] font-medium transition-colors hover:bg-white/[0.06] hover:text-foreground"
+                  style={{ color: 'var(--foreground-secondary)' }}
+                >
+                  {label}
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

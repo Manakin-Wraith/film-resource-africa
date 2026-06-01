@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, CheckCircle2, Building2, Users, Wrench, GraduationCap, Briefcase, Upload, X, ImageIcon } from 'lucide-react';
 import Link from 'next/link';
 import { submitDirectoryListing, uploadDirectoryImage } from '@/app/actions';
 import { directoryTypes, getCategoriesForType, africanCountries } from '@/lib/industryDirectoryConfig';
+import JoinToContributeCTA from '@/components/JoinToContributeCTA';
 
 const typeIcons: Record<string, typeof Building2> = {
   company: Building2,
@@ -15,6 +16,10 @@ const typeIcons: Record<string, typeof Building2> = {
 };
 
 export default function SubmitDirectoryListingPage() {
+  const [member, setMember] = useState<{ id: string } | null | undefined>(undefined);
+  useEffect(() => {
+    fetch('/api/members/me').then((r) => r.json()).then(setMember).catch(() => setMember(null));
+  }, []);
   const [directoryType, setDirectoryType] = useState<string>('company');
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
@@ -112,6 +117,15 @@ export default function SubmitDirectoryListingPage() {
             </div>
           </div>
         </div>
+      </main>
+    );
+  }
+
+  if (member === undefined) return null;
+  if (!member) {
+    return (
+      <main className="min-h-screen relative z-10 p-4 md:p-8 pt-24">
+        <JoinToContributeCTA body="Industry Directory listings are added by members. Join to list your company, crew, or service to the FRA network." />
       </main>
     );
   }

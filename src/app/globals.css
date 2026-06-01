@@ -20,11 +20,31 @@
   --border-strong: rgba(255, 255, 255, 0.16);
   --foreground-secondary: rgba(250, 250, 250, 0.55);
   --foreground-tertiary: rgba(250, 250, 250, 0.35);
+  /* Site background scrim — higher = darker / image more hidden. One-knob tunable. */
+  --bg-scrim-strength: 0.90;
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
+}
+
+/* ── Site-wide cinematic background ────────────────────────────────── */
+/* Fixed, heavily-scrimmed photo layer behind all content. Content wrappers
+   sit at z-10+; sticky nav (z-50) and modals stay above. The image reads as
+   ambient atmosphere — most visible behind the masthead, fading to solid. */
+.site-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(125% 95% at 50% 0%, rgba(9, 9, 11, 0.35) 0%, rgba(9, 9, 11, 0.78) 55%, rgba(9, 9, 11, 0.98) 100%),
+    linear-gradient(180deg, rgba(9, 9, 11, 0.68) 0%, rgba(9, 9, 11, var(--bg-scrim-strength)) 45%, rgba(9, 9, 11, 0.99) 100%),
+    url('/bg/site-cinematic.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 /* ── Section anatomy ───────────────────────────────────────────────── */

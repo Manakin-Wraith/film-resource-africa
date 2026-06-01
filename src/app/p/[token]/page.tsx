@@ -75,12 +75,16 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
 
   // Member view only when the viewer is the active member who owns this assessment.
   let isOwnerMember = false;
+  let ownerUsername: string | null = null;
   if (a.member_id) {
     const user = await getSessionUser();
     if (user?.email) {
       const { data: member } = await serviceClient
-        .from('members').select('id').eq('email', user.email.toLowerCase()).eq('status', 'active').maybeSingle();
-      if (member && member.id === a.member_id) isOwnerMember = true;
+        .from('members').select('id, username').eq('email', user.email.toLowerCase()).eq('status', 'active').maybeSingle();
+      if (member && member.id === a.member_id) {
+        isOwnerMember = true;
+        ownerUsername = (member.username as string | null) ?? null;
+      }
     }
   }
 
@@ -108,6 +112,7 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
     <ReportMember
       project={project} diagnosis={a.diagnosis} stale={stale} meta={meta}
       journal={journal} token={token}
+      username={ownerUsername} visibility={a.visibility ?? 'private'}
     />
   );
 }

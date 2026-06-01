@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { MemberProfile, Credit, Recognition } from './page';
 import { toAbsoluteUrl, looksLikeImageUrl } from '@/lib/mediaUrls';
+import MemberProjects from './MemberProjects';
+import type { ProjectCard } from '@/app/actions';
 
 function memberNumber(id: string) {
   return id.replace(/-/g, '').slice(0, 4).toUpperCase();
@@ -33,7 +35,7 @@ function CreditRow({ credit }: { credit: Credit }) {
   );
 }
 
-export default function BusinessProfile({ member, isOwner, isLoggedIn }: { member: MemberProfile; isOwner: boolean; isLoggedIn: boolean }) {
+export default function BusinessProfile({ member, isOwner, isLoggedIn, projects = [] }: { member: MemberProfile; isOwner: boolean; isLoggedIn: boolean; projects?: ProjectCard[] }) {
   const credits: Credit[] = Array.isArray(member.credits) ? member.credits : [];
   const recognition: Recognition[] = Array.isArray(member.recognition) ? member.recognition : [];
   const logoSrc = looksLikeImageUrl(member.company_logo_url) ? toAbsoluteUrl(member.company_logo_url) : null;
@@ -245,6 +247,9 @@ export default function BusinessProfile({ member, isOwner, isLoggedIn }: { membe
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }} />
               </div>
             )}
+
+            {/* Projects */}
+            <MemberProjects projects={projects} isOwner={isOwner} />
           </div>
 
           {/* Side rail */}

@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { MemberProfile, Credit } from './page';
 import { toAbsoluteUrl, toEmbedUrl, looksLikeImageUrl, detectReelHost } from '@/lib/mediaUrls';
+import MemberProjects from './MemberProjects';
+import type { ProjectCard } from '@/app/actions';
 
 const AVAILABILITY_LABEL: Record<string, string> = {
   available: 'Available for work',
@@ -69,7 +71,7 @@ function CreditRow({ credit }: { credit: Credit }) {
   );
 }
 
-export default function IndividualProfile({ member, isOwner, isLoggedIn }: { member: MemberProfile; isOwner: boolean; isLoggedIn: boolean }) {
+export default function IndividualProfile({ member, isOwner, isLoggedIn, projects = [] }: { member: MemberProfile; isOwner: boolean; isLoggedIn: boolean; projects?: ProjectCard[] }) {
   const availability = member.availability ?? 'available';
   const dotColor = AVAILABILITY_COLOR[availability] ?? '#22c55e';
   const mailSubject = encodeURIComponent(`Inbound — ${member.full_name} (via FRA)`);
@@ -280,6 +282,9 @@ export default function IndividualProfile({ member, isOwner, isLoggedIn }: { mem
                 </div>
               </div>
             )}
+
+            {/* Projects */}
+            <MemberProjects projects={projects} isOwner={isOwner} />
 
             {/* Reel */}
             {reelEmbed && reelHost !== 'unknown' && (

@@ -124,7 +124,8 @@ export default function Footer() {
             <div className="hidden md:block space-y-3">
               <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--foreground-tertiary)' }}>Explore</p>
               <nav className="flex flex-col gap-1.5 text-[13px]">
-                <Link href="/" className="transition-colors hover:text-foreground" style={{ color: 'var(--foreground-secondary)' }}>Opportunities</Link>
+                <Link href="/directory" className="transition-colors hover:text-foreground" style={{ color: 'var(--foreground-secondary)' }}>Directory</Link>
+                <Link href="/projects" className="transition-colors hover:text-foreground" style={{ color: 'var(--foreground-secondary)' }}>Projects in Development</Link>
                 <Link href="/news" className="transition-colors hover:text-foreground" style={{ color: 'var(--foreground-secondary)' }}>News & Insights</Link>
                 <Link href="/call-sheet" className="transition-colors hover:text-foreground" style={{ color: 'var(--foreground-secondary)' }}>The Call Sheet</Link>
                 <Link href="/industry" className="transition-colors hover:text-foreground" style={{ color: 'var(--foreground-secondary)' }}>Industry Directory</Link>

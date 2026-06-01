@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Calendar, DollarSign, ExternalLink, Plus, Heart, Clock, AlertTriangle, LayoutGrid, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { Opportunity, voteOpportunity } from '@/app/actions';
 import OpportunityModal from './OpportunityModal';
-import { categoryConfig, getCategoryStyle } from '@/lib/categoryConfig';
+import { directoryCategories, getDirectoryStyle, getDirectoryCategoryBySlug, PUBLIC_DIRECTORY_KEYS } from '@/lib/directoryConfig';
 import { formatDeadline, isNewListing } from '@/lib/dateUtils';
 import { decodeHtmlEntities } from '@/lib/textUtils';
 import CardVisualHeader from './CardVisualHeader';
@@ -18,12 +19,21 @@ const statusConfig: Record<string, { label: string; color: string; bg: string; i
   closed: { label: 'Closed', color: 'text-foreground/40', bg: 'bg-white/5 border-white/10', icon: Clock },
 };
 
-export default function DirectoryClient({ initialData }: { initialData: Opportunity[] }) {
+export default function DirectoryClient({ initialData, counts = {} }: { initialData: Opportunity[]; counts?: Record<string, number> }) {
+  const searchParams = useSearchParams();
   const [search, setSearch] = useState('');
+  // filter holds either 'All' or a directory_destination key
   const [filter, setFilter] = useState('All');
   const [selectedOpp, setSelectedOpp] = useState<Opportunity | null>(null);
   const [opportunities, setOpportunities] = useState<Opportunity[]>(initialData);
   const [votedIds, setVotedIds] = useState<number[]>([]);
+
+  // Deep-link support: /directory?cat=festivals pre-selects that category
+  useEffect(() => {
+    const slug = searchParams.get('cat');
+    const match = getDirectoryCategoryBySlug(slug);
+    setFilter(match ? match.key : 'All');
+  }, [searchParams]);
 
   useEffect(() => {
     const saved = localStorage.getItem('film_resource_votes');
@@ -58,35 +68,38 @@ export default function DirectoryClient({ initialData }: { initialData: Opportun
     }
   };
 
-  const filters = ['All', 'Funds & Grants', 'Labs & Fellowships', 'Markets & Pitching', 'Festivals', 'AI & Emerging Tech'];
-
-  // Short labels for mobile to keep chips compact
-  const mobileLabels: Record<string, string> = {
-    'All': 'All',
-    'Funds & Grants': 'Funds',
-    'Labs & Fellowships': 'Labs',
-    'Markets & Pitching': 'Markets',
-    'Festivals': 'Festivals',
-    'AI & Emerging Tech': 'AI',
-  };
+  // Chip model: 'All' + the 7 public Directory categories
+  const filterChips = [
+    { key: 'All', label: 'All', shortLabel: 'All', icon: LayoutGrid, color: 'text-foreground/40', filterActive: 'from-primary to-blue-600' },
+    ...directoryCategories.map((c) => ({
+      key: c.key,
+      label: c.label,
+      shortLabel: c.shortLabel,
+      icon: c.icon,
+      color: c.color,
+      filterActive: c.filterActive,
+    })),
+  ];
 
   const filteredData = opportunities.filter((opp) => {
     if (opp.application_status === 'closed') return false;
+    // Public Directory only — exclude omit / members / null destinations
+    if (!opp.directory_destination || !PUBLIC_DIRECTORY_KEYS.includes(opp.directory_destination)) return false;
 
     const term = search.toLowerCase();
     const formatStr = (opp["For Films or Series?"] || "").toLowerCase();
     const categoryStr = (opp.category || "").toLowerCase();
-    
-    const matchesSearch = !term || 
-      opp.title.toLowerCase().includes(term) || 
+
+    const matchesSearch = !term ||
+      opp.title.toLowerCase().includes(term) ||
       opp["What Is It?"].toLowerCase().includes(term) ||
       formatStr.includes(term) ||
       categoryStr.includes(term);
-    
+
     if (!matchesSearch) return false;
     if (filter === 'All') return true;
-    
-    return opp.category === filter;
+
+    return opp.directory_destination === filter;
   }).sort((a, b) => b.id - a.id);
 
   return (
@@ -118,30 +131,32 @@ export default function DirectoryClient({ initialData }: { initialData: Opportun
       <div className="mb-10 space-y-3 relative z-20">
         {/* Category chips — horizontal scroll on mobile, wrap on desktop */}
         <div className="flex md:flex-wrap md:justify-center gap-2 overflow-x-auto pb-2 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-thin snap-x snap-mandatory">
-          {filters.map((f) => {
-            const catStyle = f === 'All' ? null : categoryConfig[f];
-            const Icon = catStyle ? catStyle.icon : LayoutGrid;
-            const activeGradient = catStyle ? catStyle.filterActive : 'from-primary to-blue-600';
+          {filterChips.map((f) => {
+            const Icon = f.icon;
+            const count = f.key === 'All' ? undefined : counts[f.key];
 
             return (
               <button
-                key={f}
+                key={f.key}
                 className={`flex items-center gap-1.5 md:gap-2 px-4 md:px-5 py-2.5 min-h-[44px] rounded-xl font-semibold text-sm whitespace-nowrap snap-start flex-shrink-0 transition-all border ${
-                  filter === f
+                  filter === f.key
                     ? 'border-white/[0.2] text-foreground'
                     : 'border-white/[0.08] text-foreground/60 hover:border-white/[0.14] hover:text-foreground'
                 }`}
-                style={filter === f ? { background: 'var(--surface-raised)' } : { background: 'var(--surface)' }}
+                style={filter === f.key ? { background: 'var(--surface-raised)' } : { background: 'var(--surface)' }}
                 onClick={() => {
-                  setFilter(f);
+                  setFilter(f.key);
                   setTimeout(() => {
                     document.getElementById('directory-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                   }, 100);
                 }}
               >
-                <Icon size={16} className={filter === f ? 'text-white' : (catStyle?.color || 'text-foreground/40')} />
-                <span className="md:hidden">{mobileLabels[f]}</span>
-                <span className="hidden md:inline">{f}</span>
+                <Icon size={16} className={filter === f.key ? 'text-white' : f.color} />
+                <span className="md:hidden">{f.shortLabel}</span>
+                <span className="hidden md:inline">{f.label}</span>
+                {count !== undefined && (
+                  <span className="text-[11px] font-bold opacity-50">{count}</span>
+                )}
               </button>
             )
           })}
@@ -174,7 +189,7 @@ export default function DirectoryClient({ initialData }: { initialData: Opportun
           {filteredData.map((opp) => {
             const status = statusConfig[opp.application_status || 'open'] || statusConfig.open;
             const StatusIcon = status.icon;
-            const catStyle = getCategoryStyle(opp.category);
+            const catStyle = getDirectoryStyle(opp.directory_destination);
             const CatIcon = catStyle.icon;
             const isFree = /free/i.test(opp["Cost"] || '');
 
@@ -252,6 +267,13 @@ export default function DirectoryClient({ initialData }: { initialData: Opportun
                 <p className="text-foreground/60 text-sm line-clamp-2 flex-grow mb-4 relative z-10 leading-relaxed">
                   {decodeHtmlEntities(opp["What Is It?"])}
                 </p>
+
+                {opp.member_name && (
+                  <p className="text-[12px] mb-3 relative z-10 flex items-center gap-1.5" style={{ color: 'var(--foreground-tertiary)' }}>
+                    <span className="inline-block w-1 h-1 rounded-full bg-primary" />
+                    Added by <span className="font-medium text-foreground/70">{opp.member_name}</span>
+                  </p>
+                )}
 
                 <div className="mt-auto relative z-10 flex items-center justify-between pt-4 border-t border-white/10">
                   <div className="flex items-center gap-2 text-accent text-sm font-medium">

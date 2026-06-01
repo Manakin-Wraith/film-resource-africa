@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 import { revalidatePath } from 'next/cache';
 import { buildWelcomeEmailHtml } from '@/lib/welcomeEmail';
+import { getSessionUser } from '@/lib/supabase/server';
 import type { Country } from '@/lib/countries';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -12,11 +13,15 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 function enrichWithCountry<T extends { country_id?: string; countries?: { iso_code: string; name: string } | null }>(rows: T[]): (T & { country_iso?: string; country_name?: string })[] {
   return rows.map(row => {
-    const { countries, ...rest } = row as any;
+    const { countries, members, ...rest } = row as any;
     return {
       ...rest,
       country_iso: countries?.iso_code || undefined,
       country_name: countries?.name || undefined,
+      // Member attribution — only present when the query embeds members(...)
+      member_name: members?.full_name || undefined,
+      member_username: members?.username || undefined,
+      member_avatar: members?.avatar_url || undefined,
     };
   });
 }
@@ -47,6 +52,23 @@ export interface Opportunity {
   country_id?: string;
   country_iso?: string;
   country_name?: string;
+  directory_destination?:
+    | 'directory_funds'
+    | 'directory_grants'
+    | 'directory_festivals'
+    | 'directory_labs_fellowships'
+    | 'directory_markets_pitching'
+    | 'directory_ai'
+    | 'directory_calls'
+    | 'review_festival_prize'
+    | 'members_opportunities'
+    | 'omit'
+    | null;
+  member_id?: string | null;
+  // Joined attribution (populated when the listing was authored by a member)
+  member_name?: string;
+  member_username?: string;
+  member_avatar?: string;
 }
 
 export interface NewsItem {
@@ -98,6 +120,56 @@ export async function getOpportunities(): Promise<Opportunity[]> {
   } catch (error) {
     console.error('Failed to fetch approved from Supabase', error);
     return [];
+  }
+}
+
+// The 7 public Directory categories (kept in sync with src/lib/directoryConfig.ts).
+// Inlined here to avoid pulling the icon-laden config into the server bundle.
+const PUBLIC_DIRECTORY_KEYS = [
+  'directory_funds',
+  'directory_grants',
+  'directory_festivals',
+  'directory_labs_fellowships',
+  'directory_markets_pitching',
+  'directory_ai',
+  'directory_calls',
+];
+
+export async function getDirectoryOpportunities(): Promise<Opportunity[]> {
+  try {
+    const { data, error } = await supabase
+      .from('opportunities')
+      .select('*, countries(iso_code, name), members(full_name, username, avatar_url)')
+      .eq('status', 'approved')
+      .in('directory_destination', PUBLIC_DIRECTORY_KEYS)
+      .order('id', { ascending: false });
+
+    if (error) throw error;
+    return enrichWithCountry(data) as Opportunity[];
+  } catch (error) {
+    console.error('Failed to fetch directory opportunities', error);
+    return [];
+  }
+}
+
+export async function getDirectoryCounts(): Promise<Record<string, number>> {
+  try {
+    const { data, error } = await supabase
+      .from('opportunities')
+      .select('directory_destination')
+      .eq('status', 'approved')
+      .in('directory_destination', PUBLIC_DIRECTORY_KEYS);
+
+    if (error) throw error;
+
+    return (data as { directory_destination: string }[]).reduce((acc, row) => {
+      const key = row.directory_destination;
+      acc[key] = (acc[key] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+  } catch (error) {
+    console.error('Failed to fetch directory counts', error);
+    return {};
   }
 }
 
@@ -410,6 +482,258 @@ export async function submitPublicOpportunity(newOpp: Omit<Opportunity, 'id' | '
   }
 
   return data as Opportunity;
+}
+
+// ── Member Contributions (Phase A) ──────────────────────────────────────────
+
+export interface CurrentMember {
+  id: string;
+  full_name: string;
+  username: string | null;
+  avatar_url: string | null;
+  tier: 'individual' | 'business' | string;
+  status: string;
+}
+
+/** Resolve the logged-in active member (or null) from the session cookie. */
+export async function getCurrentMember(): Promise<CurrentMember | null> {
+  const user = await getSessionUser();
+  if (!user?.email) return null;
+  const { data } = await supabase
+    .from('members')
+    .select('id, full_name, username, avatar_url, tier, status')
+    .eq('email', user.email.toLowerCase())
+    .eq('status', 'active')
+    .maybeSingle();
+  return (data as CurrentMember) || null;
+}
+
+/**
+ * Business-tier member promotes their own opportunity into the public Directory
+ * (a chosen category) or the members-only feed. Always lands as `pending` for
+ * moderation in Phase A. Visibility maps to `directory_destination`.
+ */
+export async function submitMemberOpportunity(
+  form: Partial<Opportunity>,
+  visibility: { scope: 'public' | 'members'; category?: string }
+) {
+  const member = await getCurrentMember();
+  if (!member) throw new Error('NOT_A_MEMBER');
+  if (member.tier !== 'business') throw new Error('NOT_BUSINESS');
+
+  let directory_destination: string;
+  if (visibility.scope === 'members') {
+    directory_destination = 'members_opportunities';
+  } else {
+    if (!visibility.category || !PUBLIC_DIRECTORY_KEYS.includes(visibility.category)) {
+      throw new Error('INVALID_CATEGORY');
+    }
+    directory_destination = visibility.category;
+  }
+
+  const targetOpp = {
+    ...form,
+    member_id: member.id,
+    status: 'pending' as const,
+    directory_destination,
+  };
+
+  const { data, error } = await supabase
+    .from('opportunities')
+    .insert([targetOpp])
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+
+  // Notify admin (reuses the public-submission notification shape)
+  try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    await resend.emails.send({
+      from: 'Film Resource Africa <hello@film-resource-africa.com>',
+      to: ['hello@film-resource-africa.com'],
+      subject: `Member submission (${member.tier}): ${form.title}`,
+      html: `
+        <div style="font-family: sans-serif; padding: 20px; color: #333; max-width: 600px; margin: auto; border: 1px solid #eee; border-radius: 12px;">
+          <h2 style="color: #3b82f6;">New Member Submission</h2>
+          <p><strong>${member.full_name}</strong> (${member.tier} member) submitted an opportunity — pending approval.</p>
+          <div style="background: #f9fafb; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <p style="margin: 5px 0;"><strong>Title:</strong> ${form.title}</p>
+            <p style="margin: 5px 0;"><strong>Visibility:</strong> ${visibility.scope === 'members' ? 'Members-only feed' : 'Public Directory · ' + directory_destination}</p>
+            <p style="margin: 5px 0;"><strong>Deadline:</strong> ${form["Next Deadline"] || '—'}</p>
+          </div>
+          <p style="line-height: 1.6;">${form["What Is It?"] || ''}</p>
+          <div style="margin-top: 20px; text-align: center;">
+            <a href="https://film-resource-africa.vercel.app/admin" style="background: #3b82f6; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold;">Review in Admin</a>
+          </div>
+        </div>
+      `,
+    });
+  } catch (emailError) {
+    console.error('Failed to send member submission email', emailError);
+  }
+
+  return data as Opportunity;
+}
+
+// ── Member Projects (Phase B) ───────────────────────────────────────────────
+// A "Project" is an existing `assessments` row owned by a member. Its private
+// PRS diagnosis (scores, weaknesses, funder fit) NEVER leaves the owner-only
+// /p/[token] view. A member can surface a project as a redacted *pitch card*
+// (title, logline, format, stage, seeking, readiness tier) at three visibility
+// levels: private (default) → members (logged-in members) → public (anyone).
+
+export type ProjectVisibility = 'private' | 'members' | 'public';
+
+/** Safe, marketplace-facing projection of an assessment. No numeric score, no diagnosis. */
+export interface ProjectCard {
+  token: string;
+  title: string;
+  format: string | null;
+  genre: string | null;
+  country: string | null;
+  stage: string | null;       // intake Q9
+  logline: string | null;     // intake Q7
+  seeking: string[];          // intake Q22
+  tier: 'early' | 'developing' | 'ready' | null; // readiness band (badge only)
+  visibility: ProjectVisibility;
+  submitted_at: string;
+}
+
+function intakeStr(intake: Record<string, unknown> | null | undefined, id: number): string | null {
+  if (!intake) return null;
+  const v = intake[String(id)] ?? intake[id as unknown as string];
+  if (v == null) return null;
+  const s = Array.isArray(v) ? v.join(', ') : String(v);
+  return s.trim() || null;
+}
+
+function intakeArr(intake: Record<string, unknown> | null | undefined, id: number): string[] {
+  if (!intake) return [];
+  const v = intake[String(id)] ?? intake[id as unknown as string];
+  if (Array.isArray(v)) return v.map(String).filter(Boolean);
+  if (v == null) return [];
+  const s = String(v).trim();
+  return s ? [s] : [];
+}
+
+/**
+ * Project pitch cards owned by `memberId`, filtered by what the viewer may see:
+ * anon → public only; a logged-in member → public + members; the owner → all.
+ * Returns redacted cards only — the PRS diagnosis is never selected here.
+ */
+export async function getMemberProjects(
+  memberId: string,
+  viewer: { isOwner: boolean; isMember: boolean }
+): Promise<ProjectCard[]> {
+  const allowed: ProjectVisibility[] = viewer.isOwner
+    ? ['private', 'members', 'public']
+    : viewer.isMember
+      ? ['members', 'public']
+      : ['public'];
+
+  const { data, error } = await supabase
+    .from('assessments')
+    .select('token, project_title, format, genre, country, tier, visibility, intake_data, submitted_at, status')
+    .eq('member_id', memberId)
+    .eq('status', 'scored')
+    .in('visibility', allowed)
+    .order('submitted_at', { ascending: false });
+
+  if (error || !data) return [];
+
+  return data.map((r) => {
+    const intake = (r.intake_data as Record<string, unknown> | null) ?? null;
+    return {
+      token: r.token as string,
+      title: (r.project_title as string) || 'Untitled project',
+      format: (r.format as string | null) ?? null,
+      genre: (r.genre as string | null) ?? null,
+      country: (r.country as string | null) ?? null,
+      stage: intakeStr(intake, 9),
+      logline: intakeStr(intake, 7),
+      seeking: intakeArr(intake, 22),
+      tier: (r.tier as ProjectCard['tier']) ?? null,
+      visibility: (r.visibility as ProjectVisibility) ?? 'private',
+      submitted_at: r.submitted_at as string,
+    };
+  });
+}
+
+/** A public project card plus its owner's attribution (for the /projects index). */
+export interface PublicProjectCard extends ProjectCard {
+  member_name: string | null;
+  member_username: string | null;
+  member_avatar: string | null;
+}
+
+/**
+ * All publicly-visible project pitch cards across members, newest first — powers
+ * the /projects marketplace index. Selects only safe columns (no score/diagnosis)
+ * and embeds the owning member for attribution.
+ */
+export async function getPublicProjects(): Promise<PublicProjectCard[]> {
+  const { data, error } = await supabase
+    .from('assessments')
+    .select('token, project_title, format, genre, country, tier, visibility, intake_data, submitted_at, status, member_id, members(full_name, username, avatar_url)')
+    .eq('status', 'scored')
+    .eq('visibility', 'public')
+    .not('member_id', 'is', null)
+    .order('submitted_at', { ascending: false });
+
+  if (error || !data) return [];
+
+  return data.map((r) => {
+    const intake = (r.intake_data as Record<string, unknown> | null) ?? null;
+    const m = (r.members ?? null) as { full_name?: string; username?: string; avatar_url?: string } | null;
+    return {
+      token: r.token as string,
+      title: (r.project_title as string) || 'Untitled project',
+      format: (r.format as string | null) ?? null,
+      genre: (r.genre as string | null) ?? null,
+      country: (r.country as string | null) ?? null,
+      stage: intakeStr(intake, 9),
+      logline: intakeStr(intake, 7),
+      seeking: intakeArr(intake, 22),
+      tier: (r.tier as ProjectCard['tier']) ?? null,
+      visibility: (r.visibility as ProjectVisibility) ?? 'public',
+      submitted_at: r.submitted_at as string,
+      member_name: m?.full_name ?? null,
+      member_username: m?.username ?? null,
+      member_avatar: m?.avatar_url ?? null,
+    };
+  });
+}
+
+/** Owner-gated: change a project's visibility. Returns the new visibility. */
+export async function setProjectVisibility(
+  token: string,
+  visibility: ProjectVisibility
+): Promise<{ visibility: ProjectVisibility }> {
+  if (!['private', 'members', 'public'].includes(visibility)) {
+    throw new Error('INVALID_VISIBILITY');
+  }
+  const member = await getCurrentMember();
+  if (!member) throw new Error('NOT_A_MEMBER');
+
+  const { data: row, error: fetchErr } = await supabase
+    .from('assessments')
+    .select('member_id, status')
+    .eq('token', token)
+    .maybeSingle();
+  if (fetchErr || !row) throw new Error('NOT_FOUND');
+  if (row.member_id !== member.id) throw new Error('NOT_OWNER');
+  if (row.status !== 'scored') throw new Error('NOT_SCORED');
+
+  const { error } = await supabase
+    .from('assessments')
+    .update({ visibility })
+    .eq('token', token)
+    .eq('member_id', member.id);
+  if (error) throw new Error(error.message);
+
+  if (member.username) revalidatePath(`/members/${member.username}`);
+  return { visibility };
 }
 
 export async function updateOpportunity(id: number, updatedFields: Partial<Opportunity>) {

@@ -48,14 +48,14 @@ const SEND_DELAY_MS = 600; // Resend free tier: ~2/sec
 const ITC_OPPORTUNITY = null; // Expired 9 May 2026
 
 const FEATURED_MEMBER = {
-  name: 'The Ergo Company',
-  username: 'dumi-gumbi',
-  avatarUrl: 'https://rcgynwcttgvqcnbyfhiz.supabase.co/storage/v1/object/public/directory-logos/logos/ergo-square-1779694265253.png',
-  disciplines: 'Production Company · Feature Films',
-  location: 'Johannesburg, South Africa',
-  bio: 'For over a decade, <strong>The Ergo Company</strong> has stood at the forefront of South African cinema — proving that local stories can achieve global resonance without compromising commercial viability. Led by industry veterans <strong>Dumi Gumbi</strong> and <strong>Cati Weinek</strong>, with a combined 40+ years across development, production and international sales. Their slate includes <em>Mrs. Right Guy</em> (2016), the breakout horror <em>The Tokoloshe</em> (2018) — which played 14 international festivals — the record-breaking animation <em>Headspace</em> (2023), South Africa\'s highest-grossing film of that year, and <em>Old Righteous Blues</em>, South Africa\'s official 2024 Oscars submission. They\'re founding members of FRA.',
-  website: 'https://theergocompany.com',
-  reelUrl: null,
+  name: 'Garth McCarthy',
+  username: 'garth-mccarthy',
+  avatarUrl: 'https://rcgynwcttgvqcnbyfhiz.supabase.co/storage/v1/object/public/member-images/c9ee91b3-e10b-4690-afda-84270c1ff0ce/avatar/1778333159794.png',
+  disciplines: 'Writer · Director · Aspiring Producer',
+  location: 'Pretoria, South Africa',
+  bio: '<strong>Garth McCarthy</strong> is a Pretoria-based indie writer-filmmaker whose work spans features and short films. He has collaborated with producers as a script doctor, with multiple screenplays optioned internationally. In 2018, he sold the original screenplay for <em>Hunting Jessica Brok</em>, which reached audiences in 2025. His short film credits include <em>Blink</em>, <em>A Tragic Tail</em>, and <em>The Groom</em>. A WGASA member and proud founding member of FRA.',
+  website: null,
+  reelUrl: 'https://www.youtube.com/watch?v=9-o7JovhVuw',
 };
 
 // ─── Supabase REST helpers ───────────────────────────────────────────────────

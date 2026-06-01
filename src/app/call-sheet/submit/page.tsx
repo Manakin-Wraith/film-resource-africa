@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { submitCallSheetListing, CallSheetListing } from '@/app/actions';
 import { CheckCircle2, AlertCircle, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import JoinToContributeCTA from '@/components/JoinToContributeCTA';
 
 type FormData = Omit<CallSheetListing, 'id' | 'status' | 'created_at' | 'updated_at'>;
 
@@ -31,6 +32,10 @@ const projectStages = [
 ];
 
 export default function SubmitCallSheetPage() {
+  const [member, setMember] = useState<{ id: string } | null | undefined>(undefined);
+  useEffect(() => {
+    fetch('/api/members/me').then((r) => r.json()).then(setMember).catch(() => setMember(null));
+  }, []);
   const [formData, setFormData] = useState<Partial<FormData>>({
     mentorship_included: false,
     compensation_type: 'paid',
@@ -80,6 +85,15 @@ export default function SubmitCallSheetPage() {
           </Link>
         </motion.div>
       </div>
+    );
+  }
+
+  if (member === undefined) return null;
+  if (!member) {
+    return (
+      <main className="min-h-screen relative z-10 p-4 md:p-8 pt-24">
+        <JoinToContributeCTA body="Call Sheet listings are posted by members. Join to put your crew calls and roles in front of the FRA network." />
+      </main>
     );
   }
 

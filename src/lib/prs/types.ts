@@ -96,6 +96,7 @@ export interface Assessment {
   tier: PrsTier | null;
   score: number | null;
   diagnosis: Diagnosis | null;
+  visibility: 'private' | 'members' | 'public';
   submitted_at: string;
   scored_at: string | null;
   created_at: string;
