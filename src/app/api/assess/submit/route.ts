@@ -92,21 +92,42 @@ export async function POST(req: NextRequest) {
   // Re-assessment: if the caller owns the source project, the new diagnosis joins
   // that project_group as a fresh version and inherits its visibility. Otherwise a
   // brand-new project (DB default generates a fresh project_group; visibility=private).
+  //
+  // The new version takes over the source row's token so the member's /p/<token>
+  // card URL stays stable across every re-score. Since `token` is unique, we first
+  // hand the stable token off by re-tokening the prior version (which is retained
+  // as history), then insert the new version with the freed stable token. A failed
+  // insert is compensated by handing the stable token back to the prior version.
   let projectGroup: string | undefined;
   let inheritedVisibility: string | undefined;
+  let stableToken: string | undefined;
+  let sourceId: string | undefined;
   if (memberId && body.reassessToken) {
     const { data: source } = await serviceClient
       .from('assessments')
-      .select('project_group, visibility, member_id')
+      .select('id, project_group, visibility, member_id')
       .eq('token', body.reassessToken)
       .maybeSingle();
     if (source && source.member_id === memberId) {
       projectGroup = source.project_group as string;
       inheritedVisibility = source.visibility as string;
+      sourceId = source.id as string;
+      stableToken = body.reassessToken;
+
+      // Free up the stable token by archiving the prior version onto a new token.
+      const { error: retokenError } = await serviceClient
+        .from('assessments')
+        .update({ token: genToken() })
+        .eq('id', sourceId);
+      if (retokenError) {
+        console.error('[PRS submit] re-token of prior version failed', retokenError);
+        return NextResponse.json({ error: 'Could not save submission' }, { status: 500 });
+      }
     }
   }
 
-  const token = genToken();
+  // Re-assessment reuses the now-freed stable token; a fresh project mints one.
+  const token = stableToken ?? genToken();
   const { error } = await serviceClient.from('assessments').insert({
     token,
     email,
@@ -122,6 +143,11 @@ export async function POST(req: NextRequest) {
   });
 
   if (error) {
+    // Compensate: hand the stable token back to the prior version so the card URL
+    // is never left orphaned by a failed re-assessment insert.
+    if (stableToken && sourceId) {
+      await serviceClient.from('assessments').update({ token: stableToken }).eq('id', sourceId);
+    }
     // Unique-violation race on the one-free index.
     if (error.code === '23505') {
       const { data } = await serviceClient
