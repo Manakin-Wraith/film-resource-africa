@@ -2,7 +2,7 @@
 
 *The African film industry's discovery layer, powered by its finance-ready marketplace.*
 
-**Last updated:** 20 April 2026
+**Last updated:** 4 June 2026
 **Reference specs:** [`fra-x-afx-spec.docx`](../fra-x-afx-spec.docx) · [`rebate-calculator-spec.docx`](../rebate-calculator-spec.docx) · [FRA × AFX Google Doc](https://docs.google.com/document/d/1QbgijOc18HFSw25H3lOVXCQMRd6GLrSsfm1ERdokHks/edit)
 
 ---
@@ -75,6 +75,22 @@ Both layers share accounts, project data model, and brand — AFX is the paywall
 - [ ] B2G conversations — NFVF, DTIC, Afreximbank/CANEX.
 - [ ] Funded Here outcome database published as annual report.
 - [ ] Regional expansion: Morocco, Egypt, Ghana rebate modules.
+
+---
+
+## Discovery engine backlog (FRA scanner / opportunity verification)
+
+*Engineering backlog for the automated opportunity/news pipeline (`scan_opportunities.mjs`). Separate from the business phases above. Shipped to date: enrichment + Readability/Wayback, completeness + mandatory-deadline insert gate, Phase-C re-verification cadence, anti-invention rail + non-canonical-source block, human-keep lock, email review digest, freshness/countdown badges, news Africa-relevance gate, and cycle-history capture.*
+
+**Opportunity lifecycle "Phase 2" — cyclical intelligence:**
+- [x] **Stage 1 — cycle_history capture** (shipped 2026-06-04, PR #7). `opportunities.cycle_history` jsonb records every cycle's deadline on insert/reopen/close/shift; 109 rows backfilled.
+- [ ] **Stage 2 — seasonal reopen prediction.** Once a programme has ≥2 recorded cycles, infer its typical reopen/deadline month and gate dormant re-verify polling to that window (weekly in-window; ~quarterly safety-net otherwise) instead of blind monthly checks. *Note: mostly inert until programmes log a 2nd cycle (months out), since the backfill only captured 1 cycle each.*
+- [ ] **Stage 3 — roll-forward triggers.** Match Gmail/RSS "applications now open" signals to existing dormant/closed programmes (by domain/title entity-matching) and force an immediate re-verify + roll-forward. Higher immediate value than Stage 2; needs entity-matching.
+
+**Other discovery-engine items:**
+- [ ] News relevance is keyword-based; consider an LLM relevance pass for edge cases (e.g. SA-specific acronyms like SABC/ANC the keyword list misses).
+- [ ] Admin: when an admin approves/keeps a flagged opp, set `review_locked_at` so future re-verify never re-flags it (currently approved-status is the implicit lock).
+- [ ] PDF opportunity pages: dedicated `pdf-parse` enrichment pass (Playwright can't read PDF bodies).
 
 ---
 
