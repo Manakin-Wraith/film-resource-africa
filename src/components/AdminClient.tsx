@@ -78,7 +78,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
           </button>
         </div>
         <div className="mb-6 flex items-center gap-6 bg-white/5 p-4 rounded-2xl border border-white/10">
-          <div className="w-16 h-16 bg-black/20 rounded-2xl border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+          <div className="w-16 h-16 bg-black/20 rounded-2xl border border-white/10 flex items-center justify-center overflow-hidden shrink-0">
              {formData.logo ? (
                <img src={formData.logo} className="w-full h-full object-contain" alt="Logo preview" />
              ) : (
@@ -743,7 +743,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
             <div className="md:col-span-2">
               <label className="block text-sm font-medium opacity-80 mb-2">Logo *</label>
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-xl border border-white/10 bg-white/5 overflow-hidden flex items-center justify-center flex-shrink-0">
+                <div className="w-16 h-16 rounded-xl border border-white/10 bg-white/5 overflow-hidden flex items-center justify-center shrink-0">
                   {partnerLogoPreview ? (
                     <img src={partnerLogoPreview} alt="Preview" className="w-full h-full object-contain" />
                   ) : (
@@ -795,7 +795,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium opacity-80 mb-2">Featured Image (optional)</label>
                   <div className="flex items-center gap-4">
-                    <div className="w-24 h-14 rounded-xl border border-white/10 bg-white/5 overflow-hidden flex items-center justify-center flex-shrink-0">
+                    <div className="w-24 h-14 rounded-xl border border-white/10 bg-white/5 overflow-hidden flex items-center justify-center shrink-0">
                       {featuredImagePreview || partnerForm.featured_image_url ? (
                         <img src={featuredImagePreview || partnerForm.featured_image_url || ''} alt="Featured" className="w-full h-full object-cover" />
                       ) : (
@@ -922,7 +922,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
               <div className="col-span-1 md:col-span-2">
                 <label className="block text-sm font-medium opacity-80 mb-2">Article Image</label>
                 <div className="flex items-start gap-4">
-                  <div className="w-32 h-20 bg-black/20 rounded-xl border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+                  <div className="w-32 h-20 bg-black/20 rounded-xl border border-white/10 flex items-center justify-center overflow-hidden shrink-0">
                     {(newsImagePreview || newsFormData.image_url) ? (
                       <img src={newsImagePreview || newsFormData.image_url} className="w-full h-full object-cover" alt="Article image" />
                     ) : (
@@ -1036,7 +1036,17 @@ export default function AdminClient({ initialData, callSheetData = [], directory
               {nData.map(item => (
                 <tr key={item.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
                   <td className="p-4">
-                    <div className="font-medium">{item.title}</div>
+                    <div className="font-medium flex items-center gap-2">
+                      <span>{item.title}</span>
+                      {item.is_truncated && (
+                        <span
+                          className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-500/20 text-red-400 border border-red-500/30 uppercase tracking-wider"
+                          title="Body looks paywall-truncated. Fix the content and clear this flag (or re-run the enricher) before publishing."
+                        >
+                          Truncated
+                        </span>
+                      )}
+                    </div>
                     <div className="text-xs text-foreground/40 mt-1 max-w-xs truncate">{item.summary}</div>
                   </td>
                   <td className="p-4 text-sm">
@@ -1068,15 +1078,32 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                     </span>
                   </td>
                   <td className="p-4 flex justify-end gap-2 items-center">
-                    {item.status === 'pending' && (
+                    {item.status === 'pending' && !item.is_truncated && (
                       <button onClick={async () => {
-                        if (!confirm('Publish this spotlight submission?')) return;
+                        if (!confirm('Publish this submission?')) return;
                         const updated = await updateNewsItem(item.id, { status: 'published' });
                         setNData(nData.map(n => n.id === item.id ? updated : n));
                         router.refresh();
                       }} className="px-3 py-1.5 bg-green-500/20 text-green-400 hover:bg-green-500/30 rounded-lg transition-colors font-medium text-sm flex items-center gap-2 border border-green-500/20">
                         <CheckCircle2 size={16} />
                         Publish
+                      </button>
+                    )}
+                    {item.is_truncated && (
+                      <button
+                        onClick={async () => {
+                          if (!confirm(
+                            'This article looks paywall-truncated (mid-sentence ending or short preview). ' +
+                            'Confirm only after you have edited the body to a complete article. Clear the flag now?'
+                          )) return;
+                          const updated = await updateNewsItem(item.id, { is_truncated: false });
+                          setNData(nData.map(n => n.id === item.id ? updated : n));
+                          router.refresh();
+                        }}
+                        className="px-3 py-1.5 bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 rounded-lg transition-colors font-medium text-sm flex items-center gap-2 border border-amber-500/30"
+                        title="Clear the truncated flag so this row can be published"
+                      >
+                        Clear truncated
                       </button>
                     )}
                     {item.status === 'published' && (

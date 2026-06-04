@@ -74,6 +74,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .from('news')
       .select('slug, published_at')
       .eq('status', 'published')
+      .eq('is_truncated', false)
       .not('slug', 'is', null)
       .order('published_at', { ascending: false });
 
