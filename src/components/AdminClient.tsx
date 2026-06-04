@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Opportunity, updateOpportunity, deleteOpportunity, addOpportunity, CallSheetListing, updateCallSheetListing, deleteCallSheetListing, DirectoryListing, updateDirectoryListing, deleteDirectoryListing, Partner, addPartner, updatePartner, deletePartner, uploadDirectoryImage, uploadNewsImage, NewsItem, updateNewsItem, deleteNewsItem } from '@/app/actions';
-import { Edit2, Trash2, Plus, X, CheckCircle2, Clapperboard, Building2, Handshake, Upload, Crown, Star, Package, FileText, Sparkles } from 'lucide-react';
+import { Edit2, Trash2, Plus, X, CheckCircle2, Clapperboard, Building2, Handshake, Upload, Crown, Star, Package, FileText, Sparkles, RefreshCw } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function AdminClient({ initialData, callSheetData = [], directoryData = [], partnerData = [], newsData = [] }: { initialData: Opportunity[]; callSheetData?: CallSheetListing[]; directoryData?: DirectoryListing[]; partnerData?: Partner[]; newsData?: NewsItem[] }) {
@@ -19,6 +19,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
   const [isAddingPartner, setIsAddingPartner] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [activeTab, setActiveTab] = useState<'approved' | 'pending' | 'callsheet' | 'industry' | 'partners' | 'spotlight'>('approved');
+  const [newsFilter, setNewsFilter] = useState<'all' | 'published' | 'pending' | 'archived' | 'rejected'>('all');
   const router = useRouter();
 
   // Temporary form state
@@ -1021,7 +1022,25 @@ export default function AdminClient({ initialData, callSheetData = [], directory
 
       {/* Spotlight table */}
       {activeTab === 'spotlight' && !editingNewsId && (
-        <div className="overflow-x-auto glass-card rounded-2xl">
+        <div className="glass-card rounded-2xl">
+          {/* Status filter — review published / pending / archived (relevance-hidden) / rejected */}
+          <div className="flex flex-wrap items-center gap-2 p-4 border-b border-white/10">
+            {(['all', 'published', 'pending', 'archived', 'rejected'] as const).map(f => {
+              const count = f === 'all' ? nData.length : nData.filter(n => (n.status || 'published') === f).length;
+              return (
+                <button
+                  key={f}
+                  onClick={() => setNewsFilter(f)}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors capitalize ${
+                    newsFilter === f ? 'bg-purple-600 text-white shadow-lg' : 'text-foreground/60 hover:text-foreground bg-white/5'
+                  }`}
+                >
+                  {f} <span className="opacity-60">({count})</span>
+                </button>
+              );
+            })}
+          </div>
+          <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-white/10">
@@ -1033,7 +1052,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
               </tr>
             </thead>
             <tbody>
-              {nData.map(item => (
+              {nData.filter(n => newsFilter === 'all' || (n.status || 'published') === newsFilter).map(item => (
                 <tr key={item.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
                   <td className="p-4">
                     <div className="font-medium flex items-center gap-2">
@@ -1072,6 +1091,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                     <span className={`px-2 py-1 rounded-lg text-xs font-bold ${
                       item.status === 'published' ? 'bg-green-500/20 text-green-400' :
                       item.status === 'pending' ? 'bg-amber-500/20 text-amber-400' :
+                      item.status === 'archived' ? 'bg-slate-500/20 text-slate-300' :
                       'bg-red-500/10 text-red-400'
                     }`}>
                       {item.status || 'published'}
@@ -1125,6 +1145,18 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                         Re-publish
                       </button>
                     )}
+                    {item.status === 'archived' && (
+                      <button onClick={async () => {
+                        if (!confirm('Restore this article to the public site? (It was archived as not Africa-relevant.)')) return;
+                        const updated = await updateNewsItem(item.id, { status: 'published' });
+                        setNData(nData.map(n => n.id === item.id ? updated : n));
+                        router.refresh();
+                      }} className="px-3 py-1.5 bg-teal-500/20 text-teal-300 hover:bg-teal-500/30 rounded-lg transition-colors font-medium text-sm flex items-center gap-2 border border-teal-500/30"
+                        title="Un-archive and publish this article">
+                        <RefreshCw size={16} />
+                        Restore
+                      </button>
+                    )}
                     <button onClick={() => { setEditingNewsId(item.id); setNewsFormData(item); }} className="p-2 text-blue-500 hover:bg-blue-500/10 rounded-lg transition-colors" title="Edit">
                       <Edit2 size={18} />
                     </button>
@@ -1141,8 +1173,11 @@ export default function AdminClient({ initialData, callSheetData = [], directory
               ))}
             </tbody>
           </table>
-          {nData.length === 0 && (
-            <div className="p-8 text-center opacity-50">No news or spotlight submissions yet.</div>
+          </div>
+          {nData.filter(n => newsFilter === 'all' || (n.status || 'published') === newsFilter).length === 0 && (
+            <div className="p-8 text-center opacity-50">
+              {newsFilter === 'all' ? 'No news or spotlight submissions yet.' : `No ${newsFilter} news items.`}
+            </div>
           )}
         </div>
       )}
