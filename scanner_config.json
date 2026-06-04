@@ -194,6 +194,10 @@
       { "name": "KZN Film Commission",         "url": "https://kwazulunatalfilm.co.za",                     "keywords": ["open call","applications","funding","grant"],            "status": "active" },
       { "name": "Uganda Comms Commission",     "url": "https://ucc.co.ug",                                  "keywords": ["open call","film","broadcast","grant"],                  "status": "dead", "dead_reason": "telecoms/broadcasting regulator, not a film funder — removed 2026-06-03" },
       { "name": "Uganda Film Festival",        "url": "https://filmfreeway.com/UgandaFilmFestival",         "keywords": ["call for","submissions","entries"],                      "status": "active" },
+      { "name": "British Council Film",        "url": "https://film.britishcouncil.org/opportunities",      "keywords": ["open call","apply","grant","film lab","call for proposals","deadline"], "status": "active" },
+      { "name": "UNESCO IFCD",                 "url": "https://www.unesco.org/creativity/en/international-fund-cultural-diversity", "keywords": ["call for funding","apply","funding request","open"],     "status": "active" },
+      { "name": "Nat Geo Society Grants",      "url": "https://www.nationalgeographic.org/society/grants-and-investments/", "keywords": ["grant","apply","funding","deadline","call"],            "status": "active" },
+      { "name": "AU-EU Youth Voices Lab",      "url": "https://aueuyouthvoiceslab.eu/grants/",              "keywords": ["open call","apply","grant","funding","filmmakers"],       "status": "active" },
 
       { "name": "Doc Society",                 "url": "https://docsociety.org",                             "keywords": ["open call","fund","apply","deadline"],                  "status": "pending" },
       { "name": "Kenya Film Commission",       "url": "https://kenyafilmcommission.com",                   "keywords": ["open call","applications","funding","grant"],            "status": "pending" },
