@@ -1495,6 +1495,46 @@ function addCycle(history, deadlineDate, source) {
   return [...list, { deadline: deadlineDate, recorded_at: new Date().toISOString(), source }];
 }
 
+// ─── Stage 3: roll-forward triggers ───────────────────────────────────────────
+// When a scan surfaces a "now open / call for entries" signal that matches an existing
+// CLOSED/EXPIRED programme, we force that programme into the Phase-C re-verify batch this run
+// so a reopened cycle is caught immediately (not at the next monthly dormant check). Matching is
+// deliberately conservative: a programme's OWN domain (not a generic platform) or a distinctive
+// multi-token name. A false match only costs one extra scrape — reopen stays admin-gated.
+const ROLLFWD_GENERIC_DOMAINS = new Set([
+  'filmfreeway.com', 'forms.gle', 'docs.google.com', 'google.com', 'eventbrite.com',
+  'typeform.com', 'airtable.com', 'mailchi.mp', 'substack.com', 'medium.com',
+]);
+const ROLLFWD_GENERIC_WORDS = new Set([
+  'film', 'films', 'festival', 'festivals', 'fund', 'funds', 'grant', 'grants', 'award', 'awards',
+  'call', 'calls', 'submission', 'submissions', 'africa', 'african', 'international', 'cinema',
+  'programme', 'program', 'edition', 'open', 'labs', 'fellowship', 'residency', 'documentary',
+  'short', 'shorts', 'feature', 'filmmaker', 'filmmakers', 'council', 'project', 'projects',
+]);
+const OPENING_SIGNAL_RE = /\bopen\b|open call|call for|now accepting|applications?|submissions?|entries|deadline|reopen|cycle/i;
+
+function distinctiveTokens(title) {
+  return (title || '').toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/)
+    .filter(t => t.length >= 5 && !ROLLFWD_GENERIC_WORDS.has(t))
+    .slice(0, 3);
+}
+function isGenericRollfwdDomain(d) {
+  return !d || ROLLFWD_GENERIC_DOMAINS.has(d) || PLATFORM_DOMAINS.has(d) || isNonCanonicalSource('https://' + d);
+}
+// signals: [{domain, title}] (already opening-keyword-filtered); dormant: [{id,title,"Apply:"}]
+function rollForwardMatchIds(signals, dormant) {
+  const sigDomains = new Set(signals.map(s => s.domain).filter(d => !isGenericRollfwdDomain(d)));
+  const sigTitles = signals.map(s => (s.title || '').toLowerCase());
+  const ids = new Set();
+  for (const o of dormant) {
+    const d = extractDomain(o['Apply:']);
+    if (d && !isGenericRollfwdDomain(d) && sigDomains.has(d)) { ids.add(o.id); continue; }
+    const toks = distinctiveTokens(o.title);
+    if (toks.length >= 2 && sigTitles.some(t => toks.every(tok => t.includes(tok)))) ids.add(o.id);
+  }
+  return ids;
+}
+
 // ─── Stale deadline cleanup ───────────────────────────────────────────────────
 // Marks pending opportunities as 'expired' when their deadline has clearly passed.
 
@@ -1650,7 +1690,7 @@ async function extractArticle(page) {
   });
 }
 
-async function enrichWithPlaywright() {
+async function enrichWithPlaywright(forceVerifyIds = []) {
   let chromium;
   try {
     ({ chromium } = await import('playwright'));
@@ -1967,8 +2007,8 @@ async function enrichWithPlaywright() {
   }
   console.log(`   Opps enriched: ${oppsEnriched} / ${needsEnrich.length}`);
 
-  // Phase C: re-verify live opportunities (freshness + cycle roll-forward).
-  await reverifyOpportunities(context, DRY_RUN);
+  // Phase C: re-verify live opportunities (freshness + cycle roll-forward + Stage-3 triggers).
+  await reverifyOpportunities(context, DRY_RUN, false, forceVerifyIds);
 
   await browser.close();
   console.log('   🎭 Playwright enrichment complete.');
@@ -1979,28 +2019,34 @@ async function enrichWithPlaywright() {
 // auto-apply; major ones (cycle reopened, source dead, no-longer-an-opportunity) set
 // review_reason for the admin. Closed opps are re-checked for reopen; passed deadlines hidden.
 // `dryRun` previews decisions without writing. `context` is a live Playwright browser context.
-async function reverifyOpportunities(context, dryRun = false, forceEmail = false) {
+async function reverifyOpportunities(context, dryRun = false, forceEmail = false, forceIds = []) {
   console.log(`\n🎭 Playwright re-verification — opportunity freshness (Phase C)${dryRun ? ' [DRY RUN]' : ''}...`);
   const VERIFY_CAP = 40;
   const todayStr = new Date().toISOString().slice(0, 10);
   const nowMs = Date.now();
+  const forcedSet = new Set(forceIds || []);
+  const scrapable = o => /^https?:\/\//i.test(o['Apply:'] || '') && !(o['Apply:'] || '').toLowerCase().split('?')[0].endsWith('.pdf');
   const verifyPool = await supabaseGetAll('opportunities',
     'select=id,title,status,"Apply:","Next Deadline",deadline_date,content_hash,last_verified_at,verify_attempts,review_reason,review_locked_at,cycle_history');
-  const dueList = verifyPool
+  // Stage 3: roll-forward-triggered opps jump the cadence queue (re-checked even if not due).
+  const forcedRows = verifyPool.filter(o => forcedSet.has(o.id) && scrapable(o));
+  const cadenceDue = verifyPool
     .map(o => ({ o, bucket: verifyBucket(o, nowMs) }))
-    .filter(x => x.bucket)
+    .filter(x => x.bucket && !forcedSet.has(x.o.id))
     .sort((a, b) => {
       const rank = { closing_soon: 0, open: 1, dormant: 2 };
       if (rank[a.bucket] !== rank[b.bucket]) return rank[a.bucket] - rank[b.bucket];
       return new Date(a.o.last_verified_at || 0) - new Date(b.o.last_verified_at || 0);
-    });
-  const dueBatch = dueList.slice(0, VERIFY_CAP);
-  console.log(`   ${dueList.length} opps due for re-verification; processing ${dueBatch.length} this run.`);
+    })
+    .map(x => x.o);
+  const dueBatch = [...forcedRows, ...cadenceDue].slice(0, VERIFY_CAP);
+  console.log(`   ${cadenceDue.length} cadence-due${forcedRows.length ? ` + ${forcedRows.length} roll-forward triggered` : ''}; processing ${dueBatch.length} this run.`);
 
   const writeOpp = async (id, u) => { if (!dryRun) await supabaseUpdate('opportunities', id, u); };
   let reFresh = 0, reChanged = 0, reFlagged = 0;
   const isRealDl = v => v && v !== 'TBC' && v !== 'To be confirmed';
-  for (const { o: opp } of dueBatch) {
+  for (const opp of dueBatch) {
+    if (forcedSet.has(opp.id)) console.log(`  🚀 [${opp.id}] ${opp.title.slice(0, 45)} — roll-forward triggered (signal match)`);
     const url = opp['Apply:'];
 
     // Excluded-domain guard — if a false-positive source slipped in before it was
@@ -2585,7 +2631,26 @@ async function main() {
     // Always enrich when new news was inserted (content + images for pending articles)
     // Full opportunity enrichment only with --enrich flag
     if (newsInserted > 0 || oppsInserted > 0 || ENRICH) {
-      await enrichWithPlaywright();
+      // Stage 3 — roll-forward triggers: match this run's "now open" signals (opportunity leads
+      // + news) to existing closed/expired programmes, and force those into the re-verify batch.
+      let forceVerifyIds = [];
+      try {
+        const signals = [];
+        for (const i of results.opportunities) {
+          if (OPENING_SIGNAL_RE.test(`${i.title} ${i.snippet || ''}`)) signals.push({ domain: extractDomain(i.url), title: i.title });
+        }
+        for (const i of results.news) {
+          if (OPENING_SIGNAL_RE.test(`${i.title} ${i.description || ''}`)) signals.push({ domain: extractDomain(i.link), title: i.title });
+        }
+        if (signals.length) {
+          const dormant = await supabaseGet('opportunities', 'select=id,title,"Apply:"&status=in.(closed,expired)');
+          forceVerifyIds = [...rollForwardMatchIds(signals, dormant)];
+          if (forceVerifyIds.length) console.log(`\n🚀 Roll-forward: ${forceVerifyIds.length} closed programme(s) matched an open signal → forcing re-verify [${forceVerifyIds.join(', ')}]`);
+        }
+      } catch (err) {
+        console.log(`  ⚠ Roll-forward matching skipped: ${err.message}`);
+      }
+      await enrichWithPlaywright(forceVerifyIds);
     }
   }
 
