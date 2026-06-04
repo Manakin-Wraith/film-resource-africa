@@ -84,7 +84,7 @@ export interface NewsItem {
   image_url?: string;
   published_at: string;
   created_at?: string;
-  status?: 'pending' | 'published' | 'rejected';
+  status?: 'pending' | 'published' | 'rejected' | 'archived';
   submitted_by_name?: string;
   submitted_by_email?: string;
   project_name?: string;
