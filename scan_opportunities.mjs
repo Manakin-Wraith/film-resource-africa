@@ -598,6 +598,8 @@ const AFRICA_SPECIFIC_SOURCES = new Set([
   'Uganda Communications Commission', 'Uganda Film Festival',
   'African Film Press', 'Sinema Focus', 'Africa is a Country',
   'Nollywood Reinvented', 'The British Blacklist',
+  // African news outlets — trusted on source so their coverage is never relevance-filtered.
+  'Premium Times Arts', 'Screen Africa', 'OkayAfrica', 'The Continent', 'Mail & Guardian Arts',
 ]);
 
 const AFRICA_ADJACENT_TERMS = [
@@ -2321,7 +2323,7 @@ async function main() {
   });
 
   // 7. Validate + insert news items
-  let newsInserted = 0, newsSkipped404 = 0;
+  let newsInserted = 0, newsSkipped404 = 0, newsSkippedRelevance = 0;
   if (results.news.length > 0) {
     console.log(`\n📰 Found ${results.news.length} new news items`);
     for (const item of results.news.slice(0, 10)) {
@@ -2341,6 +2343,15 @@ async function main() {
       const isRssTeaser = /\[…\]$|…$/.test(rssBody) && rssBody.length < 600;
       if (isFeatureHub || isRssTeaser) {
         console.log(`  SKIP (${isFeatureHub ? 'hub page' : 'RSS teaser'}): ${item.title.slice(0, 55)}`);
+        continue;
+      }
+      // Pre-insert QC: Africa-relevance gate. Curated African outlets (AFRICA_SPECIFIC_SOURCES)
+      // pass on source trust; tier-2 trade feeds (Deadline/Variety/IndieWire/Guardian) only pass
+      // when the item actually concerns African film. Keeps the site Africa-focused instead of
+      // republishing generic Hollywood trade news. Checked before the URL ping to save requests.
+      if (!isAfricaRelevant(`${item.title} ${item.description || ''}`, item.source)) {
+        console.log(`  ✗ SKIP (not Africa-relevant): ${item.title.slice(0, 55)}`);
+        newsSkippedRelevance++;
         continue;
       }
       // Pre-insert QC: validate URL is reachable
@@ -2386,6 +2397,7 @@ async function main() {
       }
     }
     if (newsSkipped404 > 0) console.log(`   ⚠ Skipped ${newsSkipped404} dead URLs`);
+    if (newsSkippedRelevance > 0) console.log(`   🌍 Skipped ${newsSkippedRelevance} non-Africa-relevant news items`);
   }
 
   // 8. QC + enrich + insert opportunity leads
