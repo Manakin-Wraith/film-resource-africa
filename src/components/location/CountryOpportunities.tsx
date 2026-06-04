@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Calendar, ExternalLink, Filter, Search } from 'lucide-react';
+import { Calendar, ExternalLink, Filter, Search, BadgeCheck } from 'lucide-react';
 import type { Opportunity } from '@/app/actions';
+import { formatRelativeDate, formatLocalDateTime, formatDeadline } from '@/lib/dateUtils';
 
 interface CountryOpportunitiesProps {
   opportunities: Opportunity[];
@@ -84,7 +85,10 @@ export default function CountryOpportunities({ opportunities, countryName }: Cou
 
       {/* Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {filtered.map((opp) => (
+        {filtered.map((opp) => {
+          const deadline = opp.deadline_date ? formatDeadline(opp.deadline_date) : null;
+          const showCountdown = deadline && (deadline.urgency === 'critical' || deadline.urgency === 'warning');
+          return (
           <div
             key={opp.id}
             id={`opp-${opp.id}`}
@@ -104,11 +108,32 @@ export default function CountryOpportunities({ opportunities, countryName }: Cou
               )}
             </div>
 
-            {opp.category && (
-              <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-foreground/40 bg-white/5 px-2 py-0.5 rounded-lg mb-3">
-                {opp.category}
-              </span>
-            )}
+            <div className="flex items-center gap-2 flex-wrap mb-3">
+              {opp.category && (
+                <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-foreground/40 bg-white/5 px-2 py-0.5 rounded-lg">
+                  {opp.category}
+                </span>
+              )}
+              {opp.last_verified_at && (
+                <span
+                  title={`Source last re-checked ${formatLocalDateTime(opp.last_verified_at)}`}
+                  className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-teal-400 bg-teal-500/10 border border-teal-500/20 px-2 py-0.5 rounded-lg"
+                >
+                  <BadgeCheck size={10} />
+                  Verified {formatRelativeDate(opp.last_verified_at)}
+                </span>
+              )}
+              {showCountdown && deadline && (
+                <span className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-lg border ${
+                  deadline.urgency === 'critical'
+                    ? 'text-red-400 bg-red-500/10 border-red-500/20'
+                    : 'text-amber-400 bg-amber-500/10 border-amber-500/20'
+                }`}>
+                  <Calendar size={10} />
+                  {deadline.countdownText}
+                </span>
+              )}
+            </div>
 
             {opp['What Is It?'] && (
               <p className="text-sm text-foreground/50 leading-relaxed line-clamp-3 mb-4">
@@ -136,7 +161,8 @@ export default function CountryOpportunities({ opportunities, countryName }: Cou
               )}
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
 
       {filtered.length === 0 && (

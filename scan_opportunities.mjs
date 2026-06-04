@@ -34,7 +34,26 @@ import { generateUniqueSummary, verifyAndFixSummary } from './summary_utils.mjs'
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { execSync } from 'child_process';
-import { join } from 'path';
+import { join, dirname } from 'path';
+import { createRequire } from 'module';
+import { createHash } from 'crypto';
+
+// Resolve the @mozilla/readability browser bundle once (injected into Playwright pages for
+// article-body extraction). null if the package isn't installed — extraction falls back to
+// the legacy DOM walker.
+const _require = createRequire(import.meta.url);
+let READABILITY_JS_PATH = null;
+try {
+  READABILITY_JS_PATH = join(dirname(_require.resolve('@mozilla/readability')), 'Readability.js');
+  if (!existsSync(READABILITY_JS_PATH)) READABILITY_JS_PATH = null;
+} catch { READABILITY_JS_PATH = null; }
+
+// Domains that gate full text behind a paywall — when extraction is thin on these, we retry
+// via the Wayback Machine, which usually has the full pre-paywall snapshot.
+const PAYWALL_DOMAINS = new Set([
+  'deadline.com', 'variety.com', 'thewrap.com', 'hollywoodreporter.com',
+  'ft.com', 'wsj.com', 'nytimes.com', 'thetimes.co.uk', 'telegraph.co.uk',
+]);
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 
@@ -74,6 +93,8 @@ const args = process.argv.slice(2);
 const DRY_RUN = args.includes('--dry-run');
 const NEWS_ONLY = args.includes('--news-only');
 const ENRICH = args.includes('--enrich');
+const BACKFILL_DEADLINES = args.includes('--backfill-deadlines');
+const VERIFY_ONLY = args.includes('--verify-only');
 
 // ─── Logo fetcher ───────────────────────────────────────────────────────────
 
@@ -105,6 +126,9 @@ function isNewsArticleUrl(url) {
     if (path.endsWith('.pdf')) return false;
     if (/\/\d{4}\/\d{1,2}\//.test(path)) return true;        // /2026/04/ date paths
     if (/\/(blog|news|article|articles|post|posts|story|stories|press-release|media-release)\//i.test(path)) return true;
+    // NB: deliberately NO slug-density heuristic here — it false-rejected real call-for-entries
+    // pages (long hyphenated slugs). The actual news/non-opportunity safety net is the
+    // _isActualOpportunity gate in the insert pipeline (works post-scrape via Claude).
     return false;
   } catch { return false; }
 }
@@ -235,6 +259,21 @@ async function supabaseGet(table, query) {
   return res.json();
 }
 
+// Fetch ALL rows for a select, paging past PostgREST's per-response row cap (default 1000).
+// Without this, dedup sets miss the most-recent rows and re-inserts hit 409 unique-violations.
+async function supabaseGetAll(table, select) {
+  const PAGE = 1000;
+  const all = [];
+  let offset = 0;
+  while (true) {
+    const rows = await supabaseGet(table, `${select}&order=id.asc&limit=${PAGE}&offset=${offset}`);
+    all.push(...rows);
+    if (rows.length < PAGE) break;
+    offset += PAGE;
+  }
+  return all;
+}
+
 async function supabaseInsert(table, item) {
   const res = await nativeFetch(`${supabaseUrl}/rest/v1/${table}`, {
     method: 'POST',
@@ -261,8 +300,8 @@ async function supabaseUpdate(table, id, updates) {
 // ─── Deduplication ───────────────────────────────────────────────────────────
 
 async function getExistingTitles() {
-  const opps = await supabaseGet('opportunities', 'select=title');
-  const news = await supabaseGet('news', 'select=title,slug,url');
+  const opps = await supabaseGetAll('opportunities', 'select=title');
+  const news = await supabaseGetAll('news', 'select=title,slug,url');
   // Normalize URLs for comparison (strip trailing slash, query params, protocol)
   const normalizeUrl = (u) => u ? u.toLowerCase().replace(/^https?:\/\//, '').replace(/\/+$/, '').replace(/\?.*$/, '') : '';
   return {
@@ -734,7 +773,9 @@ async function enrichOpportunityFromPage(url) {
       // Merge: Claude wins where it has data, regex fills remaining gaps
       const merged = { ...regexFields, ...geoFields };
       for (const [key, val] of Object.entries(claudeFields)) {
-        if (val && val !== 'TBC') merged[key] = val;
+        // NB: keep `val !== undefined` not `val` — a falsy `false` (e.g. _isActualOpportunity)
+        // must survive the merge, otherwise the downstream not-an-opportunity gate is dead.
+        if (val !== undefined && val !== '' && val !== 'TBC') merged[key] = val;
       }
       return merged;
     }
@@ -812,6 +853,7 @@ Rules:
       'CALENDAR REMINDER:':           parsed['CALENDAR REMINDER:'] || '',
       category:                       parsed.category || '',
       _isActualOpportunity:           parsed.is_actual_opportunity !== false,
+      _africaRelevance:               parsed.africa_relevance || '',
       _detectedCountry:               detectCountry(pageText),
       _geoScope:                      detectGeoScope(pageText),
     };
@@ -1292,6 +1334,84 @@ async function scanKeyPages(existingTitles) {
 // For opportunities, it scrapes source pages for deadline, eligibility, format,
 // cost, and description — replacing the "To be confirmed" placeholders.
 
+// ─── Deadline text → date parsing ─────────────────────────────────────────────
+// Parse a free-text "Next Deadline" into a YYYY-MM-DD string for cadence math. Strategy:
+// collect every date mention that carries a 4-digit year, then pick the next actionable one —
+// the earliest FUTURE date, or if all are past, the latest PAST date. Returns null for
+// rolling/TBC/prose with no year-qualified date (year-less "1 July" is intentionally skipped
+// to avoid guessing). `now` is injected for testability. Reused by the Phase-C re-verify pass.
+const _MONTHS = { jan:1, feb:2, mar:3, apr:4, may:5, jun:6, jul:7, aug:8, sep:9, oct:10, nov:11, dec:12 };
+function monthNum(s) { return _MONTHS[s.slice(0, 3).toLowerCase()] || null; }
+
+function parseDeadlineToDate(text, now = new Date()) {
+  if (!text) return null;
+  const t = String(text).toLowerCase();
+  // Pure rolling/ongoing/TBC with no concrete date → no cadence date.
+  if (/\b(rolling|ongoing|tbc|to be confirmed)\b/.test(t) && !/\d{4}/.test(t)) return null;
+
+  const monthAlt = 'jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?';
+  const dates = [];
+  let m;
+  // "19 April 2026" / "09 march 2026" / "18th July 2025"
+  const reA = new RegExp(`\\b(\\d{1,2})(?:st|nd|rd|th)?\\s+(${monthAlt})\\.?\\s+(\\d{4})\\b`, 'gi');
+  while ((m = reA.exec(t))) {
+    const day = +m[1], mon = monthNum(m[2]), yr = +m[3];
+    if (mon && day >= 1 && day <= 31) dates.push(Date.UTC(yr, mon - 1, day));
+  }
+  // "April 10, 2026" / "Jan 07 2026" / "April 4th, 2026" / "OCTOBER 2, 2024"
+  const reB = new RegExp(`\\b(${monthAlt})\\.?\\s+(\\d{1,2})(?:st|nd|rd|th)?,?\\s+(\\d{4})\\b`, 'gi');
+  while ((m = reB.exec(t))) {
+    const mon = monthNum(m[1]), day = +m[2], yr = +m[3];
+    if (mon && day >= 1 && day <= 31) dates.push(Date.UTC(yr, mon - 1, day));
+  }
+
+  if (!dates.length) return null;
+  const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  const future = dates.filter(d => d >= today).sort((a, b) => a - b);
+  const chosen = future.length ? future[0] : dates.sort((a, b) => b - a)[0];
+  return new Date(chosen).toISOString().slice(0, 10);
+}
+
+// One-time (and re-runnable) backfill of deadline_date from existing "Next Deadline" text.
+async function backfillDeadlineDates() {
+  console.log('\n📅 Backfilling deadline_date from "Next Deadline" text...');
+  const opps = await supabaseGetAll('opportunities', 'select=id,"Next Deadline",deadline_date');
+  let updated = 0, alreadySet = 0, skipped = 0;
+  for (const o of opps) {
+    if (o.deadline_date) { alreadySet++; continue; }
+    const parsed = parseDeadlineToDate(o['Next Deadline']);
+    if (!parsed) { skipped++; continue; }
+    if (DRY_RUN) {
+      console.log(`  [DRY] #${o.id}: "${(o['Next Deadline'] || '').slice(0, 45)}" → ${parsed}`);
+    } else {
+      await supabaseUpdate('opportunities', o.id, { deadline_date: parsed });
+      console.log(`  ✓ #${o.id}: ${parsed}  ← "${(o['Next Deadline'] || '').slice(0, 45)}"`);
+    }
+    updated++;
+  }
+  console.log(`   Backfill complete: ${updated} ${DRY_RUN ? 'would update' : 'updated'}, ${alreadySet} already had a date, ${skipped} unparseable/rolling.`);
+}
+
+// Decide whether an opportunity is due for Phase-C re-verification, and in which urgency
+// bucket. Cadence scales with deadline proximity: closing-soon checks weekly, open monthly,
+// dormant (past/no deadline) monthly for reopen detection. Returns null if not due.
+function verifyBucket(opp, nowMs) {
+  if (!['approved', 'pending', 'closed', 'expired'].includes(opp.status)) return null;
+  const url = opp['Apply:'];
+  if (!url || !/^https?:\/\//i.test(url)) return null;
+  if (url.toLowerCase().split('?')[0].endsWith('.pdf')) return null;     // can't read PDFs
+  if ((opp.verify_attempts || 0) >= 5) return null;                      // give up on dead sources
+  const DAY = 86400000;
+  const lastV = opp.last_verified_at ? new Date(opp.last_verified_at).getTime() : 0;
+  const ageDays = (nowMs - lastV) / DAY;
+  const dd = opp.deadline_date ? new Date(opp.deadline_date + 'T00:00:00Z').getTime() : null;
+  const daysToDeadline = dd != null ? (dd - nowMs) / DAY : null;
+
+  if (daysToDeadline != null && daysToDeadline >= 0 && daysToDeadline <= 30) return ageDays >= 7 ? 'closing_soon' : null;
+  if (daysToDeadline != null && daysToDeadline > 30) return ageDays >= 30 ? 'open' : null;
+  return ageDays >= 30 ? 'dormant' : null;   // past deadline or none → monthly reopen check
+}
+
 // ─── Stale deadline cleanup ───────────────────────────────────────────────────
 // Marks pending opportunities as 'expired' when their deadline has clearly passed.
 
@@ -1316,6 +1436,135 @@ async function flagExpiredPendingOpps() {
     }
   }
   if (flagged > 0) console.log(`   Flagged ${flagged} expired opportunity/ies`);
+}
+
+// Extract article body + lead image from a fully-rendered Playwright page.
+// Prefers @mozilla/readability (injected as a page global via addScriptTag) and falls back
+// to a hand-rolled DOM walker. Returns { articleContent, imageUrl }.
+async function extractArticle(page) {
+  if (READABILITY_JS_PATH) {
+    try { await page.addScriptTag({ path: READABILITY_JS_PATH }); } catch { /* fall back to walker */ }
+  }
+  return page.evaluate(() => {
+    // ── Clean text extractor (no markdown links/images) ──
+    function toPlainText(el) {
+      if (!el) return '';
+      let out = '';
+      for (const node of el.childNodes) {
+        if (node.nodeType === 3) { // Text
+          out += node.textContent;
+        } else if (node.nodeType === 1) { // Element
+          const tag = node.tagName.toLowerCase();
+          if (['nav', 'footer', 'aside', 'script', 'style', 'form', 'button', 'noscript', 'svg', 'iframe'].includes(tag)) continue;
+          const cls = (node.className || '').toString().toLowerCase();
+          if (/\b(nav|menu|sidebar|footer|widget|cookie|banner|social|share|comment|signup|subscribe|ad-|advert)\b/.test(cls)) continue;
+
+          const content = toPlainText(node).trim();
+          if (!content && tag !== 'br') continue;
+
+          switch (tag) {
+            case 'p': out += `\n\n${content}\n\n`; break;
+            case 'h1': case 'h2': case 'h3': case 'h4': case 'h5': out += `\n\n${content}\n\n`; break;
+            case 'strong': case 'b': out += `**${content}**`; break;
+            case 'em': case 'i': out += `*${content}*`; break;
+            case 'a': out += content; break; // Just the link text, no URL
+            case 'ul': case 'ol': out += `\n${content}\n`; break;
+            case 'li': out += `\n- ${content}`; break;
+            case 'blockquote': out += `\n\n> ${content.replace(/\n/g, '\n> ')}\n\n`; break;
+            case 'img': break;
+            case 'br': out += '\n'; break;
+            case 'hr': out += '\n\n---\n\n'; break;
+            case 'figure': case 'figcaption': break;
+            case 'div': case 'section': case 'article': out += `\n${content}\n`; break;
+            default: out += content;
+          }
+        }
+      }
+      return out.replace(/\n{3,}/g, '\n\n').trim();
+    }
+
+    // ── Quality check: reject content that's mostly short lines (nav menus) ──
+    function isQualityContent(text) {
+      const lines = text.split('\n').filter(l => l.trim().length > 0);
+      if (lines.length < 2) return false;
+      const longLines = lines.filter(l => l.trim().length > 50);
+      return longLines.length >= Math.max(2, lines.length * 0.3);
+    }
+
+    let articleContent = null;
+
+    // ── Attempt 1: Mozilla Readability on a document clone (best on hostile/cluttered pages) ──
+    try {
+      if (typeof Readability === 'function') {
+        const parsed = new Readability(document.cloneNode(true)).parse();
+        if (parsed && parsed.content) {
+          const holder = document.createElement('div');
+          holder.innerHTML = parsed.content;
+          const text = toPlainText(holder);
+          if (isQualityContent(text)) articleContent = text;
+        }
+      }
+    } catch { /* fall through to legacy selectors */ }
+
+    // ── Attempt 2: legacy article-container selectors ──
+    if (!articleContent) {
+      const selectors = [
+        '[class*="article-body"]', '[class*="entry-content"]',
+        '[class*="post-content"]', '[class*="article-content"]',
+        '.td-post-content', '.post-text', '.article-text',
+        'article', 'main article'
+      ];
+      for (const sel of selectors) {
+        const el = document.querySelector(sel);
+        if (el) {
+          const text = toPlainText(el);
+          if (isQualityContent(text)) { articleContent = text; break; }
+        }
+      }
+    }
+
+    if (!articleContent) {
+      const paras = Array.from(document.querySelectorAll('p'))
+        .filter(p => {
+          const text = p.textContent.trim();
+          return text.length > 40 && !/cookie|subscribe|newsletter|sign up|terms|privacy|©|all rights/i.test(text);
+        });
+      if (paras.length >= 2) articleContent = paras.map(p => toPlainText(p)).join('\n\n');
+    }
+
+    if (!articleContent) {
+      const main = document.querySelector('main') || document.querySelector('#content') || document.querySelector('.content');
+      if (main) {
+        const text = toPlainText(main);
+        if (isQualityContent(text)) articleContent = text;
+      }
+    }
+
+    // ── Scrape image ──
+    let imageUrl = null;
+    const ogImage = document.querySelector('meta[property="og:image"]');
+    if (ogImage) imageUrl = ogImage.getAttribute('content');
+    if (!imageUrl) {
+      const twImage = document.querySelector('meta[name="twitter:image"]');
+      if (twImage) imageUrl = twImage.getAttribute('content');
+    }
+    if (!imageUrl) {
+      const articleImgs = document.querySelectorAll('article img, [class*="article"] img, [class*="content"] img, main img');
+      for (const img of articleImgs) {
+        const src = img.src || img.getAttribute('data-src') || '';
+        const w = img.naturalWidth || parseInt(img.getAttribute('width') || '0');
+        if (src && !src.includes('logo') && !src.includes('icon') && !src.includes('avatar') && !src.includes('data:image') && (w === 0 || w >= 200)) {
+          imageUrl = src;
+          break;
+        }
+      }
+    }
+    if (imageUrl && !imageUrl.startsWith('http')) {
+      try { imageUrl = new URL(imageUrl, window.location.origin).href; } catch { imageUrl = null; }
+    }
+
+    return { articleContent, imageUrl };
+  });
 }
 
 async function enrichWithPlaywright() {
@@ -1349,7 +1598,7 @@ async function enrichWithPlaywright() {
 
   // ── Phase A: Enrich pending/thin news articles ─────────────────────────
   console.log('\n🎭 Playwright enrichment — pending & thin news articles...');
-  const allNews = await supabaseGet('news', 'select=id,title,content,url,image_url,status,enriched_at&order=id.desc&limit=200');
+  const allNews = await supabaseGet('news', 'select=id,title,content,url,image_url,status,enriched_at,enrich_attempts&order=id.desc&limit=200');
   const thinNews = allNews.filter(n => n.url && !n.enriched_at && (
     n.status === 'pending' ||
     (n.content || '').length < 150 ||
@@ -1366,124 +1615,33 @@ async function enrichWithPlaywright() {
       await page.waitForTimeout(5000);
       try { await page.waitForSelector('p', { timeout: 8000 }); } catch { /* ok */ }
 
-      const scraped = await page.evaluate(() => {
-        // ── Clean text extractor (no markdown links/images) ──
-        function toPlainText(el) {
-          if (!el) return '';
-          let out = '';
-          for (const node of el.childNodes) {
-            if (node.nodeType === 3) { // Text
-              out += node.textContent;
-            } else if (node.nodeType === 1) { // Element
-              const tag = node.tagName.toLowerCase();
-              // Skip nav, footer, sidebar, script, style, form, button elements
-              if (['nav', 'footer', 'aside', 'script', 'style', 'form', 'button', 'noscript', 'svg', 'iframe'].includes(tag)) continue;
-              // Skip elements with nav/menu/sidebar/footer classes
-              const cls = (node.className || '').toString().toLowerCase();
-              if (/\b(nav|menu|sidebar|footer|widget|cookie|banner|social|share|comment|signup|subscribe|ad-|advert)\b/.test(cls)) continue;
+      let scraped = await extractArticle(page);
 
-              const content = toPlainText(node).trim();
-              if (!content && tag !== 'br') continue;
-
-              switch (tag) {
-                case 'p': out += `\n\n${content}\n\n`; break;
-                case 'h1': case 'h2': case 'h3': case 'h4': case 'h5': out += `\n\n${content}\n\n`; break;
-                case 'strong': case 'b': out += `**${content}**`; break;
-                case 'em': case 'i': out += `*${content}*`; break;
-                case 'a': out += content; break; // Just the link text, no URL
-                case 'ul': case 'ol': out += `\n${content}\n`; break;
-                case 'li': out += `\n- ${content}`; break;
-                case 'blockquote': out += `\n\n> ${content.replace(/\n/g, '\n> ')}\n\n`; break;
-                case 'img': break; // Skip images entirely in text
-                case 'br': out += '\n'; break;
-                case 'hr': out += '\n\n---\n\n'; break;
-                case 'figure': case 'figcaption': break; // Skip figure/caption
-                case 'div': case 'section': case 'article': out += `\n${content}\n`; break;
-                default: out += content;
-              }
+      // Wayback fallback: paywalled domains expose only a preview to anonymous traffic. If
+      // extraction is thin on a known paywall domain, retry against the Internet Archive
+      // snapshot, which usually captured the full pre-paywall article.
+      const _domain = (extractDomain(item.url) || '').replace(/^www\./, '');
+      const _thin = !scraped.articleContent || scraped.articleContent.length < 600;
+      if (_thin && PAYWALL_DOMAINS.has(_domain)) {
+        try {
+          const availRes = await nativeFetch(
+            `https://archive.org/wayback/available?url=${encodeURIComponent(item.url)}`,
+            { signal: AbortSignal.timeout(10000) });
+          const avail = availRes.ok ? await availRes.json() : null;
+          const snap = avail?.archived_snapshots?.closest;
+          if (snap?.available && snap.url) {
+            // Archive pages render slower than origin; wait for DOM, not just commit.
+            await page.goto(snap.url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+            await page.waitForTimeout(6000);
+            try { await page.waitForSelector('p', { timeout: 8000 }); } catch { /* ok */ }
+            const archived = await extractArticle(page);
+            if (archived.articleContent && archived.articleContent.length > (scraped.articleContent || '').length) {
+              console.log(`  ↩ [${item.id}] Wayback recovered ${(scraped.articleContent || '').length}→${archived.articleContent.length} chars`);
+              scraped = { articleContent: archived.articleContent, imageUrl: scraped.imageUrl || archived.imageUrl };
             }
           }
-          return out.replace(/\n{3,}/g, '\n\n').trim();
-        }
-
-        // ── Quality check: reject content that's mostly short lines (nav menus) ──
-        function isQualityContent(text) {
-          const lines = text.split('\n').filter(l => l.trim().length > 0);
-          if (lines.length < 2) return false;
-          const longLines = lines.filter(l => l.trim().length > 50);
-          // At least 30% of lines should be substantial paragraphs
-          return longLines.length >= Math.max(2, lines.length * 0.3);
-        }
-
-        // ── Scrape article content ──
-        let articleContent = null;
-        const selectors = [
-          '[class*="article-body"]', '[class*="entry-content"]',
-          '[class*="post-content"]', '[class*="article-content"]', 
-          '.td-post-content', '.post-text', '.article-text',
-          'article', 'main article'
-        ];
-        
-        for (const sel of selectors) {
-          const el = document.querySelector(sel);
-          if (el) {
-            const text = toPlainText(el);
-            if (isQualityContent(text)) {
-              articleContent = text;
-              break;
-            }
-          }
-        }
-
-        if (!articleContent) {
-          // Fallback: collect all substantial paragraphs
-          const paras = Array.from(document.querySelectorAll('p'))
-            .filter(p => {
-              const text = p.textContent.trim();
-              return text.length > 40 && !/cookie|subscribe|newsletter|sign up|terms|privacy|©|all rights/i.test(text);
-            });
-          if (paras.length >= 2) {
-            articleContent = paras.map(p => toPlainText(p)).join('\n\n');
-          }
-        }
-
-        if (!articleContent) {
-          const main = document.querySelector('main') || document.querySelector('#content') || document.querySelector('.content');
-          if (main) {
-            const text = toPlainText(main);
-            if (isQualityContent(text)) articleContent = text;
-          }
-        }
-
-        // ── Scrape image ──
-        let imageUrl = null;
-        // Priority 1: OG image meta tag
-        const ogImage = document.querySelector('meta[property="og:image"]');
-        if (ogImage) imageUrl = ogImage.getAttribute('content');
-        // Priority 2: Twitter card image
-        if (!imageUrl) {
-          const twImage = document.querySelector('meta[name="twitter:image"]');
-          if (twImage) imageUrl = twImage.getAttribute('content');
-        }
-        // Priority 3: First large image in article
-        if (!imageUrl) {
-          const articleImgs = document.querySelectorAll('article img, [class*="article"] img, [class*="content"] img, main img');
-          for (const img of articleImgs) {
-            const src = img.src || img.getAttribute('data-src') || '';
-            const w = img.naturalWidth || parseInt(img.getAttribute('width') || '0');
-            if (src && !src.includes('logo') && !src.includes('icon') && !src.includes('avatar') && !src.includes('data:image') && (w === 0 || w >= 200)) {
-              imageUrl = src;
-              break;
-            }
-          }
-        }
-        // Ensure absolute URL
-        if (imageUrl && !imageUrl.startsWith('http')) {
-          try { imageUrl = new URL(imageUrl, window.location.origin).href; } catch { imageUrl = null; }
-        }
-
-        return { articleContent, imageUrl };
-      });
+        } catch { /* wayback miss — keep original extraction */ }
+      }
 
       const updates = {};
 
@@ -1517,9 +1675,22 @@ async function enrichWithPlaywright() {
         console.log(`  ✅ [${item.id}] ${item.title.slice(0, 55)} — ${parts.join(', ')}`);
         newsEnriched++;
       } else {
-        // Mark as enriched even with no improvement — page was visited, no better content exists
-        await supabaseUpdate('news', item.id, { enriched_at: new Date().toISOString() });
-        console.log(`  · [${item.id}] ${item.title.slice(0, 55)} — no improvement, marked done`);
+        // Seal if content is already substantial OR we've exhausted the retry budget. Thin
+        // rows (paywalled previews, RSS teasers) are left unsealed for a few attempts so a
+        // future extractor improvement can recover them — but capped so they don't churn forever.
+        const MAX_ENRICH_ATTEMPTS = 3;
+        const existingLen = (item.content || '').length;
+        const attempts = (item.enrich_attempts || 0) + 1;
+        if (existingLen >= 800) {
+          await supabaseUpdate('news', item.id, { enriched_at: new Date().toISOString() });
+          console.log(`  · [${item.id}] ${item.title.slice(0, 55)} — no improvement, sealed (${existingLen} chars)`);
+        } else if (attempts >= MAX_ENRICH_ATTEMPTS) {
+          await supabaseUpdate('news', item.id, { enriched_at: new Date().toISOString(), enrich_attempts: attempts });
+          console.log(`  · [${item.id}] ${item.title.slice(0, 55)} — no improvement (${existingLen} chars), sealed after ${attempts} attempts`);
+        } else {
+          await supabaseUpdate('news', item.id, { enrich_attempts: attempts });
+          console.log(`  · [${item.id}] ${item.title.slice(0, 55)} — no improvement (${existingLen} chars), retry ${attempts}/${MAX_ENRICH_ATTEMPTS}`);
+        }
       }
     } catch (err) {
       console.log(`  ✗ [${item.id}] ${item.title.slice(0, 40)} — ${err.message.slice(0, 60)}`);
@@ -1532,7 +1703,7 @@ async function enrichWithPlaywright() {
   // ── Phase B: Enrich opportunity fields ──────────────────────────────────
   console.log('\n🎭 Playwright enrichment — opportunity fields...');
   const allOpps = await supabaseGet('opportunities',
-    `select=id,title,"What Is It?","Apply:","For Films or Series?","Next Deadline","Who Can Apply / Eligibility","What Do You Get If Selected?","Cost",category,enriched_at&order=id.desc&limit=200`);
+    `select=id,title,status,"What Is It?","Apply:","For Films or Series?","Next Deadline","Who Can Apply / Eligibility","What Do You Get If Selected?","Cost","What to Submit",category,africa_relevance,enriched_at&order=id.desc&limit=200`);
   const needsEnrich = allOpps.filter(o => !o.enriched_at && (
     (o['For Films or Series?'] === 'To be confirmed') ||
     (o['For Films or Series?'] === 'TBC') ||
@@ -1550,6 +1721,13 @@ async function enrichWithPlaywright() {
   for (const opp of needsEnrich) {
     const url = opp['Apply:'];
     if (!url) continue;
+    // Playwright hands PDFs to the browser's built-in viewer, so the DOM has no readable
+    // body — enrichment can never succeed. Seal enriched_at so it stops re-queuing forever.
+    if (url.toLowerCase().split('?')[0].endsWith('.pdf')) {
+      await supabaseUpdate('opportunities', opp.id, { enriched_at: new Date().toISOString() });
+      console.log(`  · [${opp.id}] ${opp.title.slice(0, 50)} — PDF, skipped (needs manual/pdf-parse)`);
+      continue;
+    }
     let page;
     try {
       page = await context.newPage();
@@ -1598,7 +1776,7 @@ async function enrichWithPlaywright() {
         const claudeFields = await claudeEnrichFields(pageText, url);
         enriched = { ...regexFields };
         for (const [key, val] of Object.entries(claudeFields)) {
-          if (val && val !== 'TBC') enriched[key] = val;
+          if (val !== undefined && val !== '' && val !== 'TBC') enriched[key] = val;
         }
       } else {
         enriched = regexFields;
@@ -1626,6 +1804,26 @@ async function enrichWithPlaywright() {
         updates.category = enriched.category;
       if (enriched['Cost'] && enriched['Cost'] !== 'TBC' && placeholder(opp['Cost']))
         updates['Cost'] = enriched['Cost'];
+      if (enriched._africaRelevance && !opp.africa_relevance)
+        updates.africa_relevance = enriched._africaRelevance;
+
+      // Promote a held 'needs_enrichment' row to 'pending' once enrichment has filled the
+      // core boxes (using the merged post-update values), so it can reach the admin queue.
+      if (opp.status === 'needs_enrichment') {
+        const merged = { ...opp, ...updates };
+        const isReal = v => v && v !== 'TBC' && v !== 'To be confirmed';
+        const coreNow = [
+          merged['Next Deadline'],
+          merged['Who Can Apply / Eligibility'],
+          merged['What Do You Get If Selected?'],
+          merged['What to Submit'],
+        ].filter(isReal).length;
+        // A real deadline is mandatory for promotion — same rule as insert (Step D.6).
+        if (coreNow >= 3 && isReal(merged['Next Deadline'])) {
+          updates.status = 'pending';
+          console.log(`  ⬆ [${opp.id}] ${opp.title.slice(0, 45)} — promoted needs_enrichment → pending (${coreNow}/4 core)`);
+        }
+      }
 
       updates.enriched_at = new Date().toISOString();
       await supabaseUpdate('opportunities', opp.id, updates);
@@ -1643,14 +1841,248 @@ async function enrichWithPlaywright() {
   }
   console.log(`   Opps enriched: ${oppsEnriched} / ${needsEnrich.length}`);
 
+  // Phase C: re-verify live opportunities (freshness + cycle roll-forward).
+  await reverifyOpportunities(context, DRY_RUN);
+
   await browser.close();
   console.log('   🎭 Playwright enrichment complete.');
+}
+
+// ── Phase C: Re-verify live opportunities on a proximity-based cadence ─────────
+// Keeps deadlines/info fresh and rolls cycles forward. Minor changes (deadline shifted)
+// auto-apply; major ones (cycle reopened, source dead, no-longer-an-opportunity) set
+// review_reason for the admin. Closed opps are re-checked for reopen; passed deadlines hidden.
+// `dryRun` previews decisions without writing. `context` is a live Playwright browser context.
+async function reverifyOpportunities(context, dryRun = false, forceEmail = false) {
+  console.log(`\n🎭 Playwright re-verification — opportunity freshness (Phase C)${dryRun ? ' [DRY RUN]' : ''}...`);
+  const VERIFY_CAP = 40;
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const nowMs = Date.now();
+  const verifyPool = await supabaseGetAll('opportunities',
+    'select=id,title,status,"Apply:","Next Deadline",deadline_date,content_hash,last_verified_at,verify_attempts,review_reason');
+  const dueList = verifyPool
+    .map(o => ({ o, bucket: verifyBucket(o, nowMs) }))
+    .filter(x => x.bucket)
+    .sort((a, b) => {
+      const rank = { closing_soon: 0, open: 1, dormant: 2 };
+      if (rank[a.bucket] !== rank[b.bucket]) return rank[a.bucket] - rank[b.bucket];
+      return new Date(a.o.last_verified_at || 0) - new Date(b.o.last_verified_at || 0);
+    });
+  const dueBatch = dueList.slice(0, VERIFY_CAP);
+  console.log(`   ${dueList.length} opps due for re-verification; processing ${dueBatch.length} this run.`);
+
+  const writeOpp = async (id, u) => { if (!dryRun) await supabaseUpdate('opportunities', id, u); };
+  let reFresh = 0, reChanged = 0, reFlagged = 0;
+  const isRealDl = v => v && v !== 'TBC' && v !== 'To be confirmed';
+  for (const { o: opp } of dueBatch) {
+    const url = opp['Apply:'];
+    let page;
+    try {
+      page = await context.newPage();
+      await page.goto(url, { waitUntil: 'commit', timeout: 15000 });
+      await page.waitForTimeout(2500);
+      const pageText = await page.evaluate(() => (document.body?.innerText || '').replace(/\s+/g, ' ').trim().slice(0, 6000));
+
+      const looksBlocked = !pageText || pageText.length < 120 ||
+        /verif(y|ying) you are|cloudflare|just a moment|enable javascript|are you a robot/i.test(pageText.slice(0, 300));
+      if (looksBlocked) {
+        const attempts = (opp.verify_attempts || 0) + 1;
+        const u = { verify_attempts: attempts, last_verified_at: new Date().toISOString() };
+        if (attempts >= 3) u.review_reason = `source unreachable (${attempts} attempts)`;
+        await writeOpp(opp.id, u);
+        console.log(`  ⚠ [${opp.id}] ${opp.title.slice(0, 45)} — unreachable (attempt ${attempts})`);
+        continue;
+      }
+
+      const hash = createHash('sha1').update(pageText.toLowerCase()).digest('hex');
+      // Unchanged page → cheap freshness bump, no Claude call. We loaded the page, so a
+      // connectivity flag is now stale and can be cleared; an opportunity-ness flag can't be
+      // (we didn't re-run Claude), so it stays.
+      if (opp.content_hash && hash === opp.content_hash) {
+        const u = { last_verified_at: new Date().toISOString(), verify_attempts: 0 };
+        if (opp.review_reason && /(unreachable|source error)/i.test(opp.review_reason)) u.review_reason = null;
+        await writeOpp(opp.id, u);
+        console.log(`  ✓ [${opp.id}] ${opp.title.slice(0, 45)} — unchanged, freshness bumped`);
+        reFresh++;
+        continue;
+      }
+
+      // Page changed (or first verification) → re-extract the live state with Claude.
+      const fields = anthropicApiKey ? await claudeEnrichFields(pageText, url) : {};
+      const updates = { content_hash: hash, last_verified_at: new Date().toISOString(), verify_attempts: 0 };
+      // Assume the re-check heals any prior flag; the flag/reopen branches below re-set it.
+      if (opp.review_reason) updates.review_reason = null;
+      const freshText = fields['Next Deadline'];
+      const freshDate = parseDeadlineToDate(freshText, new Date());
+      const freshFuture = freshDate && freshDate >= todayStr;
+      const isClosedState = opp.status === 'closed' || opp.status === 'expired';
+
+      if (fields._isActualOpportunity === false) {
+        updates.review_reason = 'page no longer looks like an opportunity';
+        reFlagged++;
+        console.log(`  ⚑ [${opp.id}] ${opp.title.slice(0, 45)} — flagged: no longer an opportunity`);
+      } else if (isClosedState && freshFuture) {
+        // Cycle reopened — major change; route to admin for a one-click approve.
+        updates['Next Deadline'] = freshText;
+        updates.deadline_date = freshDate;
+        updates.status = 'pending';
+        updates.review_reason = 'cycle reopened — verify before publishing';
+        reFlagged++;
+        console.log(`  ⟳ [${opp.id}] ${opp.title.slice(0, 45)} — REOPENED → pending (${freshDate})`);
+      } else if (!isClosedState && isRealDl(freshText) && freshDate && !freshFuture) {
+        // Deadline has passed → close + hide (routine lifecycle, auto, no admin flag).
+        updates['Next Deadline'] = freshText;
+        updates.deadline_date = freshDate;
+        updates.status = 'closed';
+        reChanged++;
+        console.log(`  🗓 [${opp.id}] ${opp.title.slice(0, 45)} — deadline passed → closed`);
+      } else if (!isClosedState && freshFuture && freshDate !== (opp.deadline_date || null)) {
+        // Deadline shifted to a new future date → minor auto-update.
+        updates['Next Deadline'] = freshText;
+        updates.deadline_date = freshDate;
+        reChanged++;
+        console.log(`  ✎ [${opp.id}] ${opp.title.slice(0, 45)} — deadline updated → ${freshDate}`);
+      } else {
+        console.log(`  · [${opp.id}] ${opp.title.slice(0, 45)} — content changed, no deadline change`);
+      }
+      await writeOpp(opp.id, updates);
+      reFresh++;
+    } catch {
+      const attempts = (opp.verify_attempts || 0) + 1;
+      const u = { verify_attempts: attempts, last_verified_at: new Date().toISOString() };
+      if (attempts >= 3) u.review_reason = `source error (${attempts} attempts)`;
+      await writeOpp(opp.id, u).catch(() => {});
+    } finally {
+      if (page) await page.close().catch(() => {});
+    }
+  }
+  console.log(`   Re-verified ${reFresh} (${reChanged} deadline updates, ${reFlagged} flagged). ${Math.max(0, dueList.length - dueBatch.length)} remain for next run.`);
+
+  // Standalone verification email only for manual --verify-only runs (forceEmail). During the
+  // daily --enrich run the flagged queue rides along in the scan-summary email instead, so we
+  // don't double-send.
+  if (!dryRun && forceEmail) await sendVerificationReviewEmail();
+}
+
+// Build the "needs a human glance" HTML section — every opportunity currently carrying a
+// review_reason (excluding rejected), grouped by the kind of attention needed, each row linking
+// to the live source page and the admin dashboard. Returns { count, html }; html is '' if none.
+// Shared by the standalone verification email and the daily scan-summary email.
+async function buildFlaggedQueueSection() {
+  const flagged = await supabaseGetAll('opportunities',
+    'select=id,title,status,review_reason,"Apply:","Next Deadline"&review_reason=not.is.null&status=neq.rejected');
+  if (!flagged.length) return { count: 0, html: '' };
+
+  const groups = {
+    reopened: { title: '⟳ Cycle reopened — approve to publish', items: [] },
+    notOpp:   { title: '⚑ No longer looks like an opportunity — keep or reject?', items: [] },
+    dead:     { title: '⚠ Source unreachable — check the link still works', items: [] },
+    other:    { title: '• Other flags', items: [] },
+  };
+  for (const o of flagged.sort((a, b) => a.id - b.id)) {
+    const r = (o.review_reason || '').toLowerCase();
+    const key = r.includes('reopen') ? 'reopened'
+      : r.includes('no longer') ? 'notOpp'
+      : (r.includes('unreachable') || r.includes('source error')) ? 'dead'
+      : 'other';
+    groups[key].items.push(o);
+  }
+
+  const esc = s => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const row = o => `
+    <li style="margin:0 0 14px;">
+      <strong>${esc(o.title)}</strong>
+      <span style="color:#888;">(#${o.id}, ${esc(o.status)})</span><br/>
+      <span style="color:#b45309;font-size:13px;">${esc(o.review_reason)}</span><br/>
+      <span style="font-size:13px;">Deadline on file: ${esc(o['Next Deadline'] || '—')}</span><br/>
+      ${o['Apply:'] ? `<a href="${esc(o['Apply:'])}" style="color:#0d9488;">🔗 Open source page</a> · ` : ''}
+      <a href="${siteUrl}/admin" style="color:#0d9488;">✏️ Edit in admin</a>
+    </li>`;
+
+  const sections = Object.values(groups)
+    .filter(g => g.items.length)
+    .map(g => `<h3 style="color:#0f172a;margin:22px 0 8px;">${g.title} <span style="color:#888;font-weight:normal;">(${g.items.length})</span></h3><ul style="padding-left:18px;margin:0;list-style:none;">${g.items.map(row).join('')}</ul>`)
+    .join('');
+
+  const html = `
+    <h2 style="color:#0d9488;margin-top:24px;">🔍 Needs a glance — ${flagged.length} flagged</h2>
+    <p style="color:#555;font-size:14px;">Auto-verifier flagged these. Click through, decide, and act in admin. Items disappear once resolved (reject, or the source recovers / re-verifies healthy).</p>
+    ${sections}`;
+  return { count: flagged.length, html };
+}
+
+// Standalone verification email (used by manual --verify-only runs). No-ops if nothing flagged.
+async function sendVerificationReviewEmail() {
+  if (!resendApiKey) return;
+  const today = new Date().toISOString().slice(0, 10);
+  const { count, html } = await buildFlaggedQueueSection();
+  if (!count) {
+    console.log('\n📧 No flagged opportunities — review email skipped.');
+    return;
+  }
+  try {
+    const res = await nativeFetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${resendApiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: 'Film Resource Africa <hello@film-resource-africa.com>',
+        to: ['hello@film-resource-africa.com'],
+        subject: `FRA Verification: ${count} opportunit${count === 1 ? 'y needs' : 'ies need'} a glance — ${today}`,
+        html: `<div style="font-family:sans-serif;max-width:640px;margin:auto;padding:20px;">${html}
+          <hr style="border:none;border-top:1px solid #eee;margin:22px 0;" />
+          <p style="font-size:13px;color:#888;"><a href="${siteUrl}/admin" style="color:#0d9488;font-weight:bold;">Open Admin Dashboard</a></p></div>`,
+      }),
+    });
+    if (res.ok) console.log(`\n📧 Verification review email sent (${count} flagged).`);
+    else console.log(`\n  ✗ Review email failed: ${res.status}`);
+  } catch (err) {
+    console.log(`\n  ✗ Review email error: ${err.message}`);
+  }
+}
+
+// Standalone entry for `--verify-only`: run just Phase C with its own browser. Useful for
+// testing (with --dry-run) and for running verification off its own schedule if ever needed.
+async function runVerifyOnly() {
+  let chromium;
+  try {
+    ({ chromium } = await import('playwright'));
+  } catch {
+    console.log('  ⚠ Playwright not installed — cannot run verification.');
+    return;
+  }
+  const browser = await chromium.launch({ headless: true });
+  const context = await browser.newContext({
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    viewport: { width: 1920, height: 1080 },
+  });
+  try {
+    await reverifyOpportunities(context, DRY_RUN, true);  // manual run → always email the queue
+  } finally {
+    await browser.close();
+  }
 }
 
 // ─── Main ────────────────────────────────────────────────────────────────────
 
 async function main() {
   const today = new Date().toISOString().slice(0, 10);
+
+  // Standalone maintenance mode: backfill deadline_date and exit (no scanning).
+  if (BACKFILL_DEADLINES) {
+    console.log(`\n🎬 FRA Scanner — deadline_date backfill — ${today}${DRY_RUN ? ' (DRY RUN)' : ''}`);
+    await backfillDeadlineDates();
+    console.log('\n✅ Done.');
+    return;
+  }
+
+  // Standalone maintenance mode: run only the Phase-C re-verification pass and exit.
+  if (VERIFY_ONLY) {
+    console.log(`\n🎬 FRA Scanner — re-verification only — ${today}${DRY_RUN ? ' (DRY RUN)' : ''}`);
+    await runVerifyOnly();
+    console.log('\n✅ Done.');
+    return;
+  }
+
   console.log(`\n🎬 FRA Daily Opportunity Scanner — ${today}`);
   console.log(`   Mode: ${DRY_RUN ? 'DRY RUN' : 'LIVE'}${NEWS_ONLY ? ' (news only)' : ''}${ENRICH ? ' + enrichment' : ''}`);
 
@@ -1769,6 +2201,15 @@ async function main() {
         console.log(`  SKIP (URL exists): ${item.title.slice(0, 60)}`);
         continue;
       }
+      // Pre-insert QC: drop non-article hub pages and teaser-only RSS items that can never
+      // enrich into a real body (e.g. Deadline /feature/ landing pages, "[…]" RSS stubs).
+      const isFeatureHub = /\/feature\//i.test(item.link || '');
+      const rssBody = (item.description || '').trim();
+      const isRssTeaser = /\[…\]$|…$/.test(rssBody) && rssBody.length < 600;
+      if (isFeatureHub || isRssTeaser) {
+        console.log(`  SKIP (${isFeatureHub ? 'hub page' : 'RSS teaser'}): ${item.title.slice(0, 55)}`);
+        continue;
+      }
       // Pre-insert QC: validate URL is reachable
       if (item.link) {
         const urlOk = await validateUrl(item.link);
@@ -1843,7 +2284,11 @@ async function main() {
 
       // Step B: Scrape page for real field data
       const scraped = await enrichOpportunityFromPage(item.url);
-      const enrichedFields = Object.keys(scraped).filter(k => !k.startsWith('_')).length;
+      // Count only fields actually filled with real data — not keys present. Claude always
+      // returns all keys (many as 'TBC'), so counting keys overstated how complete a row was.
+      const enrichedFields = Object.entries(scraped)
+        .filter(([k, v]) => !k.startsWith('_') && v && v !== 'TBC')
+        .length;
 
       // Step B.1: Web search items with no enrichment data at all (bot-blocked, timeout, etc.)
       // are too risky to auto-insert. Org-page items are trusted sources so pass through.
@@ -1872,6 +2317,24 @@ async function main() {
         continue;
       }
 
+      // Step D.6: Schema-completeness gate. An opportunity is only worth surfacing if the
+      // core "boxes" are actually filled. A real deadline is MANDATORY — a "TBC" deadline is
+      // useless to a filmmaker deciding whether to apply, so it never reaches the pending
+      // queue. Of the remaining boxes we require ≥3 of 4 to be real. Anything short is held
+      // as 'needs_enrichment' (invisible publicly) for Phase-B re-enrichment. "Rolling" counts
+      // as a real deadline.
+      const isReal = v => v && v !== 'TBC' && v !== 'To be confirmed';
+      const deadlineVal = scraped['Next Deadline'] || item._emailDeadline;
+      const hasRealDeadline = isReal(deadlineVal);
+      const coreValues = [
+        deadlineVal,
+        scraped['Who Can Apply / Eligibility'] || item._emailEligibility,
+        scraped['What Do You Get If Selected?'] || item._emailBenefits,
+        scraped['What to Submit'],
+      ];
+      const coreFilled = coreValues.filter(isReal).length;
+      const oppStatus = (hasRealDeadline && coreFilled >= 3) ? 'pending' : 'needs_enrichment';
+
       // Step E: Build the record — page scrape takes priority, email extraction fills gaps
       const oppItem = {
         title: decodeEntities(item.title),
@@ -1885,15 +2348,18 @@ async function main() {
         'What to Submit': scraped['What to Submit'] || 'TBC',
         'Strongest Submission Tips': scraped['Strongest Submission Tips'] || '',
         'CALENDAR REMINDER:': scraped['CALENDAR REMINDER:'] || '',
-        status: 'pending',
+        status: oppStatus,
         votes: 0,
         application_status: 'open',
         ...(scraped.category || item._emailCategory ? { category: scraped.category || item._emailCategory } : {}),
+        ...(scraped._africaRelevance ? { africa_relevance: scraped._africaRelevance } : {}),
         ...(logo ? { logo } : {}),
         ...(ogImage ? { og_image_url: ogImage } : {}),
       };
       const extras = [
+        `${coreFilled}/4 core`,
         enrichedFields > 0 && `${enrichedFields} fields`,
+        oppStatus === 'needs_enrichment' && '⏳ needs_enrichment',
         detectedCountry && `🌍 ${detectedCountry}`,
         logo && 'logo',
         ogImage && 'og',
@@ -1935,13 +2401,16 @@ async function main() {
   console.log(`   Opps inserted:            ${oppsInserted}${oppsSkipped404 ? ` (${oppsSkipped404} dead URLs skipped)` : ''}`);
   console.log('─'.repeat(60));
 
-  // 11. Send admin summary email
+  // 11. Send admin summary email — covers new items AND the outstanding verification queue,
+  // so the flagged opportunities ride along even on runs that found nothing new.
   const totalNew = newsInserted + oppsInserted;
-  if (totalNew > 0 && !DRY_RUN && resendApiKey) {
+  const flaggedSection = (!DRY_RUN && resendApiKey) ? await buildFlaggedQueueSection() : { count: 0, html: '' };
+  if ((totalNew > 0 || flaggedSection.count > 0) && !DRY_RUN && resendApiKey) {
     console.log('\n📧 Sending admin summary...');
     const emailLines = [];
     if (newsInserted > 0) emailLines.push(`<p><strong>${newsInserted} new news article${newsInserted > 1 ? 's' : ''}</strong> added as PENDING — <a href="${siteUrl}/admin">review & publish in admin</a>.</p>`);
     if (oppsInserted > 0) emailLines.push(`<p><strong>${oppsInserted} new opportunity lead${oppsInserted > 1 ? 's' : ''}</strong> added as PENDING — <a href="${siteUrl}/admin">review in admin</a>.</p>`);
+    if (totalNew === 0) emailLines.push('<p style="color:#555;">No new items this run.</p>');
 
     if (results.emails.length > 0) {
       emailLines.push('<p><strong>Email signals (no body extracted — check manually):</strong></p><ul>');
@@ -1951,6 +2420,10 @@ async function main() {
       emailLines.push('</ul>');
     }
 
+    const subjectBits = [];
+    if (totalNew > 0) subjectBits.push(`${totalNew} new`);
+    if (flaggedSection.count > 0) subjectBits.push(`${flaggedSection.count} to verify`);
+
     try {
       const emailRes = await nativeFetch('https://api.resend.com/emails', {
         method: 'POST',
@@ -1958,11 +2431,12 @@ async function main() {
         body: JSON.stringify({
           from: 'Film Resource Africa <hello@film-resource-africa.com>',
           to: ['hello@film-resource-africa.com'],
-          subject: `FRA Scanner: ${totalNew} new item${totalNew > 1 ? 's' : ''} found — ${today}`,
+          subject: `FRA Scanner: ${subjectBits.join(', ')} — ${today}`,
           html: `
-            <div style="font-family:sans-serif;max-width:600px;margin:auto;padding:20px;">
+            <div style="font-family:sans-serif;max-width:640px;margin:auto;padding:20px;">
               <h2 style="color:#0d9488;">🎬 Daily Opportunity Scan — ${today}</h2>
               ${emailLines.join('\n')}
+              ${flaggedSection.html ? `<hr style="border:none;border-top:1px solid #eee;margin:20px 0;" />${flaggedSection.html}` : ''}
               <hr style="border:none;border-top:1px solid #eee;margin:20px 0;" />
               <p style="font-size:13px;color:#888;">
                 <a href="${siteUrl}/admin" style="color:#0d9488;font-weight:bold;">Open Admin Dashboard</a>
@@ -1971,13 +2445,13 @@ async function main() {
           `,
         }),
       });
-      if (emailRes.ok) console.log('  ✓ Admin summary sent');
+      if (emailRes.ok) console.log(`  ✓ Admin summary sent${flaggedSection.count ? ` (incl. ${flaggedSection.count} flagged)` : ''}`);
       else console.log(`  ✗ Email failed: ${emailRes.status}`);
     } catch (err) {
       console.log(`  ✗ Email error: ${err.message}`);
     }
   } else if (totalNew === 0) {
-    console.log('\n   No new items to report. All quiet on the African front. 🌍');
+    console.log('\n   No new items and nothing flagged. All quiet on the African front. 🌍');
   }
 
   console.log('\n✅ Scan complete.\n');
