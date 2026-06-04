@@ -55,6 +55,51 @@ const PAYWALL_DOMAINS = new Set([
   'ft.com', 'wsj.com', 'nytimes.com', 'thetimes.co.uk', 'telegraph.co.uk',
 ]);
 
+// ─── Truncation detection ───────────────────────────────────────────────────
+// Returns true if `content` looks like a paywall-truncated / RSS-teaser body.
+// Used to (a) flag rows is_truncated=true so public reads filter them out, and
+// (b) keep them eligible for re-enrichment until they're recovered.
+//
+// Signals (any one trips the flag):
+//   1. Body ends mid-sentence (last non-ws char isn't terminal punctuation).
+//   2. Body ends with RSS ellipsis marker "[…]" or "[...]".
+//   3. Last non-empty line is a known paywall stub (Advertisement, Subscribe,
+//      "To continue reading", "Sign in", "Source: ...", etc.).
+//   4. Length is below the paywall threshold AND the source is a known paywall
+//      domain (Deadline, Variety, WSJ, NYT, etc.).
+function isTruncatedContent(content, url) {
+  if (!content || typeof content !== 'string') return true;
+  const text = content.trim();
+  if (text.length < 200) return true;                              // any tiny body is suspect
+
+  // 2. RSS ellipsis marker
+  if (/\[(?:\u2026|\.\.\.)]\s*$/.test(text)) return true;
+  if (/(?:\u2026|\.\.\.)\s*$/.test(text) && text.length < 1200) return true;
+
+  // 3. Paywall stub on the last non-empty line
+  const lines = text.split(/\n+/).map(l => l.trim()).filter(Boolean);
+  const lastLine = lines[lines.length - 1] || '';
+  const stubRe = /^(advertisement|subscribe(?:rs only| to .+)?|sign in( to .+)?|read more|continue reading|to continue reading.*|source\s*:.*|follow us.*|share this.*)\.?$/i;
+  if (stubRe.test(lastLine)) return true;
+
+  // 1. Mid-sentence ending (last char not terminal punctuation or closing quote/bracket)
+  const lastChar = text.replace(/\s+$/, '').slice(-1);
+  const terminal = new Set(['.', '!', '?', '"', "'", ')', ']', '\u201d', '\u2019', '\u2026']);
+  const endsMidSentence = !terminal.has(lastChar);
+
+  // 4. Paywall-domain length floor
+  let domain = '';
+  try { domain = (new URL(url).hostname || '').replace(/^www\./, ''); } catch { /* ignore */ }
+  const isPaywall = domain && PAYWALL_DOMAINS.has(domain);
+  if (isPaywall && text.length < 1200) return true;
+
+  // Mid-sentence ending alone is only fatal when body is also shortish;
+  // long-form articles occasionally end on a quote/parenthetical we missed.
+  if (endsMidSentence && text.length < 1500) return true;
+
+  return false;
+}
+
 // ─── Config ──────────────────────────────────────────────────────────────────
 
 // Load env: use .env.local if present (local dev), otherwise fall back to process.env (CI)
@@ -114,6 +159,32 @@ function extractDomain(url) {
     if (!u.startsWith('http')) u = 'https://' + u;
     return new URL(u).hostname.replace(/^www\./, '');
   } catch { return null; }
+}
+
+// Domains that are never real film opportunities (false-positive sources).
+// Source of truth: scanner_config.json → exclude_domains.list. Hard-blocked at
+// insert and auto-rejected on re-verify. Matches the domain and its parent domain.
+const EXCLUDE_DOMAINS = new Set(
+  (SCANNER_CONFIG.exclude_domains?.list || []).map(d => d.toLowerCase().replace(/^www\./, ''))
+);
+function isExcludedDomain(url) {
+  const d = extractDomain(url);
+  if (!d) return false;
+  return EXCLUDE_DOMAINS.has(d) || EXCLUDE_DOMAINS.has(d.replace(/^[^.]+\./, ''));
+}
+
+// A1 — non-canonical sources: URL shorteners and social platforms are never a canonical
+// apply/source page. An opportunity whose only URL is one of these cannot be page-corroborated,
+// so it is quarantined as 'unverified' (never public) for a human to resolve. This is the exact
+// vector that produced the lnkd.in phantom listings (#294/#296).
+const NON_CANONICAL_SOURCES = new Set([
+  'lnkd.in', 'bit.ly', 't.co', 'tinyurl.com', 'ow.ly', 'buff.ly', 'rebrand.ly', 'cutt.ly', 'shorturl.at',
+  'linkedin.com', 'facebook.com', 'fb.com', 'instagram.com', 'x.com', 'twitter.com', 'threads.net', 'tiktok.com',
+]);
+function isNonCanonicalSource(url) {
+  const d = extractDomain(url);
+  if (!d) return false;
+  return NON_CANONICAL_SOURCES.has(d) || NON_CANONICAL_SOURCES.has(d.replace(/^[^.]+\./, ''));
 }
 
 // Returns true for URLs that are clearly news articles rather than application pages.
@@ -1598,9 +1669,15 @@ async function enrichWithPlaywright() {
 
   // ── Phase A: Enrich pending/thin news articles ─────────────────────────
   console.log('\n🎭 Playwright enrichment — pending & thin news articles...');
-  const allNews = await supabaseGet('news', 'select=id,title,content,url,image_url,status,enriched_at,enrich_attempts&order=id.desc&limit=200');
-  const thinNews = allNews.filter(n => n.url && !n.enriched_at && (
+  const allNews = await supabaseGet('news', 'select=id,title,content,url,image_url,status,enriched_at,enrich_attempts,is_truncated&order=id.desc&limit=200');
+  // Enrich anything unsealed OR flagged truncated (give truncated rows another chance even
+  // after enriched_at is set, until they're recovered or hit MAX_ENRICH_ATTEMPTS).
+  const thinNews = allNews.filter(n => n.url && (
+    !n.enriched_at ||
+    n.is_truncated === true
+  ) && (
     n.status === 'pending' ||
+    n.is_truncated === true ||
     (n.content || '').length < 150 ||
     !n.image_url
   ));
@@ -1643,17 +1720,39 @@ async function enrichWithPlaywright() {
         } catch { /* wayback miss — keep original extraction */ }
       }
 
+      // AMP fallback: many paywall sites (Deadline, Variety, Hollywood Reporter) don't gate
+      // their AMP version. Try the <link rel="amphtml"> URL if extraction is still thin.
+      const _stillThin = !scraped.articleContent || scraped.articleContent.length < 800;
+      if (_stillThin) {
+        try {
+          const ampUrl = await page.evaluate(() => {
+            const l = document.querySelector('link[rel="amphtml"]');
+            return l ? l.getAttribute('href') : null;
+          });
+          if (ampUrl) {
+            await page.goto(ampUrl, { waitUntil: 'domcontentloaded', timeout: 15000 });
+            await page.waitForTimeout(3000);
+            try { await page.waitForSelector('p', { timeout: 6000 }); } catch { /* ok */ }
+            const ampScraped = await extractArticle(page);
+            if (ampScraped.articleContent && ampScraped.articleContent.length > (scraped.articleContent || '').length) {
+              console.log(`  ⚡ [${item.id}] AMP recovered ${(scraped.articleContent || '').length}→${ampScraped.articleContent.length} chars`);
+              scraped = { articleContent: ampScraped.articleContent, imageUrl: scraped.imageUrl || ampScraped.imageUrl };
+            }
+          }
+        } catch { /* amp miss — keep what we have */ }
+      }
+
       const updates = {};
 
       // Update content if we got something better
       if (scraped.articleContent) {
         const cleaned = scraped.articleContent.replace(/\s*(Share|Related|You may also|Read more|Sign up|Subscribe|Newsletter|Cookie|Privacy|©|Follow us)[\s\S]*$/i, '').trim();
-        
+
         // Priority for 'pending' articles: if we got structured markdown, we want it
         const isPending = item.status === 'pending';
         const currentLen = (item.content || '').length;
         const newLen = cleaned.length;
-        
+
         // Always accept if new content is significantly longer, or if pending and looks like quality markdown
         if (newLen > currentLen + 50 || (isPending && newLen > 300 && newLen > currentLen * 0.7)) {
           updates.content = cleaned;
@@ -1666,30 +1765,45 @@ async function enrichWithPlaywright() {
         updates.image_url = scraped.imageUrl;
       }
 
+      // ── Truncation gate ────────────────────────────────────────────────
+      // Decide is_truncated from the *final* body we'd persist (new content if we accepted
+      // an improvement, otherwise existing body). This is the single source of truth that
+      // public read paths use to keep mid-sentence/paywall-clipped articles off the site.
+      const finalBody = updates.content || item.content || '';
+      const wasTruncated = item.is_truncated === true;
+      const stillTruncated = isTruncatedContent(finalBody, item.url);
+
       if (Object.keys(updates).length > 0) {
         updates.enriched_at = new Date().toISOString();
+        updates.is_truncated = stillTruncated;
         await supabaseUpdate('news', item.id, updates);
         const parts = [];
         if (updates.content) parts.push(`content ${(item.content || '').length}→${updates.content.length}`);
         if (updates.image_url) parts.push('+ image');
+        if (wasTruncated && !stillTruncated) parts.push('✓ recovered');
+        if (stillTruncated) parts.push('⚠ still truncated');
         console.log(`  ✅ [${item.id}] ${item.title.slice(0, 55)} — ${parts.join(', ')}`);
         newsEnriched++;
       } else {
-        // Seal if content is already substantial OR we've exhausted the retry budget. Thin
-        // rows (paywalled previews, RSS teasers) are left unsealed for a few attempts so a
-        // future extractor improvement can recover them — but capped so they don't churn forever.
+        // No content improvement this run.
+        // Seal if content is already substantial AND not truncated, OR we've exhausted the
+        // retry budget. Truncated rows stay unsealed (within budget) so a future extractor
+        // or AMP/Wayback hit can still recover them.
         const MAX_ENRICH_ATTEMPTS = 3;
         const existingLen = (item.content || '').length;
         const attempts = (item.enrich_attempts || 0) + 1;
-        if (existingLen >= 800) {
-          await supabaseUpdate('news', item.id, { enriched_at: new Date().toISOString() });
+        const patch = { is_truncated: stillTruncated, enrich_attempts: attempts };
+        if (existingLen >= 800 && !stillTruncated) {
+          patch.enriched_at = new Date().toISOString();
+          await supabaseUpdate('news', item.id, patch);
           console.log(`  · [${item.id}] ${item.title.slice(0, 55)} — no improvement, sealed (${existingLen} chars)`);
         } else if (attempts >= MAX_ENRICH_ATTEMPTS) {
-          await supabaseUpdate('news', item.id, { enriched_at: new Date().toISOString(), enrich_attempts: attempts });
-          console.log(`  · [${item.id}] ${item.title.slice(0, 55)} — no improvement (${existingLen} chars), sealed after ${attempts} attempts`);
+          patch.enriched_at = new Date().toISOString();
+          await supabaseUpdate('news', item.id, patch);
+          console.log(`  · [${item.id}] ${item.title.slice(0, 55)} — no improvement (${existingLen} chars${stillTruncated ? ', truncated' : ''}), sealed after ${attempts} attempts`);
         } else {
-          await supabaseUpdate('news', item.id, { enrich_attempts: attempts });
-          console.log(`  · [${item.id}] ${item.title.slice(0, 55)} — no improvement (${existingLen} chars), retry ${attempts}/${MAX_ENRICH_ATTEMPTS}`);
+          await supabaseUpdate('news', item.id, patch);
+          console.log(`  · [${item.id}] ${item.title.slice(0, 55)} — no improvement (${existingLen} chars${stillTruncated ? ', truncated' : ''}), retry ${attempts}/${MAX_ENRICH_ATTEMPTS}`);
         }
       }
     } catch (err) {
@@ -1859,7 +1973,7 @@ async function reverifyOpportunities(context, dryRun = false, forceEmail = false
   const todayStr = new Date().toISOString().slice(0, 10);
   const nowMs = Date.now();
   const verifyPool = await supabaseGetAll('opportunities',
-    'select=id,title,status,"Apply:","Next Deadline",deadline_date,content_hash,last_verified_at,verify_attempts,review_reason');
+    'select=id,title,status,"Apply:","Next Deadline",deadline_date,content_hash,last_verified_at,verify_attempts,review_reason,review_locked_at');
   const dueList = verifyPool
     .map(o => ({ o, bucket: verifyBucket(o, nowMs) }))
     .filter(x => x.bucket)
@@ -1876,6 +1990,15 @@ async function reverifyOpportunities(context, dryRun = false, forceEmail = false
   const isRealDl = v => v && v !== 'TBC' && v !== 'To be confirmed';
   for (const { o: opp } of dueBatch) {
     const url = opp['Apply:'];
+
+    // Excluded-domain guard — if a false-positive source slipped in before it was
+    // added to scanner_config.json → exclude_domains, auto-reject it on re-verify.
+    if (isExcludedDomain(url)) {
+      await writeOpp(opp.id, { status: 'rejected', review_reason: 'auto-rejected: excluded domain (false-positive source)' });
+      console.log(`  ✗ [${opp.id}] ${opp.title.slice(0, 45)} — excluded domain → rejected`);
+      continue;
+    }
+
     let page;
     try {
       page = await context.newPage();
@@ -1916,11 +2039,19 @@ async function reverifyOpportunities(context, dryRun = false, forceEmail = false
       const freshDate = parseDeadlineToDate(freshText, new Date());
       const freshFuture = freshDate && freshDate >= todayStr;
       const isClosedState = opp.status === 'closed' || opp.status === 'expired';
+      // B1 — human-keep lock: a row a human has vetted (explicitly locked, or already
+      // 'approved' = published) must not be re-flagged on the noisy opportunity-ness signal.
+      // The verifier misreads rolling directories, festival landing pages, and non-English
+      // pages as "not an opportunity"; one eager read shouldn't demote a vetted listing. We
+      // still refresh its deadline/freshness and still close it on a genuinely passed deadline.
+      const oppLocked = opp.review_locked_at != null || opp.status === 'approved';
 
-      if (fields._isActualOpportunity === false) {
+      if (fields._isActualOpportunity === false && !oppLocked) {
         updates.review_reason = 'page no longer looks like an opportunity';
         reFlagged++;
         console.log(`  ⚑ [${opp.id}] ${opp.title.slice(0, 45)} — flagged: no longer an opportunity`);
+      } else if (fields._isActualOpportunity === false && oppLocked) {
+        console.log(`  🔒 [${opp.id}] ${opp.title.slice(0, 45)} — verifier says not-an-opp, but locked/approved; kept`);
       } else if (isClosedState && freshFuture) {
         // Cycle reopened — major change; route to admin for a one-click approve.
         updates['Next Deadline'] = freshText;
@@ -1974,14 +2105,16 @@ async function buildFlaggedQueueSection() {
   if (!flagged.length) return { count: 0, html: '' };
 
   const groups = {
-    reopened: { title: '⟳ Cycle reopened — approve to publish', items: [] },
-    notOpp:   { title: '⚑ No longer looks like an opportunity — keep or reject?', items: [] },
-    dead:     { title: '⚠ Source unreachable — check the link still works', items: [] },
-    other:    { title: '• Other flags', items: [] },
+    reopened:   { title: '⟳ Cycle reopened — approve to publish', items: [] },
+    unverified: { title: '🚧 Unverified source — confirm a real apply page exists, then publish or reject', items: [] },
+    notOpp:     { title: '⚑ No longer looks like an opportunity — keep or reject?', items: [] },
+    dead:       { title: '⚠ Source unreachable — check the link still works', items: [] },
+    other:      { title: '• Other flags', items: [] },
   };
   for (const o of flagged.sort((a, b) => a.id - b.id)) {
     const r = (o.review_reason || '').toLowerCase();
     const key = r.includes('reopen') ? 'reopened'
+      : r.includes('unverified source') ? 'unverified'
       : r.includes('no longer') ? 'notOpp'
       : (r.includes('unreachable') || r.includes('source error')) ? 'dead'
       : 'other';
@@ -2225,16 +2358,20 @@ async function main() {
       // Auto-detect country from title + description
       const combinedText = `${item.title} ${item.description || ''}`;
       const detectedCountry = detectCountry(combinedText);
+      const initialContent = decodeEntities((item.description || '')).replace(/<[^>]+>/g, '').replace(/\s{2,}/g, ' ').trim();
       const newsItem = {
         title: decodeEntities(item.title),
-        summary: generateUniqueSummary(decodeEntities((item.description || '')).replace(/<[^>]+>/g, '').replace(/\s{2,}/g, ' ').trim(), 300),
-        content: decodeEntities((item.description || '')).replace(/<[^>]+>/g, '').replace(/\s{2,}/g, ' ').trim(),
+        summary: generateUniqueSummary(initialContent, 300),
+        content: initialContent,
         category: isTrailer ? 'trailer' : 'industry_news',
         url: item.link || null,
         slug,
         image_url: item.imageUrl || null,
         published_at: item.pubDate ? new Date(item.pubDate).toISOString() : new Date().toISOString(),
         status: 'pending',
+        // Pre-flag truncated bodies (RSS teasers, paywall previews) so they're never
+        // visible publicly until Phase-A enrichment recovers a full body.
+        is_truncated: isTruncatedContent(initialContent, item.link),
       };
       if (DRY_RUN) {
         console.log(`  [DRY] Would insert news: ${item.title.slice(0, 55)}${detectedCountry ? ` (🌍 ${detectedCountry})` : ''}`);
@@ -2271,6 +2408,13 @@ async function main() {
       const urlDomain = extractDomain(item.url);
       if (urlDomain && (PLATFORM_DOMAINS.has(urlDomain) || PLATFORM_DOMAINS.has(urlDomain.replace(/^[^.]+\./, '')))) {
         console.log(`  ✗ SKIP (platform domain — not an application page): ${item.title.slice(0, 55)}`);
+        continue;
+      }
+
+      // Step A.1b: Excluded-domain gate — known non-opportunity / false-positive
+      // sources (scanner_config.json → exclude_domains). Hard-blocked: never inserted.
+      if (isExcludedDomain(item.url)) {
+        console.log(`  ✗ SKIP (excluded domain — false-positive source): ${item.title.slice(0, 55)}`);
         continue;
       }
 
@@ -2333,7 +2477,29 @@ async function main() {
         scraped['What to Submit'],
       ];
       const coreFilled = coreValues.filter(isReal).length;
-      const oppStatus = (hasRealDeadline && coreFilled >= 3) ? 'pending' : 'needs_enrichment';
+
+      // ── Anti-invention rail ──────────────────────────────────────────────────
+      // An opportunity may only enter the public-review queue ('pending') if its
+      // existence is corroborated by the canonical source page the scanner actually
+      // fetched — i.e. Claude positively confirmed the page IS an opportunity AND the
+      // deadline came from the PAGE, not from email/LLM extraction alone. Items backed
+      // only by newsletter/LLM extraction (or whose page didn't confirm) are quarantined
+      // as 'unverified': never published, always surfaced in the review queue for a human
+      // to confirm a real apply page exists. This closes the vector that produced phantom
+      // listings (LinkedIn-digest items with no real source page behind them).
+      // A1 — a shortener/social URL is never a canonical apply page, so it can never
+      // corroborate, regardless of what the fetched page appeared to say.
+      const canonicalSource = !isNonCanonicalSource(item.url);
+      const pageCorroborated = canonicalSource && scraped._isActualOpportunity === true && isReal(scraped['Next Deadline']);
+      let oppStatus, oppReviewReason = null;
+      if (!pageCorroborated) {
+        oppStatus = 'unverified';
+        oppReviewReason = canonicalSource
+          ? 'unverified source — confirm a real apply/source page exists before publishing'
+          : 'unverified source — only a shortener/social link (no canonical apply page); resolve before publishing';
+      } else {
+        oppStatus = (hasRealDeadline && coreFilled >= 3) ? 'pending' : 'needs_enrichment';
+      }
 
       // Step E: Build the record — page scrape takes priority, email extraction fills gaps
       const oppItem = {
@@ -2349,6 +2515,7 @@ async function main() {
         'Strongest Submission Tips': scraped['Strongest Submission Tips'] || '',
         'CALENDAR REMINDER:': scraped['CALENDAR REMINDER:'] || '',
         status: oppStatus,
+        ...(oppReviewReason ? { review_reason: oppReviewReason } : {}),
         votes: 0,
         application_status: 'open',
         ...(scraped.category || item._emailCategory ? { category: scraped.category || item._emailCategory } : {}),
@@ -2360,6 +2527,7 @@ async function main() {
         `${coreFilled}/4 core`,
         enrichedFields > 0 && `${enrichedFields} fields`,
         oppStatus === 'needs_enrichment' && '⏳ needs_enrichment',
+        oppStatus === 'unverified' && '🚧 unverified (quarantined — no canonical source)',
         detectedCountry && `🌍 ${detectedCountry}`,
         logo && 'logo',
         ogImage && 'og',

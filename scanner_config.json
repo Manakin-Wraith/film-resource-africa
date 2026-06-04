@@ -14,6 +14,14 @@
     "min_keyword_matches": 2
   },
 
+  "exclude_domains": {
+    "_note": "Domains that are never real film opportunities (false-positive sources). Hard-blocked at insert and auto-rejected on re-verify. Add a domain here when a non-film site keeps getting scraped in.",
+    "list": [
+      "tamassociati.org",
+      "eepafrica.org"
+    ]
+  },
+
   "llm": {
     "triage": {
       "model": "claude-haiku-4-5-20251001",

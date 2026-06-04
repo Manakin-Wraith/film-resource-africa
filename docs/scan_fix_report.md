@@ -358,4 +358,99 @@ When extraction yields <600 chars on a known paywall domain, retry via `https://
 
 ---
 
+## 10. Truncation pipeline (2026-06-04 addendum)
+
+Spec'd and implemented in response to a published Deadline article surfacing on the live site with a mid-sentence ending (`"…Netflix and Disney+ to"`). The fix is four layers — detection, recovery, quarantine, insert-time pre-flag — and is the durable answer to **B1** / **B2**.
+
+### 10.1 Detection — `isTruncatedContent(content, url)`
+
+`@/Users/thecasterymedia/Downloads/ANTIGRAVITY/film_resource_africa/film-directory/scan_opportunities.mjs:70-101`
+
+Flags `content` as truncated if **any** signal trips:
+
+1. Body ends mid-sentence (last non-ws char is not `.`, `!`, `?`, `"`, `'`, `)`, `]`, `…`, `”`, `’`) AND length < 1500.
+2. Ends with RSS ellipsis `[…]` / `[...]`, or trailing `…` with length < 1200.
+3. Last non-empty line is a paywall stub: `ADVERTISEMENT`, `Subscribe`, `Sign in`, `Read More`, `To continue reading`, `Source: …`, `Follow us`, `Share this`.
+4. Length < 1200 AND source domain ∈ `PAYWALL_DOMAINS` (Deadline, Variety, WSJ, NYT, HR, TheWrap, FT, Times, Telegraph).
+5. Length < 200 (always).
+
+### 10.2 Recovery — AMP probe (new) + Wayback (already shipped)
+
+`@/Users/thecasterymedia/Downloads/ANTIGRAVITY/film_resource_africa/film-directory/scan_opportunities.mjs:1697-1717`
+
+After Wayback fallback, if still thin, follow `<link rel="amphtml">` and re-extract. Most paywall sites (Deadline, Variety, HR) don't gate AMP. This is cheap (one extra page load when warranted) and recovers the bulk of B1 cases.
+
+### 10.3 Quarantine — `is_truncated` column + read-path filter
+
+DB migration `add_news_is_truncated`:
+
+```sql
+alter table public.news
+  add column if not exists is_truncated boolean not null default false;
+create index if not exists news_is_truncated_idx
+  on public.news (is_truncated) where is_truncated = true;
+```
+
+Public read paths now filter `is_truncated = false`:
+
+- `@/Users/thecasterymedia/Downloads/ANTIGRAVITY/film_resource_africa/film-directory/src/app/actions.ts:236-243` — `getTrailers`
+- `@/Users/thecasterymedia/Downloads/ANTIGRAVITY/film_resource_africa/film-directory/src/app/actions.ts:255-262` — `getNews`
+- `@/Users/thecasterymedia/Downloads/ANTIGRAVITY/film_resource_africa/film-directory/src/app/actions.ts:274-279` — `getNewsArticle`
+- `@/Users/thecasterymedia/Downloads/ANTIGRAVITY/film_resource_africa/film-directory/src/app/actions.ts:308-313` — `getAllNews`
+- `@/Users/thecasterymedia/Downloads/ANTIGRAVITY/film_resource_africa/film-directory/src/app/sitemap.ts:73-79` — `sitemap`
+
+Admin read (`getAllNewsAdmin`) is intentionally untouched so admins can see + fix truncated rows.
+
+### 10.4 Insert-time pre-flag
+
+`@/Users/thecasterymedia/Downloads/ANTIGRAVITY/film_resource_africa/film-directory/scan_opportunities.mjs:2316-2330`
+
+At RSS insert, `is_truncated` is set from `isTruncatedContent(initialContent, item.link)` so paywall/teaser bodies never enter the publish queue clean — they sit as pending+truncated and wait for the enricher.
+
+### 10.5 Enrichment loop changes
+
+`@/Users/thecasterymedia/Downloads/ANTIGRAVITY/film_resource_africa/film-directory/scan_opportunities.mjs:1646-1657, 1742-1782`
+
+- Phase A query now selects `is_truncated`.
+- Truncated rows are eligible for re-enrichment even after `enriched_at` is set (until either recovered or `MAX_ENRICH_ATTEMPTS = 3`).
+- After every extraction attempt the row's `is_truncated` is re-evaluated against the *final* body that would be persisted (either new content or existing), so a Wayback/AMP recovery clears the flag in the same write.
+- Sealing now requires `length ≥ 800 AND is_truncated = false` (or attempts exhausted).
+
+### 10.6 Admin UX
+
+`@/Users/thecasterymedia/Downloads/ANTIGRAVITY/film_resource_africa/film-directory/src/components/AdminClient.tsx:1038-1108`
+
+- Red **TRUNCATED** badge next to the title.
+- One-click **Publish** is hidden when `is_truncated === true`.
+- New **Clear truncated** action requires an explicit confirmation that the body has been fixed.
+
+### 10.7 Backfill
+
+```sql
+update public.news set is_truncated = true
+ where length(content) < 800 and (
+   url ilike '%deadline.com%' or url ilike '%variety.com%' or url ilike '%thewrap.com%' or
+   url ilike '%hollywoodreporter.com%' or url ilike '%ft.com%' or url ilike '%wsj.com%' or
+   url ilike '%nytimes.com%' or url ilike '%thetimes.co.uk%' or url ilike '%telegraph.co.uk%'
+ ) or content ~ '\[(\u2026|\.\.\.)\]\s*$'
+   or content ~* '(advertisement|subscribe|sign in|read more|to continue reading|subscribers only)\s*$';
+```
+
+Ran 2026-06-04 — flagged ~200 historical rows (including several `status='published'` Deadline/Variety articles that were showing truncated on the live site). They will be hidden from public reads immediately and become eligible for AMP/Wayback re-enrichment on the next `--enrich` run.
+
+### 10.8 Verification
+
+- `node --check scan_opportunities.mjs` — passes.
+- `npx tsc --noEmit` — passes (NewsItem.is_truncated typed).
+
+To watch the pipeline work on next run, look for these new log markers in the enricher output:
+
+```
+⚡ [1027] AMP recovered 496→3142 chars
+✅ [1027] Zack Snyder / Escape From New York... — content 496→3142, ✓ recovered
+⚠ still truncated   ← still paywalled after all fallbacks; stays quarantined
+```
+
+---
+
 *End of report.*
