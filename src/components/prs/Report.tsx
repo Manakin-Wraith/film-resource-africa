@@ -182,7 +182,6 @@ export function ReportFree({
                 ['Pathway-scoped scoring', 'Your project against two SA funding lanes — primary and secondary, with a numeric verdict on each.'],
                 ['Named funders, programs, and deadlines', "Three live opportunities matched to your project, sorted by deadline. Updated weekly by FRA's scanner."],
                 ['Three concrete moves for this quarter', 'Each with a named program, deadline, and a contact you can be introduced to.'],
-                ['Matched counterparties', "Producers, mentors, and co-pros from FRA's curated rolodex — with a one-click intro request."],
                 ['"What FRA would do"', 'The representation moves FRA would make if this project were on our desk. Each ends with a tracked conversation link.'],
                 ['Resubmit any time', 'A journal of point-in-time diagnoses. Your project evolves; the read should evolve with it.'],
               ].map(([t, s]) => (
@@ -528,6 +527,7 @@ export function ReportMember({
           </div>
         </Section>
 
+        {d.counterparties.length > 0 && (
         <Section
           rule="muted" rubric="Counterparties" title="People we'd put you in front of"
           sub="Curated from FRA's rolodex. Tap any card to request an introduction."
@@ -558,6 +558,7 @@ export function ReportMember({
             })}
           </div>
         </Section>
+        )}
 
         <Section
           rule="primary" rubric="What FRA would do" title="If this were our desk"

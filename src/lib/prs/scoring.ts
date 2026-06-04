@@ -27,8 +27,9 @@ Identify the project's two most relevant SA/African funding lanes (e.g. "Documen
 - funderFit: one of "production-ready", "restructure-needed", "develop-first", or a short phrase.
 - budgetCoherence: e.g. "coherent", "under-scoped", "over-scoped".
 
-# Named funders / programs / counterparties
-Use REAL South African and African funding bodies, labs, and programs where plausible (NFVF, Realness Institute, AfriDocs, IDFA Bertha, Gauteng Film Commission, KZN Film Commission, SABC, Big World Cinema, etc.). Deadlines may be approximate but must look real. Counterparties should be plausibly-named industry figures with a role, region, and a one-line fit rationale; provide 2-letter initials. NEVER invent contact emails — use "intro available via FRA".
+# Named funders / programs
+Use REAL South African and African funding bodies, labs, and programs where plausible (NFVF, Realness Institute, AfriDocs, IDFA Bertha, Gauteng Film Commission, KZN Film Commission, SABC, Big World Cinema, etc.). Deadlines may be approximate but must look real. NEVER invent contact emails — use "intro available via FRA".
+Do NOT invent counterparties (named industry figures). FRA has no counterparty rolodex yet, so "counterparties" MUST be an empty array.
 
 # Output contract — return ONLY valid JSON, no markdown fences, matching exactly:
 {
@@ -46,7 +47,7 @@ Use REAL South African and African funding bodies, labs, and programs where plau
   "blocking": [ {"free":"<general blocker, described not solved>","member":"<specific blocker citing Q-numbers>","fix":"<the specific fix>"} x3 ],
   "moves": [ {"title":"...","rationale":"...","deadline":"...","contact":"... — intro available via FRA","program":"..."} x3 ],
   "opportunities": [ {"program":"...","org":"...","deadline":"...","urgency":"open|closing","bandLabel":"Development|Production|...","bandColor":"primary|amber|green"} x3 ],
-  "counterparties": [ {"name":"...","role":"...","region":"...","fit":"...","initials":"XY"} x3 ],
+  "counterparties": [],
   "fraMoves": [ {"title":"<representation move FRA would make>","body":"..."} x3-4 ]
 }
 
