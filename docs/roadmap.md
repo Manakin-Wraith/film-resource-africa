@@ -85,7 +85,7 @@ Both layers share accounts, project data model, and brand — AFX is the paywall
 **Opportunity lifecycle "Phase 2" — cyclical intelligence:**
 - [x] **Stage 1 — cycle_history capture** (shipped 2026-06-04, PR #7). `opportunities.cycle_history` jsonb records every cycle's deadline on insert/reopen/close/shift; 109 rows backfilled.
 - [ ] **Stage 2 — seasonal reopen prediction.** Once a programme has ≥2 recorded cycles, infer its typical reopen/deadline month and gate dormant re-verify polling to that window (weekly in-window; ~quarterly safety-net otherwise) instead of blind monthly checks. *Note: mostly inert until programmes log a 2nd cycle (months out), since the backfill only captured 1 cycle each.*
-- [ ] **Stage 3 — roll-forward triggers.** Match Gmail/RSS "applications now open" signals to existing dormant/closed programmes (by domain/title entity-matching) and force an immediate re-verify + roll-forward. Higher immediate value than Stage 2; needs entity-matching.
+- [x] **Stage 3 — roll-forward triggers** (shipped 2026-06-04). A scan's "now open" signals (opportunity leads + news, opening-keyword-filtered) are matched to existing closed/expired programmes by own-domain (excluding generic platforms) or distinctive multi-token name, and forced into the Phase-C re-verify batch immediately. Reopen stays admin-gated, so a false match only costs one scrape.
 
 **Other discovery-engine items:**
 - [ ] News relevance is keyword-based; consider an LLM relevance pass for edge cases (e.g. SA-specific acronyms like SABC/ANC the keyword list misses).
