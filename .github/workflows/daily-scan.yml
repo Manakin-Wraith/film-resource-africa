@@ -31,7 +31,9 @@ jobs:
         env:
           NEXT_PUBLIC_SUPABASE_URL:      ${{ secrets.SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY:     ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           ANTHROPIC_API_KEY:             ${{ secrets.ANTHROPIC_API_KEY }}
+          RESEND_API_KEY:                ${{ secrets.RESEND_API_KEY }}
           VAULT_GITHUB_PAT:              ${{ secrets.VAULT_GITHUB_PAT }}
           VAULT_GITHUB_REPO:             ${{ secrets.VAULT_GITHUB_REPO }}
           GMAIL_CLIENT_SECRET:           ${{ secrets.GMAIL_CLIENT_SECRET }}
