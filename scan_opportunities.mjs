@@ -2148,7 +2148,8 @@ async function reverifyOpportunities(context, dryRun = false, forceEmail = false
       if (page) await page.close().catch(() => {});
     }
   }
-  console.log(`   Re-verified ${reFresh} (${reChanged} deadline updates, ${reFlagged} flagged). ${Math.max(0, dueList.length - dueBatch.length)} remain for next run.`);
+  const totalDue = cadenceDue.length + forcedRows.length;
+  console.log(`   Re-verified ${reFresh} (${reChanged} deadline updates, ${reFlagged} flagged). ${Math.max(0, totalDue - dueBatch.length)} remain for next run.`);
 
   // Standalone verification email only for manual --verify-only runs (forceEmail). During the
   // daily --enrich run the flagged queue rides along in the scan-summary email instead, so we
