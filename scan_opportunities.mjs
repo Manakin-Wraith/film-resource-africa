@@ -1485,6 +1485,16 @@ function verifyBucket(opp, nowMs) {
   return ageDays >= 30 ? 'dormant' : null;   // past deadline or none → monthly reopen check
 }
 
+// Append a cycle's deadline to an opportunity's cycle_history (dedup by date). This is the
+// raw material for Stage-2 seasonal reopen prediction — over ≥2 cycles we can infer the month
+// a programme typically opens. Returns the new array (or the original if nothing to add).
+function addCycle(history, deadlineDate, source) {
+  const list = Array.isArray(history) ? history : [];
+  if (!deadlineDate) return list;
+  if (list.some(c => c && c.deadline === deadlineDate)) return list;
+  return [...list, { deadline: deadlineDate, recorded_at: new Date().toISOString(), source }];
+}
+
 // ─── Stale deadline cleanup ───────────────────────────────────────────────────
 // Marks pending opportunities as 'expired' when their deadline has clearly passed.
 
@@ -1975,7 +1985,7 @@ async function reverifyOpportunities(context, dryRun = false, forceEmail = false
   const todayStr = new Date().toISOString().slice(0, 10);
   const nowMs = Date.now();
   const verifyPool = await supabaseGetAll('opportunities',
-    'select=id,title,status,"Apply:","Next Deadline",deadline_date,content_hash,last_verified_at,verify_attempts,review_reason,review_locked_at');
+    'select=id,title,status,"Apply:","Next Deadline",deadline_date,content_hash,last_verified_at,verify_attempts,review_reason,review_locked_at,cycle_history');
   const dueList = verifyPool
     .map(o => ({ o, bucket: verifyBucket(o, nowMs) }))
     .filter(x => x.bucket)
@@ -2058,6 +2068,7 @@ async function reverifyOpportunities(context, dryRun = false, forceEmail = false
         // Cycle reopened — major change; route to admin for a one-click approve.
         updates['Next Deadline'] = freshText;
         updates.deadline_date = freshDate;
+        updates.cycle_history = addCycle(opp.cycle_history, freshDate, 'reopen');
         updates.status = 'pending';
         updates.review_reason = 'cycle reopened — verify before publishing';
         reFlagged++;
@@ -2066,6 +2077,7 @@ async function reverifyOpportunities(context, dryRun = false, forceEmail = false
         // Deadline has passed → close + hide (routine lifecycle, auto, no admin flag).
         updates['Next Deadline'] = freshText;
         updates.deadline_date = freshDate;
+        updates.cycle_history = addCycle(opp.cycle_history, freshDate, 'closed');
         updates.status = 'closed';
         reChanged++;
         console.log(`  🗓 [${opp.id}] ${opp.title.slice(0, 45)} — deadline passed → closed`);
@@ -2073,6 +2085,7 @@ async function reverifyOpportunities(context, dryRun = false, forceEmail = false
         // Deadline shifted to a new future date → minor auto-update.
         updates['Next Deadline'] = freshText;
         updates.deadline_date = freshDate;
+        updates.cycle_history = addCycle(opp.cycle_history, freshDate, 'shift');
         reChanged++;
         console.log(`  ✎ [${opp.id}] ${opp.title.slice(0, 45)} — deadline updated → ${freshDate}`);
       } else {
@@ -2513,6 +2526,10 @@ async function main() {
         oppStatus = (hasRealDeadline && coreFilled >= 3) ? 'pending' : 'needs_enrichment';
       }
 
+      // Seed deadline_date + the first cycle_history entry at birth when the deadline parses,
+      // so new opps carry cadence + cyclical data immediately (not only after a re-verify pass).
+      const insDeadlineDate = hasRealDeadline ? parseDeadlineToDate(deadlineVal) : null;
+
       // Step E: Build the record — page scrape takes priority, email extraction fills gaps
       const oppItem = {
         title: decodeEntities(item.title),
@@ -2532,6 +2549,7 @@ async function main() {
         application_status: 'open',
         ...(scraped.category || item._emailCategory ? { category: scraped.category || item._emailCategory } : {}),
         ...(scraped._africaRelevance ? { africa_relevance: scraped._africaRelevance } : {}),
+        ...(insDeadlineDate ? { deadline_date: insDeadlineDate, cycle_history: [{ deadline: insDeadlineDate, recorded_at: new Date().toISOString(), source: 'insert' }] } : {}),
         ...(logo ? { logo } : {}),
         ...(ogImage ? { og_image_url: ogImage } : {}),
       };
