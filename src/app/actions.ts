@@ -92,6 +92,9 @@ export interface NewsItem {
   country_id?: string;
   country_iso?: string;
   country_name?: string;
+  // Set by the scanner/enricher when the article body looks paywall-truncated.
+  // Public read paths filter this out; admin must clear it before publish.
+  is_truncated?: boolean;
 }
 
 export async function getAllOpportunities(): Promise<Opportunity[]> {
@@ -238,6 +241,7 @@ export async function getTrailers(): Promise<NewsItem[]> {
       .select('*, countries(iso_code, name)')
       .eq('status', 'published')
       .eq('category', 'trailer')
+      .eq('is_truncated', false)
       .order('published_at', { ascending: false })
       .limit(10);
       
@@ -256,6 +260,7 @@ export async function getNews(): Promise<NewsItem[]> {
       .select('*, countries(iso_code, name)')
       .eq('status', 'published')
       .neq('category', 'trailer')
+      .eq('is_truncated', false)
       .order('published_at', { ascending: false })
       .limit(6);
       
@@ -273,6 +278,7 @@ export async function getNewsArticle(slug: string): Promise<NewsItem | null> {
       .from('news')
       .select('*')
       .eq('slug', slug)
+      .eq('is_truncated', false)
       .single();
       
     if (error) throw error;
@@ -306,6 +312,7 @@ export async function getAllNews(): Promise<NewsItem[]> {
       .from('news')
       .select('*, countries(iso_code, name)')
       .eq('status', 'published')
+      .eq('is_truncated', false)
       .order('published_at', { ascending: false });
       
     if (error) throw error;
