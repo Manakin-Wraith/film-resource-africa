@@ -48,6 +48,8 @@ export interface Opportunity {
   deadline_date?: string;
   application_status?: 'open' | 'closing_soon' | 'upcoming' | 'closed';
   updated_at?: string;
+  last_verified_at?: string;
+  review_reason?: string;
   geo_scope?: 'country_specific' | 'pan_african' | 'international';
   country_id?: string;
   country_iso?: string;

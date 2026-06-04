@@ -2,13 +2,14 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo, useDragControls } from 'framer-motion';
-import { Calendar, DollarSign, FileText, ExternalLink, X, Info, Target, FileCheck, CheckCircle2, AlertCircle, Share2, Clock, AlertTriangle, Lightbulb } from 'lucide-react';
+import { Calendar, DollarSign, FileText, ExternalLink, X, Info, Target, FileCheck, CheckCircle2, AlertCircle, Share2, Clock, AlertTriangle, Lightbulb, BadgeCheck } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Opportunity } from '@/app/actions';
 import { getCategoryStyle } from '@/lib/categoryConfig';
 import { decodeHtmlEntities } from '@/lib/textUtils';
+import { formatRelativeDate, formatLocalDateTime } from '@/lib/dateUtils';
 import GeoIndicator from '@/components/GeoIndicator';
 
 function ModalMarkdown({ text }: { text: string }) {
@@ -239,6 +240,15 @@ export default function OpportunityModal({ selectedOpp, onClose }: OpportunityMo
                     <div>
                       <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--foreground-tertiary)' }}>Deadline</p>
                       <p className="text-sm font-semibold text-foreground leading-snug">{decodeHtmlEntities(selectedOpp["Next Deadline"])}</p>
+                      {selectedOpp.last_verified_at && (
+                        <p
+                          title={`Source last re-checked ${formatLocalDateTime(selectedOpp.last_verified_at)}`}
+                          className="mt-1.5 inline-flex items-center gap-1 text-[11px] font-medium text-teal-400"
+                        >
+                          <BadgeCheck size={12} />
+                          Verified {formatRelativeDate(selectedOpp.last_verified_at)}
+                        </p>
+                      )}
                     </div>
                   </div>
                 )}

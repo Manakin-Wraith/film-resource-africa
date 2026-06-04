@@ -184,7 +184,7 @@
       { "name": "Gauteng Film Commission",     "url": "https://gautengfilm.org.za",                         "keywords": ["open call","applications","funding","grant"],            "status": "active" },
       { "name": "Wesgro Film",                 "url": "https://wesgro.co.za/film",                          "keywords": ["open call","applications","funding","grant"],            "status": "active" },
       { "name": "KZN Film Commission",         "url": "https://kwazulunatalfilm.co.za",                     "keywords": ["open call","applications","funding","grant"],            "status": "active" },
-      { "name": "Uganda Comms Commission",     "url": "https://ucc.co.ug",                                  "keywords": ["open call","film","broadcast","grant"],                  "status": "active" },
+      { "name": "Uganda Comms Commission",     "url": "https://ucc.co.ug",                                  "keywords": ["open call","film","broadcast","grant"],                  "status": "dead", "dead_reason": "telecoms/broadcasting regulator, not a film funder — removed 2026-06-03" },
       { "name": "Uganda Film Festival",        "url": "https://filmfreeway.com/UgandaFilmFestival",         "keywords": ["call for","submissions","entries"],                      "status": "active" },
 
       { "name": "Doc Society",                 "url": "https://docsociety.org",                             "keywords": ["open call","fund","apply","deadline"],                  "status": "pending" },

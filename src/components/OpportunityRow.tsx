@@ -1,9 +1,9 @@
 'use client';
 
 import { Opportunity } from '@/app/actions';
-import { Calendar, DollarSign, ExternalLink, AlertTriangle, Clock, Sparkles, RefreshCw } from 'lucide-react';
+import { Calendar, DollarSign, ExternalLink, AlertTriangle, Clock, Sparkles, RefreshCw, BadgeCheck } from 'lucide-react';
 import { getCategoryStyle } from '@/lib/categoryConfig';
-import { isNewListing, isUpdatedListing, formatDeadline } from '@/lib/dateUtils';
+import { isNewListing, isUpdatedListing, formatDeadline, formatRelativeDate, formatLocalDateTime } from '@/lib/dateUtils';
 import { decodeHtmlEntities } from '@/lib/textUtils';
 import SponsoredCard from './SponsoredCard';
 import { trackOpportunityClick } from '@/lib/analytics';
@@ -112,6 +112,15 @@ export default function OpportunityRow({ opportunities, title, subtitle, icon, o
                   <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border bg-amber-500/20 border-amber-500/30 text-amber-300">
                     <RefreshCw size={9} />
                     UPDATED
+                  </span>
+                )}
+                {opp.last_verified_at && (
+                  <span
+                    title={`Source last re-checked ${formatLocalDateTime(opp.last_verified_at)}`}
+                    className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border bg-teal-500/15 border-teal-500/25 text-teal-300"
+                  >
+                    <BadgeCheck size={10} />
+                    Verified {formatRelativeDate(opp.last_verified_at)}
                   </span>
                 )}
               </div>
