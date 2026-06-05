@@ -82,20 +82,21 @@ function isTruncatedContent(content, url) {
   const stubRe = /^(advertisement|subscribe(?:rs only| to .+)?|sign in( to .+)?|read more|continue reading|to continue reading.*|source\s*:.*|follow us.*|share this.*)\.?$/i;
   if (stubRe.test(lastLine)) return true;
 
-  // 1. Mid-sentence ending (last char not terminal punctuation or closing quote/bracket)
-  const lastChar = text.replace(/\s+$/, '').slice(-1);
-  const terminal = new Set(['.', '!', '?', '"', "'", ')', ']', '\u201d', '\u2019', '\u2026']);
-  const endsMidSentence = !terminal.has(lastChar);
-
-  // 4. Paywall-domain length floor
+  // 4. Paywall-domain length floor (cheap pre-check)
   let domain = '';
   try { domain = (new URL(url).hostname || '').replace(/^www\./, ''); } catch { /* ignore */ }
   const isPaywall = domain && PAYWALL_DOMAINS.has(domain);
   if (isPaywall && text.length < 1200) return true;
 
-  // Mid-sentence ending alone is only fatal when body is also shortish;
-  // long-form articles occasionally end on a quote/parenthetical we missed.
-  if (endsMidSentence && text.length < 1500) return true;
+  // 1. Mid-sentence ending — *always* fatal. A legitimately complete article never ends
+  // with a bare letter, digit, or comma; it ends with terminal punctuation, a closing
+  // quote, a closing bracket, or an ellipsis. This is the strongest single signal — the
+  // Deadline `…Disney+ to` failure was a 1534-char body that slipped past an earlier
+  // length-gated version of this rule.
+  const trimmed = text.replace(/\s+$/, '');
+  const lastChar = trimmed.slice(-1);
+  const terminal = /[.!?\u2026)\]"'\u201d\u2019\u00bb\u300d\u300f]/;   // . ! ? … ) ] " ' ” ’ » 」 』
+  if (!terminal.test(lastChar)) return true;
 
   return false;
 }

@@ -179,7 +179,7 @@ export default function Header({ stats }: HeaderProps) {
         </div>
 
         {/* Mobile dropdown */}
-        <div className={`md:hidden overflow-hidden transition-all duration-200 ${menuOpen ? 'max-h-[520px] opacity-100' : 'max-h-0 opacity-0'}`}>
+        <div className={`md:hidden transition-all duration-200 ${menuOpen ? 'max-h-[calc(100vh-4rem)] opacity-100 overflow-y-auto overscroll-contain' : 'max-h-0 opacity-0 overflow-hidden'}`}>
           <div className="border-t border-white/[0.06] container mx-auto px-4 py-2">
             <Link
               href="/assess"
