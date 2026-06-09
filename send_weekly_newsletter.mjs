@@ -47,15 +47,23 @@ const SEND_DELAY_MS = 600; // Resend free tier: ~2/sec
 
 const ITC_OPPORTUNITY = null; // Expired 9 May 2026
 
-const FEATURED_MEMBER = {
-  name: 'Garth McCarthy',
-  username: 'garth-mccarthy',
-  avatarUrl: 'https://rcgynwcttgvqcnbyfhiz.supabase.co/storage/v1/object/public/member-images/c9ee91b3-e10b-4690-afda-84270c1ff0ce/avatar/1778333159794.png',
-  disciplines: 'Writer · Director · Aspiring Producer',
-  location: 'Pretoria, South Africa',
-  bio: '<strong>Garth McCarthy</strong> is a Pretoria-based indie writer-filmmaker whose work spans features and short films. He has collaborated with producers as a script doctor, with multiple screenplays optioned internationally. In 2018, he sold the original screenplay for <em>Hunting Jessica Brok</em>, which reached audiences in 2025. His short film credits include <em>Blink</em>, <em>A Tragic Tail</em>, and <em>The Groom</em>. A WGASA member and proud founding member of FRA.',
-  website: null,
-  reelUrl: 'https://www.youtube.com/watch?v=9-o7JovhVuw',
+const FEATURED_MEMBER = null;
+
+// Directory listing spotlight (overrides FEATURED_MEMBER when set).
+// Pulled from directory_listings.id = 77
+const FEATURED_LISTING = {
+  id: 77,
+  name: 'Wanzami Entertainment',
+  category: 'Distribution',
+  country: 'Nigeria',
+  city: 'Lagos',
+  website: 'https://wanzamientertainment.com',
+  logoUrl: 'https://rcgynwcttgvqcnbyfhiz.supabase.co/storage/v1/object/public/directory-logos/logos/1777054481861-gn28lp.jpeg',
+  description: 'A production and distribution company redefining the cinema space in Nigeria and Africa at large. Founded in 2024, Wanzami pairs theatrical and platform distribution with in-house production across feature film, commercials, documentary and music video.',
+  speciality: 'Production · Distribution · Commercials · Documentary · Music video',
+  notableProjects: 'Ruin · Traffick · Against Creation · Quicksand · Those Focking Nigerians',
+  yearFounded: 2024,
+  companySize: 'indie',
 };
 
 // ─── Supabase REST helpers ───────────────────────────────────────────────────
@@ -399,6 +407,59 @@ function buildMemberSpotlightCard(member) {
     </tr>`;
 }
 
+function buildListingSpotlightCard(listing) {
+  if (!listing) return '';
+  const websiteUrl = listing.website ? trackUrl(listing.website, 'listing_spotlight_website') : null;
+  const directoryUrl = trackUrl(`${siteUrl}/industry`, 'listing_spotlight_profile');
+  const location = [listing.city, listing.country].filter(Boolean).map(escapeHtml).join(', ');
+  const logoHtml = listing.logoUrl
+    ? `<td style="vertical-align:middle;padding-right:14px;">
+        <a href="${escapeHtml(directoryUrl)}" style="text-decoration:none;">
+          <img src="${escapeHtml(listing.logoUrl)}" alt="${escapeHtml(listing.name)}" width="64" height="64" style="width:64px;height:64px;border-radius:8px;object-fit:contain;background:#ffffff;display:block;border:1px solid #e8e8e8;" />
+        </a>
+       </td>`
+    : '';
+  let buttons = `<a href="${escapeHtml(directoryUrl)}" style="display:inline-block;background:#37352f;color:#ffffff;font-weight:600;font-size:13px;text-decoration:none;padding:9px 22px;border-radius:6px;margin-right:8px;">View on FRA &rarr;</a>`;
+  if (websiteUrl) {
+    buttons += `\n<a href="${escapeHtml(websiteUrl)}" style="display:inline-block;background:#ffffff;color:#37352f;border:1px solid #d6d4cc;font-weight:600;font-size:13px;text-decoration:none;padding:8px 20px;border-radius:6px;">Visit website</a>`;
+  }
+  const meta = [escapeHtml(listing.category || ''), location, listing.yearFounded ? `Est. ${listing.yearFounded}` : '']
+    .filter(Boolean).join(' · ');
+  return `
+    <tr>
+      <td style="padding:8px 24px 0;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e8e8e8;border-radius:12px;overflow:hidden;background:#fafaf8;">
+          <tr><td style="padding:20px 22px 6px;">
+            <p style="margin:0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#9b9a97;">Directory Spotlight</p>
+          </td></tr>
+          <tr><td style="padding:8px 22px 4px;">
+            <table role="presentation" cellpadding="0" cellspacing="0"><tr>
+              ${logoHtml}
+              <td style="vertical-align:middle;">
+                <a href="${escapeHtml(directoryUrl)}" style="color:#37352f;text-decoration:none;font-size:20px;font-weight:700;">${escapeHtml(listing.name)}</a>
+                <p style="margin:4px 0 0;font-size:13px;color:#787774;">${meta}</p>
+              </td>
+            </tr></table>
+          </td></tr>
+          <tr><td style="padding:14px 22px 4px;">
+            <p style="margin:0;font-size:14px;line-height:1.6;color:#37352f;">${escapeHtml(listing.description)}</p>
+          </td></tr>
+          ${listing.speciality ? `<tr><td style="padding:10px 22px 0;">
+            <p style="margin:0;font-size:12px;color:#9b9a97;text-transform:uppercase;letter-spacing:0.6px;font-weight:600;">Specialities</p>
+            <p style="margin:4px 0 0;font-size:13px;line-height:1.5;color:#37352f;">${escapeHtml(listing.speciality)}</p>
+          </td></tr>` : ''}
+          ${listing.notableProjects ? `<tr><td style="padding:10px 22px 0;">
+            <p style="margin:0;font-size:12px;color:#9b9a97;text-transform:uppercase;letter-spacing:0.6px;font-weight:600;">Notable projects</p>
+            <p style="margin:4px 0 0;font-size:13px;line-height:1.5;color:#37352f;">${escapeHtml(listing.notableProjects)}</p>
+          </td></tr>` : ''}
+          <tr><td style="padding:16px 22px 20px;">
+            ${buttons}
+          </td></tr>
+        </table>
+      </td>
+    </tr>`;
+}
+
 function buildIndustryListingsSection(listings, siteUrl) {
   if (!listings || listings.length === 0) return '';
   let rows = '';
@@ -440,7 +501,7 @@ function buildIndustryListingsSection(listings, siteUrl) {
     </tr>`;
 }
 
-function buildNewsletterHtml({ closingSoon, newlyOpen, justAdded, news, proTip, weekLabel, callSheetListings, communitySpotlights, partners, episodeNumber, itcOpportunity, industryListings, featuredMember }) {
+function buildNewsletterHtml({ closingSoon, newlyOpen, justAdded, news, proTip, weekLabel, callSheetListings, communitySpotlights, partners, episodeNumber, itcOpportunity, industryListings, featuredMember, featuredListing }) {
   // Deduplicate: if an opp appears in closingSoon, don't show it again in newlyOpen or justAdded
   const closingIds = new Set(closingSoon.map(o => o.id));
   const openIds = new Set(newlyOpen.map(o => o.id));
@@ -449,8 +510,11 @@ function buildNewsletterHtml({ closingSoon, newlyOpen, justAdded, news, proTip, 
 
   let sections = '';
 
-  // ── Featured: Member Spotlight ──
-  if (featuredMember) {
+  // ── Featured: Directory Listing Spotlight (preferred) ──
+  if (featuredListing) {
+    sections += buildListingSpotlightCard(featuredListing);
+  } else if (featuredMember) {
+    // ── Featured: Member Spotlight (fallback) ──
     sections += buildMemberSpotlightCard(featuredMember);
   }
 
@@ -794,8 +858,19 @@ function buildNewsletterHtml({ closingSoon, newlyOpen, justAdded, news, proTip, 
 
 // ─── Plain text fallback generator ───────────────────────────────────────────
 
-function buildPlainText({ closingSoon, newlyOpen, justAdded, news, proTip, weekLabel, callSheetListings, itcOpportunity, industryListings }) {
+function buildPlainText({ closingSoon, newlyOpen, justAdded, news, proTip, weekLabel, callSheetListings, itcOpportunity, industryListings, featuredListing }) {
   let text = `FILM RESOURCE AFRICA — Weekly Opportunities Digest\nWeek of ${weekLabel}\n\n`;
+
+  if (featuredListing) {
+    text += `--- DIRECTORY SPOTLIGHT ---\n\n`;
+    text += `${featuredListing.name} (${featuredListing.category})\n`;
+    text += `${[featuredListing.city, featuredListing.country].filter(Boolean).join(', ')}\n`;
+    text += `${featuredListing.description}\n`;
+    if (featuredListing.speciality) text += `Specialities: ${featuredListing.speciality}\n`;
+    if (featuredListing.notableProjects) text += `Notable projects: ${featuredListing.notableProjects}\n`;
+    if (featuredListing.website) text += `Website: ${featuredListing.website}\n`;
+    text += `Profile: ${siteUrl}/industry\n\n`;
+  }
 
   if (itcOpportunity) {
     text += `--- FEATURED OPPORTUNITY · ITC ---\n\n`;
@@ -1015,14 +1090,17 @@ async function main() {
   console.log(`  Industry listings: ${industryListings.length}`);
   console.log(`  ITC featured: ${ITC_OPPORTUNITY ? 'yes' : 'no'}`);
   console.log(`  Member spotlight: ${FEATURED_MEMBER ? FEATURED_MEMBER.name : 'none'}`);
+  console.log(`  Listing spotlight: ${FEATURED_LISTING ? FEATURED_LISTING.name : 'none'}`);
 
   // 3. Generate newsletter HTML
-  const data = { closingSoon, newlyOpen, justAdded, news, proTip, weekLabel, callSheetListings, communitySpotlights, partners, episodeNumber, itcOpportunity: ITC_OPPORTUNITY, industryListings, featuredMember: FEATURED_MEMBER };
+  const data = { closingSoon, newlyOpen, justAdded, news, proTip, weekLabel, callSheetListings, communitySpotlights, partners, episodeNumber, itcOpportunity: ITC_OPPORTUNITY, industryListings, featuredMember: FEATURED_MEMBER, featuredListing: FEATURED_LISTING };
   const html = buildNewsletterHtml(data);
   const plainText = buildPlainText(data);
-  // Dynamic subject line — lead with member spotlight when present
+  // Dynamic subject line — lead with directory spotlight when present, then member spotlight
   let subject;
-  if (FEATURED_MEMBER) {
+  if (FEATURED_LISTING) {
+    subject = `FRA Weekly — ${weekLabel} · Directory Spotlight: ${FEATURED_LISTING.name}`;
+  } else if (FEATURED_MEMBER) {
     subject = `FRA Weekly — ${weekLabel} · Founding Member Spotlight: ${FEATURED_MEMBER.name}`;
   } else if (news.length > 0 && news[0].title) {
     const shortTitle = news[0].title.length > 50 ? news[0].title.slice(0, 47).replace(/\s+\S*$/, '') + '...' : news[0].title;
