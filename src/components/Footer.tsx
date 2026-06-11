@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import ContactModal from './ContactModal';
 import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
 import type { InquiryType } from '@/app/actions';
 
 export default function Footer() {
@@ -43,14 +44,14 @@ export default function Footer() {
 
   return (
     <>
-      <footer className="relative z-20 border-t border-white/[0.08] py-12 pb-24 md:pb-16">
+      <footer className="relative z-20 border-t border-line py-12 pb-24 md:pb-16">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-10 items-start text-center md:text-left">
 
             {/* Branding */}
             <div className="space-y-5">
               <div className="flex items-center justify-center md:justify-start gap-3">
-                <div className="w-9 h-9 rounded-xl border border-white/[0.12] overflow-hidden p-1.5 flex items-center justify-center flex-shrink-0" style={{ background: 'var(--surface-raised)' }}>
+                <div className="w-9 h-9 rounded-xl border border-line-mid overflow-hidden p-1.5 flex items-center justify-center flex-shrink-0" style={{ background: 'var(--surface-raised)' }}>
                   <Image
                     src="/icon.png"
                     alt="Film Resource Africa"
@@ -92,19 +93,20 @@ export default function Footer() {
               </div>
               <form onSubmit={handleSubscribe} className="space-y-2">
                 <div className="relative">
-                  <input
+                  <Input
                     type="email"
                     required
                     placeholder="your@email.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full border border-white/[0.12] rounded-xl px-4 py-3 pr-12 text-sm focus:border-primary/50 transition-colors text-foreground placeholder:text-foreground/50"
-                    style={{ background: 'var(--surface-raised)' }}
+                    className="pr-12"
+                    error={error ?? undefined}
                   />
                   <button
                     disabled={submitting || subscribed}
                     type="submit"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-primary hover:bg-blue-600 disabled:bg-success text-white rounded-lg transition-colors flex items-center justify-center"
+                    aria-label="Subscribe"
+                    className="absolute right-2 top-[22px] -translate-y-1/2 w-8 h-8 bg-primary hover:bg-primary-hover disabled:bg-success text-white rounded-lg transition-colors flex items-center justify-center"
                   >
                     {submitting ? (
                       <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -115,8 +117,7 @@ export default function Footer() {
                     )}
                   </button>
                 </div>
-                {error && <p className="text-red-400 text-[11px]">{error}</p>}
-                {subscribed && <p className="text-[11px] font-medium" style={{ color: 'var(--color-success)' }}>Successfully subscribed!</p>}
+                {subscribed && <p className="text-xs font-medium text-success">Successfully subscribed!</p>}
               </form>
             </div>
 
@@ -145,7 +146,7 @@ export default function Footer() {
                     key={i}
                     href={s.href}
                     aria-label={s.label}
-                    className="w-10 h-10 rounded-xl border border-white/[0.1] flex items-center justify-center transition-colors hover:border-white/[0.2] hover:text-foreground"
+                    className="w-10 h-10 rounded-xl border border-line-mid flex items-center justify-center transition-colors hover:border-line-strong hover:text-foreground"
                     style={{ background: 'var(--surface-raised)', color: 'var(--foreground-secondary)' }}
                   >
                     <s.icon size={18} />

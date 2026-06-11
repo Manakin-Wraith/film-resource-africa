@@ -50,7 +50,7 @@ export default function MobileTabBar() {
       }`}
     >
       <div
-        className="border-t border-white/[0.12]"
+        className="border-t border-line-mid"
         style={{
           background: 'var(--surface)',
           paddingBottom: 'env(safe-area-inset-bottom)',
@@ -77,7 +77,7 @@ export default function MobileTabBar() {
                   <Icon size={22} strokeWidth={active ? 2.5 : 1.5} />
                 </div>
                 <span
-                  className={`text-[10px] font-semibold tracking-wide ${
+                  className={`text-[11px] font-semibold tracking-wide ${
                     active ? 'text-primary' : ''
                   }`}
                 >

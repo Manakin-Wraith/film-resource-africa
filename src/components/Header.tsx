@@ -89,7 +89,7 @@ export default function Header({ stats }: HeaderProps) {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50">
-      <div className="border-b border-white/[0.08]" style={{ background: 'var(--surface)' }}>
+      <div className="border-b border-line" style={{ background: 'var(--surface)' }}>
         <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-8">
 
           {/* Publication wordmark */}
@@ -139,10 +139,9 @@ export default function Header({ stats }: HeaderProps) {
                   className="flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors hover:bg-white/[0.06]"
                 >
                   {member.avatar_url ? (
-                    <img src={member.avatar_url} alt="" className="w-7 h-7 rounded-full object-cover" style={{ border: '1px solid rgba(255,255,255,0.16)' }} />
+                    <img src={member.avatar_url} alt="" className="w-7 h-7 rounded-full object-cover border border-line-strong" />
                   ) : (
-                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold"
-                      style={{ background: 'rgba(59,130,246,0.2)', border: '1px solid rgba(59,130,246,0.3)', color: '#93c5fd' }}>
+                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold bg-primary/20 border border-primary/30 text-blue-300">
                       {firstName.charAt(0)}
                     </div>
                   )}
@@ -160,7 +159,7 @@ export default function Header({ stats }: HeaderProps) {
               /* Logged-out state */
               <Link
                 href="/login"
-                className="flex items-center px-4 py-2 text-[13px] font-semibold border border-white/[0.2] text-foreground hover:bg-white/[0.06] rounded-lg transition-all"
+                className="flex items-center px-4 py-2 text-[13px] font-semibold border border-line-strong text-foreground hover:bg-white/[0.06] rounded-lg transition-all"
               >
                 Member login
               </Link>
@@ -180,11 +179,11 @@ export default function Header({ stats }: HeaderProps) {
 
         {/* Mobile dropdown */}
         <div className={`md:hidden transition-all duration-200 ${menuOpen ? 'max-h-[calc(100vh-4rem)] opacity-100 overflow-y-auto overscroll-contain' : 'max-h-0 opacity-0 overflow-hidden'}`}>
-          <div className="border-t border-white/[0.06] container mx-auto px-4 py-2">
+          <div className="border-t border-line container mx-auto px-4 py-2">
             <Link
               href="/assess"
               onClick={() => setMenuOpen(false)}
-              className="flex items-center py-3.5 text-sm font-semibold border-b border-white/[0.06] transition-colors min-h-[44px]"
+              className="flex items-center py-3.5 text-sm font-semibold border-b border-line transition-colors min-h-[44px]"
               style={{ color: 'var(--primary)' }}
             >
               Assess Your Project
@@ -194,7 +193,7 @@ export default function Header({ stats }: HeaderProps) {
             <Link
               href="/directory"
               onClick={() => setMenuOpen(false)}
-              className="flex items-center py-3.5 text-sm font-semibold border-b border-white/[0.06] transition-colors min-h-[44px] text-foreground"
+              className="flex items-center py-3.5 text-sm font-semibold border-b border-line transition-colors min-h-[44px] text-foreground"
             >
               Directory
             </Link>
@@ -203,7 +202,7 @@ export default function Header({ stats }: HeaderProps) {
                 key={href}
                 href={href}
                 onClick={() => setMenuOpen(false)}
-                className="flex items-center pl-4 py-3 text-[13px] font-medium border-b border-white/[0.06] transition-colors hover:text-foreground min-h-[40px]"
+                className="flex items-center pl-4 py-3 text-[13px] font-medium border-b border-line transition-colors hover:text-foreground min-h-[44px]"
                 style={{ color: 'var(--foreground-tertiary)' }}
               >
                 {label}
@@ -215,7 +214,7 @@ export default function Header({ stats }: HeaderProps) {
                 key={href}
                 href={href}
                 onClick={() => setMenuOpen(false)}
-                className="flex items-center py-3.5 text-sm font-medium border-b border-white/[0.06] last:border-0 transition-colors hover:text-foreground min-h-[44px]"
+                className="flex items-center py-3.5 text-sm font-medium border-b border-line last:border-0 transition-colors hover:text-foreground min-h-[44px]"
                 style={{ color: 'var(--foreground-secondary)' }}
               >
                 {label}
@@ -226,13 +225,13 @@ export default function Header({ stats }: HeaderProps) {
                 <Link
                   href={member.username ? `/members/${member.username}` : '/members/onboarding'}
                   onClick={() => setMenuOpen(false)}
-                  className="flex-1 flex items-center justify-center py-3.5 text-sm font-semibold border border-white/[0.2] text-foreground hover:bg-white/[0.06] rounded-lg min-h-[48px]"
+                  className="flex-1 flex items-center justify-center py-3.5 text-sm font-semibold border border-line-strong text-foreground hover:bg-white/[0.06] rounded-lg min-h-[48px]"
                 >
                   My profile
                 </Link>
                 <button
                   onClick={() => { setMenuOpen(false); handleSignOut(); }}
-                  className="px-4 py-3.5 text-sm font-medium rounded-lg border border-white/[0.1] min-h-[48px]"
+                  className="px-4 py-3.5 text-sm font-medium rounded-lg border border-line-mid min-h-[48px]"
                   style={{ color: 'var(--foreground-tertiary)' }}
                 >
                   Sign out
@@ -242,7 +241,7 @@ export default function Header({ stats }: HeaderProps) {
               <Link
                 href="/login"
                 onClick={() => setMenuOpen(false)}
-                className="flex items-center justify-center mt-3 mb-2 py-3.5 text-sm font-semibold border border-white/[0.2] text-foreground hover:bg-white/[0.06] rounded-lg min-h-[48px] transition-all"
+                className="flex items-center justify-center mt-3 mb-2 py-3.5 text-sm font-semibold border border-line-strong text-foreground hover:bg-white/[0.06] rounded-lg min-h-[48px] transition-all"
               >
                 Member login
               </Link>
@@ -279,6 +278,10 @@ function DirectoryDropdown({ active }: { active: boolean }) {
       className="relative"
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
+      onBlur={(e) => {
+        // close when focus leaves the whole dropdown (keyboard navigation)
+        if (ref.current && !ref.current.contains(e.relatedTarget as Node)) setOpen(false);
+      }}
     >
       <Link
         href="/directory"
@@ -289,6 +292,14 @@ function DirectoryDropdown({ active }: { active: boolean }) {
         }`}
         style={active ? undefined : { color: 'var(--foreground-secondary)' }}
         onClick={() => setOpen(false)}
+        onFocus={() => setOpen(true)}
+        onKeyDown={(e) => {
+          if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            setOpen(true);
+            (ref.current?.querySelector('[role="menuitem"]') as HTMLElement | null)?.focus();
+          }
+        }}
       >
         Directory
         <ChevronDown size={14} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
@@ -300,13 +311,13 @@ function DirectoryDropdown({ active }: { active: boolean }) {
           role="menu"
         >
           <div
-            className="min-w-[220px] rounded-xl border border-white/[0.1] p-1.5 shadow-xl"
+            className="min-w-[220px] rounded-xl border border-line-mid p-1.5 shadow-xl"
             style={{ background: 'var(--surface)' }}
           >
             {DIRECTORY_CHILDREN.map(({ href, label }, i) => (
               <div key={href}>
                 {i === directoryCategories.length && (
-                  <div className="my-1 h-px bg-white/[0.08]" />
+                  <div className="my-1 h-px bg-line" />
                 )}
                 <Link
                   href={href}
