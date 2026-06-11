@@ -66,7 +66,7 @@ export default function NewsletterCTA({
           type="submit"
           className={`w-full px-6 py-3.5 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-lg whitespace-nowrap ${
             subscribed
-              ? 'bg-green-500 text-white'
+              ? 'bg-success text-white'
               : 'bg-primary hover:bg-primary-hover text-white shadow-primary/30 hover:-translate-y-0.5'
           }`}
         >
@@ -78,7 +78,7 @@ export default function NewsletterCTA({
             <><Send size={18} /> Subscribe</>
           )}
         </button>
-        {error && <p className="text-red-400 text-xs text-center sm:text-left">{error}</p>}
+        {error && <p className="text-urgent text-xs text-center sm:text-left">{error}</p>}
       </form>
     );
   }
@@ -118,7 +118,7 @@ export default function NewsletterCTA({
             </button>
           </form>
         </div>
-        {error && <p className="text-red-400 text-xs mt-3">{error}</p>}
+        {error && <p className="text-urgent text-xs mt-3">{error}</p>}
         {subscribed && <p className="text-sm mt-3 font-medium" style={{ color: 'var(--color-success)' }}>Welcome aboard! Check your inbox.</p>}
       </div>
     );

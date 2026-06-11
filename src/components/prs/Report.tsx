@@ -285,7 +285,7 @@ function NextStepsPanel({
       <div
         role="radiogroup"
         aria-label="Project visibility"
-        style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginTop: 18, maxWidth: 460 }}
+        className="grid grid-cols-3 gap-2 mt-[18px] max-w-[460px]"
       >
         {VIS_CHOICES.map(({ value, label, sub, Icon }) => {
           const active = value === visibility;
@@ -297,18 +297,15 @@ function NextStepsPanel({
               aria-checked={active}
               onClick={() => change(value)}
               disabled={pending}
-              style={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5,
-                padding: '12px 8px', borderRadius: 12, cursor: pending ? 'default' : 'pointer',
-                border: active ? '1px solid rgba(59,130,246,0.6)' : '1px solid rgba(255,255,255,0.1)',
-                background: active ? 'rgba(59,130,246,0.14)' : 'rgba(255,255,255,0.02)',
-                color: active ? '#fff' : 'var(--foreground-secondary)',
-                transition: 'background 0.15s, border-color 0.15s',
-              }}
+              className={`flex flex-col items-center gap-[5px] px-2 py-3 rounded-xl border transition-colors disabled:cursor-default ${
+                active
+                  ? 'border-primary/60 bg-primary/15 text-white'
+                  : 'border-line-mid bg-white/[0.02] text-(--foreground-secondary) cursor-pointer'
+              }`}
             >
               <Icon size={16} />
-              <span style={{ fontSize: 13, fontWeight: 700 }}>{label}</span>
-              <span style={{ fontSize: 11, color: 'var(--foreground-tertiary)' }}>{sub}</span>
+              <span className="text-[13px] font-bold">{label}</span>
+              <span className="text-[11px] text-(--foreground-tertiary)">{sub}</span>
             </button>
           );
         })}
@@ -317,7 +314,7 @@ function NextStepsPanel({
       <p style={{ fontSize: 12.5, lineHeight: 1.55, color: 'var(--foreground-tertiary)', marginTop: 12, maxWidth: 560 }}>
         {pending ? 'Saving…' : VIS_STATUS[visibility]}
       </p>
-      {error && <p style={{ fontSize: 12.5, color: '#ef4444', marginTop: 4 }}>{error}</p>}
+      {error && <p className="text-urgent" style={{ fontSize: 12.5, marginTop: 4 }}>{error}</p>}
 
       {/* Action links */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 18, alignItems: 'center', marginTop: 20 }}>

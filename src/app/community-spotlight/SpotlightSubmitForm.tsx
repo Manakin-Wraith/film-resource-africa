@@ -81,7 +81,7 @@ export default function SpotlightSubmitForm() {
   if (isSuccess) {
     return (
       <div className="max-w-2xl rounded-xl p-10 text-center border border-amber-500/20" style={{ background: 'var(--surface)' }}>
-        <CheckCircle2 size={40} className="text-amber-400 mx-auto mb-5" />
+        <CheckCircle2 size={40} className="text-success mx-auto mb-5" />
         <h2 className="text-[24px] font-bold font-heading text-foreground mb-3">Submission Received</h2>
         <p className="text-[14px] leading-relaxed mb-8" style={{ color: 'var(--foreground-secondary)' }}>
           Thank you for sharing your story. Our team will review it and feature it on the site and in the weekly newsletter.
@@ -106,14 +106,14 @@ export default function SpotlightSubmitForm() {
 
         <div>
           <label className="block text-[13px] font-semibold mb-1.5">
-            Your Name <span className="text-red-400">*</span>
+            Your Name <span className="text-urgent">*</span>
           </label>
           <input type="text" required placeholder="e.g. Thandi Mokoena" value={formData.name || ''} onChange={(e) => set('name', e.target.value)} className={inputClass} />
         </div>
 
         <div>
           <label className="block text-[13px] font-semibold mb-1.5">
-            Your Email <span className="text-red-400">*</span>
+            Your Email <span className="text-urgent">*</span>
           </label>
           <input type="email" required placeholder="e.g. thandi@example.com" value={formData.email || ''} onChange={(e) => set('email', e.target.value)} className={inputClass} />
           <p className="text-[11px] mt-1.5" style={{ color: 'var(--foreground-tertiary)' }}>For admin contact only — not shown publicly.</p>
@@ -121,7 +121,7 @@ export default function SpotlightSubmitForm() {
 
         <div className="col-span-1 md:col-span-2">
           <label className="block text-[13px] font-semibold mb-1.5">
-            Headline <span className="text-red-400">*</span>
+            Headline <span className="text-urgent">*</span>
           </label>
           <input type="text" required placeholder="e.g. THE TREK Wins Jury Award at Fantasporto" value={formData.title || ''} onChange={(e) => set('title', e.target.value)} className={inputClass} />
         </div>
@@ -133,7 +133,7 @@ export default function SpotlightSubmitForm() {
 
         <div>
           <label className="block text-[13px] font-semibold mb-1.5">
-            Category <span className="text-red-400">*</span>
+            Category <span className="text-urgent">*</span>
           </label>
           <select required value={formData.category || ''} onChange={(e) => set('category', e.target.value)} className={`${inputClass} appearance-none`}>
             <option value="" disabled>Select a category</option>
@@ -145,7 +145,7 @@ export default function SpotlightSubmitForm() {
 
         <div className="col-span-1 md:col-span-2">
           <label className="block text-[13px] font-semibold mb-1.5">
-            Short Summary <span className="text-red-400">*</span>
+            Short Summary <span className="text-urgent">*</span>
           </label>
           <textarea required placeholder="A 1-2 sentence summary that will appear on the news card..." value={formData.summary || ''} onChange={(e) => set('summary', e.target.value)} maxLength={300} className={`${inputClass} min-h-[80px] resize-none`} />
           <p className="text-[11px] mt-1" style={{ color: 'var(--foreground-tertiary)' }}>{(formData.summary || '').length}/300</p>
@@ -153,7 +153,7 @@ export default function SpotlightSubmitForm() {
 
         <div className="col-span-1 md:col-span-2">
           <label className="block text-[13px] font-semibold mb-1.5">
-            Full Story <span className="text-red-400">*</span>
+            Full Story <span className="text-urgent">*</span>
           </label>
           <textarea required placeholder="Tell us the full story — background, what happened, cast/crew involved, what this means for your career..." value={formData.story || ''} onChange={(e) => set('story', e.target.value)} className={`${inputClass} min-h-[160px] resize-none`} />
         </div>
@@ -185,7 +185,7 @@ export default function SpotlightSubmitForm() {
       </div>
 
       {error && (
-        <div className="mt-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-start gap-3">
+        <div className="mt-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-urgent text-sm flex items-start gap-3">
           <AlertCircle size={16} className="flex-shrink-0 mt-0.5" />
           {error}
         </div>
@@ -199,7 +199,7 @@ export default function SpotlightSubmitForm() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className={`w-full sm:w-auto px-8 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-white font-bold text-sm transition-colors flex items-center justify-center gap-2 ${isSubmitting ? 'opacity-60 cursor-not-allowed' : ''}`}
+          className={`w-full sm:w-auto px-8 py-3 min-h-[48px] rounded-xl bg-amber-500 hover:bg-amber-400 text-white font-bold text-sm transition-colors flex items-center justify-center gap-2 ${isSubmitting ? 'opacity-60 cursor-not-allowed' : ''}`}
         >
           {uploading ? 'Uploading image…' : isSubmitting ? 'Submitting…' : 'Submit Your Story'}
         </button>

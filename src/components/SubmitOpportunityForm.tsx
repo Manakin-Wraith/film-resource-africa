@@ -118,7 +118,7 @@ export default function SubmitOpportunityForm({ memberName }: { memberName: stri
               className="w-full bg-black/10 border border-white/10 hover:border-white/20 rounded-2xl px-5 py-4 focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-base"
             >
               {directoryCategories.map((c) => (
-                <option key={c.key} value={c.key} style={{ background: '#18181b' }}>
+                <option key={c.key} value={c.key} style={{ background: 'var(--surface-raised)' }}>
                   {c.label}
                 </option>
               ))}
@@ -188,7 +188,7 @@ export default function SubmitOpportunityForm({ memberName }: { memberName: stri
       </div>
 
       {error && (
-        <p className="mt-8 text-sm text-red-400 flex items-center gap-2">
+        <p className="mt-8 text-sm text-urgent flex items-center gap-2">
           <AlertCircle size={16} /> {error}
         </p>
       )}

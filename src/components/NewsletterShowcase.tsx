@@ -264,7 +264,7 @@ export default function NewsletterShowcase() {
             )}
           </button>
         </div>
-        {error && <p className="text-red-400 text-xs mt-2">{error}</p>}
+        {error && <p className="text-urgent text-xs mt-2">{error}</p>}
         {subscribed && <p className="text-sm mt-2 font-medium" style={{ color: 'var(--color-success)' }}>Welcome aboard! Check your inbox for a confirmation.</p>}
       </form>
     </section>
