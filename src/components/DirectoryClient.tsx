@@ -196,7 +196,7 @@ export default function DirectoryClient({ initialData, counts = {} }: { initialD
                   countryName={opp.country_name}
                 />
 
-                <div className="p-6 flex flex-col flex-grow">
+                <div className="p-5 flex flex-col flex-grow">
                 <div className="flex items-start justify-between mb-4 relative z-10">
                   <div className="flex items-center gap-2">
                     <Badge variant="status" colorway={status.colorway} icon={StatusIcon}>
@@ -269,7 +269,7 @@ export default function DirectoryClient({ initialData, counts = {} }: { initialD
           {filteredData.length === 0 && (
             <motion.div 
               initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-              className="col-span-full text-center py-24 rounded-xl border border-white/[0.06]"
+              className="col-span-full text-center py-20 rounded-xl border border-white/[0.06]"
               style={{ background: 'var(--surface)' }}
             >
               <Search className="w-12 h-12 text-primary/50 mx-auto mb-4" />

@@ -105,14 +105,14 @@ export default function SpotlightSubmitForm() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
         <div>
-          <label className="block text-[13px] font-semibold mb-1.5">
+          <label className="block text-sm font-semibold mb-1.5">
             Your Name <span className="text-urgent">*</span>
           </label>
           <input type="text" required placeholder="e.g. Thandi Mokoena" value={formData.name || ''} onChange={(e) => set('name', e.target.value)} className={inputClass} />
         </div>
 
         <div>
-          <label className="block text-[13px] font-semibold mb-1.5">
+          <label className="block text-sm font-semibold mb-1.5">
             Your Email <span className="text-urgent">*</span>
           </label>
           <input type="email" required placeholder="e.g. thandi@example.com" value={formData.email || ''} onChange={(e) => set('email', e.target.value)} className={inputClass} />
@@ -120,19 +120,19 @@ export default function SpotlightSubmitForm() {
         </div>
 
         <div className="col-span-1 md:col-span-2">
-          <label className="block text-[13px] font-semibold mb-1.5">
+          <label className="block text-sm font-semibold mb-1.5">
             Headline <span className="text-urgent">*</span>
           </label>
           <input type="text" required placeholder="e.g. THE TREK Wins Jury Award at Fantasporto" value={formData.title || ''} onChange={(e) => set('title', e.target.value)} className={inputClass} />
         </div>
 
         <div>
-          <label className="block text-[13px] font-semibold mb-1.5">Project / Film Name</label>
+          <label className="block text-sm font-semibold mb-1.5">Project / Film Name</label>
           <input type="text" placeholder="e.g. The Trek" value={formData.project_name || ''} onChange={(e) => set('project_name', e.target.value)} className={inputClass} />
         </div>
 
         <div>
-          <label className="block text-[13px] font-semibold mb-1.5">
+          <label className="block text-sm font-semibold mb-1.5">
             Category <span className="text-urgent">*</span>
           </label>
           <select required value={formData.category || ''} onChange={(e) => set('category', e.target.value)} className={`${inputClass} appearance-none`}>
@@ -144,7 +144,7 @@ export default function SpotlightSubmitForm() {
         </div>
 
         <div className="col-span-1 md:col-span-2">
-          <label className="block text-[13px] font-semibold mb-1.5">
+          <label className="block text-sm font-semibold mb-1.5">
             Short Summary <span className="text-urgent">*</span>
           </label>
           <textarea required placeholder="A 1-2 sentence summary that will appear on the news card..." value={formData.summary || ''} onChange={(e) => set('summary', e.target.value)} maxLength={300} className={`${inputClass} min-h-[80px] resize-none`} />
@@ -152,20 +152,20 @@ export default function SpotlightSubmitForm() {
         </div>
 
         <div className="col-span-1 md:col-span-2">
-          <label className="block text-[13px] font-semibold mb-1.5">
+          <label className="block text-sm font-semibold mb-1.5">
             Full Story <span className="text-urgent">*</span>
           </label>
           <textarea required placeholder="Tell us the full story — background, what happened, cast/crew involved, what this means for your career..." value={formData.story || ''} onChange={(e) => set('story', e.target.value)} className={`${inputClass} min-h-[160px] resize-none`} />
         </div>
 
         <div>
-          <label className="block text-[13px] font-semibold mb-1.5">Related Link</label>
+          <label className="block text-sm font-semibold mb-1.5">Related Link</label>
           <input type="url" placeholder="https://..." value={formData.url || ''} onChange={(e) => set('url', e.target.value)} className={inputClass} />
           <p className="text-[11px] mt-1.5" style={{ color: 'var(--foreground-tertiary)' }}>Trailer, press release, festival page, etc.</p>
         </div>
 
         <div>
-          <label className="block text-[13px] font-semibold mb-1.5">Image</label>
+          <label className="block text-sm font-semibold mb-1.5">Image</label>
           {imagePreview ? (
             <div className="relative rounded-xl overflow-hidden border border-white/[0.1]">
               <Image src={imagePreview} alt="Preview" width={400} height={160} className="w-full h-36 object-cover" />

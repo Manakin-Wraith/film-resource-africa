@@ -58,7 +58,7 @@ export default function NewsletterCTA({
             placeholder="Get weekly deadline alerts..."
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full bg-white/5 border border-white/10 rounded-2xl pl-11 pr-4 py-3.5 text-sm focus:ring-2 focus:ring-primary/50 transition-all text-foreground placeholder:text-foreground/50"
+            className="w-full bg-white/5 border border-white/10 rounded-2xl pl-11 pr-4 py-3.5 text-sm focus:border-primary/60 transition-colors text-foreground placeholder:text-foreground/50"
           />
         </div>
         <button
@@ -98,7 +98,7 @@ export default function NewsletterCTA({
               placeholder="your@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="flex-grow md:w-56 border border-white/[0.12] rounded-xl px-4 py-3 text-sm focus:border-primary/50 transition-colors text-foreground placeholder:text-foreground/50"
+              className="flex-grow md:w-56 border border-white/[0.12] rounded-xl px-4 py-3 text-sm focus:border-primary/60 transition-colors text-foreground placeholder:text-foreground/50"
               style={{ background: 'var(--surface-raised)' }}
             />
             <button

@@ -92,7 +92,7 @@ export default function NewsPageClient({ news, placements = [] }: { news: NewsIt
           return (
             <Link
               href={href}
-              className="block rounded-xl border border-white/8 hover:border-white/16 transition-all group overflow-hidden mb-6"
+              className="block rounded-xl border border-line hover:border-line-strong transition-all group overflow-hidden mb-6"
               style={{ background: 'var(--surface)' }}
             >
               {featured.image_url ? (
@@ -175,7 +175,7 @@ export default function NewsPageClient({ news, placements = [] }: { news: NewsIt
                 <Link
                   key={item.id}
                   href={href}
-                  className="rounded-xl border border-white/8 hover:border-white/16 transition-all group flex flex-col overflow-hidden"
+                  className="rounded-xl border border-line hover:border-line-strong transition-all group flex flex-col overflow-hidden"
                   style={{ background: 'var(--surface)' }}
                 >
                   {item.image_url ? (

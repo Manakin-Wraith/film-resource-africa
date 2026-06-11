@@ -117,7 +117,7 @@ function EmailMockup({ digest }: { digest: typeof digests[0] }) {
   };
 
   return (
-    <div className="rounded-2xl overflow-hidden border border-white/10 bg-[#111] shadow-2xl">
+    <div className="rounded-2xl overflow-hidden border border-white/10 bg-surface shadow-2xl">
       {/* Email header bar */}
       <div className="px-5 py-3 bg-white/[0.04] border-b border-white/10 flex items-center gap-3">
         <div className="flex gap-1.5">
@@ -244,7 +244,7 @@ export default function NewsletterShowcase() {
               placeholder="your@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-white/[0.12] rounded-xl pl-10 pr-4 py-3 text-sm focus:border-primary/50 transition-colors text-foreground placeholder:text-foreground/50 min-h-[48px]"
+              className="w-full border border-white/[0.12] rounded-xl pl-10 pr-4 py-3 text-sm focus:border-primary/60 transition-colors text-foreground placeholder:text-foreground/50 min-h-[48px]"
               style={{ background: 'var(--surface-raised)' }}
             />
           </div>

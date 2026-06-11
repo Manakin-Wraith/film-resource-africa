@@ -136,10 +136,10 @@ export default function CallSheetClient({ initialData }: { initialData: CallShee
                 </div>
 
                 {/* Title */}
-                <h2 className="text-xl font-bold font-heading group-hover:text-teal-400 transition-colors leading-tight mb-1 relative z-10">
+                <h2 className="text-xl font-bold font-heading group-hover:text-callsheet transition-colors leading-tight mb-1 relative z-10">
                   {listing.title}
                 </h2>
-                <p className="text-sm text-teal-400/80 font-medium mb-3 relative z-10">
+                <p className="text-sm text-callsheet/80 font-medium mb-3 relative z-10">
                   {listing.production_title}
                 </p>
 
@@ -163,13 +163,13 @@ export default function CallSheetClient({ initialData }: { initialData: CallShee
                 {/* Footer: Compensation + arrow */}
                 <div className="mt-auto relative z-10 flex items-center justify-between pt-4 border-t border-white/10">
                   <div className="flex items-center gap-2">
-                    <span className="flex items-center gap-1.5 text-teal-400 text-sm font-bold">
+                    <span className="flex items-center gap-1.5 text-callsheet text-sm font-bold">
                       <DollarSign size={14} />
                       {listing.compensation}
                     </span>
                     <span className="text-foreground/50 text-xs">({compTypeLabel})</span>
                   </div>
-                  <ExternalLink size={16} className="text-foreground/30 group-hover:text-teal-400 transition-colors flex-shrink-0" />
+                  <ExternalLink size={16} className="text-foreground/30 group-hover:text-callsheet transition-colors flex-shrink-0" />
                 </div>
               </motion.div>
             );

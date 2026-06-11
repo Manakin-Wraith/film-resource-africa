@@ -83,7 +83,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
              {formData.logo ? (
                <img src={formData.logo} className="w-full h-full object-contain" alt="Logo preview" />
              ) : (
-               <span className="opacity-50 text-[10px] uppercase font-bold text-center">No<br/>Logo</span>
+               <span className="opacity-50 text-xs uppercase font-bold text-center">No<br/>Logo</span>
              )}
           </div>
           <div>
@@ -652,9 +652,9 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                   </td>
                   <td className="p-4">
                     <div className="flex flex-wrap gap-1">
-                      <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-green-500/15 text-green-400">Ticker</span>
-                      {(p.bundle === 'growth' || p.bundle === 'headline') && <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-500/15 text-purple-400">News Card</span>}
-                      <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-cyan-500/15 text-cyan-400">{p.newsletter_type === 'spotlight' ? 'NL Spotlight' : 'NL Mention'}</span>
+                      <span className="px-1.5 py-0.5 rounded text-xs font-bold bg-green-500/15 text-green-400">Ticker</span>
+                      {(p.bundle === 'growth' || p.bundle === 'headline') && <span className="px-1.5 py-0.5 rounded text-xs font-bold bg-purple-500/15 text-purple-400">News Card</span>}
+                      <span className="px-1.5 py-0.5 rounded text-xs font-bold bg-cyan-500/15 text-cyan-400">{p.newsletter_type === 'spotlight' ? 'NL Spotlight' : 'NL Mention'}</span>
                     </div>
                   </td>
                   <td className="p-4">
@@ -1059,7 +1059,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                       <span>{item.title}</span>
                       {item.is_truncated && (
                         <span
-                          className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-500/20 text-red-400 border border-red-500/30 uppercase tracking-wider"
+                          className="px-1.5 py-0.5 rounded text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/30 uppercase tracking-wider"
                           title="Body looks paywall-truncated. Fix the content and clear this flag (or re-run the enricher) before publishing."
                         >
                           Truncated
