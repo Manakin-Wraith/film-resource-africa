@@ -178,8 +178,9 @@ export default function Header({ stats }: HeaderProps) {
         </div>
 
         {/* Mobile dropdown */}
-        <div className={`md:hidden transition-all duration-200 ${menuOpen ? 'max-h-[calc(100vh-4rem)] opacity-100 overflow-y-auto overscroll-contain' : 'max-h-0 opacity-0 overflow-hidden'}`}>
-          <div className="border-t border-line container mx-auto px-4 py-2">
+        <div className={`md:hidden transition-all duration-200 ${menuOpen ? 'max-h-[calc(100dvh-var(--header-h))] opacity-100 overflow-y-auto overscroll-contain' : 'max-h-0 opacity-0 overflow-hidden'}`}>
+          {/* bottom padding clears the fixed mobile tab bar so the last item (login) stays reachable */}
+          <div className="border-t border-line container mx-auto px-4 py-2 pb-[calc(var(--tabbar-h)+env(safe-area-inset-bottom)+0.5rem)]">
             <Link
               href="/assess"
               onClick={() => setMenuOpen(false)}
