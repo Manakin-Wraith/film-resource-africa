@@ -252,7 +252,7 @@ export default function NewsletterShowcase() {
             disabled={submitting || subscribed}
             type="submit"
             className={`px-6 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2 whitespace-nowrap min-h-[48px] ${
-              subscribed ? 'bg-success text-white' : 'bg-primary hover:bg-blue-600 text-white'
+              subscribed ? 'bg-success text-white' : 'bg-primary hover:bg-primary-hover text-white'
             }`}
           >
             {submitting ? (

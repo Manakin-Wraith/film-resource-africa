@@ -23,14 +23,14 @@ function NewWaveRow({ opp, onSelect }: { opp: Opportunity; onSelect: (o: Opportu
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <h3 className="text-[14px] md:text-[15px] font-bold font-heading text-foreground group-hover:text-primary transition-colors line-clamp-1 leading-snug">
+        <h3 className="text-[15px] font-bold font-heading text-foreground group-hover:text-primary transition-colors line-clamp-1 leading-snug">
           {opp.title}
         </h3>
         {deadline && deadline.urgency !== 'passed' && (
-          <span className="editorial-dateline text-[11px]">
+          <span className="editorial-dateline text-xs">
             {opp['Next Deadline']?.substring(0, 36) || deadline.dateFormatted}
             {deadline.urgency !== 'normal' && (
-              <span className="ml-1 font-semibold" style={{ color: '#ef4444' }}>
+              <span className="ml-1 font-semibold text-urgent">
                 {' '}— {deadline.countdownText}
               </span>
             )}

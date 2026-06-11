@@ -29,11 +29,11 @@ function OpenNowCard({ opp, onSelect }: { opp: Opportunity; onSelect: (o: Opport
       />
       <div className="p-4">
         {deadline && deadline.urgency !== 'passed' && (
-          <span className="editorial-dateline text-[11px] mb-1.5 block">
+          <span className="editorial-dateline text-xs mb-1.5 block">
             {opp['Next Deadline']?.substring(0, 36) || deadline.dateFormatted}
           </span>
         )}
-        <h3 className="text-[14px] font-bold font-heading text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-snug mb-3">
+        <h3 className="text-[15px] font-bold font-heading text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-snug mb-3">
           {opp.title}
         </h3>
         <div className="flex items-center justify-between">
@@ -49,7 +49,7 @@ function OpenNowCard({ opp, onSelect }: { opp: Opportunity; onSelect: (o: Opport
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="flex items-center gap-1 text-[11px] font-semibold text-primary hover:text-blue-400 transition-colors"
+              className="flex items-center gap-1 text-xs font-semibold text-primary hover:text-blue-400 transition-colors"
             >
               Apply <ExternalLink size={10} />
             </a>

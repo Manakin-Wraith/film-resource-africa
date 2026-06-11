@@ -27,7 +27,7 @@ export default function GhostCard({ variant, sectionLabel, valueProp, slotsAvail
     return (
       <div
         onClick={onClaim}
-        className="ghost-card-branded relative rounded-[1.5rem] min-w-[320px] max-w-[360px] flex-shrink-0 snap-start cursor-pointer border border-amber-500/20 hover:border-amber-500/40 transition-all duration-300 group flex flex-col overflow-hidden hover:-translate-y-1 hover:shadow-[0_16px_32px_-10px_rgba(245,158,11,0.2)]"
+        className="ghost-card-branded relative rounded-xl min-w-[320px] max-w-[360px] flex-shrink-0 snap-start cursor-pointer border border-amber-500/20 hover:border-amber-500/40 transition-all duration-300 group flex flex-col overflow-hidden hover:-translate-y-1 hover:shadow-[0_16px_32px_-10px_rgba(245,158,11,0.2)]"
       >
         {/* Available ribbon */}
         <div className="absolute top-3 right-3 z-10">
@@ -69,7 +69,7 @@ export default function GhostCard({ variant, sectionLabel, valueProp, slotsAvail
   return (
     <div
       onClick={onClaim}
-      className="ghost-card-minimal relative rounded-[1.5rem] min-w-[320px] max-w-[360px] flex-shrink-0 snap-start cursor-pointer border-2 border-dashed border-white/10 hover:border-amber-500/30 transition-all duration-300 group flex flex-col items-center justify-center text-center p-8 opacity-60 hover:opacity-100 hover:shadow-[0_16px_32px_-10px_rgba(245,158,11,0.12)]"
+      className="ghost-card-minimal relative rounded-xl min-w-[320px] max-w-[360px] flex-shrink-0 snap-start cursor-pointer border-2 border-dashed border-white/10 hover:border-amber-500/30 transition-all duration-300 group flex flex-col items-center justify-center text-center p-8 opacity-60 hover:opacity-100 hover:shadow-[0_16px_32px_-10px_rgba(245,158,11,0.12)]"
       style={{ minHeight: 220 }}
     >
       {/* Icon */}

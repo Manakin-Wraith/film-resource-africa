@@ -7,6 +7,8 @@ import Link from 'next/link';
 import { CallSheetListing } from '@/app/actions';
 import CallSheetModal from './CallSheetModal';
 import { callSheetCategories, getCallSheetCategoryStyle, projectStageLabels, compensationTypeLabels } from '@/lib/callSheetConfig';
+import Input from '@/components/ui/Input';
+import FilterChip, { FilterChipRow } from '@/components/ui/FilterChip';
 
 export default function CallSheetClient({ initialData }: { initialData: CallSheetListing[] }) {
   const [search, setSearch] = useState('');
@@ -43,50 +45,31 @@ export default function CallSheetClient({ initialData }: { initialData: CallShee
     <div className="w-full">
       {/* Search Bar */}
       <div className="mb-8 relative z-20 max-w-2xl mx-auto">
-        <div className="relative">
-          <Search size={20} className="absolute left-5 top-1/2 -translate-y-1/2 text-foreground/30" />
-          <input
-            type="text"
-            placeholder="Search roles, productions, locations..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full border border-white/[0.12] rounded-xl pl-12 pr-5 py-3 focus:border-primary/50 transition-colors text-foreground placeholder:text-foreground/50 text-sm"
-            style={{ background: 'var(--surface-raised)', paddingLeft: '3.25rem' }}
-          />
-          {search && (
-            <button
-              onClick={() => setSearch('')}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-foreground/50 hover:text-foreground transition-colors text-sm font-medium"
-            >
-              Clear
-            </button>
-          )}
-        </div>
+        <Input
+          type="text"
+          placeholder="Search roles, productions, locations..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          leftIcon={Search}
+          onClear={() => setSearch('')}
+        />
       </div>
 
       {/* Filters */}
       <div className="mb-10 space-y-3 relative z-20">
-        <div className="flex md:flex-wrap md:justify-center gap-2 overflow-x-auto pb-2 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-thin snap-x snap-mandatory">
+        <FilterChipRow>
           {filters.map((f) => {
             const catStyle = f === 'All' ? null : callSheetCategories[f];
-            const Icon = catStyle ? catStyle.icon : LayoutGrid;
-            const activeGradient = catStyle ? catStyle.filterActive : 'from-teal-600 to-cyan-600';
-
             return (
-              <button
+              <FilterChip
                 key={f}
-                className={`flex items-center gap-1.5 md:gap-2 px-4 md:px-5 py-2.5 min-h-[44px] rounded-xl font-semibold text-sm whitespace-nowrap snap-start flex-shrink-0 transition-all border ${
-                  filter === f
-                    ? 'border-white/[0.2] text-foreground'
-                    : 'border-white/[0.08] text-foreground/60 hover:border-white/[0.14] hover:text-foreground'
-                }`}
-                style={filter === f ? { background: 'var(--surface-raised)' } : { background: 'var(--surface)' }}
+                active={filter === f}
                 onClick={() => setFilter(f)}
-              >
-                <Icon size={16} className={filter === f ? 'text-white' : (catStyle?.color || 'text-foreground/40')} />
-                <span className="md:hidden">{mobileLabels[f]}</span>
-                <span className="hidden md:inline">{f}</span>
-              </button>
+                label={f}
+                shortLabel={mobileLabels[f]}
+                icon={catStyle ? catStyle.icon : LayoutGrid}
+                iconClass={catStyle?.color || 'text-foreground/40'}
+              />
             );
           })}
 
@@ -94,13 +77,13 @@ export default function CallSheetClient({ initialData }: { initialData: CallShee
 
           <Link
             href="/call-sheet/submit"
-            className="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-colors border border-white/[0.12] hover:border-white/[0.2] flex-shrink-0"
+            className="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-colors border border-line-mid hover:border-line-strong flex-shrink-0"
             style={{ background: 'var(--surface)', color: 'var(--foreground-secondary)' }}
           >
             <Plus size={16} />
             <span>Post a Listing</span>
           </Link>
-        </div>
+        </FilterChipRow>
 
         {/* Count */}
         <div className="flex items-center justify-center gap-3">
@@ -204,7 +187,7 @@ export default function CallSheetClient({ initialData }: { initialData: CallShee
               <p className="text-foreground/60 mb-6">Be the first to post — productions are looking for talent like you.</p>
               <Link
                 href="/call-sheet/submit"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary hover:bg-blue-600 text-white font-bold transition-colors text-sm"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary hover:bg-primary-hover text-white font-bold transition-colors text-sm"
               >
                 <Plus size={18} />
                 Post a Listing

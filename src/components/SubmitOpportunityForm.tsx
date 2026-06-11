@@ -201,7 +201,7 @@ export default function SubmitOpportunityForm({ memberName }: { memberName: stri
         <button
           type="submit"
           disabled={isSubmitting}
-          className={`w-full sm:w-auto px-10 py-4 rounded-2xl bg-primary hover:bg-blue-600 text-white font-bold text-lg transition-colors flex items-center justify-center gap-3 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
+          className={`w-full sm:w-auto px-10 py-4 rounded-2xl bg-primary hover:bg-primary-hover text-white font-bold text-lg transition-colors flex items-center justify-center gap-3 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
         >
           {isSubmitting ? 'Submitting...' : 'Submit for review'}
         </button>

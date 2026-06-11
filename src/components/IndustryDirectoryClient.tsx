@@ -7,6 +7,8 @@ import Link from 'next/link';
 import { DirectoryListing, voteDirectoryListing } from '@/app/actions';
 import DirectoryListingModal from './DirectoryListingModal';
 import { directoryTypes, getDirectoryType, getCategoriesForType } from '@/lib/industryDirectoryConfig';
+import Input from '@/components/ui/Input';
+import FilterChip, { FilterChipRow } from '@/components/ui/FilterChip';
 
 const availabilityConfig: Record<string, { label: string; color: string; bg: string }> = {
   available: { label: 'Available', color: 'text-green-400', bg: 'bg-green-500/20 border-green-500/30' },
@@ -58,71 +60,49 @@ export default function IndustryDirectoryClient({ initialData }: { initialData: 
     <div className="w-full">
       {/* Search Bar */}
       <div className="mb-8 relative z-20 max-w-2xl mx-auto">
-        <div className="relative">
-          <Search size={20} className="absolute left-5 top-1/2 -translate-y-1/2 text-foreground/30" />
-          <input
-            type="text"
-            placeholder="Search companies, crew, services, schools..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full border border-white/[0.12] rounded-xl pl-12 pr-5 py-3 focus:border-primary/50 transition-colors text-foreground placeholder:text-foreground/50 text-sm"
-            style={{ background: 'var(--surface-raised)', paddingLeft: '3.25rem' }}
-          />
-          {search && (
-            <button onClick={() => setSearch('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-foreground/50 hover:text-foreground transition-colors text-sm font-medium">
-              Clear
-            </button>
-          )}
-        </div>
+        <Input
+          type="text"
+          placeholder="Search companies, crew, services, schools..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          leftIcon={Search}
+          onClear={() => setSearch('')}
+        />
       </div>
 
       {/* Filters */}
       <div className="mb-10 space-y-3 relative z-20">
         {/* Type chips */}
-        <div className="flex md:flex-wrap md:justify-center gap-2 overflow-x-auto pb-2 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-thin snap-x snap-mandatory">
-          <button
+        <FilterChipRow>
+          <FilterChip
+            active={typeFilter === 'all'}
             onClick={() => setTypeFilter('all')}
-            className={`flex items-center gap-1.5 md:gap-2 px-4 md:px-5 py-2.5 min-h-[44px] rounded-xl font-semibold text-sm whitespace-nowrap snap-start flex-shrink-0 transition-all border ${
-              typeFilter === 'all'
-                ? 'border-white/[0.2] text-foreground'
-                : 'border-white/[0.08] text-foreground/60 hover:border-white/[0.14] hover:text-foreground'
-            }`}
-            style={typeFilter === 'all' ? { background: 'var(--surface-raised)' } : { background: 'var(--surface)' }}
-          >
-            <LayoutGrid size={16} className={typeFilter === 'all' ? 'text-white' : 'text-foreground/40'} />
-            All
-          </button>
-          {Object.entries(directoryTypes).map(([key, dt]) => {
-            const Icon = dt.icon;
-            return (
-              <button
-                key={key}
-                onClick={() => setTypeFilter(key)}
-                className={`flex items-center gap-1.5 md:gap-2 px-4 md:px-5 py-2.5 min-h-[44px] rounded-xl font-semibold text-sm whitespace-nowrap snap-start flex-shrink-0 transition-all border ${
-                  typeFilter === key
-                    ? 'border-white/[0.2] text-foreground'
-                    : 'border-white/[0.08] text-foreground/60 hover:border-white/[0.14] hover:text-foreground'
-                }`}
-                style={typeFilter === key ? { background: 'var(--surface-raised)' } : { background: 'var(--surface)' }}
-              >
-                <Icon size={16} className={typeFilter === key ? 'text-white' : dt.color} />
-                <span className="hidden md:inline">{dt.label}</span>
-                <span className="md:hidden">{dt.label.split(' ')[0]}</span>
-              </button>
-            );
-          })}
+            label="All"
+            icon={LayoutGrid}
+          />
+          {Object.entries(directoryTypes).map(([key, dt]) => (
+            <FilterChip
+              key={key}
+              active={typeFilter === key}
+              onClick={() => setTypeFilter(key)}
+              label={dt.label}
+              shortLabel={dt.label.split(' ')[0]}
+              icon={dt.icon}
+              iconClass={dt.color}
+            />
+          ))}
 
           <div className="w-[1px] h-8 bg-white/15 mx-1 hidden md:flex self-center flex-shrink-0"></div>
 
           <Link
             href="/industry/submit"
-            className="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-colors border border-white/[0.12] hover:border-white/[0.2] flex-shrink-0"
+            className="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-colors border border-line-mid hover:border-line-strong flex-shrink-0"
             style={{ background: 'var(--surface)', color: 'var(--foreground-secondary)' }}
           >
             <Plus size={16} />
             <span>Add Listing</span>
           </Link>
-        </div>
+        </FilterChipRow>
 
         {/* Category + Country filters + result count */}
         <div className="flex flex-wrap items-center justify-center gap-2">
@@ -266,7 +246,7 @@ export default function IndustryDirectoryClient({ initialData }: { initialData: 
               <p className="text-foreground/60 mb-6">Try adjusting your filters or search terms.</p>
               <Link
                 href="/industry/submit"
-                className="inline-flex items-center gap-2 bg-primary hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-xl transition-colors text-sm"
+                className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white font-semibold py-3 px-6 rounded-xl transition-colors text-sm"
               >
                 <Plus size={16} /> Add the first listing
               </Link>

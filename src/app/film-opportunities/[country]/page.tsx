@@ -237,7 +237,7 @@ export default async function CountryPage({ params }: PageProps) {
               </p>
               <Link
                 href="/"
-                className="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-600 transition-colors text-sm"
+                className="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-bold hover:bg-primary-hover transition-colors text-sm"
               >
                 Browse All African Opportunities
               </Link>

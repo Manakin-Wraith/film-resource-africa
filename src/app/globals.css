@@ -147,6 +147,14 @@ body {
   border-bottom: 1px solid var(--color-line);
 }
 
+/* Mobile horizontal-scroll affordance: fade the clipped edges of chip rows */
+@media (max-width: 767px) {
+  .scroll-fade-x {
+    mask-image: linear-gradient(to right, transparent 0, black 16px, black calc(100% - 28px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0, black 16px, black calc(100% - 28px), transparent 100%);
+  }
+}
+
 /* ── SponsorTicker carousel ────────────────────────────────────────── */
 
 @keyframes ticker {

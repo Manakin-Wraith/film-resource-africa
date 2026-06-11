@@ -20,7 +20,7 @@ function FeaturedCard({ opp, onSelect }: { opp: Opportunity; onSelect: (o: Oppor
 
   return (
     <div
-      className="rounded-2xl overflow-hidden border border-white/[0.08] cursor-pointer group"
+      className="rounded-xl overflow-hidden border border-line cursor-pointer group"
       style={{ background: 'var(--surface)' }}
       onClick={handleClick}
     >
@@ -47,7 +47,7 @@ function FeaturedCard({ opp, onSelect }: { opp: Opportunity; onSelect: (o: Oppor
               ? `Deadline: ${opp['Next Deadline'].substring(0, 50)}`
               : `Deadline: ${deadline.dateFormatted}`}
             {deadline.urgency !== 'normal' && (
-              <span className="ml-2 font-semibold text-[12px]" style={{ color: '#ef4444' }}>
+              <span className="ml-2 font-semibold text-xs text-urgent">
                 — {deadline.countdownText}
               </span>
             )}
@@ -77,7 +77,7 @@ function FeaturedCard({ opp, onSelect }: { opp: Opportunity; onSelect: (o: Oppor
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="flex items-center justify-center gap-2 bg-primary hover:bg-blue-600 text-white font-bold text-sm px-6 rounded-xl transition-all hover:-translate-y-0.5 min-h-[48px]"
+              className="flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-white font-bold text-sm px-6 rounded-xl transition-all hover:-translate-y-0.5 min-h-[48px]"
             >
               Apply Now <ExternalLink size={14} />
             </a>
@@ -136,18 +136,18 @@ function CompactCard({ opp, onSelect }: { opp: Opportunity; onSelect: (o: Opport
       <div className="p-4">
         {/* Dateline */}
         {deadline && deadline.urgency !== 'passed' && (
-          <span className="editorial-dateline text-[12px] mb-1 block">
+          <span className="editorial-dateline text-xs mb-1 block">
             {deadline.countdownText}
           </span>
         )}
 
         {/* Title */}
-        <h4 className="text-[14px] font-bold font-heading text-foreground group-hover:text-primary transition-colors line-clamp-2 mb-3 leading-snug">
+        <h4 className="text-[15px] font-bold font-heading text-foreground group-hover:text-primary transition-colors line-clamp-2 mb-3 leading-snug">
           {opp.title}
         </h4>
 
         {/* Deadline row */}
-        <div className="flex items-center gap-1.5 text-[11px]" style={{ color: 'var(--foreground-tertiary)' }}>
+        <div className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--foreground-tertiary)' }}>
           <Calendar size={10} />
           <span className="truncate">
             {opp['Next Deadline']?.substring(0, 32) || 'Check website'}

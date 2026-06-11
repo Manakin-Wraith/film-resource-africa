@@ -13,7 +13,7 @@ const fieldClasses =
   'w-full bg-surface-raised border border-line-mid rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-foreground/50 focus:border-primary/60 transition-colors';
 
 interface FieldChromeProps {
-  id: string;
+  id?: string;
   label?: string;
   hint?: string;
   error?: string;
@@ -64,7 +64,9 @@ export default function Input({
   ...rest
 }: InputProps) {
   const autoId = useId();
-  const id = idProp ?? autoId;
+  // Only attach an id when a label needs htmlFor — components SSR'd inside a
+  // Suspense boundary (useSearchParams pages) get unstable useId values.
+  const id = idProp ?? (label ? autoId : undefined);
 
   return (
     <FieldChrome id={id} label={label} hint={hint} error={error} required={required}>
@@ -101,7 +103,7 @@ interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
 
 export function Textarea({ label, hint, error, required, className = '', id: idProp, ...rest }: TextareaProps) {
   const autoId = useId();
-  const id = idProp ?? autoId;
+  const id = idProp ?? (label ? autoId : undefined);
   return (
     <FieldChrome id={id} label={label} hint={hint} error={error} required={required}>
       <textarea id={id} required={required} className={`${fieldClasses} min-h-[120px] resize-vertical ${className}`} {...rest} />
@@ -121,7 +123,7 @@ const selectChevron =
 
 export function Select({ label, hint, error, required, className = '', id: idProp, children, ...rest }: SelectProps) {
   const autoId = useId();
-  const id = idProp ?? autoId;
+  const id = idProp ?? (label ? autoId : undefined);
   return (
     <FieldChrome id={id} label={label} hint={hint} error={error} required={required}>
       <select

@@ -37,7 +37,7 @@ export default async function SubmitPage() {
               Your Individual membership lets you list and diagnose your own projects. Upgrade to Business to promote opportunities, briefs, and crew calls to the FRA audience.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Link href="/members" className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-primary hover:bg-blue-600 text-white px-7 py-3.5 rounded-xl font-semibold transition-colors">
+              <Link href="/members" className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-white px-7 py-3.5 rounded-xl font-semibold transition-colors">
                 Upgrade to Business <ArrowRight size={18} />
               </Link>
               <Link href="/assess" className="w-full sm:w-auto inline-flex items-center justify-center px-7 py-3.5 rounded-xl font-semibold border border-white/[0.2] hover:bg-white/[0.06] transition-colors text-foreground">

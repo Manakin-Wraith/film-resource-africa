@@ -13,6 +13,7 @@ import { decodeHtmlEntities } from '@/lib/textUtils';
 import CardVisualHeader from './CardVisualHeader';
 import Input from '@/components/ui/Input';
 import Badge from '@/components/ui/Badge';
+import FilterChip, { FilterChipRow } from '@/components/ui/FilterChip';
 import type { Colorway } from '@/lib/colorways';
 
 const statusConfig: Record<string, { label: string; colorway: Colorway; icon: typeof Clock }> = {
@@ -122,48 +123,36 @@ export default function DirectoryClient({ initialData, counts = {} }: { initialD
       {/* Filters & Sort */}
       <div className="mb-10 space-y-3 relative z-20">
         {/* Category chips — horizontal scroll on mobile, wrap on desktop */}
-        <div className="flex md:flex-wrap md:justify-center gap-2 overflow-x-auto pb-2 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-thin snap-x snap-mandatory">
-          {filterChips.map((f) => {
-            const Icon = f.icon;
-            const count = f.key === 'All' ? undefined : counts[f.key];
+        <FilterChipRow>
+          {filterChips.map((f) => (
+            <FilterChip
+              key={f.key}
+              active={filter === f.key}
+              onClick={() => {
+                setFilter(f.key);
+                setTimeout(() => {
+                  document.getElementById('directory-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+              }}
+              label={f.label}
+              shortLabel={f.shortLabel}
+              icon={f.icon}
+              iconClass={f.color}
+              count={f.key === 'All' ? undefined : counts[f.key]}
+            />
+          ))}
 
-            return (
-              <button
-                key={f.key}
-                className={`flex items-center gap-1.5 md:gap-2 px-4 md:px-5 py-2.5 min-h-[44px] rounded-xl font-semibold text-sm whitespace-nowrap snap-start flex-shrink-0 transition-all border ${
-                  filter === f.key
-                    ? 'border-white/[0.2] text-foreground'
-                    : 'border-white/[0.08] text-foreground/60 hover:border-white/[0.14] hover:text-foreground'
-                }`}
-                style={filter === f.key ? { background: 'var(--surface-raised)' } : { background: 'var(--surface)' }}
-                onClick={() => {
-                  setFilter(f.key);
-                  setTimeout(() => {
-                    document.getElementById('directory-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }, 100);
-                }}
-              >
-                <Icon size={16} className={filter === f.key ? 'text-white' : f.color} />
-                <span className="md:hidden">{f.shortLabel}</span>
-                <span className="hidden md:inline">{f.label}</span>
-                {count !== undefined && (
-                  <span className="text-[11px] font-bold opacity-50">{count}</span>
-                )}
-              </button>
-            )
-          })}
-          
           <div className="w-[1px] h-8 bg-white/15 mx-1 hidden md:flex self-center flex-shrink-0"></div>
-          
-          <Link 
+
+          <Link
             href="/submit"
-            className="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-colors border border-white/[0.12] hover:border-white/[0.2] flex-shrink-0"
+            className="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-colors border border-line-mid hover:border-line-strong flex-shrink-0"
             style={{ background: 'var(--surface)', color: 'var(--foreground-secondary)' }}
           >
             <Plus size={16} />
             <span>Submit</span>
           </Link>
-        </div>
+        </FilterChipRow>
 
         {/* Result count */}
         <div className="flex items-center justify-center">

@@ -108,7 +108,7 @@ export default function SubmitDirectoryListingPage() {
               Your listing has been submitted for review. We&apos;ll review it within 48 hours and notify you once it&apos;s live.
             </p>
             <div className="flex gap-3 justify-center">
-              <Link href="/industry" className="inline-flex items-center gap-2 bg-primary hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-2xl transition-all shadow-lg text-sm">
+              <Link href="/industry" className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white font-semibold py-3 px-6 rounded-2xl transition-all shadow-lg text-sm">
                 View Directory
               </Link>
               <button onClick={() => { setSuccess(false); setFormData({}); }} className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-foreground font-semibold py-3 px-6 rounded-2xl transition-all border border-white/10 text-sm">
@@ -456,7 +456,7 @@ export default function SubmitDirectoryListingPage() {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full bg-primary hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-4 px-6 rounded-2xl transition-all shadow-lg shadow-primary/20 text-base"
+            className="w-full bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-4 px-6 rounded-2xl transition-all shadow-lg shadow-primary/20 text-base"
           >
             {uploading ? 'Uploading image...' : submitting ? 'Submitting...' : 'Submit Listing for Review'}
           </button>

@@ -67,7 +67,7 @@ export default function CountryHero({ country, opportunityCount }: CountryHeroPr
               href={href}
               className={`px-4 py-2 rounded-xl text-[13px] font-semibold border transition-colors ${
                 primary
-                  ? 'bg-primary border-primary text-white hover:bg-blue-600'
+                  ? 'bg-primary border-primary text-white hover:bg-primary-hover'
                   : 'border-white/[0.1] hover:border-white/[0.2] hover:text-foreground'
               }`}
               style={primary ? undefined : { background: 'var(--surface)', color: 'var(--foreground-secondary)' }}

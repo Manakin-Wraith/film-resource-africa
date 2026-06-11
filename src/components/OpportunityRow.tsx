@@ -98,18 +98,18 @@ export default function OpportunityRow({ opportunities, title, subtitle, icon, o
 
               {/* Status badges */}
               <div className="flex items-center gap-1.5 mb-3 flex-wrap">
-                <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border ${status.bg} ${status.color}`}>
+                <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold uppercase tracking-wider border ${status.bg} ${status.color}`}>
                   <StatusIcon size={10} />
                   {status.label}
                 </span>
                 {isNewListing(opp.created_at, opp.id) && (
-                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border bg-gradient-to-r from-blue-500/20 to-purple-500/20 border-purple-500/30 text-purple-300">
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold uppercase tracking-wider border bg-gradient-to-r from-blue-500/20 to-purple-500/20 border-purple-500/30 text-purple-300">
                     <Sparkles size={9} />
                     NEW
                   </span>
                 )}
                 {!isNewListing(opp.created_at, opp.id) && isUpdatedListing(opp.created_at, opp.updated_at, opp.id) && (
-                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border bg-amber-500/20 border-amber-500/30 text-amber-300">
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold uppercase tracking-wider border bg-amber-500/20 border-amber-500/30 text-amber-300">
                     <RefreshCw size={9} />
                     UPDATED
                   </span>
@@ -117,7 +117,7 @@ export default function OpportunityRow({ opportunities, title, subtitle, icon, o
                 {opp.last_verified_at && (
                   <span
                     title={`Source last re-checked ${formatLocalDateTime(opp.last_verified_at)}`}
-                    className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border bg-teal-500/15 border-teal-500/25 text-teal-300"
+                    className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold uppercase tracking-wider border bg-teal-500/15 border-teal-500/25 text-teal-300"
                   >
                     <BadgeCheck size={10} />
                     Verified {formatRelativeDate(opp.last_verified_at)}

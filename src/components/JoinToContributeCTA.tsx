@@ -30,7 +30,7 @@ export default function JoinToContributeCTA({
       <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
         <Link
           href={primaryHref}
-          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-primary hover:bg-blue-600 text-white px-7 py-3.5 rounded-xl font-semibold transition-colors"
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-white px-7 py-3.5 rounded-xl font-semibold transition-colors"
         >
           {primaryLabel} <ArrowRight size={18} />
         </Link>

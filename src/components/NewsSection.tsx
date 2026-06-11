@@ -23,7 +23,7 @@ function FeaturedNewsCard({ item }: { item: NewsItem }) {
   return (
     <Link href={href} className="block group mb-5">
       <div
-        className="rounded-xl overflow-hidden border border-white/8 hover:border-white/16 transition-all"
+        className="rounded-xl overflow-hidden border border-line hover:border-line-strong transition-all"
         style={{ background: 'var(--surface)' }}
       >
         {item.image_url ? (
@@ -38,7 +38,7 @@ function FeaturedNewsCard({ item }: { item: NewsItem }) {
             <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
           </div>
         ) : (
-          <NewsImageFallback category={item.category} title={item.title} className="h-40 md:h-52" />
+          <NewsImageFallback category={item.category} title={item.title} className="h-48 md:h-64" />
         )}
         <div className="p-5 md:p-6">
           <div className="flex items-center gap-3 mb-2">
@@ -75,7 +75,7 @@ function SecondaryNewsCard({ item }: { item: NewsItem }) {
         )}
       </div>
       <div className="flex-1 min-w-0">
-        <span className="editorial-dateline text-[11px] mb-1 block">
+        <span className="editorial-dateline text-xs mb-1 block">
           <RelativeDate date={item.published_at} />
         </span>
         <h4 className="text-[13px] font-bold font-heading text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-snug">

@@ -76,7 +76,7 @@ export default function CountryDirectory({ listings, countryName }: CountryDirec
           </p>
           <Link
             href="/industry/submit"
-            className="inline-flex items-center gap-2 bg-primary hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-2xl transition-all shadow-lg text-sm"
+            className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white font-semibold py-3 px-6 rounded-2xl transition-all shadow-lg text-sm"
           >
             <Plus size={16} /> Add the first listing
           </Link>

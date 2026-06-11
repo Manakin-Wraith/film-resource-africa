@@ -78,7 +78,7 @@ export default function PartnersSection() {
             return (
               <div
                 key={cat.title}
-                className={`group relative rounded-2xl border ${colors.bg} p-5 md:p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg ${colors.glow} cursor-default`}
+                className={`group relative rounded-2xl border ${colors.bg} p-5 md:p-6 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg ${colors.glow} cursor-default`}
               >
                 <div className={`w-10 h-10 rounded-xl border ${colors.bg} flex items-center justify-center mb-3`}>
                   <cat.icon size={20} className={colors.text} />
@@ -99,7 +99,7 @@ export default function PartnersSection() {
           <div className="inline-flex flex-col sm:flex-row items-center gap-3">
             <button
               onClick={() => openModal('partner')}
-              className="inline-flex items-center gap-2 bg-primary hover:bg-blue-600 text-white font-semibold py-3 px-7 rounded-2xl transition-all shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:scale-[1.02]"
+              className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white font-semibold py-3 px-7 rounded-2xl transition-all shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:scale-[1.02]"
             >
               <Handshake size={18} />
               Become a Partner
@@ -113,7 +113,7 @@ export default function PartnersSection() {
               Advertise your services
             </button>
           </div>
-          <p className="text-foreground/50 text-[11px]">
+          <p className="text-foreground/50 text-xs">
             Partner listings are coming soon. Get in early and be featured from day one.
           </p>
         </div>

@@ -29,10 +29,10 @@ function JustAddedCard({ opp, onSelect }: { opp: Opportunity; onSelect: (o: Oppo
       />
       <div className="p-4">
         {deadline && deadline.urgency !== 'passed' && (
-          <span className="editorial-dateline text-[11px] mb-1.5 block">
+          <span className="editorial-dateline text-xs mb-1.5 block">
             {opp['Next Deadline']?.substring(0, 40) || deadline.dateFormatted}
             {deadline.urgency !== 'normal' && (
-              <span className="ml-1.5 font-semibold" style={{ color: '#ef4444' }}>
+              <span className="ml-1.5 font-semibold text-urgent">
                 {' '}— {deadline.countdownText}
               </span>
             )}
