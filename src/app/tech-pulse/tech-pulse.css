@@ -5,14 +5,22 @@
    Inter/Outfit fonts come from globals.css + layout.tsx. JetBrains Mono is added
    as --font-mono in layout.tsx. */
 
+/* DESIGN-SYSTEM EXEMPTION: like .prs-root, this namespace keeps its class
+   anatomy but ALIASES the site @theme color tokens so palette changes
+   propagate. Do not re-introduce literal colors here.
+   --tp-soon-* are local derived tints of the accent for the coming-soon
+   treatment. */
 .tp-root {
   --font-heading: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --surface-raised-2: #222226;
-  --primary: #3b82f6;
-  --accent: #f59e0b;
-  --success: #22c55e;
-  --urgent: #ef4444;
+  --primary: var(--color-primary);
+  --accent: var(--color-accent);
+  --success: var(--color-success);
+  --urgent: var(--color-urgent);
+  --tp-soon-text: #ffd17a;
+  --tp-tag-border: rgba(59, 130, 246, .25);
+  --tp-tag-text: #9cc0ff;
   font-family: var(--font-sans);
   font-size: 15px;
   line-height: 1.5;
@@ -39,19 +47,19 @@
 .tp-root .count-pill .n { color: var(--foreground); font-weight: 600; }
 .tp-root .count-pill.primary .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--primary); }
 .tp-root .count-pill.accent .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
-.tp-root .count-pill.soon { background: rgba(245, 158, 11, .1); border-color: rgba(245, 158, 11, .35); color: #ffd17a; }
-.tp-root .count-pill.soon .dot { width: 6px; height: 6px; border-radius: 50%; background: #f59e0b; box-shadow: 0 0 0 0 rgba(245, 158, 11, .55); animation: tp-pulse-amber 1.8s infinite; }
-.tp-root .count-pill.soon .n { color: #ffd17a; font-weight: 600; }
+.tp-root .count-pill.soon { background: rgba(245, 158, 11, .1); border-color: rgba(245, 158, 11, .35); color: var(--tp-soon-text); }
+.tp-root .count-pill.soon .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 0 rgba(245, 158, 11, .55); animation: tp-pulse-amber 1.8s infinite; }
+.tp-root .count-pill.soon .n { color: var(--tp-soon-text); font-weight: 600; }
 @keyframes tp-pulse-amber { 0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, .55); } 70% { box-shadow: 0 0 0 7px rgba(245, 158, 11, 0); } 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); } }
 
 /* ---------- COMING SOON / OFF-AIR ---------- */
 .tp-root .band.band-soon { background: linear-gradient(180deg, rgba(245, 158, 11, .04), rgba(245, 158, 11, 0)); border-style: dashed; }
-.tp-root .band .onair.soon { background: rgba(245, 158, 11, .12); border-color: rgba(245, 158, 11, .35); color: #ffd17a; }
-.tp-root .band .onair.soon .pulse { background: #f59e0b; box-shadow: 0 0 0 0 rgba(245, 158, 11, .55); animation: tp-pulse-amber 1.8s infinite; }
+.tp-root .band .onair.soon { background: rgba(245, 158, 11, .12); border-color: rgba(245, 158, 11, .35); color: var(--tp-soon-text); }
+.tp-root .band .onair.soon .pulse { background: var(--accent); box-shadow: 0 0 0 0 rgba(245, 158, 11, .55); animation: tp-pulse-amber 1.8s infinite; }
 .tp-root .coming-soon-frame { display: flex; align-items: center; justify-content: center; background: radial-gradient(120% 100% at 20% 20%, rgba(59, 130, 246, .18) 0, transparent 55%), radial-gradient(120% 100% at 80% 80%, rgba(245, 158, 11, .18) 0, transparent 55%), linear-gradient(135deg, #0c0c10 0%, #1a1a22 50%, #0c0c10 100%); }
 .tp-root .coming-soon-frame .cs-grid { position: absolute; inset: 0; pointer-events: none; background-image: repeating-linear-gradient(0deg, rgba(255, 255, 255, .03) 0 1px, transparent 1px 4px), repeating-linear-gradient(90deg, rgba(255, 255, 255, .03) 0 1px, transparent 1px 60px); }
 .tp-root .coming-soon-frame .cs-content { position: relative; z-index: 1; max-width: 640px; padding: 40px 32px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 14px; }
-.tp-root .coming-soon-frame .cs-kicker { font-family: var(--font-mono); font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: #ffd17a; }
+.tp-root .coming-soon-frame .cs-kicker { font-family: var(--font-mono); font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--tp-soon-text); }
 .tp-root .coming-soon-frame .cs-title { font-family: var(--font-heading); font-weight: 700; font-size: clamp(48px, 7vw, 88px); line-height: .95; letter-spacing: -.02em; margin: 4px 0 6px; color: #fff; }
 .tp-root .coming-soon-frame .cs-title em { font-style: italic; font-weight: 500; color: rgba(255, 255, 255, .65); }
 .tp-root .coming-soon-frame .cs-sub { margin: 0; max-width: 52ch; color: rgba(255, 255, 255, .72); font-size: 15px; line-height: 1.5; }
@@ -102,7 +110,7 @@
 .tp-root .guests { margin-top: 28px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .tp-root .guest { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); transition: border-color .15s, background .15s; }
 .tp-root .guest:hover { border-color: var(--border-strong); background: var(--surface-raised); }
-.tp-root .guest .avatar { width: 44px; height: 44px; border-radius: 50%; background: radial-gradient(circle at 50% 38%, rgba(59, 130, 246, .25) 0 40%, transparent 41%), var(--surface-raised); border: 1px solid var(--border-strong); flex: none; }
+.tp-root .guest .avatar { width: 44px; height: 44px; border-radius: 50%; background: radial-gradient(circle at 50% 38%, var(--tp-tag-border) 0 40%, transparent 41%), var(--surface-raised); border: 1px solid var(--border-strong); flex: none; }
 .tp-root .guest .avatar.amber { background: radial-gradient(circle at 50% 38%, rgba(245, 158, 11, .25) 0 40%, transparent 41%), var(--surface-raised); }
 .tp-root .guest .info { min-width: 0; }
 .tp-root .guest .name { font-family: var(--font-heading); font-weight: 600; font-size: 15px; color: var(--foreground); line-height: 1.1; }
@@ -130,8 +138,8 @@
 .tp-root .transcript-link::after { content: "↗"; }
 
 .tp-root .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-.tp-root .tag { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(59, 130, 246, .25); background: rgba(59, 130, 246, .1); color: #9cc0ff; }
-.tp-root .tag.editor { border-color: rgba(245, 158, 11, .3); background: rgba(245, 158, 11, .1); color: #ffd17a; }
+.tp-root .tag { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; padding: 4px 10px; border-radius: 8px; border: 1px solid var(--tp-tag-border); background: rgba(59, 130, 246, .1); color: var(--tp-tag-text); }
+.tp-root .tag.editor { border-color: rgba(245, 158, 11, .3); background: rgba(245, 158, 11, .1); color: var(--tp-soon-text); }
 
 /* ---------- TV-GUIDE SCHEDULE ---------- */
 .tp-root .schedule-section { margin-top: 80px; }
@@ -156,7 +164,7 @@
 .tp-root .ep-block.now .epn { color: #ffb4b4; }
 .tp-root .ep-block.now .t { color: #fff; }
 .tp-root .ep-block.upcoming { background: rgba(245, 158, 11, .08); border-color: rgba(245, 158, 11, .3); border-style: dashed; }
-.tp-root .ep-block.upcoming .epn { color: #ffd17a; }
+.tp-root .ep-block.upcoming .epn { color: var(--tp-soon-text); }
 .tp-root .ep-block.upcoming .t { color: #ffe2b0; }
 .tp-root .schedule-foot { font-family: var(--font-mono); font-size: 11px; color: var(--foreground-tertiary); letter-spacing: .06em; margin-top: 10px; }
 
@@ -212,7 +220,7 @@
 
 .tp-root .next-strip { display: flex; gap: 14px; align-items: center; }
 .tp-root .next-strip .nthumb { width: 96px; aspect-ratio: 4/3; flex: none; border-radius: 8px; background: radial-gradient(circle at 30% 30%, rgba(245, 158, 11, .25) 0 40%, transparent 50%), linear-gradient(135deg, #1a1a22, #0c0c10); border: 1px solid var(--border-strong); position: relative; }
-.tp-root .next-strip .nthumb .epn { position: absolute; top: 6px; left: 8px; font-family: var(--font-mono); font-size: 10px; color: #ffd17a; background: rgba(0, 0, 0, .5); padding: 2px 6px; border-radius: 3px; letter-spacing: .05em; }
+.tp-root .next-strip .nthumb .epn { position: absolute; top: 6px; left: 8px; font-family: var(--font-mono); font-size: 10px; color: var(--tp-soon-text); background: rgba(0, 0, 0, .5); padding: 2px 6px; border-radius: 3px; letter-spacing: .05em; }
 .tp-root .when { font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
 .tp-root .member-hint { font-family: var(--font-mono); font-size: 11px; letter-spacing: .06em; color: var(--foreground-tertiary); }
 .tp-root .member-hint a { color: var(--foreground); border-bottom: 1px solid var(--border-strong); padding-bottom: 1px; }

@@ -155,9 +155,9 @@ export default async function NewsArticlePage({ params }: { params: Promise<{ sl
           </div>
         )}
 
-        {/* Article body */}
+        {/* Article body — MarkdownBody is the single typography source (no prose wrapper) */}
         <article className="mb-10 border-t border-white/8 pt-8">
-          <div className="prose prose-invert prose-base max-w-none">
+          <div className="max-w-none">
             {article.content && (
               <MarkdownBody content={decodeEntities(article.content)} />
             )}

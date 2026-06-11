@@ -30,7 +30,7 @@ export default function PrivacyPage() {
           Last updated: {LAST_UPDATED} &nbsp;·&nbsp; Effective: {EFFECTIVE_DATE}
         </p>
 
-        <div className="prose prose-invert prose-sm max-w-none space-y-10" style={{ color: 'var(--foreground-secondary)' }}>
+        <div className="prose prose-invert prose-sm max-w-[70ch] space-y-10" style={{ color: 'var(--foreground-secondary)' }}>
 
           {/* 1 */}
           <section>

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import { Calculator, FileCheck2, TrendingUp, ShieldCheck, Layers } from 'lucide-react';
+import Badge from '@/components/ui/Badge';
 
 export const metadata: Metadata = {
   title: 'SA Film Rebate & Net Exposure Calculator — Film Resource Africa',
@@ -75,10 +76,9 @@ export default function RebateCalculatorPage() {
           <h1 className="text-[26px] md:text-[38px] font-bold font-heading leading-tight text-foreground mb-4">
             SA Film Rebate & Net Exposure Calculator
           </h1>
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-amber-500/20 bg-amber-500/10 text-amber-400 text-[12px] font-bold uppercase tracking-wider mb-5">
-            <Calculator size={13} />
+          <Badge colorway="amber" icon={Calculator} className="mb-5">
             Coming Soon
-          </div>
+          </Badge>
           <p className="text-[16px] md:text-[18px] leading-relaxed" style={{ color: 'var(--foreground-secondary)' }}>
             A free, producer-ready tool for estimating your DTIC film rebate, bonus uplifts, and net exposure — built on the verified 2025/26 Incentive Schemes Guide.
           </p>

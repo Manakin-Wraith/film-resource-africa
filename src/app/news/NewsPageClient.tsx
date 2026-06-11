@@ -60,16 +60,16 @@ export default function NewsPageClient({ news, placements = [] }: { news: NewsIt
               <button
                 key={tab.key}
                 onClick={() => setActiveFilter(tab.key)}
+                aria-pressed={isActive}
                 className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[13px] font-semibold border transition-all ${
                   isActive
-                    ? 'border-white/20 text-foreground'
-                    : 'border-white/8 hover:border-white/14 hover:text-foreground'
+                    ? 'border-line-strong text-foreground bg-surface-raised'
+                    : 'border-line hover:border-line-mid hover:text-foreground bg-surface text-(--foreground-secondary)'
                 }`}
-                style={isActive ? { background: 'var(--surface-raised)', color: 'var(--foreground)' } : { background: 'var(--surface)', color: 'var(--foreground-secondary)' }}
               >
                 <Icon size={13} />
                 {tab.label}
-                <span className="text-[11px] px-1.5 py-0.5 rounded-md" style={{ background: 'var(--surface-raised)', color: 'var(--foreground-tertiary)' }}>
+                <span className="text-[11px] px-1.5 py-0.5 rounded-md bg-surface-raised text-(--foreground-tertiary)">
                   {count}
                 </span>
               </button>
@@ -114,7 +114,7 @@ export default function NewsPageClient({ news, placements = [] }: { news: NewsIt
                   )}
                 </div>
               ) : (
-                <NewsImageFallback category={featured.category} title={featured.title} className={isTrailer ? 'h-64 md:h-80' : 'h-40 md:h-52'} />
+                <NewsImageFallback category={featured.category} title={featured.title} className={isTrailer ? 'h-64 md:h-80' : 'h-52 md:h-72'} />
               )}
               <div className="p-5 md:p-6">
                 <div className="flex items-center gap-3 mb-3">
