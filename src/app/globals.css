@@ -5,6 +5,12 @@
   --color-accent: #f59e0b;
   --color-urgent: #ef4444;
   --color-success: #22c55e;
+  /* Core neutrals — these activate the text-foreground/bg-surface utility
+     families used throughout the app. Values mirror the legacy :root vars. */
+  --color-background: #09090b;
+  --color-foreground: #fafafa;
+  --color-surface: #111113;
+  --color-surface-raised: #18181b;
   --font-sans: var(--font-inter);
   --font-heading: var(--font-outfit);
 }
