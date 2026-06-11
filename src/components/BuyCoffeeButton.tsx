@@ -14,7 +14,7 @@ export default function BuyCoffeeButton() {
         <div className="relative bg-white/10 backdrop-blur-xl border border-white/15 rounded-2xl p-4 shadow-2xl max-w-[260px] animate-in slide-in-from-bottom-2 fade-in duration-300">
           <button
             onClick={() => setShowTooltip(false)}
-            className="absolute top-2 right-2 text-foreground/40 hover:text-foreground/70 transition-colors"
+            className="absolute top-2 right-2 text-foreground/50 hover:text-foreground/70 transition-colors"
           >
             <X size={14} />
           </button>

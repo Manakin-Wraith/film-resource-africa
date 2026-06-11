@@ -56,7 +56,7 @@ export default function CountryFilmCommission({ commission, productionGuideUrl, 
         )}
 
         {commission.address && (
-          <p className="flex items-start gap-2 text-sm text-foreground/40">
+          <p className="flex items-start gap-2 text-sm text-foreground/50">
             <MapPin size={14} className="flex-shrink-0 mt-0.5" />
             {commission.address}
           </p>

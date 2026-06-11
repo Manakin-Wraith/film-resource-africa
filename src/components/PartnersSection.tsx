@@ -92,7 +92,7 @@ export default function PartnersSection() {
                   <cat.icon size={20} className={colors.text} />
                 </div>
                 <h3 className="font-semibold text-white text-sm md:text-base">{cat.title}</h3>
-                <p className="text-foreground/40 text-xs mt-1 leading-relaxed hidden md:block">{cat.description}</p>
+                <p className="text-foreground/50 text-xs mt-1 leading-relaxed hidden md:block">{cat.description}</p>
                 {/* Coming soon badge */}
                 <div className="absolute top-3 right-3 text-[9px] font-bold uppercase tracking-widest text-foreground/20">
                   Soon
@@ -113,7 +113,7 @@ export default function PartnersSection() {
               Become a Partner
               <ArrowRight size={16} />
             </button>
-            <span className="text-foreground/30 text-xs">or</span>
+            <span className="text-foreground/50 text-xs">or</span>
             <button
               onClick={() => openModal('advertise')}
               className="inline-flex items-center gap-2 text-foreground/50 hover:text-foreground/80 text-sm transition-colors underline underline-offset-4 decoration-white/10 hover:decoration-white/30"
@@ -121,7 +121,7 @@ export default function PartnersSection() {
               Advertise your services
             </button>
           </div>
-          <p className="text-foreground/30 text-[11px]">
+          <p className="text-foreground/50 text-[11px]">
             Partner listings are coming soon. Get in early and be featured from day one.
           </p>
         </div>

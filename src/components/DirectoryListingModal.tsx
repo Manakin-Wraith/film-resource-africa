@@ -353,7 +353,7 @@ export default function DirectoryListingModal({ listing, onClose }: DirectoryLis
                   </a>
                 )}
               </div>
-              <p className="text-foreground/30 text-xs mt-3">Always verify contact details directly before engaging.</p>
+              <p className="text-foreground/50 text-xs mt-3">Always verify contact details directly before engaging.</p>
             </div>
           </motion.div>
         </div>

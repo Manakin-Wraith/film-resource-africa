@@ -98,7 +98,7 @@ export default function Footer() {
                     placeholder="your@email.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full border border-white/[0.12] rounded-xl px-4 py-3 pr-12 text-sm focus:outline-none focus:border-primary/50 transition-colors text-foreground placeholder:text-foreground/30"
+                    className="w-full border border-white/[0.12] rounded-xl px-4 py-3 pr-12 text-sm focus:outline-none focus:border-primary/50 transition-colors text-foreground placeholder:text-foreground/50"
                     style={{ background: 'var(--surface-raised)' }}
                   />
                   <button

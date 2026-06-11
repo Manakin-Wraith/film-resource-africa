@@ -50,13 +50,13 @@ export default function CallSheetClient({ initialData }: { initialData: CallShee
             placeholder="Search roles, productions, locations..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full border border-white/[0.12] rounded-xl pl-12 pr-5 py-3 focus:outline-none focus:border-primary/50 transition-colors text-foreground placeholder:text-foreground/30 text-sm"
+            className="w-full border border-white/[0.12] rounded-xl pl-12 pr-5 py-3 focus:outline-none focus:border-primary/50 transition-colors text-foreground placeholder:text-foreground/50 text-sm"
             style={{ background: 'var(--surface-raised)', paddingLeft: '3.25rem' }}
           />
           {search && (
             <button
               onClick={() => setSearch('')}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-foreground/40 hover:text-foreground transition-colors text-sm font-medium"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-foreground/50 hover:text-foreground transition-colors text-sm font-medium"
             >
               Clear
             </button>
@@ -104,7 +104,7 @@ export default function CallSheetClient({ initialData }: { initialData: CallShee
 
         {/* Count */}
         <div className="flex items-center justify-center gap-3">
-          <span className="text-foreground/30 text-xs md:text-sm">{filteredData.length} listing{filteredData.length !== 1 ? 's' : ''}</span>
+          <span className="text-foreground/50 text-xs md:text-sm">{filteredData.length} listing{filteredData.length !== 1 ? 's' : ''}</span>
         </div>
       </div>
 
@@ -184,7 +184,7 @@ export default function CallSheetClient({ initialData }: { initialData: CallShee
                       <DollarSign size={14} />
                       {listing.compensation}
                     </span>
-                    <span className="text-foreground/30 text-xs">({compTypeLabel})</span>
+                    <span className="text-foreground/50 text-xs">({compTypeLabel})</span>
                   </div>
                   <ExternalLink size={16} className="text-foreground/30 group-hover:text-teal-400 transition-colors flex-shrink-0" />
                 </div>

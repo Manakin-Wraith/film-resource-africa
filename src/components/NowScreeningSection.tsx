@@ -35,7 +35,7 @@ export default function NowScreeningSection({ trailers }: NowScreeningSectionPro
           </div>
           <div>
             <h2 className="text-2xl md:text-3xl font-bold font-heading">Now Screening</h2>
-            <p className="text-sm text-foreground/40 mt-0.5">Trailers & first looks from African cinema</p>
+            <p className="text-sm text-foreground/50 mt-0.5">Trailers & first looks from African cinema</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -114,7 +114,7 @@ export default function NowScreeningSection({ trailers }: NowScreeningSectionPro
                 <h3 className="text-sm font-bold font-heading leading-snug group-hover:text-pink-400 transition-colors line-clamp-2 mb-2">
                   {item.title}
                 </h3>
-                <span className="text-foreground/30 text-xs mt-auto">
+                <span className="text-foreground/50 text-xs mt-auto">
                   <RelativeDate date={item.published_at} />
                 </span>
               </div>

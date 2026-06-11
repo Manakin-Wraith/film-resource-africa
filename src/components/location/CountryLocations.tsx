@@ -17,7 +17,7 @@ export default function CountryLocations({ locations, countryName }: CountryLoca
         </div>
         <div>
           <h2 className="text-2xl md:text-3xl font-bold font-heading">Filming Locations</h2>
-          <p className="text-foreground/40 text-sm">
+          <p className="text-foreground/50 text-sm">
             Popular production destinations across {countryName}
           </p>
         </div>
@@ -34,7 +34,7 @@ export default function CountryLocations({ locations, countryName }: CountryLoca
               <h3 className="font-bold font-heading text-base group-hover:text-rose-400 transition-colors leading-tight">
                 {location.name}
               </h3>
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold text-foreground/40 bg-white/5 border border-white/10 whitespace-nowrap">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold text-foreground/50 bg-white/5 border border-white/10 whitespace-nowrap">
                 <MapPin size={8} />
                 {location.region}
               </span>
@@ -46,7 +46,7 @@ export default function CountryLocations({ locations, countryName }: CountryLoca
 
             {location.notable_productions && location.notable_productions.length > 0 && (
               <div>
-                <p className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-foreground/30 mb-1.5">
+                <p className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-foreground/50 mb-1.5">
                   <Clapperboard size={10} /> Notable Productions
                 </p>
                 <div className="flex flex-wrap gap-1.5">

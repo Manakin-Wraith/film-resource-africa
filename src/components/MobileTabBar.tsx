@@ -67,7 +67,7 @@ export default function MobileTabBar() {
                 className={`flex flex-col items-center gap-1 px-3 py-2.5 min-w-[60px] min-h-[52px] transition-all duration-200 ${
                   active
                     ? 'text-foreground'
-                    : 'text-foreground/35 active:text-foreground/60'
+                    : 'text-foreground/60 active:text-foreground/80'
                 }`}
               >
                 <div className="relative">

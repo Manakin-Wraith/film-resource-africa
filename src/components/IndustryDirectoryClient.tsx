@@ -65,11 +65,11 @@ export default function IndustryDirectoryClient({ initialData }: { initialData: 
             placeholder="Search companies, crew, services, schools..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full border border-white/[0.12] rounded-xl pl-12 pr-5 py-3 focus:outline-none focus:border-primary/50 transition-colors text-foreground placeholder:text-foreground/30 text-sm"
+            className="w-full border border-white/[0.12] rounded-xl pl-12 pr-5 py-3 focus:outline-none focus:border-primary/50 transition-colors text-foreground placeholder:text-foreground/50 text-sm"
             style={{ background: 'var(--surface-raised)', paddingLeft: '3.25rem' }}
           />
           {search && (
-            <button onClick={() => setSearch('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-foreground/40 hover:text-foreground transition-colors text-sm font-medium">
+            <button onClick={() => setSearch('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-foreground/50 hover:text-foreground transition-colors text-sm font-medium">
               Clear
             </button>
           )}
@@ -150,7 +150,7 @@ export default function IndustryDirectoryClient({ initialData }: { initialData: 
             </select>
           )}
 
-          <span className="text-foreground/30 text-xs md:text-sm">{filteredData.length} results</span>
+          <span className="text-foreground/50 text-xs md:text-sm">{filteredData.length} results</span>
         </div>
       </div>
 
@@ -224,7 +224,7 @@ export default function IndustryDirectoryClient({ initialData }: { initialData: 
                   <span className="text-xs text-foreground/50 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg font-medium">
                     {listing.category}
                   </span>
-                  <span className="text-xs text-foreground/40 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg font-medium flex items-center gap-1">
+                  <span className="text-xs text-foreground/50 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg font-medium flex items-center gap-1">
                     <MapPin size={10} />
                     {listing.city ? `${listing.city}, ` : ''}{listing.country}
                   </span>

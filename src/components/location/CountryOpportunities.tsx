@@ -35,7 +35,7 @@ export default function CountryOpportunities({ opportunities, countryName }: Cou
           <p className="text-foreground/50 text-lg mb-4">
             We&apos;re building our {countryName} opportunities database.
           </p>
-          <p className="text-foreground/40 text-sm max-w-md mx-auto">
+          <p className="text-foreground/50 text-sm max-w-md mx-auto">
             New opportunities are added daily. Subscribe to our newsletter to get notified when we
             add {countryName}-specific listings.
           </p>
@@ -62,7 +62,7 @@ export default function CountryOpportunities({ opportunities, countryName }: Cou
             placeholder="Search opportunities..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-foreground/30"
+            className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-foreground/50"
           />
         </div>
         {categories.length > 2 && (
@@ -110,7 +110,7 @@ export default function CountryOpportunities({ opportunities, countryName }: Cou
 
             <div className="flex items-center gap-2 flex-wrap mb-3">
               {opp.category && (
-                <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-foreground/40 bg-white/5 px-2 py-0.5 rounded-lg">
+                <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-foreground/50 bg-white/5 px-2 py-0.5 rounded-lg">
                   {opp.category}
                 </span>
               )}
@@ -144,7 +144,7 @@ export default function CountryOpportunities({ opportunities, countryName }: Cou
 
             <div className="flex items-center justify-between mt-auto pt-3 border-t border-white/5">
               {opp['Next Deadline'] && (
-                <span className="flex items-center gap-1.5 text-xs text-foreground/40">
+                <span className="flex items-center gap-1.5 text-xs text-foreground/50">
                   <Calendar size={12} />
                   {opp['Next Deadline']}
                 </span>
@@ -166,7 +166,7 @@ export default function CountryOpportunities({ opportunities, countryName }: Cou
       </div>
 
       {filtered.length === 0 && (
-        <div className="text-center py-12 text-foreground/40">
+        <div className="text-center py-12 text-foreground/50">
           No opportunities match your search. Try adjusting your filters.
         </div>
       )}

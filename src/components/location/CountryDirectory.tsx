@@ -93,7 +93,7 @@ export default function CountryDirectory({ listings, countryName }: CountryDirec
         </div>
         <div>
           <h2 className="text-2xl md:text-3xl font-bold font-heading">Film Services Directory</h2>
-          <p className="text-foreground/40 text-sm">{listings.length} listing{listings.length !== 1 ? 's' : ''} in {countryName}</p>
+          <p className="text-foreground/50 text-sm">{listings.length} listing{listings.length !== 1 ? 's' : ''} in {countryName}</p>
         </div>
       </div>
 
@@ -105,10 +105,10 @@ export default function CountryDirectory({ listings, countryName }: CountryDirec
           placeholder={`Search services in ${countryName}...`}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-white/5 border border-white/10 rounded-2xl pl-11 pr-5 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-foreground placeholder:text-foreground/30 text-sm"
+          className="w-full bg-white/5 border border-white/10 rounded-2xl pl-11 pr-5 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-foreground placeholder:text-foreground/50 text-sm"
         />
         {search && (
-          <button onClick={() => setSearch('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-foreground/40 hover:text-foreground transition-colors text-xs font-medium">
+          <button onClick={() => setSearch('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-foreground/50 hover:text-foreground transition-colors text-xs font-medium">
             Clear
           </button>
         )}
@@ -161,7 +161,7 @@ export default function CountryDirectory({ listings, countryName }: CountryDirec
             <option value="all">All Categories</option>
             {categories.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
-          <span className="text-foreground/30 text-xs">{filteredData.length} result{filteredData.length !== 1 ? 's' : ''}</span>
+          <span className="text-foreground/50 text-xs">{filteredData.length} result{filteredData.length !== 1 ? 's' : ''}</span>
         </div>
       )}
 
@@ -235,7 +235,7 @@ export default function CountryDirectory({ listings, countryName }: CountryDirec
                     {listing.category}
                   </span>
                   {listing.city && (
-                    <span className="text-[10px] text-foreground/40 bg-white/5 border border-white/10 px-2 py-0.5 rounded-lg font-medium flex items-center gap-1">
+                    <span className="text-[10px] text-foreground/50 bg-white/5 border border-white/10 px-2 py-0.5 rounded-lg font-medium flex items-center gap-1">
                       <MapPin size={8} />
                       {listing.city}
                     </span>

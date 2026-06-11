@@ -16,7 +16,7 @@ const statusConfig: Record<string, { label: string; color: string; bg: string; i
   open: { label: 'Open', color: 'text-green-400', bg: 'bg-green-500/20 border-green-500/30', icon: Clock },
   closing_soon: { label: 'Closing Soon', color: 'text-red-400', bg: 'bg-red-500/20 border-red-500/30', icon: AlertTriangle },
   upcoming: { label: 'Upcoming', color: 'text-blue-400', bg: 'bg-blue-500/20 border-blue-500/30', icon: Calendar },
-  closed: { label: 'Closed', color: 'text-foreground/40', bg: 'bg-white/5 border-white/10', icon: Clock },
+  closed: { label: 'Closed', color: 'text-foreground/50', bg: 'bg-white/5 border-white/10', icon: Clock },
 };
 
 export default function DirectoryClient({ initialData, counts = {} }: { initialData: Opportunity[]; counts?: Record<string, number> }) {
@@ -113,13 +113,13 @@ export default function DirectoryClient({ initialData, counts = {} }: { initialD
             placeholder="Search opportunities, funds, labs, festivals..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full border border-white/[0.12] rounded-xl pr-5 py-3 focus:outline-none focus:border-primary/50 transition-colors text-foreground placeholder:text-foreground/30 text-sm"
+            className="w-full border border-white/[0.12] rounded-xl pr-5 py-3 focus:outline-none focus:border-primary/50 transition-colors text-foreground placeholder:text-foreground/50 text-sm"
             style={{ background: 'var(--surface-raised)', paddingLeft: '3.25rem' }}
           />
           {search && (
             <button
               onClick={() => setSearch('')}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-foreground/40 hover:text-foreground transition-colors text-sm font-medium"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-foreground/50 hover:text-foreground transition-colors text-sm font-medium"
             >
               Clear
             </button>
@@ -175,7 +175,7 @@ export default function DirectoryClient({ initialData, counts = {} }: { initialD
 
         {/* Result count */}
         <div className="flex items-center justify-center">
-          <span className="text-foreground/30 text-xs md:text-sm">{filteredData.length} results</span>
+          <span className="text-foreground/50 text-xs md:text-sm">{filteredData.length} results</span>
         </div>
       </div>
 

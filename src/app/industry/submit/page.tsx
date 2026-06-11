@@ -130,7 +130,7 @@ export default function SubmitDirectoryListingPage() {
     );
   }
 
-  const inputClass = "w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-foreground placeholder:text-foreground/30 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-sm";
+  const inputClass = "w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-foreground placeholder:text-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-sm";
   const labelClass = "block text-sm font-semibold text-foreground/80 mb-1.5";
 
   return (
@@ -282,13 +282,13 @@ export default function SubmitDirectoryListingPage() {
                       <button
                         type="button"
                         onClick={() => { setLogoFile(null); setLogoPreview(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}
-                        className="text-foreground/30 hover:text-red-400 transition-colors"
+                        className="text-foreground/50 hover:text-red-400 transition-colors"
                       >
                         <X size={14} />
                       </button>
                     </div>
                   )}
-                  <p className="text-xs text-foreground/30">JPG, PNG, WebP, GIF, or SVG. Max 5MB.</p>
+                  <p className="text-xs text-foreground/50">JPG, PNG, WebP, GIF, or SVG. Max 5MB.</p>
                 </div>
               </div>
             </div>
@@ -461,7 +461,7 @@ export default function SubmitDirectoryListingPage() {
             {uploading ? 'Uploading image...' : submitting ? 'Submitting...' : 'Submit Listing for Review'}
           </button>
 
-          <p className="text-center text-foreground/30 text-xs">
+          <p className="text-center text-foreground/50 text-xs">
             All listings are reviewed by our team before going live. This usually takes 24–48 hours.
           </p>
         </form>

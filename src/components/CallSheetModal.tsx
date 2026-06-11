@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { X, MapPin, Calendar, Clock, DollarSign, ExternalLink, Sparkles, Building2, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CallSheetListing } from '@/app/actions';
@@ -11,6 +12,14 @@ interface CallSheetModalProps {
 }
 
 export default function CallSheetModal({ listing, onClose }: CallSheetModalProps) {
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (listing) {
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = ''; };
+    }
+  }, [listing]);
+
   if (!listing) return null;
 
   const catStyle = getCallSheetCategoryStyle(listing.category);
@@ -75,16 +84,16 @@ export default function CallSheetModal({ listing, onClose }: CallSheetModalProps
             </div>
 
             {/* Meta grid */}
-            <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
               <div className="bg-white/5 rounded-xl p-4 border border-white/5">
-                <div className="flex items-center gap-2 text-xs text-foreground/40 uppercase font-bold tracking-wider mb-1">
+                <div className="flex items-center gap-2 text-xs text-foreground/50 uppercase font-bold tracking-wider mb-1">
                   <Building2 size={12} />
                   Production Company
                 </div>
                 <p className="text-foreground/90 font-medium">{listing.production_company}</p>
               </div>
               <div className="bg-white/5 rounded-xl p-4 border border-white/5">
-                <div className="flex items-center gap-2 text-xs text-foreground/40 uppercase font-bold tracking-wider mb-1">
+                <div className="flex items-center gap-2 text-xs text-foreground/50 uppercase font-bold tracking-wider mb-1">
                   <User size={12} />
                   Producer
                 </div>
@@ -99,7 +108,7 @@ export default function CallSheetModal({ listing, onClose }: CallSheetModalProps
                 <p className="text-teal-400/60 text-xs mt-0.5">{compTypeLabel}</p>
               </div>
               <div className="bg-white/5 rounded-xl p-4 border border-white/5">
-                <div className="flex items-center gap-2 text-xs text-foreground/40 uppercase font-bold tracking-wider mb-1">
+                <div className="flex items-center gap-2 text-xs text-foreground/50 uppercase font-bold tracking-wider mb-1">
                   <MapPin size={12} />
                   Location
                 </div>
@@ -107,7 +116,7 @@ export default function CallSheetModal({ listing, onClose }: CallSheetModalProps
               </div>
               {listing.start_date && (
                 <div className="bg-white/5 rounded-xl p-4 border border-white/5">
-                  <div className="flex items-center gap-2 text-xs text-foreground/40 uppercase font-bold tracking-wider mb-1">
+                  <div className="flex items-center gap-2 text-xs text-foreground/50 uppercase font-bold tracking-wider mb-1">
                     <Calendar size={12} />
                     Start Date
                   </div>
@@ -116,7 +125,7 @@ export default function CallSheetModal({ listing, onClose }: CallSheetModalProps
               )}
               {listing.duration && (
                 <div className="bg-white/5 rounded-xl p-4 border border-white/5">
-                  <div className="flex items-center gap-2 text-xs text-foreground/40 uppercase font-bold tracking-wider mb-1">
+                  <div className="flex items-center gap-2 text-xs text-foreground/50 uppercase font-bold tracking-wider mb-1">
                     <Clock size={12} />
                     Duration
                   </div>
@@ -127,14 +136,14 @@ export default function CallSheetModal({ listing, onClose }: CallSheetModalProps
 
             {/* Description */}
             <div className="mb-6">
-              <h3 className="text-xs text-foreground/40 uppercase font-bold tracking-wider mb-2">About This Role</h3>
+              <h3 className="text-xs text-foreground/50 uppercase font-bold tracking-wider mb-2">About This Role</h3>
               <p className="text-foreground/80 leading-relaxed whitespace-pre-wrap">{listing.description}</p>
             </div>
 
             {/* Requirements */}
             {listing.requirements && (
               <div className="mb-6">
-                <h3 className="text-xs text-foreground/40 uppercase font-bold tracking-wider mb-2">Requirements</h3>
+                <h3 className="text-xs text-foreground/50 uppercase font-bold tracking-wider mb-2">Requirements</h3>
                 <p className="text-foreground/80 leading-relaxed whitespace-pre-wrap">{listing.requirements}</p>
               </div>
             )}

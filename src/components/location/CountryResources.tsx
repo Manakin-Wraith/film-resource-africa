@@ -27,7 +27,7 @@ export default function CountryResources({ resources, associations, countryName 
         </div>
         <div>
           <h2 className="text-2xl md:text-3xl font-bold font-heading">Key Resources</h2>
-          <p className="text-foreground/40 text-sm">
+          <p className="text-foreground/50 text-sm">
             Essential organisations, funds, and industry bodies in {countryName}
           </p>
         </div>
@@ -109,7 +109,7 @@ export default function CountryResources({ resources, associations, countryName 
                       assoc.name
                     )}
                   </p>
-                  <p className="text-foreground/40 text-xs mt-0.5 line-clamp-2">{assoc.description}</p>
+                  <p className="text-foreground/50 text-xs mt-0.5 line-clamp-2">{assoc.description}</p>
                 </div>
               </div>
             ))}

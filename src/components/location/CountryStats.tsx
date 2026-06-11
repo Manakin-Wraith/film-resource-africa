@@ -87,9 +87,9 @@ export default function CountryStats({ country }: CountryStatsProps) {
                 >
                   <div className="flex items-center justify-between mb-0.5">
                     <span className="text-xs font-semibold">{treaty.country}</span>
-                    <span className="text-[10px] text-foreground/30">{treaty.year}</span>
+                    <span className="text-[10px] text-foreground/50">{treaty.year}</span>
                   </div>
-                  <p className="text-[11px] text-foreground/40 leading-snug">
+                  <p className="text-[11px] text-foreground/50 leading-snug">
                     {treaty.treaty_name}
                   </p>
                 </div>

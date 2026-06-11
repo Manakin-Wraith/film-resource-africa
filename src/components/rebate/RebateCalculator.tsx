@@ -389,7 +389,7 @@ function Field({
 }
 
 function inputClass(extra = '') {
-  return `w-full rounded-xl bg-white/[0.08] border border-white/[0.15] focus:border-primary/60 focus:ring-2 focus:ring-primary/25 outline-none px-4 py-2.5 text-sm text-foreground placeholder:text-foreground/40 transition ${extra}`;
+  return `w-full rounded-xl bg-white/[0.08] border border-white/[0.15] focus:border-primary/60 focus:ring-2 focus:ring-primary/25 outline-none px-4 py-2.5 text-sm text-foreground placeholder:text-foreground/50 transition ${extra}`;
 }
 
 function selectClass(extra = '') {

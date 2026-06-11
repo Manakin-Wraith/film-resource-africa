@@ -89,11 +89,11 @@ export default function SponsoredCard({
             <h3 className="text-lg font-bold font-heading mb-1 text-amber-400/80 group-hover:text-amber-400 transition-colors">
               {placement.partner_name}
             </h3>
-            <p className="text-foreground/40 text-sm leading-relaxed flex-grow mb-4">
+            <p className="text-foreground/50 text-sm leading-relaxed flex-grow mb-4">
               {placement.cta_text || sectionValueProps[sectionLabel] || 'Partner with Film Resource Africa'}
             </p>
             <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/10">
-              <span className="text-[11px] font-medium text-foreground/30">
+              <span className="text-[11px] font-medium text-foreground/50">
                 Sponsored
               </span>
               <span className="inline-flex items-center gap-1.5 text-amber-400 text-xs font-bold uppercase tracking-wide opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -285,7 +285,7 @@ export function NewsSponsoredCard({
           )}
 
           <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/10">
-            <span className="text-[11px] text-foreground/25">Sponsored</span>
+            <span className="text-[11px] text-foreground/50">Sponsored</span>
             <a
               href={ctaUrl}
               target="_blank"
@@ -339,11 +339,11 @@ export function NewsSponsoredCard({
             <h3 className="text-lg font-bold font-heading mb-2 text-amber-400/80 group-hover:text-amber-400 transition-colors leading-snug">
               {placement.partner_name}
             </h3>
-            <p className="text-foreground/40 text-sm leading-relaxed flex-grow mb-4">
+            <p className="text-foreground/50 text-sm leading-relaxed flex-grow mb-4">
               {placement.cta_text || sectionValueProps[sectionLabel] || 'Partner with Film Resource Africa'}
             </p>
             <div className="flex items-center justify-between mt-auto">
-              <span className="text-[11px] text-foreground/25">Sponsored</span>
+              <span className="text-[11px] text-foreground/50">Sponsored</span>
               <span className="inline-flex items-center gap-2 text-amber-400 text-sm font-semibold group-hover:gap-3 transition-all">
                 {placement.cta_text || 'Learn More'} <ArrowRight size={14} />
               </span>

@@ -32,7 +32,7 @@ export default function CountryPracticalInfo({ info, countryName }: CountryPract
               <Icon size={14} />
             </div>
             <div className="min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-foreground/40">{label}</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-foreground/50">{label}</p>
               <p className="text-sm text-foreground/70 leading-snug">{value}</p>
             </div>
           </div>
@@ -44,7 +44,7 @@ export default function CountryPracticalInfo({ info, countryName }: CountryPract
               <Plane size={14} />
             </div>
             <div className="min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-foreground/40">Visa & Work Permits</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-foreground/50">Visa & Work Permits</p>
               <p className="text-xs text-foreground/50 leading-relaxed">{info.visa_info}</p>
             </div>
           </div>

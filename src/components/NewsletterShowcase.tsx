@@ -244,7 +244,7 @@ export default function NewsletterShowcase() {
               placeholder="your@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-white/[0.12] rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-primary/50 transition-colors text-foreground placeholder:text-foreground/30 min-h-[48px]"
+              className="w-full border border-white/[0.12] rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-primary/50 transition-colors text-foreground placeholder:text-foreground/50 min-h-[48px]"
               style={{ background: 'var(--surface-raised)' }}
             />
           </div>

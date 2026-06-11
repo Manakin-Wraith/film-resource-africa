@@ -41,7 +41,7 @@ export default function SponsorTicker({ partners = [] }: SponsorTickerProps) {
   return (
     <div className="relative py-5">
       <div className="flex items-center gap-6 flex-wrap md:flex-nowrap">
-        <h2 className="text-[10px] font-semibold text-foreground/40 uppercase tracking-[0.2em] whitespace-nowrap shrink-0">
+        <h2 className="text-[10px] font-semibold text-foreground/50 uppercase tracking-[0.2em] whitespace-nowrap shrink-0">
           In partnership with
         </h2>
         <div className="flex-1 min-w-0 relative">

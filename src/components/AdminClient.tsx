@@ -1066,16 +1066,16 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                         </span>
                       )}
                     </div>
-                    <div className="text-xs text-foreground/40 mt-1 max-w-xs truncate">{item.summary}</div>
+                    <div className="text-xs text-foreground/50 mt-1 max-w-xs truncate">{item.summary}</div>
                   </td>
                   <td className="p-4 text-sm">
                     {item.submitted_by_name ? (
                       <div>
                         <div className="text-foreground/80">{item.submitted_by_name}</div>
-                        <div className="text-xs text-foreground/40">{item.submitted_by_email}</div>
+                        <div className="text-xs text-foreground/50">{item.submitted_by_email}</div>
                       </div>
                     ) : (
-                      <span className="text-foreground/30">Admin</span>
+                      <span className="text-foreground/50">Admin</span>
                     )}
                   </td>
                   <td className="p-4">

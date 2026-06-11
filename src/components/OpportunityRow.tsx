@@ -14,7 +14,7 @@ const statusConfig: Record<string, { label: string; color: string; bg: string; i
   open: { label: 'Open', color: 'text-green-400', bg: 'bg-green-500/20 border-green-500/30', icon: Clock },
   closing_soon: { label: 'Closing Soon', color: 'text-red-400', bg: 'bg-red-500/20 border-red-500/30', icon: AlertTriangle },
   upcoming: { label: 'Upcoming', color: 'text-blue-400', bg: 'bg-blue-500/20 border-blue-500/30', icon: Calendar },
-  closed: { label: 'Closed', color: 'text-foreground/40', bg: 'bg-white/5 border-white/10', icon: Clock },
+  closed: { label: 'Closed', color: 'text-foreground/50', bg: 'bg-white/5 border-white/10', icon: Clock },
 };
 
 interface OpportunityRowProps {
@@ -38,10 +38,10 @@ export default function OpportunityRow({ opportunities, title, subtitle, icon, o
         <div className="flex items-center gap-3">
           {icon}
           <h2 className="text-2xl md:text-3xl font-bold font-heading">{title}</h2>
-          <span className="text-foreground/40 text-sm font-medium ml-auto">{opportunities.length} {opportunities.length === 1 ? 'opportunity' : 'opportunities'}</span>
+          <span className="text-foreground/50 text-sm font-medium ml-auto">{opportunities.length} {opportunities.length === 1 ? 'opportunity' : 'opportunities'}</span>
         </div>
         {subtitle && (
-          <p className="text-foreground/40 text-sm pl-[52px]">{subtitle}</p>
+          <p className="text-foreground/50 text-sm pl-[52px]">{subtitle}</p>
         )}
       </div>
 
