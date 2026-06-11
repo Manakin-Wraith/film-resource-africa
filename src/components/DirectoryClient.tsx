@@ -11,12 +11,15 @@ import { directoryCategories, getDirectoryStyle, getDirectoryCategoryBySlug, PUB
 import { formatDeadline, isNewListing } from '@/lib/dateUtils';
 import { decodeHtmlEntities } from '@/lib/textUtils';
 import CardVisualHeader from './CardVisualHeader';
+import Input from '@/components/ui/Input';
+import Badge from '@/components/ui/Badge';
+import type { Colorway } from '@/lib/colorways';
 
-const statusConfig: Record<string, { label: string; color: string; bg: string; icon: typeof Clock }> = {
-  open: { label: 'Open', color: 'text-green-400', bg: 'bg-green-500/20 border-green-500/30', icon: Clock },
-  closing_soon: { label: 'Closing Soon', color: 'text-red-400', bg: 'bg-red-500/20 border-red-500/30', icon: AlertTriangle },
-  upcoming: { label: 'Upcoming', color: 'text-blue-400', bg: 'bg-blue-500/20 border-blue-500/30', icon: Calendar },
-  closed: { label: 'Closed', color: 'text-foreground/50', bg: 'bg-white/5 border-white/10', icon: Clock },
+const statusConfig: Record<string, { label: string; colorway: Colorway; icon: typeof Clock }> = {
+  open: { label: 'Open', colorway: 'green', icon: Clock },
+  closing_soon: { label: 'Closing Soon', colorway: 'red', icon: AlertTriangle },
+  upcoming: { label: 'Upcoming', colorway: 'blue', icon: Calendar },
+  closed: { label: 'Closed', colorway: 'neutral', icon: Clock },
 };
 
 export default function DirectoryClient({ initialData, counts = {} }: { initialData: Opportunity[]; counts?: Record<string, number> }) {
@@ -106,25 +109,14 @@ export default function DirectoryClient({ initialData, counts = {} }: { initialD
     <div className="w-full">
       {/* Search Bar */}
       <div className="mb-8 relative z-20 max-w-2xl mx-auto">
-        <div className="relative">
-          <Search size={20} className="absolute left-5 top-1/2 -translate-y-1/2 text-foreground/30" />
-          <input
-            type="text"
-            placeholder="Search opportunities, funds, labs, festivals..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full border border-white/[0.12] rounded-xl pr-5 py-3 focus:border-primary/50 transition-colors text-foreground placeholder:text-foreground/50 text-sm"
-            style={{ background: 'var(--surface-raised)', paddingLeft: '3.25rem' }}
-          />
-          {search && (
-            <button
-              onClick={() => setSearch('')}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-foreground/50 hover:text-foreground transition-colors text-sm font-medium"
-            >
-              Clear
-            </button>
-          )}
-        </div>
+        <Input
+          type="text"
+          placeholder="Search opportunities, funds, labs, festivals..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          leftIcon={Search}
+          onClear={() => setSearch('')}
+        />
       </div>
 
       {/* Filters & Sort */}
@@ -218,10 +210,9 @@ export default function DirectoryClient({ initialData, counts = {} }: { initialD
                 <div className="p-6 flex flex-col flex-grow">
                 <div className="flex items-start justify-between mb-4 relative z-10">
                   <div className="flex items-center gap-2">
-                    <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider border ${status.bg} ${status.color}`}>
-                      <StatusIcon size={12} />
+                    <Badge variant="status" colorway={status.colorway} icon={StatusIcon}>
                       {status.label}
-                    </span>
+                    </Badge>
                     {isNewListing(opp.created_at, opp.id) && (
                       <span className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider border bg-gradient-to-r from-blue-500/20 to-purple-500/20 border-purple-500/30 text-purple-300 animate-pulse">
                         <Sparkles size={10} />

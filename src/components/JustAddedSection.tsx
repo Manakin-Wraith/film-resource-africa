@@ -6,6 +6,7 @@ import { formatDeadline } from '@/lib/dateUtils';
 import { decodeHtmlEntities } from '@/lib/textUtils';
 import { trackOpportunityClick } from '@/lib/analytics';
 import CardVisualHeader from './CardVisualHeader';
+import Card from '@/components/ui/Card';
 
 function JustAddedCard({ opp, onSelect }: { opp: Opportunity; onSelect: (o: Opportunity) => void }) {
   const deadline = opp.deadline_date ? formatDeadline(opp.deadline_date) : null;
@@ -13,10 +14,9 @@ function JustAddedCard({ opp, onSelect }: { opp: Opportunity; onSelect: (o: Oppo
   const CatIcon = catStyle.icon;
 
   return (
-    <div
+    <Card
+      interactive
       onClick={() => { trackOpportunityClick(opp.title, opp.category || '', 'Just Added'); onSelect(opp); }}
-      className="rounded-xl overflow-hidden border border-white/[0.08] hover:border-white/[0.16] hover:-translate-y-0.5 transition-all cursor-pointer group"
-      style={{ background: 'var(--surface)' }}
     >
       <CardVisualHeader
         logo={opp.logo}
@@ -53,7 +53,7 @@ function JustAddedCard({ opp, onSelect }: { opp: Opportunity; onSelect: (o: Oppo
           </span>
         </div>
       </div>
-    </div>
+    </Card>
   );
 }
 

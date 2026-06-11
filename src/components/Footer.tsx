@@ -5,6 +5,7 @@ import { Mail, Twitter, Linkedin, Send, CheckCircle2, Megaphone } from 'lucide-r
 import Link from 'next/link';
 import Image from 'next/image';
 import ContactModal from './ContactModal';
+import Button from '@/components/ui/Button';
 import type { InquiryType } from '@/app/actions';
 
 export default function Footer() {
@@ -66,13 +67,12 @@ export default function Footer() {
                 Connecting African storytellers with global opportunities and resources.
               </p>
               <div className="flex flex-col items-center md:items-start gap-2">
-                <button
+                <Button
                   onClick={() => { setInquiryType('advertise'); setIsContactOpen(true); }}
-                  className="inline-flex items-center gap-2 text-white text-sm font-semibold py-2.5 px-5 bg-primary hover:bg-blue-600 rounded-xl transition-colors"
+                  leftIcon={Megaphone}
                 >
-                  <Megaphone size={15} />
                   Advertise With Us
-                </button>
+                </Button>
                 <button
                   onClick={() => { setInquiryType('general'); setIsContactOpen(true); }}
                   className="inline-flex items-center gap-1.5 text-sm transition-colors"
