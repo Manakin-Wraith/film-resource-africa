@@ -113,7 +113,7 @@ export default function DirectoryClient({ initialData, counts = {} }: { initialD
             placeholder="Search opportunities, funds, labs, festivals..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full border border-white/[0.12] rounded-xl pr-5 py-3 focus:outline-none focus:border-primary/50 transition-colors text-foreground placeholder:text-foreground/50 text-sm"
+            className="w-full border border-white/[0.12] rounded-xl pr-5 py-3 focus:border-primary/50 transition-colors text-foreground placeholder:text-foreground/50 text-sm"
             style={{ background: 'var(--surface-raised)', paddingLeft: '3.25rem' }}
           />
           {search && (

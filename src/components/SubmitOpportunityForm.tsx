@@ -115,7 +115,7 @@ export default function SubmitOpportunityForm({ memberName }: { memberName: stri
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full bg-black/10 border border-white/10 hover:border-white/20 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-base"
+              className="w-full bg-black/10 border border-white/10 hover:border-white/20 rounded-2xl px-5 py-4 focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-base"
             >
               {directoryCategories.map((c) => (
                 <option key={c.key} value={c.key} style={{ background: '#18181b' }}>
@@ -171,7 +171,7 @@ export default function SubmitOpportunityForm({ memberName }: { memberName: stri
                 placeholder={field.placeholder || ''}
                 value={(formData[field.key] as string) || ''}
                 onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
-                className="w-full bg-black/10 border border-white/10 hover:border-white/20 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent min-h-[140px] transition-all text-base placeholder:opacity-40"
+                className="w-full bg-black/10 border border-white/10 hover:border-white/20 rounded-2xl px-5 py-4 focus:ring-2 focus:ring-primary focus:border-transparent min-h-[140px] transition-all text-base placeholder:opacity-40"
               />
             ) : (
               <input
@@ -180,7 +180,7 @@ export default function SubmitOpportunityForm({ memberName }: { memberName: stri
                 placeholder={field.placeholder || ''}
                 value={(formData[field.key] as string) || ''}
                 onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
-                className="w-full bg-black/10 border border-white/10 hover:border-white/20 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-base placeholder:opacity-40"
+                className="w-full bg-black/10 border border-white/10 hover:border-white/20 rounded-2xl px-5 py-4 focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-base placeholder:opacity-40"
               />
             )}
           </div>

@@ -14,7 +14,7 @@ const spotlightCategories = [
   { value: 'other', label: 'Other News', emoji: '📣' },
 ];
 
-const inputClass = "w-full border border-white/[0.12] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500/40 transition-colors text-foreground placeholder:text-foreground/50 bg-white/[0.04]";
+const inputClass = "w-full border border-white/[0.12] rounded-xl px-4 py-3 text-sm focus:border-amber-500/40 transition-colors text-foreground placeholder:text-foreground/50 bg-white/[0.04]";
 
 export default function SpotlightSubmitForm() {
   const [formData, setFormData] = useState<Record<string, string>>({});

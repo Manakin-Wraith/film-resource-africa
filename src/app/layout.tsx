@@ -9,7 +9,7 @@ import { getHeaderStats } from './actions';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const outfit = Outfit({ subsets: ['latin'], variable: '--font-outfit' });
-const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono' });
+const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-jetbrains' });
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://film-resource-africa.com'),
@@ -56,7 +56,7 @@ export default async function RootLayout({
         <link rel="preload" as="image" href="/bg/site-cinematic.jpg" />
         <div className="site-bg" aria-hidden="true" />
         <SiteNav stats={stats} />
-        <div className="relative z-10 flex flex-col min-h-screen pt-[64px] pb-[72px] md:pb-0">
+        <div className="relative z-10 flex flex-col min-h-screen pt-(--header-h) pb-(--tabbar-h) md:pb-0">
           <div className="grow">
             {children}
           </div>

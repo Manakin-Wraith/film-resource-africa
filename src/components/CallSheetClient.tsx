@@ -50,7 +50,7 @@ export default function CallSheetClient({ initialData }: { initialData: CallShee
             placeholder="Search roles, productions, locations..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full border border-white/[0.12] rounded-xl pl-12 pr-5 py-3 focus:outline-none focus:border-primary/50 transition-colors text-foreground placeholder:text-foreground/50 text-sm"
+            className="w-full border border-white/[0.12] rounded-xl pl-12 pr-5 py-3 focus:border-primary/50 transition-colors text-foreground placeholder:text-foreground/50 text-sm"
             style={{ background: 'var(--surface-raised)', paddingLeft: '3.25rem' }}
           />
           {search && (

@@ -65,7 +65,7 @@ export default function IndustryDirectoryClient({ initialData }: { initialData: 
             placeholder="Search companies, crew, services, schools..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full border border-white/[0.12] rounded-xl pl-12 pr-5 py-3 focus:outline-none focus:border-primary/50 transition-colors text-foreground placeholder:text-foreground/50 text-sm"
+            className="w-full border border-white/[0.12] rounded-xl pl-12 pr-5 py-3 focus:border-primary/50 transition-colors text-foreground placeholder:text-foreground/50 text-sm"
             style={{ background: 'var(--surface-raised)', paddingLeft: '3.25rem' }}
           />
           {search && (
@@ -130,7 +130,7 @@ export default function IndustryDirectoryClient({ initialData }: { initialData: 
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="border border-white/[0.12] rounded-xl px-3 py-2 text-xs font-medium focus:outline-none focus:border-primary/50 transition-colors"
+              className="border border-white/[0.12] rounded-xl px-3 py-2 text-xs font-medium focus:border-primary/50 transition-colors"
               style={{ background: 'var(--surface-raised)', color: 'var(--foreground-secondary)' }}
             >
               <option value="all">All Categories</option>
@@ -142,7 +142,7 @@ export default function IndustryDirectoryClient({ initialData }: { initialData: 
             <select
               value={countryFilter}
               onChange={(e) => setCountryFilter(e.target.value)}
-              className="border border-white/[0.12] rounded-xl px-3 py-2 text-xs font-medium focus:outline-none focus:border-primary/50 transition-colors"
+              className="border border-white/[0.12] rounded-xl px-3 py-2 text-xs font-medium focus:border-primary/50 transition-colors"
               style={{ background: 'var(--surface-raised)', color: 'var(--foreground-secondary)' }}
             >
               <option value="all">All Countries</option>
