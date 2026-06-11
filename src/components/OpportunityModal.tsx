@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
-import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo, useDragControls } from 'framer-motion';
-import { Calendar, DollarSign, FileText, ExternalLink, X, Info, Target, FileCheck, CheckCircle2, AlertCircle, Share2, Clock, AlertTriangle, Lightbulb, BadgeCheck } from 'lucide-react';
+import { useCallback } from 'react';
+import { Calendar, DollarSign, FileText, ExternalLink, Target, FileCheck, CheckCircle2, Share2, Clock, Lightbulb, BadgeCheck } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -11,6 +10,8 @@ import { getCategoryStyle } from '@/lib/categoryConfig';
 import { decodeHtmlEntities } from '@/lib/textUtils';
 import { formatRelativeDate, formatLocalDateTime } from '@/lib/dateUtils';
 import GeoIndicator from '@/components/GeoIndicator';
+import Modal from '@/components/ui/Modal';
+import Button from '@/components/ui/Button';
 
 function ModalMarkdown({ text }: { text: string }) {
   return (
@@ -40,32 +41,6 @@ interface OpportunityModalProps {
 }
 
 export default function OpportunityModal({ selectedOpp, onClose }: OpportunityModalProps) {
-  const [isMobile, setIsMobile] = useState(false);
-  const dragY = useMotionValue(0);
-  const overlayOpacity = useTransform(dragY, [0, 300], [1, 0]);
-  const dragControls = useDragControls();
-
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
-    check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
-  }, []);
-
-  // Lock body scroll when modal is open
-  useEffect(() => {
-    if (selectedOpp) {
-      document.body.style.overflow = 'hidden';
-      return () => { document.body.style.overflow = ''; };
-    }
-  }, [selectedOpp]);
-
-  const handleDragEnd = useCallback((_: any, info: PanInfo) => {
-    if (info.offset.y > 100 || info.velocity.y > 500) {
-      onClose();
-    }
-  }, [onClose]);
-
   const handleShare = useCallback(async () => {
     if (!selectedOpp) return;
     const shareData = {
@@ -84,68 +59,24 @@ export default function OpportunityModal({ selectedOpp, onClose }: OpportunityMo
     }
   }, [selectedOpp]);
 
+  if (!selectedOpp) return null;
+
   return (
-    <AnimatePresence>
-      {selectedOpp && (
-        <div className="fixed inset-0 z-[60] flex items-end md:items-center justify-center md:p-8">
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            style={{ opacity: isMobile ? overlayOpacity : undefined }}
-            onClick={onClose}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer"
-          />
-          
-          <motion.div 
-            initial={isMobile ? { y: '100%' } : { opacity: 0, scale: 0.9, y: 50 }}
-            animate={isMobile ? { y: 0 } : { opacity: 1, scale: 1, y: 0 }}
-            exit={isMobile ? { y: '100%' } : { opacity: 0, scale: 0.9, y: 50 }}
-            transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            drag={isMobile ? 'y' : false}
-            dragControls={dragControls}
-            dragListener={false}
-            dragConstraints={{ top: 0 }}
-            dragElastic={0.2}
-            onDragEnd={handleDragEnd}
-            style={isMobile ? { y: dragY, background: 'var(--surface)' } : { background: 'var(--surface)' }}
-            className={`w-full overflow-hidden flex flex-col relative shadow-2xl ${
-              isMobile
-                ? 'max-h-[95vh] rounded-t-[2rem] border-t border-white/[0.12]'
-                : 'max-w-4xl max-h-[90vh] rounded-2xl border border-white/[0.12]'
-            }`}
-          >
-            {/* Mobile drag handle */}
-            {isMobile && (
-              <div
-                className="flex justify-center pt-3 pb-1 cursor-grab active:cursor-grabbing touch-none"
-                onPointerDown={(e) => dragControls.start(e)}
-              >
-                <div className="w-10 h-1 rounded-full bg-white/20" />
-              </div>
-            )}
-
-            {/* Floating action buttons — always visible */}
-            <div className="absolute top-3 md:top-6 right-4 md:right-6 flex items-center gap-2 z-30">
-              <button
-                onClick={handleShare}
-                className="w-10 h-10 md:w-12 md:h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors border border-white/10 backdrop-blur-md"
-                aria-label="Share this opportunity"
-              >
-                <Share2 size={18} />
-              </button>
-              <button 
-                onClick={onClose}
-                className="w-10 h-10 md:w-12 md:h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors border border-white/10 backdrop-blur-md"
-              >
-                <X size={20} className="md:w-6 md:h-6" />
-              </button>
-            </div>
-
-            {/* Scrollable area — header + content unified so long titles don't starve mobile viewport */}
-            <div className="overflow-y-auto custom-scrollbar flex-grow overscroll-contain">
-              {/* OG Image hero banner */}
-              {selectedOpp.og_image_url && (
+    <Modal
+      open={!!selectedOpp}
+      onClose={onClose}
+      size="2xl"
+      labelledBy="opportunity-modal-title"
+      actions={
+        <button
+          onClick={handleShare}
+          className="w-10 h-10 md:w-12 md:h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors border border-white/10 backdrop-blur-md"
+          aria-label="Share this opportunity"
+        >
+          <Share2 size={18} />
+        </button>
+      }
+      hero={selectedOpp.og_image_url && (
                 <div className="relative h-40 md:h-56 overflow-hidden">
                   <Image
                     src={selectedOpp.og_image_url}
@@ -171,12 +102,25 @@ export default function OpportunityModal({ selectedOpp, onClose }: OpportunityMo
                   </div>
                 </div>
               )}
-
+      footer={selectedOpp["Apply:"] && (
+        <div className="flex flex-col md:flex-row items-center justify-between gap-3 px-5 md:px-8 py-4">
+          <p className="text-xs hidden md:block" style={{ color: 'var(--foreground-tertiary)' }}>
+            Verify dates and eligibility on the official website before applying.
+          </p>
+          <Button
+            href={selectedOpp["Apply:"].startsWith('http') ? selectedOpp["Apply:"] : `https://${selectedOpp["Apply:"]}`}
+            external
+            size="lg"
+            rightIcon={ExternalLink}
+            className="w-full md:w-auto"
+          >
+            Apply Now
+          </Button>
+        </div>
+      )}
+    >
               {/* Header */}
-              <div
-                className="relative p-6 md:p-10 pb-5 md:pb-6 border-b border-white/[0.08]"
-                onPointerDown={(e) => { if (isMobile) dragControls.start(e); }}
-              >
+              <div className="relative p-6 md:p-10 pb-5 md:pb-6 border-b border-line">
                 {/* Org logo + Category badge */}
                 <div className="flex items-center gap-3 mb-3 md:mb-4">
                   {!selectedOpp.og_image_url && selectedOpp.logo && (
@@ -203,7 +147,7 @@ export default function OpportunityModal({ selectedOpp, onClose }: OpportunityMo
                   <GeoIndicator geoScope={selectedOpp.geo_scope} countryIso={selectedOpp.country_iso} countryName={selectedOpp.country_name} variant="pill" />
                 </div>
                 
-                <h2 className="text-xl md:text-4xl font-bold font-heading leading-tight pr-24 md:pr-28 mb-4 md:mb-5">
+                <h2 id="opportunity-modal-title" className="text-xl md:text-4xl font-bold font-heading leading-tight pr-24 md:pr-28 mb-4 md:mb-5">
                   {selectedOpp.title}
                 </h2>
 
@@ -328,30 +272,6 @@ export default function OpportunityModal({ selectedOpp, onClose }: OpportunityMo
               )}
 
             </div>
-            </div>
-
-            {/* Pinned Apply footer */}
-            {selectedOpp["Apply:"] && (
-              <div
-                className="flex flex-col md:flex-row items-center justify-between gap-3 px-5 md:px-8 py-4 border-t border-white/[0.08]"
-                style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}
-              >
-                <p className="text-xs hidden md:block" style={{ color: 'var(--foreground-tertiary)' }}>
-                  Verify dates and eligibility on the official website before applying.
-                </p>
-                <a
-                  href={selectedOpp["Apply:"].startsWith('http') ? selectedOpp["Apply:"] : `https://${selectedOpp["Apply:"]}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full md:w-auto flex items-center justify-center gap-2 px-8 py-3.5 bg-primary hover:bg-blue-600 text-white font-bold text-sm rounded-xl transition-all min-h-[48px]"
-                >
-                  Apply Now <ExternalLink size={15} />
-                </a>
-              </div>
-            )}
-          </motion.div>
-        </div>
-      )}
-    </AnimatePresence>
+    </Modal>
   );
 }

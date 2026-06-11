@@ -9,12 +9,12 @@ import { X } from 'lucide-react';
    --z-modal, the floating close button, focus hand-off and return, and the
    mobile bottom-sheet with drag-to-dismiss (lifted from OpportunityModal). */
 
-type ModalSize = 'md' | 'lg' | 'xl';
+type ModalSize = 'md' | 'lg' | 'xl' | '2xl';
 
 interface ModalProps {
   open: boolean;
   onClose: () => void;
-  /** md = max-w-lg · lg = max-w-2xl · xl = max-w-4xl */
+  /** md = max-w-lg · lg = max-w-2xl · xl = max-w-3xl · 2xl = max-w-4xl */
   size?: ModalSize;
   /** Bottom-sheet behavior below 768px (default). false = centered at all sizes */
   mobileSheet?: boolean;
@@ -32,7 +32,8 @@ interface ModalProps {
 const sizeClasses: Record<ModalSize, string> = {
   md: 'md:max-w-lg',
   lg: 'md:max-w-2xl',
-  xl: 'md:max-w-4xl',
+  xl: 'md:max-w-3xl',
+  '2xl': 'md:max-w-4xl',
 };
 
 export function ModalCloseButton({ onClick, label = 'Close' }: { onClick: () => void; label?: string }) {

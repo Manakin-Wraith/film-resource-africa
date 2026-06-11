@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
-import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo, useDragControls } from 'framer-motion';
-import { X, Share2, ExternalLink, MapPin, Globe, Mail, Phone, Calendar, DollarSign, Clock, Star, CheckCircle2, Briefcase, GraduationCap, Film, Users, Award } from 'lucide-react';
+import { useCallback } from 'react';
+import { Share2, ExternalLink, MapPin, Globe, Mail, Phone, Calendar, DollarSign, Clock, Star, CheckCircle2, Briefcase, GraduationCap, Film, Users, Award } from 'lucide-react';
 import { DirectoryListing } from '@/app/actions';
-import { getDirectoryType, getCategoriesForType } from '@/lib/industryDirectoryConfig';
+import { getDirectoryType } from '@/lib/industryDirectoryConfig';
+import Modal from '@/components/ui/Modal';
 
 interface DirectoryListingModalProps {
   listing: DirectoryListing | null;
@@ -12,29 +12,6 @@ interface DirectoryListingModalProps {
 }
 
 export default function DirectoryListingModal({ listing, onClose }: DirectoryListingModalProps) {
-  const [isMobile, setIsMobile] = useState(false);
-  const dragY = useMotionValue(0);
-  const overlayOpacity = useTransform(dragY, [0, 300], [1, 0]);
-  const dragControls = useDragControls();
-
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
-    check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
-  }, []);
-
-  useEffect(() => {
-    if (listing) {
-      document.body.style.overflow = 'hidden';
-      return () => { document.body.style.overflow = ''; };
-    }
-  }, [listing]);
-
-  const handleDragEnd = useCallback((_: any, info: PanInfo) => {
-    if (info.offset.y > 100 || info.velocity.y > 500) onClose();
-  }, [onClose]);
-
   const handleShare = useCallback(async () => {
     if (!listing) return;
     try {
@@ -61,58 +38,54 @@ export default function DirectoryListingModal({ listing, onClose }: DirectoryLis
   const pricingLabels: Record<string, string> = { budget: 'Budget-Friendly', mid: 'Mid-Range', premium: 'Premium' };
 
   return (
-    <AnimatePresence>
-      {listing && (
-        <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center md:p-8">
-          <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            style={{ opacity: isMobile ? overlayOpacity : undefined }}
-            onClick={onClose}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer"
-          />
-
-          <motion.div
-            initial={isMobile ? { y: '100%' } : { opacity: 0, scale: 0.9, y: 50 }}
-            animate={isMobile ? { y: 0 } : { opacity: 1, scale: 1, y: 0 }}
-            exit={isMobile ? { y: '100%' } : { opacity: 0, scale: 0.9, y: 50 }}
-            transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            drag={isMobile ? 'y' : false}
-            dragControls={dragControls}
-            dragListener={false}
-            dragConstraints={{ top: 0 }}
-            dragElastic={0.2}
-            onDragEnd={handleDragEnd}
-            style={isMobile ? { y: dragY, background: 'var(--surface)' } : { background: 'var(--surface)' }}
-            className={`w-full border border-white/[0.08] overflow-hidden flex flex-col relative shadow-2xl ${
-              isMobile ? 'max-h-[95vh] rounded-t-2xl' : 'max-w-3xl max-h-[90vh] rounded-2xl'
-            }`}
-          >
-            {isMobile && (
-              <div
-                className="flex justify-center pt-3 pb-1 cursor-grab active:cursor-grabbing touch-none"
-                onPointerDown={(e) => dragControls.start(e)}
-              >
-                <div className="w-10 h-1 rounded-full bg-white/20" />
-              </div>
+    <Modal
+      open={!!listing}
+      onClose={onClose}
+      size="xl"
+      labelledBy="directory-listing-title"
+      actions={
+        <button
+          onClick={handleShare}
+          className="w-10 h-10 md:w-12 md:h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors border border-white/10 backdrop-blur-md"
+          aria-label="Share"
+        >
+          <Share2 size={18} />
+        </button>
+      }
+      footer={
+        <div className="p-5 md:p-8 bg-black/20">
+          <div className="flex flex-wrap items-center gap-3">
+            {listing.website && (
+              <a href={listing.website} target="_blank" rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white font-semibold py-3 px-6 rounded-2xl transition-all shadow-lg shadow-primary/20 text-sm">
+                <Globe size={16} /> Visit Website <ExternalLink size={14} />
+              </a>
             )}
-
-            {/* Floating action buttons — always visible */}
-            <div className="absolute top-3 md:top-6 right-4 md:right-6 flex items-center gap-2 z-30">
-              <button onClick={handleShare} className="w-10 h-10 md:w-12 md:h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors border border-white/10" aria-label="Share">
-                <Share2 size={18} />
-              </button>
-              <button onClick={onClose} className="w-10 h-10 md:w-12 md:h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors border border-white/10">
-                <X size={20} className="md:w-6 md:h-6" />
-              </button>
-            </div>
-
-            {/* Scrollable area — header + content unified so long titles don't starve mobile viewport */}
-            <div className="overflow-y-auto custom-scrollbar flex-grow overscroll-contain">
-              {/* Header */}
-              <div
-                className="relative p-6 md:p-10 pb-5 md:pb-6 border-b border-white/10 bg-gradient-to-b from-primary/10 to-transparent"
-                onPointerDown={(e) => { if (isMobile) dragControls.start(e); }}
-              >
+            {listing.portfolio_url && (
+              <a href={listing.portfolio_url} target="_blank" rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-foreground font-semibold py-3 px-6 rounded-2xl transition-all border border-white/10 text-sm">
+                <Film size={16} /> Portfolio <ExternalLink size={14} />
+              </a>
+            )}
+            {listing.email && (
+              <a href={`mailto:${listing.email}`}
+                className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-foreground font-medium py-3 px-5 rounded-2xl transition-all border border-white/10 text-sm">
+                <Mail size={16} /> Email
+              </a>
+            )}
+            {listing.phone && (
+              <a href={`tel:${listing.phone}`}
+                className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-foreground font-medium py-3 px-5 rounded-2xl transition-all border border-white/10 text-sm">
+                <Phone size={16} /> Call
+              </a>
+            )}
+          </div>
+          <p className="text-foreground/50 text-xs mt-3">Always verify contact details directly before engaging.</p>
+        </div>
+      }
+    >
+              {/* Header — 'rich profile' masthead variant: gradient wash is intentional */}
+              <div className="relative p-6 md:p-10 pb-5 md:pb-6 border-b border-white/10 bg-gradient-to-b from-primary/10 to-transparent">
                 {/* Type + Category badges */}
                 <div className="flex flex-wrap gap-2 mb-3 md:mb-4">
                   <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg font-semibold text-xs uppercase tracking-wider border ${dirType.bg} ${dirType.color}`}>
@@ -145,7 +118,7 @@ export default function DirectoryListingModal({ listing, onClose }: DirectoryLis
                       <DirIcon size={28} className={`${dirType.color} opacity-40`} />
                     </div>
                   )}
-                  <h2 className="text-xl md:text-4xl font-bold font-heading leading-tight">
+                  <h2 id="directory-listing-title" className="text-xl md:text-4xl font-bold font-heading leading-tight">
                     {listing.name}
                   </h2>
                 </div>
@@ -322,42 +295,7 @@ export default function DirectoryListingModal({ listing, onClose }: DirectoryLis
                   </section>
                 )}
               </div>
-            </div>
-            </div>
-
-            {/* Footer — contact links */}
-            <div className="p-5 md:p-8 pb-[calc(1.25rem+env(safe-area-inset-bottom))] md:pb-8 border-t border-white/10 bg-black/20">
-              <div className="flex flex-wrap items-center gap-3">
-                {listing.website && (
-                  <a href={listing.website} target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 bg-primary hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-2xl transition-all shadow-lg shadow-primary/20 text-sm">
-                    <Globe size={16} /> Visit Website <ExternalLink size={14} />
-                  </a>
-                )}
-                {listing.portfolio_url && (
-                  <a href={listing.portfolio_url} target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-foreground font-semibold py-3 px-6 rounded-2xl transition-all border border-white/10 text-sm">
-                    <Film size={16} /> Portfolio <ExternalLink size={14} />
-                  </a>
-                )}
-                {listing.email && (
-                  <a href={`mailto:${listing.email}`}
-                    className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-foreground font-medium py-3 px-5 rounded-2xl transition-all border border-white/10 text-sm">
-                    <Mail size={16} /> Email
-                  </a>
-                )}
-                {listing.phone && (
-                  <a href={`tel:${listing.phone}`}
-                    className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-foreground font-medium py-3 px-5 rounded-2xl transition-all border border-white/10 text-sm">
-                    <Phone size={16} /> Call
-                  </a>
-                )}
               </div>
-              <p className="text-foreground/50 text-xs mt-3">Always verify contact details directly before engaging.</p>
-            </div>
-          </motion.div>
-        </div>
-      )}
-    </AnimatePresence>
+    </Modal>
   );
 }
