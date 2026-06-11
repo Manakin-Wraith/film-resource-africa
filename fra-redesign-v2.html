@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FRA Redesign v2 — Sign-off Mockup (Warm / Fraunces)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,400..700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ════════════════════════════════════════════════════════════════════
+   TOKENS — these are the exact Phase B-2 values. Signing off this file
+   signs off the production token sheet.
+   ════════════════════════════════════════════════════════════════════ */
+:root{
+  --background:#0b0907;
+  --foreground:#f6efe6;
+  --surface:#1a1614;
+  --surface-raised:#221d1a;
+  --fg-secondary:rgba(246,239,230,0.62);
+  --fg-tertiary:rgba(246,239,230,0.48);
+  --line:rgba(246,239,230,0.08);
+  --line-mid:rgba(246,239,230,0.12);
+  --line-strong:rgba(246,239,230,0.18);
+  --ochre:#e8b057;          /* signature · primary · accent */
+  --ochre-hover:#f0bd6b;
+  --ochre-fg:#1a1410;       /* dark text on ochre */
+  --ember:#e5553a;          /* urgent */
+  --moss:#8bb56a;           /* open / positive / free */
+  --indigo:#8a7dd1;         /* special / new wave / AI */
+  --sand:#f1e2c4;
+  --font-display:'Fraunces',serif;
+  --font-body:'Inter',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--background);
+  color:var(--foreground);
+  font-family:var(--font-body);
+  font-size:15px;line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:var(--ochre);color:var(--ochre-fg)}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer}
+img{display:block;max-width:100%}
+
+/* warm ambient bg (stands in for the re-warmed cinematic photo + scrim) */
+.bg-wash{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(120% 80% at 50% -10%, rgba(122,74,28,0.22) 0%, rgba(11,9,7,0) 55%),
+    radial-gradient(90% 60% at 85% 110%, rgba(229,85,58,0.05) 0%, rgba(11,9,7,0) 60%),
+    var(--background);
+}
+.grain{position:fixed;inset:0;z-index:999;pointer-events:none;opacity:.13;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  background-size:256px 256px}
+
+/* ── editorial anatomy ─────────────────────────────────────────────── */
+.rubric{font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--fg-tertiary)}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase}
+.mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+.rule{height:1px;background:var(--line)}
+.rule-strong{height:1px;background:var(--line-strong)}
+.rule-double{position:relative;height:1px;background:var(--line-strong)}
+.rule-double::after{content:"";position:absolute;left:0;right:0;top:3px;height:1px;background:var(--line)}
+.rule-dashed{height:1px;opacity:.55;
+  background:repeating-linear-gradient(90deg,var(--ochre) 0 10px,transparent 10px 20px)}
+
+/* ── screens / mockup chrome ───────────────────────────────────────── */
+.screen{display:none;position:relative;z-index:1}
+.screen.on{display:block}
+.switcher{position:fixed;bottom:18px;right:18px;z-index:1000;display:flex;gap:6px;
+  background:var(--surface);border:1px solid var(--line-strong);border-radius:999px;padding:5px}
+.switcher button{font-size:12px;font-weight:600;padding:7px 14px;border-radius:999px;border:0;
+  background:transparent;color:var(--fg-secondary)}
+.switcher button.on{background:var(--ochre);color:var(--ochre-fg)}
+.wrap{max-width:1280px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
+
+/* ── site header ───────────────────────────────────────────────────── */
+.topbar{position:sticky;top:0;z-index:40;background:rgba(11,9,7,0.86);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line)}
+.topbar-in{max-width:1280px;margin:0 auto;padding:0 24px;height:60px;display:flex;align-items:center;gap:28px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-weight:600;
+  font-size:17px;letter-spacing:-.01em}
+.brand .mark{width:26px;height:26px;border-radius:7px;flex:none;
+  background:conic-gradient(from 210deg,var(--ember),var(--ochre),var(--sand),var(--ember))}
+.nav{display:flex;gap:2px;flex:1}
+.nav a{font-size:13px;font-weight:500;color:var(--fg-secondary);padding:7px 11px;border-radius:8px}
+.nav a:hover{color:var(--foreground);background:var(--surface)}
+.nav a.on{color:var(--foreground);font-weight:600}
+.top-cta{display:flex;gap:10px;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;
+  padding:9px 16px;border-radius:10px;border:0;transition:filter .15s, transform .1s}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:var(--ochre);color:var(--ochre-fg)}
+.btn-primary:hover{filter:brightness(1.07)}
+.btn-ghost{background:transparent;border:1px solid var(--line-strong);color:var(--foreground)}
+.btn-ghost:hover{background:var(--surface)}
+
+/* ════════════════════════════════════════════════════════════════════
+   SCREEN 1 — FRONT PAGE
+   ════════════════════════════════════════════════════════════════════ */
+.dateline{display:flex;align-items:baseline;justify-content:space-between;gap:16px;
+  padding:14px 0 10px}
+.dateline .mono{font-size:11px;letter-spacing:.06em;color:var(--fg-tertiary);text-transform:uppercase}
+.masthead{padding:34px 0 8px}
+.masthead h1{font-family:var(--font-display);font-weight:600;font-size:clamp(44px,6vw,84px);
+  line-height:1.02;letter-spacing:-.02em;max-width:11ch}
+.masthead h1 em{font-style:italic;font-weight:400;
+  background:linear-gradient(92deg,var(--ochre),var(--ember));
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.lede-band{display:flex;align-items:center;justify-content:space-between;gap:32px;flex-wrap:wrap;
+  border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  margin-top:30px;padding:16px 0}
+.lede{font-size:16px;color:var(--fg-secondary);max-width:52ch}
+.signup{display:flex;gap:8px;flex:none}
+.signup input{background:var(--surface);border:1px solid var(--line-mid);border-radius:10px;
+  color:var(--foreground);font-size:13px;padding:10px 14px;width:230px;font-family:inherit}
+.signup input::placeholder{color:var(--fg-tertiary)}
+.signup input:focus{outline:2px solid var(--ochre);outline-offset:0;border-color:transparent}
+
+.frontgrid{display:grid;grid-template-columns:1.4fr 1fr;gap:0;margin-top:40px}
+.lead-story{padding-right:40px;border-right:1px solid var(--line)}
+.lead-media{position:relative;border-radius:14px;overflow:hidden;aspect-ratio:16/8.5;
+  background:
+    radial-gradient(110% 90% at 25% 20%, rgba(232,176,87,.34) 0%, transparent 55%),
+    radial-gradient(120% 110% at 85% 90%, rgba(229,85,58,.28) 0%, transparent 60%),
+    linear-gradient(160deg,#3a2a18 0%,#17100a 70%)}
+.lead-media::before,.lead-media::after{content:"";position:absolute;top:0;bottom:0;width:20px;
+  background:repeating-linear-gradient(180deg,var(--background) 0 12px,transparent 12px 26px)}
+.lead-media::before{left:0;border-right:1px solid rgba(246,239,230,.1)}
+.lead-media::after{right:0;border-left:1px solid rgba(246,239,230,.1)}
+.lead-media .frame-note{position:absolute;bottom:14px;left:34px;font-family:var(--font-mono);
+  font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(246,239,230,.55)}
+.lead-body{padding-top:18px}
+.lead-body .eyebrow{color:var(--ochre);display:block;margin-bottom:10px}
+.lead-body h2{font-family:var(--font-display);font-weight:600;font-size:clamp(26px,3vw,40px);
+  line-height:1.08;letter-spacing:-.015em;margin-bottom:12px}
+.lead-body p{color:var(--fg-secondary);font-size:15px;max-width:58ch}
+.lead-meta{display:flex;align-items:baseline;gap:18px;margin-top:14px}
+.lead-deadline{font-size:13px;font-weight:600;color:var(--ember)}
+.lead-cat{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--fg-tertiary)}
+
+.closing-col{padding-left:40px}
+.closing-col .col-head{display:flex;align-items:baseline;justify-content:space-between;
+  padding-bottom:12px;border-bottom:1px solid var(--line-strong)}
+.closing-col .col-head h3{font-family:var(--font-display);font-weight:600;font-size:19px;letter-spacing:-.01em}
+.closing-col .col-head a{font-size:12px;color:var(--fg-tertiary)}
+.closing-col .col-head a:hover{color:var(--ochre)}
+.c-row{display:flex;align-items:baseline;justify-content:space-between;gap:14px;
+  padding:13px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.c-row:hover .c-title{color:var(--ochre)}
+.c-title{font-family:var(--font-display);font-weight:600;font-size:15px;line-height:1.25;
+  letter-spacing:-.005em;transition:color .15s}
+.c-cat{display:block;font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--fg-tertiary);margin-top:3px}
+.c-days{font-family:var(--font-mono);font-size:12px;font-weight:600;flex:none}
+.d-ember{color:var(--ember)}.d-ochre{color:var(--ochre)}.d-moss{color:var(--moss)}
+
+/* quieted card language (Just Added) */
+.sect{margin-top:72px}
+.sect-head{padding-bottom:14px;margin-bottom:22px;border-bottom:1px solid var(--line);
+  display:flex;align-items:baseline;justify-content:space-between;gap:16px}
+.sect-head .left .rubric{display:block;margin-bottom:6px}
+.sect-head h2{font-family:var(--font-display);font-weight:600;font-size:30px;letter-spacing:-.015em}
+.sect-head .count{font-size:13px;color:var(--fg-tertiary)}
+.cardrow{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;
+  transition:transform .15s,border-color .2s;cursor:pointer}
+.card:hover{transform:translateY(-2px);border-color:var(--line-strong)}
+.card-media{aspect-ratio:16/7;display:flex;align-items:flex-end;padding:12px 16px}
+.cm-a{background:linear-gradient(150deg,#2c3a22 0%,#131a0e 75%)}
+.cm-b{background:linear-gradient(150deg,#34241c 0%,#170f0a 75%)}
+.cm-c{background:linear-gradient(150deg,#272140 0%,#120f1e 75%)}
+.card-media .src{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.14em;
+  text-transform:uppercase;color:rgba(246,239,230,.5)}
+.card-pad{padding:16px 18px 18px}
+.card .label{font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--fg-tertiary);display:block;margin-bottom:7px}
+.card h3{font-family:var(--font-display);font-weight:600;font-size:18px;line-height:1.22;
+  letter-spacing:-.01em;margin-bottom:8px}
+.card:hover h3{color:var(--ochre)}
+.card .dek{font-size:13px;color:var(--fg-secondary);display:-webkit-box;-webkit-line-clamp:2;
+  -webkit-box-orient:vertical;overflow:hidden}
+.card-foot{display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+  border-top:1px solid var(--line);margin-top:14px;padding-top:12px}
+.card-foot .meta{font-size:12px;color:var(--fg-tertiary)}
+.card-foot .meta .new{color:var(--ochre)}
+.card-foot .meta .free{color:var(--moss)}
+.card-foot .when{font-family:var(--font-mono);font-size:11.5px;color:var(--ochre)}
+
+/* pills — the entire pill vocabulary of the new design */
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;
+  letter-spacing:.06em;text-transform:uppercase;padding:5px 11px;border-radius:999px}
+.pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.pill-moss{background:rgba(139,181,106,.13);color:var(--moss)}
+.pill-ember{background:rgba(229,85,58,.13);color:var(--ember)}
+.pill-ochre{background:rgba(232,176,87,.13);color:var(--ochre)}
+.pill-indigo{background:rgba(138,125,209,.14);color:#b8afe1}
+.pill-neutral{background:rgba(246,239,230,.06);color:var(--fg-secondary)}
+
+/* footer folio */
+.folio{margin-top:80px;padding:26px 0 40px}
+.folio .rule-double{margin-bottom:18px}
+.folio-in{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.folio .mono{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--fg-tertiary)}
+
+/* staged reveal preview (D-1) */
+@media (prefers-reduced-motion:no-preference){
+  .reveal>*{opacity:0;transform:translateY(8px);animation:rise .5s ease-out forwards}
+  .reveal>*:nth-child(2){animation-delay:.08s}.reveal>*:nth-child(3){animation-delay:.16s}
+  .reveal>*:nth-child(4){animation-delay:.24s}.reveal>*:nth-child(5){animation-delay:.32s}
+  @keyframes rise{to{opacity:1;transform:none}}
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   SCREEN 2 — DIRECTORY
+   ════════════════════════════════════════════════════════════════════ */
+.dir-head{padding:36px 0 0}
+.dir-head .rule-strong{margin-bottom:12px}
+.dir-head h1{font-family:var(--font-display);font-weight:600;font-size:clamp(30px,3.6vw,46px);
+  letter-spacing:-.018em;line-height:1.05}
+.dir-head .dek{color:var(--fg-secondary);font-size:15px;max-width:62ch;margin-top:10px}
+.dir-head .row{display:flex;align-items:baseline;justify-content:space-between;gap:16px}
+.dir-head .count{font-size:13px;color:var(--fg-tertiary);flex:none}
+
+.searchbar{position:relative;max-width:620px;margin:26px auto 0}
+.searchbar svg{position:absolute;left:18px;top:50%;transform:translateY(-50%);opacity:.35}
+.searchbar input{width:100%;background:var(--surface-raised);border:1px solid var(--line-mid);
+  border-radius:12px;color:var(--foreground);font-family:inherit;font-size:14px;
+  padding:13px 16px 13px 50px}
+.searchbar input::placeholder{color:var(--fg-tertiary)}
+.searchbar input:focus{outline:2px solid var(--ochre);outline-offset:0;border-color:transparent}
+
+.chips{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin:20px 0 8px}
+.chip{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;
+  padding:10px 16px;min-height:42px;border-radius:11px;border:1px solid var(--line);
+  background:var(--surface);color:var(--fg-secondary);transition:all .15s}
+.chip svg{opacity:.55}
+.chip:hover{border-color:var(--line-mid);color:var(--foreground)}
+.chip.on{background:var(--surface-raised);border-color:var(--line-strong);color:var(--foreground)}
+.chip.on svg{opacity:.9}
+.results-line{text-align:center;font-size:12.5px;color:var(--fg-tertiary);margin:10px 0 26px}
+
+.dirgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.lead-card{grid-column:1/-1;display:grid;grid-template-columns:1.2fr 1fr;background:var(--surface);
+  border:1px solid rgba(232,176,87,.25);border-radius:16px;overflow:hidden;cursor:pointer;
+  transition:transform .15s,border-color .2s}
+.lead-card:hover{transform:translateY(-2px);border-color:rgba(232,176,87,.45)}
+.lead-card .lc-media{position:relative;min-height:250px;
+  background:
+    radial-gradient(100% 90% at 30% 25%, rgba(232,176,87,.3) 0%, transparent 55%),
+    linear-gradient(150deg,#33271a 0%,#150e08 75%)}
+.lead-card .lc-media .src{position:absolute;bottom:14px;left:18px;font-family:var(--font-mono);
+  font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(246,239,230,.5)}
+.lead-card .lc-body{padding:28px 30px;display:flex;flex-direction:column}
+.lead-card .eyebrow{color:var(--ochre);margin-bottom:10px}
+.lead-card h2{font-family:var(--font-display);font-weight:600;font-size:29px;line-height:1.1;
+  letter-spacing:-.015em;margin-bottom:10px}
+.lead-card .dek{color:var(--fg-secondary);font-size:14px}
+.lead-card .lc-foot{margin-top:auto;display:flex;align-items:center;gap:16px;padding-top:18px}
+
+.dcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;
+  display:flex;flex-direction:column;cursor:pointer;transition:transform .15s,border-color .2s;
+  border-left:3px solid var(--line-strong)}
+.dcard:hover{transform:translateY(-2px);border-color:var(--line-strong)}
+.dcard.is-ai{border-left-color:var(--indigo)}
+.dcard-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:13px}
+.dcard .label{font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--fg-tertiary);display:block;margin-bottom:6px}
+.dcard h3{font-family:var(--font-display);font-weight:600;font-size:19px;line-height:1.2;
+  letter-spacing:-.01em;margin-bottom:8px}
+.dcard:hover h3{color:var(--ochre)}
+.dcard .dek{font-size:13px;color:var(--fg-secondary);display:-webkit-box;-webkit-line-clamp:2;
+  -webkit-box-orient:vertical;overflow:hidden;flex:1}
+.dcard-foot{display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+  border-top:1px solid var(--line);margin-top:16px;padding-top:13px}
+.dcard-foot .meta{font-size:12px;color:var(--fg-tertiary)}
+.dcard-foot .meta .new{color:var(--ochre)}
+.dcard-foot .meta .free{color:var(--moss)}
+.dcard-foot .when{font-family:var(--font-mono);font-size:11.5px;color:var(--fg-secondary)}
+
+/* ════════════════════════════════════════════════════════════════════
+   SCREEN 3 — MODAL (over dimmed directory)
+   ════════════════════════════════════════════════════════════════════ */
+.modal-stage{position:relative;min-height:100vh}
+.modal-stage .dimmed{filter:blur(3px) brightness(.55);pointer-events:none;user-select:none}
+.overlay{position:fixed;inset:0;z-index:70;display:flex;align-items:center;justify-content:center;padding:32px;
+  background:rgba(5,4,3,.6);backdrop-filter:blur(4px)}
+.modal{width:100%;max-width:880px;max-height:88vh;overflow:hidden;display:flex;flex-direction:column;
+  background:var(--surface);border:1px solid var(--line-mid);border-radius:18px;
+  box-shadow:0 40px 90px -20px rgba(0,0,0,.7);position:relative}
+.modal-x{position:absolute;top:18px;right:18px;z-index:5;width:42px;height:42px;border-radius:50%;
+  background:rgba(246,239,230,.08);border:1px solid var(--line-mid);color:var(--foreground);
+  font-size:17px;backdrop-filter:blur(8px)}
+.modal-x:hover{background:rgba(246,239,230,.16)}
+.modal-scroll{overflow-y:auto}
+.m-hero{position:relative;height:215px;
+  background:
+    radial-gradient(110% 100% at 70% 10%, rgba(229,85,58,.3) 0%, transparent 55%),
+    radial-gradient(90% 90% at 15% 80%, rgba(232,176,87,.28) 0%, transparent 55%),
+    linear-gradient(160deg,#33251a 0%,#140d08 80%)}
+.m-hero::before,.m-hero::after{content:"";position:absolute;top:0;bottom:0;width:20px;
+  background:repeating-linear-gradient(180deg,var(--surface) 0 12px,transparent 12px 26px)}
+.m-hero::before{left:0;border-right:1px solid rgba(246,239,230,.1)}
+.m-hero::after{right:0;border-left:1px solid rgba(246,239,230,.1)}
+.m-hero .scrim{position:absolute;inset:0;background:linear-gradient(180deg,transparent 30%,var(--surface) 100%)}
+.m-head{padding:24px 36px 22px;border-bottom:1px solid var(--line)}
+.m-head .pillrow{display:flex;gap:8px;margin-bottom:14px}
+.m-head h2{font-family:var(--font-display);font-weight:600;font-size:clamp(26px,3vw,38px);
+  line-height:1.08;letter-spacing:-.015em;padding-right:60px;margin-bottom:12px}
+.m-head .about{font-size:15px;color:var(--fg-secondary);max-width:64ch}
+.m-body{padding:24px 36px 30px}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:22px}
+.fact{background:rgba(246,239,230,.04);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.fact.hi{background:rgba(232,176,87,.08);border-color:rgba(232,176,87,.25)}
+.fact .k{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--fg-tertiary);display:block;margin-bottom:5px}
+.fact.hi .k{color:var(--ochre)}
+.fact .v{font-size:14px;font-weight:600;line-height:1.4}
+.fact .v .verified{display:block;font-size:11.5px;font-weight:500;color:var(--moss);margin-top:4px}
+.m-section{margin-top:20px}
+.m-section .k{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--fg-tertiary);display:block;margin-bottom:8px}
+.m-section p{font-size:14px;color:var(--fg-secondary)}
+.m-foot{border-top:1px solid var(--line);padding:16px 36px;display:flex;align-items:center;
+  justify-content:space-between;gap:16px;background:rgba(11,9,7,.35)}
+.m-foot .note{font-size:12px;color:var(--fg-tertiary)}
+
+/* ── responsive ────────────────────────────────────────────────────── */
+@media (max-width:920px){
+  .frontgrid{grid-template-columns:1fr}
+  .lead-story{padding-right:0;border-right:0;border-bottom:1px solid var(--line);padding-bottom:34px}
+  .closing-col{padding-left:0;padding-top:28px}
+  .cardrow,.dirgrid{grid-template-columns:1fr 1fr}
+  .lead-card{grid-template-columns:1fr}
+  .lead-card .lc-media{min-height:190px}
+  .facts{grid-template-columns:1fr}
+}
+@media (max-width:640px){
+  .nav{display:none}
+  .brand{font-size:15px;white-space:nowrap}
+  .topbar-in{gap:12px;justify-content:space-between}
+  .top-cta .btn-primary{display:none}
+  .masthead h1{font-size:clamp(40px,11vw,52px)}
+  .lede-band{flex-direction:column;align-items:flex-start}
+  .signup input{width:100%}
+  .signup{width:100%}
+  .cardrow,.dirgrid{grid-template-columns:1fr}
+  .sect{margin-top:52px}
+  .m-head,.m-body{padding-left:22px;padding-right:22px}
+  .m-foot{padding:14px 22px;flex-direction:column;align-items:stretch}
+  .overlay{padding:0;align-items:flex-end}
+  .modal{border-radius:22px 22px 0 0;max-height:94vh}
+}
+</style>
+</head>
+<body>
+<div class="bg-wash"></div>
+<div class="grain"></div>
+
+<!-- mockup screen switcher (not part of the design) -->
+<div class="switcher" role="tablist" aria-label="Mockup screens">
+  <button class="on" data-s="s-front">1 · Front page</button>
+  <button data-s="s-dir">2 · Directory</button>
+  <button data-s="s-modal">3 · Modal</button>
+</div>
+
+<!-- ════════════════ SCREEN 1 · FRONT PAGE ════════════════ -->
+<section class="screen on" id="s-front">
+  <header class="topbar">
+    <div class="topbar-in">
+      <a class="brand" href="#"><span class="mark"></span>Film Resource Africa</a>
+      <nav class="nav">
+        <a href="#" class="on">Directory</a><a href="#">News</a><a href="#">Members</a>
+        <a href="#">Tech-Pulse</a><a href="#">Call Sheet</a><a href="#">Industry</a><a href="#">Spotlight</a>
+      </nav>
+      <div class="top-cta">
+        <a class="btn btn-ghost" href="#">Member login</a>
+        <a class="btn btn-primary" href="#">Assess your project</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap reveal">
+    <!-- dateline -->
+    <div>
+      <div class="dateline">
+        <span class="rubric">Film Resource Africa</span>
+        <span class="mono">Wednesday 11 June 2026 · Edition №&thinsp;84</span>
+      </div>
+      <div class="rule-double"></div>
+    </div>
+
+    <!-- masthead -->
+    <div class="masthead">
+      <h1>African film, <em>funded.</em></h1>
+    </div>
+
+    <!-- lede + signup band -->
+    <div class="lede-band">
+      <p class="lede">Screenwriting labs, co-production funds, and pitch forums — every live opportunity for African creators, verified and tracked to deadline.</p>
+      <form class="signup" onsubmit="return false">
+        <input type="email" placeholder="Get weekly deadline alerts…" aria-label="Email">
+        <button class="btn btn-primary">Subscribe</button>
+      </form>
+    </div>
+
+    <!-- front-page grid -->
+    <div class="frontgrid">
+      <article class="lead-story">
+        <div class="rule-dashed" style="margin-bottom:14px"></div>
+        <div class="lead-media">
+          <span class="frame-note">Lead photograph · We Are Human Festival</span>
+        </div>
+        <div class="lead-body">
+          <span class="eyebrow" style="margin-top:18px">Lead story · Closing soon</span>
+          <h2>We Are Human Festival opens its Film &amp; AI international call to African storytellers</h2>
+          <p>Free entry until September. The festival's 2026 open call pairs selected filmmakers with post-production support and a screening slot — documentary, fiction and experimental work eligible at any stage.</p>
+          <div class="lead-meta">
+            <span class="lead-deadline">Closes 30 September — 112 days</span>
+            <span class="lead-cat">AI &amp; Emerging Tech</span>
+          </div>
+        </div>
+      </article>
+
+      <aside class="closing-col">
+        <div class="col-head">
+          <h3>Closing this week</h3>
+          <a href="#">All deadlines →</a>
+        </div>
+        <div class="c-row">
+          <div><span class="c-title">FVG Film Fund — Second Call 2026</span><span class="c-cat">Funds · Italy / co-production</span></div>
+          <span class="c-days d-ember">3 days</span>
+        </div>
+        <div class="c-row">
+          <div><span class="c-title">Durban FilmMart Pitch Forum</span><span class="c-cat">Markets &amp; Pitching</span></div>
+          <span class="c-days d-ember">5 days</span>
+        </div>
+        <div class="c-row">
+          <div><span class="c-title">NFVF Production Cycle 1</span><span class="c-cat">Funds · South Africa</span></div>
+          <span class="c-days d-ochre">9 days</span>
+        </div>
+        <div class="c-row">
+          <div><span class="c-title">Realness African Screenwriters' Residency</span><span class="c-cat">Labs &amp; Fellowships</span></div>
+          <span class="c-days d-ochre">14 days</span>
+        </div>
+        <div class="c-row">
+          <div><span class="c-title">Hot Docs — CrossCurrents Doc Fund</span><span class="c-cat">Grants · documentary</span></div>
+          <span class="c-days d-moss">21 days</span>
+        </div>
+        <div class="c-row" style="border-bottom:0">
+          <div><span class="c-title">AXS Film Fund</span><span class="c-cat">Grants · finishing funds</span></div>
+          <span class="c-days d-moss">51 days</span>
+        </div>
+      </aside>
+    </div>
+
+    <!-- quieted card language -->
+    <section class="sect">
+      <div class="sect-head">
+        <div class="left">
+          <span class="rubric">Just added</span>
+          <h2>New this week</h2>
+        </div>
+        <span class="count">3 new</span>
+      </div>
+      <div class="cardrow">
+        <article class="card">
+          <div class="card-media cm-a"><span class="src">Redford Center</span></div>
+          <div class="card-pad">
+            <span class="label">Grants · Environmental</span>
+            <h3>Redford Center Grants 2026</h3>
+            <p class="dek">Production grants up to $30,000 for impact-driven environmental documentaries, open worldwide.</p>
+            <div class="card-foot">
+              <span class="meta"><span class="new">●</span> New · <span class="free">Free to apply</span></span>
+              <span class="when">Aug 14</span>
+            </div>
+          </div>
+        </article>
+        <article class="card">
+          <div class="card-media cm-b"><span class="src">Hot Docs</span></div>
+          <div class="card-pad">
+            <span class="label">Funds &amp; Grants</span>
+            <h3>CrossCurrents International Doc Fund</h3>
+            <p class="dek">Development and production funding for storytellers from communities under-represented in documentary.</p>
+            <div class="card-foot">
+              <span class="meta"><span class="new">●</span> New</span>
+              <span class="when">Jul 02</span>
+            </div>
+          </div>
+        </article>
+        <article class="card">
+          <div class="card-media cm-c"><span class="src">We Are Human</span></div>
+          <div class="card-pad">
+            <span class="label">AI &amp; Emerging Tech</span>
+            <h3>Film &amp; AI International Open Call</h3>
+            <p class="dek">A festival call for work made with or about emerging tools — free entry, all African countries eligible.</p>
+            <div class="card-foot">
+              <span class="meta"><span class="free">Free to apply</span></span>
+              <span class="when">Sep 30</span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- folio -->
+    <footer class="folio">
+      <div class="rule-double"></div>
+      <div class="folio-in">
+        <span class="mono">Film Resource Africa · Est. 2024</span>
+        <span class="mono">Johannesburg — Nairobi — Lagos</span>
+        <span class="mono">№ 84 · 11.06.2026</span>
+      </div>
+    </footer>
+  </main>
+</section>
+
+<!-- ════════════════ SCREEN 2 · DIRECTORY ════════════════ -->
+<section class="screen" id="s-dir">
+  <header class="topbar">
+    <div class="topbar-in">
+      <a class="brand" href="#"><span class="mark"></span>Film Resource Africa</a>
+      <nav class="nav">
+        <a href="#" class="on">Directory</a><a href="#">News</a><a href="#">Members</a>
+        <a href="#">Tech-Pulse</a><a href="#">Call Sheet</a><a href="#">Industry</a><a href="#">Spotlight</a>
+      </nav>
+      <div class="top-cta"><a class="btn btn-ghost" href="#">Member login</a></div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="dir-head">
+      <div class="rule-strong"></div>
+      <span class="rubric">The directory</span>
+      <div class="row">
+        <h1>Funds, grants &amp; festivals for African film</h1>
+        <span class="count">128 listings</span>
+      </div>
+      <p class="dek">Every standing fund, grant, festival, lab, market, and open call we track for filmmakers across the continent — browse by category or search.</p>
+    </div>
+
+    <div class="searchbar">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f6efe6" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" placeholder="Search opportunities, funds, labs, festivals…">
+    </div>
+
+    <div class="chips">
+      <button class="chip on"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>All</button>
+      <button class="chip"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Funds <span style="opacity:.45;font-size:11px">21</span></button>
+      <button class="chip"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Grants <span style="opacity:.45;font-size:11px">7</span></button>
+      <button class="chip"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3v18M17 3v18M3 7h4m10 0h4M3 12h18M3 17h4m10 0h4M3 3h18v18H3z"/></svg>Festivals <span style="opacity:.45;font-size:11px">6</span></button>
+      <button class="chip"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>Labs <span style="opacity:.45;font-size:11px">37</span></button>
+      <button class="chip"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>Markets <span style="opacity:.45;font-size:11px">19</span></button>
+      <button class="chip"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3z"/></svg>AI &amp; Tech <span style="opacity:.45;font-size:11px">16</span></button>
+    </div>
+    <p class="results-line">73 results</p>
+
+    <div class="dirgrid" style="padding-bottom:80px">
+      <!-- lead card -->
+      <article class="lead-card">
+        <div class="lc-media"><span class="src">Photograph · NFVF</span></div>
+        <div class="lc-body">
+          <span class="eyebrow">Featured · Funds</span>
+          <h2>NFVF Production &amp; Development Funding — Cycle 1</h2>
+          <p class="dek">The National Film and Video Foundation's principal funding round for South African fiction, documentary and animation — development through production.</p>
+          <div class="lc-foot">
+            <span class="pill pill-moss"><span class="dot"></span>Open</span>
+            <span class="pill pill-ember">9 days left</span>
+            <span class="card-foot" style="border:0;margin:0;padding:0"><span class="when mono" style="color:var(--fg-tertiary)">Closes 20 Jun 2026</span></span>
+          </div>
+        </div>
+      </article>
+
+      <!-- quieted cards -->
+      <article class="dcard">
+        <div class="dcard-top">
+          <span class="pill pill-moss"><span class="dot"></span>Open</span>
+          <span class="pill pill-ember">5 days left</span>
+        </div>
+        <span class="label">Markets &amp; Pitching · South Africa</span>
+        <h3>Durban FilmMart Pitch Forum</h3>
+        <p class="dek">Africa's premier co-production market — pitch fiction or documentary projects to financiers, sales agents and festival programmers.</p>
+        <div class="dcard-foot">
+          <span class="meta"><span class="new">●</span> New</span>
+          <span class="when">Jun 16</span>
+        </div>
+      </article>
+
+      <article class="dcard">
+        <div class="dcard-top">
+          <span class="pill pill-moss"><span class="dot"></span>Open</span>
+        </div>
+        <span class="label">Grants · Documentary</span>
+        <h3>AXS Film Fund</h3>
+        <p class="dek">An annual grant supporting independent documentary makers and nonfiction new-media creators living with disabilities — up to $10,000.</p>
+        <div class="dcard-foot">
+          <span class="meta"><span class="free">Free to apply</span> · Verified 2d ago</span>
+          <span class="when">Jul 31</span>
+        </div>
+      </article>
+
+      <article class="dcard is-ai">
+        <div class="dcard-top">
+          <span class="pill pill-indigo"><span class="dot"></span>Upcoming</span>
+        </div>
+        <span class="label">AI &amp; Emerging Tech · International</span>
+        <h3>Runway Gen:48 African Edition</h3>
+        <p class="dek">A 48-hour AI filmmaking challenge with mentorship, tool credits and a screening showcase for the winning teams.</p>
+        <div class="dcard-foot">
+          <span class="meta">Opens next month</span>
+          <span class="when">Aug 02</span>
+        </div>
+      </article>
+    </div>
+  </main>
+</section>
+
+<!-- ════════════════ SCREEN 3 · MODAL ════════════════ -->
+<section class="screen" id="s-modal">
+  <div class="modal-stage">
+    <div class="dimmed">
+      <header class="topbar"><div class="topbar-in">
+        <a class="brand" href="#"><span class="mark"></span>Film Resource Africa</a>
+        <nav class="nav"><a href="#" class="on">Directory</a><a href="#">News</a><a href="#">Members</a><a href="#">Tech-Pulse</a><a href="#">Call Sheet</a></nav>
+      </div></header>
+      <main class="wrap">
+        <div class="dir-head">
+          <div class="rule-strong"></div><span class="rubric">The directory</span>
+          <h1>Funds, grants &amp; festivals for African film</h1>
+        </div>
+        <div class="dirgrid" style="margin-top:30px">
+          <article class="dcard"><span class="label">Grants</span><h3>AXS Film Fund</h3><p class="dek">An annual grant supporting independent documentary makers…</p></article>
+          <article class="dcard"><span class="label">Funds</span><h3>NFVF Cycle 1</h3><p class="dek">Production and development funding for South African film…</p></article>
+          <article class="dcard"><span class="label">Markets</span><h3>Durban FilmMart</h3><p class="dek">Africa's premier co-production market…</p></article>
+        </div>
+      </main>
+    </div>
+
+    <div class="overlay">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="m-title">
+        <button class="modal-x" aria-label="Close">✕</button>
+        <div class="modal-scroll">
+          <div class="m-hero"><div class="scrim"></div></div>
+          <div class="m-head">
+            <div class="pillrow">
+              <span class="pill pill-neutral">Grants · Documentary</span>
+            </div>
+            <h2 id="m-title">AXS Film Fund</h2>
+            <p class="about">An annual grant from AXS Lab supporting independent documentary filmmakers and nonfiction new-media creators living with disabilities, with priority for creators from historically under-represented communities. Awards up to $10,000 to 3–5 creators per year to help finish projects at any stage of production.</p>
+          </div>
+          <div class="m-body">
+            <div class="facts">
+              <div class="fact hi">
+                <span class="k">Deadline</span>
+                <span class="v">31 July 2026<span class="verified">✓ Verified 2 days ago</span></span>
+              </div>
+              <div class="fact">
+                <span class="k">Cost</span>
+                <span class="v">Free to apply</span>
+              </div>
+              <div class="fact">
+                <span class="k">Format</span>
+                <span class="v">Documentary &amp; nonfiction new media — feature length (45+ min) or experimental, any stage</span>
+              </div>
+              <div class="fact">
+                <span class="k">Eligibility</span>
+                <span class="v">Individual creators 18+ directing or producing their own project, not enrolled full-time in a degree programme</span>
+              </div>
+            </div>
+            <div class="m-section">
+              <span class="k">What you get</span>
+              <p>Grants of up to $10,000, plus mentorship from the AXS Lab network and visibility through the fund's screening partners. Funds may be applied to any production or post-production cost.</p>
+            </div>
+            <div class="m-section">
+              <span class="k">What to submit</span>
+              <p>A project statement, work sample or rough cut, production timeline, and a budget summary indicating how the grant would be applied.</p>
+            </div>
+          </div>
+        </div>
+        <div class="m-foot">
+          <span class="note">Verify dates and eligibility on the official website before applying.</span>
+          <a class="btn btn-primary" href="#" style="padding:12px 26px;font-size:14px">Apply now ↗</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+const tabs=document.querySelectorAll('.switcher button');
+const screens=document.querySelectorAll('.screen');
+tabs.forEach(t=>t.addEventListener('click',()=>{
+  tabs.forEach(x=>x.classList.remove('on'));t.classList.add('on');
+  screens.forEach(s=>s.classList.toggle('on',s.id===t.dataset.s));
+  window.scrollTo({top:0});
+}));
+</script>
+</body>
+</html>
