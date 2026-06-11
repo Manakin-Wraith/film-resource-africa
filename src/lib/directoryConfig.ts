@@ -1,4 +1,5 @@
 import { DollarSign, GraduationCap, Target, Film, Sparkles, CalendarClock, LayoutGrid } from 'lucide-react';
+import { cw, type Colorway } from './colorways';
 
 // Public Directory taxonomy — driven by opportunities.directory_destination.
 // This is the source of truth for the /directory hub, its filter chips, the
@@ -18,6 +19,12 @@ export interface DirectoryCategory {
   filterActive: string;
 }
 
+// Colorway → the style fields this taxonomy carries
+function styleOf(c: Colorway) {
+  const k = cw(c);
+  return { color: k.text, bg: k.bg, border: k.border, borderLeft: k.borderLeft, filterActive: k.filterActive };
+}
+
 export const directoryCategories: DirectoryCategory[] = [
   {
     key: 'directory_funds',
@@ -26,11 +33,7 @@ export const directoryCategories: DirectoryCategory[] = [
     shortLabel: 'Funds',
     description: 'Standing film funds, co-production funds, and commission financing for African projects.',
     icon: DollarSign,
-    color: 'text-green-400',
-    bg: 'bg-green-500/10 border-green-500/20',
-    border: 'border-green-500/30',
-    borderLeft: 'border-l-green-500',
-    filterActive: 'from-green-600 to-emerald-600',
+    ...styleOf('green'),
   },
   {
     key: 'directory_grants',
@@ -39,11 +42,7 @@ export const directoryCategories: DirectoryCategory[] = [
     shortLabel: 'Grants',
     description: 'Non-repayable grant programmes and awards open to African filmmakers.',
     icon: DollarSign,
-    color: 'text-emerald-400',
-    bg: 'bg-emerald-500/10 border-emerald-500/20',
-    border: 'border-emerald-500/30',
-    borderLeft: 'border-l-emerald-500',
-    filterActive: 'from-emerald-600 to-teal-600',
+    ...styleOf('emerald'),
   },
   {
     key: 'directory_festivals',
@@ -52,11 +51,7 @@ export const directoryCategories: DirectoryCategory[] = [
     shortLabel: 'Festivals',
     description: 'Film festivals with cash prizes or material awards for selected films.',
     icon: Film,
-    color: 'text-rose-400',
-    bg: 'bg-rose-500/10 border-rose-500/20',
-    border: 'border-rose-500/30',
-    borderLeft: 'border-l-rose-500',
-    filterActive: 'from-rose-600 to-pink-600',
+    ...styleOf('rose'),
   },
   {
     key: 'directory_labs_fellowships',
@@ -65,11 +60,7 @@ export const directoryCategories: DirectoryCategory[] = [
     shortLabel: 'Labs',
     description: 'Labs, fellowships, residencies, workshops, accelerators, and training programmes.',
     icon: GraduationCap,
-    color: 'text-blue-400',
-    bg: 'bg-blue-500/10 border-blue-500/20',
-    border: 'border-blue-500/30',
-    borderLeft: 'border-l-blue-500',
-    filterActive: 'from-blue-600 to-cyan-600',
+    ...styleOf('blue'),
   },
   {
     key: 'directory_markets_pitching',
@@ -78,11 +69,7 @@ export const directoryCategories: DirectoryCategory[] = [
     shortLabel: 'Markets',
     description: 'Co-production markets, pitch competitions, and industry financing forums.',
     icon: Target,
-    color: 'text-amber-400',
-    bg: 'bg-amber-500/10 border-amber-500/20',
-    border: 'border-amber-500/30',
-    borderLeft: 'border-l-amber-500',
-    filterActive: 'from-amber-600 to-orange-600',
+    ...styleOf('amber'),
   },
   {
     key: 'directory_ai',
@@ -91,11 +78,7 @@ export const directoryCategories: DirectoryCategory[] = [
     shortLabel: 'AI',
     description: 'AI and emerging-technology opportunities for filmmakers and storytellers.',
     icon: Sparkles,
-    color: 'text-purple-400',
-    bg: 'bg-purple-500/10 border-purple-500/20',
-    border: 'border-purple-500/30',
-    borderLeft: 'border-l-purple-500',
-    filterActive: 'from-purple-600 to-violet-600',
+    ...styleOf('purple'),
   },
   {
     key: 'directory_calls',
@@ -104,11 +87,7 @@ export const directoryCategories: DirectoryCategory[] = [
     shortLabel: 'Calls',
     description: 'Time-bound open calls, festival call-for-entries, commissions, and bursaries.',
     icon: CalendarClock,
-    color: 'text-teal-400',
-    bg: 'bg-teal-500/10 border-teal-500/20',
-    border: 'border-teal-500/30',
-    borderLeft: 'border-l-teal-500',
-    filterActive: 'from-teal-600 to-cyan-600',
+    ...styleOf('teal'),
   },
 ];
 
@@ -129,11 +108,7 @@ export const defaultDirectoryStyle: DirectoryCategory = {
   shortLabel: 'Other',
   description: '',
   icon: LayoutGrid,
-  color: 'text-foreground/40',
-  bg: 'bg-white/5 border-white/10',
-  border: 'border-white/10',
-  borderLeft: 'border-l-white/20',
-  filterActive: 'from-primary to-blue-600',
+  ...styleOf('neutral'),
 };
 
 export function getDirectoryStyle(dest?: string | null): DirectoryCategory {

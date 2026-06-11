@@ -7,22 +7,12 @@ import { NewsItem, trackSponsoredClick } from '@/app/actions';
 import type { SponsoredPlacement } from '@/app/actions';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import { NewsSponsoredCard } from '@/components/SponsoredCard';
-import { Newspaper, AlertTriangle, Sparkles, Lightbulb, ArrowRight, Star, Clapperboard, Play } from 'lucide-react';
+import { Newspaper, Lightbulb, ArrowRight, Clapperboard, Play } from 'lucide-react';
 import RelativeDate from '@/components/RelativeDate';
 import GeoIndicator from '@/components/GeoIndicator';
 import { decodeEntities, cleanText } from '@/lib/decodeEntities';
 import NewsImageFallback from '@/components/NewsImageFallback';
-
-const categoryConfig: Record<string, { label: string; icon: typeof Newspaper; color: string; bg: string }> = {
-  industry_news: { label: 'Industry News', icon: Newspaper, color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20' },
-  deadline_alert: { label: 'Deadline Alert', icon: AlertTriangle, color: 'text-red-400', bg: 'bg-red-500/10 border-red-500/20' },
-  new_opportunity: { label: 'New Opportunity', icon: Sparkles, color: 'text-green-400', bg: 'bg-green-500/10 border-green-500/20' },
-  tip: { label: 'Pro Tip', icon: Lightbulb, color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20' },
-  community_spotlight: { label: 'Community Spotlight', icon: Star, color: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-500/20' },
-  trailer: { label: 'Trailer', icon: Clapperboard, color: 'text-pink-400', bg: 'bg-pink-500/10 border-pink-500/20' },
-  industry_analysis: { label: 'Industry Analysis', icon: Newspaper, color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20' },
-  opportunities: { label: 'Opportunities', icon: Sparkles, color: 'text-green-400', bg: 'bg-green-500/10 border-green-500/20' },
-};
+import { newsCategories as categoryConfig } from '@/lib/newsCategoryConfig';
 
 const FILTER_TABS = [
   { key: 'all', label: 'All', icon: Newspaper },

@@ -1,4 +1,5 @@
 import { Building2, Users, Camera, Film, Megaphone, GraduationCap, Wrench, MapPin, Clapperboard, Palette, Volume2, Lightbulb, Monitor, Truck, UtensilsCrossed, Shield, BookOpen, Laptop, UserCheck, Award, Briefcase, Plane, HardHat, Crosshair, Eye, Pen, Music, Hammer, Shirt, Car, HeartPulse, Rocket, Handshake, Warehouse, Languages, FileVideo } from 'lucide-react';
+import { cw, type Colorway } from './colorways';
 
 // === Directory Types ===
 export interface DirectoryTypeStyle {
@@ -10,46 +11,38 @@ export interface DirectoryTypeStyle {
   gradient: string;
 }
 
+
+// Colorway -> the style fields this taxonomy carries
+function styleOf(c: Colorway) {
+  const k = cw(c);
+  return { color: k.text, bg: k.bg, border: k.border, gradient: k.filterActive };
+}
+
 export const directoryTypes: Record<string, DirectoryTypeStyle> = {
   company: {
     label: 'Production Companies',
     icon: Clapperboard,
-    color: 'text-blue-400',
-    bg: 'bg-blue-500/10 border-blue-500/20',
-    border: 'border-blue-500/30',
-    gradient: 'from-blue-600 to-cyan-600',
+    ...styleOf('blue'),
   },
   crew: {
     label: 'Crew',
     icon: Users,
-    color: 'text-green-400',
-    bg: 'bg-green-500/10 border-green-500/20',
-    border: 'border-green-500/30',
-    gradient: 'from-green-600 to-emerald-600',
+    ...styleOf('green'),
   },
   service: {
     label: 'Services',
     icon: Wrench,
-    color: 'text-purple-400',
-    bg: 'bg-purple-500/10 border-purple-500/20',
-    border: 'border-purple-500/30',
-    gradient: 'from-purple-600 to-violet-600',
+    ...styleOf('purple'),
   },
   training: {
     label: 'Training & Education',
     icon: GraduationCap,
-    color: 'text-amber-400',
-    bg: 'bg-amber-500/10 border-amber-500/20',
-    border: 'border-amber-500/30',
-    gradient: 'from-amber-600 to-orange-600',
+    ...styleOf('amber'),
   },
   agency: {
     label: 'Agencies',
     icon: Briefcase,
-    color: 'text-pink-400',
-    bg: 'bg-pink-500/10 border-pink-500/20',
-    border: 'border-pink-500/30',
-    gradient: 'from-pink-600 to-rose-600',
+    ...styleOf('pink'),
   },
 };
 

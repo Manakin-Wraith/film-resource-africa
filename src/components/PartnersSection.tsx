@@ -4,8 +4,9 @@ import { useState } from 'react';
 import { GraduationCap, Users, Camera, Film, Megaphone, Building2, Handshake, ArrowRight } from 'lucide-react';
 import ContactModal from './ContactModal';
 import type { InquiryType } from '@/app/actions';
+import { cw, type Colorway } from '@/lib/colorways';
 
-const partnerCategories = [
+const partnerCategories: { icon: typeof GraduationCap; title: string; description: string; color: Colorway }[] = [
   {
     icon: GraduationCap,
     title: 'Film Schools',
@@ -44,15 +45,6 @@ const partnerCategories = [
   },
 ];
 
-const colorMap: Record<string, { bg: string; border: string; text: string; glow: string }> = {
-  blue:   { bg: 'bg-blue-500/10',   border: 'border-blue-500/20',   text: 'text-blue-400',   glow: 'group-hover:shadow-blue-500/10' },
-  green:  { bg: 'bg-green-500/10',  border: 'border-green-500/20',  text: 'text-green-400',  glow: 'group-hover:shadow-green-500/10' },
-  purple: { bg: 'bg-purple-500/10', border: 'border-purple-500/20', text: 'text-purple-400', glow: 'group-hover:shadow-purple-500/10' },
-  amber:  { bg: 'bg-amber-500/10',  border: 'border-amber-500/20',  text: 'text-amber-400',  glow: 'group-hover:shadow-amber-500/10' },
-  red:    { bg: 'bg-red-500/10',    border: 'border-red-500/20',    text: 'text-red-400',    glow: 'group-hover:shadow-red-500/10' },
-  teal:   { bg: 'bg-teal-500/10',   border: 'border-teal-500/20',   text: 'text-teal-400',   glow: 'group-hover:shadow-teal-500/10' },
-};
-
 export default function PartnersSection() {
   const [isContactOpen, setIsContactOpen] = useState(false);
   const [inquiryType, setInquiryType] = useState<InquiryType>('partner');
@@ -82,13 +74,13 @@ export default function PartnersSection() {
         {/* Category Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-10">
           {partnerCategories.map((cat) => {
-            const colors = colorMap[cat.color];
+            const colors = cw(cat.color);
             return (
               <div
                 key={cat.title}
-                className={`group relative rounded-2xl ${colors.bg} border ${colors.border} p-5 md:p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg ${colors.glow} cursor-default`}
+                className={`group relative rounded-2xl border ${colors.bg} p-5 md:p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg ${colors.glow} cursor-default`}
               >
-                <div className={`w-10 h-10 rounded-xl ${colors.bg} border ${colors.border} flex items-center justify-center mb-3`}>
+                <div className={`w-10 h-10 rounded-xl border ${colors.bg} flex items-center justify-center mb-3`}>
                   <cat.icon size={20} className={colors.text} />
                 </div>
                 <h3 className="font-semibold text-white text-sm md:text-base">{cat.title}</h3>
