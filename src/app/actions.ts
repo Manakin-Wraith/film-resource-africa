@@ -427,36 +427,6 @@ export async function getJustAddedOpportunities(): Promise<Opportunity[]> {
   }
 }
 
-export async function getHeaderStats(): Promise<{ total: number; closingSoon: number; open: number }> {
-  try {
-    const { count: total } = await supabase
-      .from('opportunities')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'approved');
-
-    const { count: closingSoon } = await supabase
-      .from('opportunities')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'approved')
-      .eq('application_status', 'closing_soon');
-
-    const { count: open } = await supabase
-      .from('opportunities')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'approved')
-      .eq('application_status', 'open');
-
-    return {
-      total: total || 0,
-      closingSoon: closingSoon || 0,
-      open: open || 0,
-    };
-  } catch (error) {
-    console.error('Failed to fetch header stats', error);
-    return { total: 0, closingSoon: 0, open: 0 };
-  }
-}
-
 export async function addOpportunity(newOpp: Omit<Opportunity, 'id'>) {
   const targetOpp = { status: 'approved' as const, ...newOpp };
   const { data, error } = await supabase

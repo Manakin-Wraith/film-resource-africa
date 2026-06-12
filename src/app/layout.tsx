@@ -5,7 +5,6 @@ import './globals.css';
 import Footer from '@/components/Footer';
 import SiteNav from '@/components/SiteNav';
 import MobileTabBar from '@/components/MobileTabBar';
-import { getHeaderStats } from './actions';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const outfit = Outfit({ subsets: ['latin'], variable: '--font-outfit' });
@@ -47,15 +46,13 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const stats = await getHeaderStats();
-
   return (
     <html lang="en">
       <body className={`${inter.variable} ${outfit.variable} ${jetbrainsMono.variable} font-sans antialiased text-foreground bg-background film-grain`}>
         {/* React hoists this preload to <head> for fast first paint of the bg image */}
         <link rel="preload" as="image" href="/bg/site-cinematic.jpg" />
         <div className="site-bg" aria-hidden="true" />
-        <SiteNav stats={stats} />
+        <SiteNav />
         <div className="relative z-10 flex flex-col min-h-screen pt-(--header-h) pb-(--tabbar-h) md:pb-0">
           <div className="grow">
             {children}

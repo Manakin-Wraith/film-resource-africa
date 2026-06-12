@@ -6,15 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
-import { directoryCategories } from '@/lib/directoryConfig';
-
-interface HeaderProps {
-  stats: {
-    total: number;
-    closingSoon: number;
-    open: number;
-  };
-}
+import { navGroups, type NavGroup } from '@/lib/navConfig';
 
 type MemberSession = {
   full_name: string;
@@ -22,23 +14,7 @@ type MemberSession = {
   avatar_url: string | null;
 } | null;
 
-// Flat top-level links (Directory is rendered separately as a dropdown parent).
-const NAV_LINKS_BASE = [
-  { href: '/news', label: 'News' },
-  { href: '/call-sheet', label: 'Call Sheet' },
-  { href: '/industry', label: 'Industry' },
-  { href: '/rebate-calculator', label: 'Rebate' },
-  { href: '/community-spotlight', label: 'Spotlight' },
-];
-
-// Directory dropdown children: the 7 public categories + By Country.
-const DIRECTORY_CHILDREN = [
-  ...directoryCategories.map((c) => ({ href: `/directory?cat=${c.slug}`, label: c.label })),
-  { href: '/film-opportunities', label: 'By Country' },
-  { href: '/projects', label: 'Projects in Development' },
-];
-
-export default function Header({ stats }: HeaderProps) {
+export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [member, setMember] = useState<MemberSession>(undefined as unknown as MemberSession);
   const pathname = usePathname();
@@ -77,15 +53,19 @@ export default function Header({ stats }: HeaderProps) {
     return pathname === href || (href !== '/' && pathname.startsWith(href));
   };
 
+  const isGroupActive = (group: NavGroup) =>
+    isActive(group.href) ||
+    (group.children ?? []).some((c) => isActive(c.href.split('?')[0]));
+
   const firstName = member?.full_name?.split(' ')[0] ?? '';
-  const membersHref = member ? '/members/directory' : '/members';
-  const navLinks = [
-    NAV_LINKS_BASE[0], // News
-    { href: membersHref, label: 'Members' },
-    { href: '/tech-pulse', label: 'Tech-Pulse' },
-    ...NAV_LINKS_BASE.slice(1),
-  ];
-  const directoryActive = pathname.startsWith('/directory') || pathname.startsWith('/film-opportunities') || pathname.startsWith('/projects');
+
+  // Logged-in members land on the members directory instead of the join page
+  const resolveHref = (href: string) => (member && href === '/members' ? '/members/directory' : href);
+  const groups: NavGroup[] = navGroups.map((g) => ({
+    ...g,
+    href: resolveHref(g.href),
+    children: g.children?.map((c) => ({ ...c, href: resolveHref(c.href) })),
+  }));
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50">
@@ -102,19 +82,21 @@ export default function Header({ stats }: HeaderProps) {
 
           {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-0 flex-1">
-            <DirectoryDropdown active={directoryActive} />
-            {navLinks.map(({ href, label }) => {
-              const active = isActive(href);
+            {groups.map((group) => {
+              const active = isGroupActive(group);
+              if (group.children) {
+                return <NavDropdown key={group.label} group={group} active={active} />;
+              }
               return (
                 <Link
-                  key={href}
-                  href={href}
+                  key={group.label}
+                  href={group.href}
                   className={`px-3.5 py-2 text-[13px] font-medium transition-colors whitespace-nowrap ${
                     active ? 'text-foreground font-semibold' : 'hover:text-foreground'
                   }`}
                   style={active ? undefined : { color: 'var(--foreground-secondary)' }}
                 >
-                  {label}
+                  {group.label}
                 </Link>
               );
             })}
@@ -190,37 +172,41 @@ export default function Header({ stats }: HeaderProps) {
               Assess Your Project
             </Link>
 
-            {/* Directory group */}
-            <Link
-              href="/directory"
-              onClick={() => setMenuOpen(false)}
-              className="flex items-center py-3.5 text-sm font-semibold border-b border-line transition-colors min-h-[44px] text-foreground"
-            >
-              Directory
-            </Link>
-            {DIRECTORY_CHILDREN.map(({ href, label }) => (
-              <Link
-                key={href}
-                href={href}
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center pl-4 py-3 text-[13px] font-medium border-b border-line transition-colors hover:text-foreground min-h-[44px]"
-                style={{ color: 'var(--foreground-tertiary)' }}
-              >
-                {label}
-              </Link>
-            ))}
+            {groups.map((group) =>
+              group.children ? (
+                <div key={group.label}>
+                  <Link
+                    href={group.href}
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center py-3.5 text-sm font-semibold border-b border-line transition-colors min-h-[44px] text-foreground"
+                  >
+                    {group.label}
+                  </Link>
+                  {group.children.map(({ href, label }) => (
+                    <Link
+                      key={href}
+                      href={href}
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center pl-4 py-3 text-[13px] font-medium border-b border-line transition-colors hover:text-foreground min-h-[44px]"
+                      style={{ color: 'var(--foreground-tertiary)' }}
+                    >
+                      {label}
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <Link
+                  key={group.label}
+                  href={group.href}
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center py-3.5 text-sm font-medium border-b border-line transition-colors hover:text-foreground min-h-[44px]"
+                  style={{ color: 'var(--foreground-secondary)' }}
+                >
+                  {group.label}
+                </Link>
+              )
+            )}
 
-            {navLinks.map(({ href, label }) => (
-              <Link
-                key={href}
-                href={href}
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center py-3.5 text-sm font-medium border-b border-line last:border-0 transition-colors hover:text-foreground min-h-[44px]"
-                style={{ color: 'var(--foreground-secondary)' }}
-              >
-                {label}
-              </Link>
-            ))}
             {member ? (
               <div className="flex gap-2 mt-3 mb-2">
                 <Link
@@ -254,7 +240,7 @@ export default function Header({ stats }: HeaderProps) {
   );
 }
 
-function DirectoryDropdown({ active }: { active: boolean }) {
+function NavDropdown({ group, active }: { group: NavGroup; active: boolean }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -285,7 +271,7 @@ function DirectoryDropdown({ active }: { active: boolean }) {
       }}
     >
       <Link
-        href="/directory"
+        href={group.href}
         aria-haspopup="true"
         aria-expanded={open}
         className={`flex items-center gap-1 px-3.5 py-2 text-[13px] font-medium transition-colors whitespace-nowrap ${
@@ -302,7 +288,7 @@ function DirectoryDropdown({ active }: { active: boolean }) {
           }
         }}
       >
-        Directory
+        {group.label}
         <ChevronDown size={14} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
       </Link>
 
@@ -315,11 +301,9 @@ function DirectoryDropdown({ active }: { active: boolean }) {
             className="min-w-[220px] rounded-xl border border-line-mid p-1.5 shadow-xl"
             style={{ background: 'var(--surface)' }}
           >
-            {DIRECTORY_CHILDREN.map(({ href, label }, i) => (
+            {(group.children ?? []).map(({ href, label, dividerBefore }) => (
               <div key={href}>
-                {i === directoryCategories.length && (
-                  <div className="my-1 h-px bg-line" />
-                )}
+                {dividerBefore && <div className="my-1 h-px bg-line" />}
                 <Link
                   href={href}
                   role="menuitem"

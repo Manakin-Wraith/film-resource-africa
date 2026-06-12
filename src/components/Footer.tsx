@@ -8,6 +8,7 @@ import ContactModal from './ContactModal';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import type { InquiryType } from '@/app/actions';
+import { navGroups, footerExtras } from '@/lib/navConfig';
 
 export default function Footer() {
   const [isContactOpen, setIsContactOpen] = useState(false);
@@ -125,13 +126,11 @@ export default function Footer() {
             <div className="hidden md:block space-y-3">
               <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--foreground-tertiary)' }}>Explore</p>
               <nav className="flex flex-col gap-1.5 text-[13px]">
-                <Link href="/directory" className="transition-colors hover:text-foreground" style={{ color: 'var(--foreground-secondary)' }}>Directory</Link>
-                <Link href="/projects" className="transition-colors hover:text-foreground" style={{ color: 'var(--foreground-secondary)' }}>Projects in Development</Link>
-                <Link href="/news" className="transition-colors hover:text-foreground" style={{ color: 'var(--foreground-secondary)' }}>News & Insights</Link>
-                <Link href="/call-sheet" className="transition-colors hover:text-foreground" style={{ color: 'var(--foreground-secondary)' }}>The Call Sheet</Link>
-                <Link href="/industry" className="transition-colors hover:text-foreground" style={{ color: 'var(--foreground-secondary)' }}>Industry Directory</Link>
-                <Link href="/film-opportunities" className="transition-colors hover:text-foreground" style={{ color: 'var(--foreground-secondary)' }}>By Country</Link>
-                <Link href="/submit" className="transition-colors hover:text-foreground" style={{ color: 'var(--foreground-secondary)' }}>Submit an Opportunity</Link>
+                {[...navGroups.map(({ href, label }) => ({ href, label })), ...footerExtras].map(({ href, label }) => (
+                  <Link key={href} href={href} className="transition-colors hover:text-foreground" style={{ color: 'var(--foreground-secondary)' }}>
+                    {label}
+                  </Link>
+                ))}
               </nav>
             </div>
 

@@ -1,17 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Home, Database, Newspaper, Building2, Users } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-
-const tabs = [
-  { href: '/', label: 'Home', icon: Home },
-  { href: '/directory', label: 'Directory', icon: Database },
-  { href: '/news', label: 'News', icon: Newspaper },
-  { href: '/members', label: 'Members', icon: Users },
-  { href: '/industry', label: 'Industry', icon: Building2 },
-];
+import { mobileTabs as tabs } from '@/lib/navConfig';
 
 export default function MobileTabBar() {
   const pathname = usePathname();
