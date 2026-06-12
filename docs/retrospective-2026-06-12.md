@@ -69,6 +69,7 @@ FRA is publishing industry news with its own voice — most recently covering Ma
 | Newsletter system (weekly, midweek, alerts) | Live, reusable campaign playbook |
 | Members' area visual refresh | Planned — next on the quality track |
 | Finance tools (rebate calculator, project intake) | Specified, not yet built |
+| Project assessment tool ("Assess Your Project") | Live, but removed from the site navigation on 12 June — it remains reachable by direct link while we decide how it fits into the finance-tools offering |
 
 ---
 
