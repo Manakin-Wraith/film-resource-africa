@@ -104,6 +104,7 @@ export default function Header() {
 
           {/* Auth CTA — desktop only */}
           <div className="hidden md:flex items-center gap-2 flex-shrink-0">
+            {/* Assess Your Project — hidden for now
             <Link
               href="/assess"
               className={`flex items-center px-3.5 py-2 text-[13px] font-semibold rounded-lg transition-colors whitespace-nowrap ${
@@ -113,6 +114,7 @@ export default function Header() {
             >
               Assess Your Project
             </Link>
+            */}
             {member ? (
               /* Logged-in state */
               <div className="flex items-center gap-2">
@@ -163,6 +165,7 @@ export default function Header() {
         <div className={`md:hidden transition-all duration-200 ${menuOpen ? 'max-h-[calc(100dvh-var(--header-h))] opacity-100 overflow-y-auto overscroll-contain' : 'max-h-0 opacity-0 overflow-hidden'}`}>
           {/* bottom padding clears the fixed mobile tab bar so the last item (login) stays reachable */}
           <div className="border-t border-line container mx-auto px-4 py-2 pb-[calc(var(--tabbar-h)+env(safe-area-inset-bottom)+0.5rem)]">
+            {/* Assess Your Project — hidden for now
             <Link
               href="/assess"
               onClick={() => setMenuOpen(false)}
@@ -171,6 +174,7 @@ export default function Header() {
             >
               Assess Your Project
             </Link>
+            */}
 
             {groups.map((group) =>
               group.children ? (
