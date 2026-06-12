@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const countryData = await getCountryBySlug(country);
 
   if (!countryData) {
-    return { title: 'Country Not Found | Film Resource Africa' };
+    return { title: 'Country Not Found' };
   }
 
   const now = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const hasLocations = countryData.filming_locations && countryData.filming_locations.length > 0;
 
   return {
-    title: `Film Opportunities in ${countryData.name} | Film Resource Africa`,
+    title: `Film Opportunities in ${countryData.name}`,
     description: `Comprehensive guide to film festivals, grants, labs, production companies, gear houses, co-production partners, filming locations, and industry services in ${countryData.name}.${hasCommission ? ` Film commission contacts and tax incentives included.` : ''} Updated ${now}.`,
     keywords: [
       `film opportunities ${countryData.name}`,

@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!article) return { title: 'Article Not Found' };
 
   return {
-    title: `${article.title} | Film Resource Africa`,
+    title: article.title,
     description: article.summary,
     openGraph: {
       title: article.title,

@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import OnboardingClient from './OnboardingClient';
 
 export const metadata: Metadata = {
-  title: 'Complete Your Profile | Film Resource Africa',
+  title: 'Complete Your Profile',
 };
 
 const supabase = createClient(

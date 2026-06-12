@@ -9,7 +9,7 @@ import NewsletterCTA from '@/components/NewsletterCTA';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Film Opportunities by Country | Film Resource Africa',
+  title: 'Film Opportunities by Country',
   description:
     'Browse film grants, festivals, labs, and funding opportunities across Africa. Find opportunities specific to Nigeria, South Africa, Kenya, Ghana, Egypt, Morocco, and more.',
   openGraph: {

@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { CheckCircle2, ArrowRight } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Welcome to FRA Members | Film Resource Africa',
+  title: 'Welcome to FRA Members',
 };
 
 export default function MembersWelcomePage() {

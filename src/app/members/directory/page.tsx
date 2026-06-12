@@ -5,7 +5,7 @@ import { getSessionUser } from '@/lib/supabase/server';
 import DirectoryClient from './DirectoryClient';
 
 export const metadata: Metadata = {
-  title: 'The Room | Film Resource Africa',
+  title: 'The Room',
   description: 'The members directory — active filmmakers, production companies, and creative businesses across Africa.',
 };
 

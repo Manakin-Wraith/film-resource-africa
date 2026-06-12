@@ -73,11 +73,11 @@ export async function generateMetadata(
     .eq('status', 'active')
     .maybeSingle();
 
-  if (!data) return { title: 'Member | Film Resource Africa' };
+  if (!data) return { title: 'Member' };
 
   const name = data.tier === 'business' ? (data.company_name ?? data.full_name) : data.full_name;
   return {
-    title: `${name} | Film Resource Africa`,
+    title: name,
     description: data.tagline ?? undefined,
   };
 }

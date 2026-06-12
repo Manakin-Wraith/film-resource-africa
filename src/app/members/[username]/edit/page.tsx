@@ -4,7 +4,7 @@ import { getSessionUser } from '@/lib/supabase/server';
 import EditProfileClient from './EditProfileClient';
 import { MemberProfile } from '../page';
 
-export const metadata = { title: 'Edit Profile | Film Resource Africa' };
+export const metadata = { title: 'Edit Profile' };
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,

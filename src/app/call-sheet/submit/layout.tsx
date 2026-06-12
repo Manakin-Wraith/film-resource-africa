@@ -1,7 +1,7 @@
 import Breadcrumbs from '@/components/Breadcrumbs';
 
 export const metadata = {
-  title: 'Post a Listing — The Call Sheet | Film Resource Africa',
+  title: 'Post a Listing — The Call Sheet',
   description: 'Post paid crew calls, writing rooms, and co-production opportunities for African film productions.',
   openGraph: {
     title: 'Post a Listing — The Call Sheet | Film Resource Africa',

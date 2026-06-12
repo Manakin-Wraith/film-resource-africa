@@ -8,7 +8,7 @@ import { getSessionUser } from '@/lib/supabase/server';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Members | Film Resource Africa',
+  title: 'Members',
   description: 'Join FRA as an Individual or Business member. Permanent directory listing, project readiness scoring, and representation for African filmmakers.',
 };
 

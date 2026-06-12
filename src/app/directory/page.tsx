@@ -8,7 +8,7 @@ import NewsletterCTA from '@/components/NewsletterCTA';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Directory — Film Funds, Grants & Festivals in Africa | Film Resource Africa',
+  title: 'Directory — Film Funds, Grants & Festivals in Africa',
   description:
     'The Film Resource Africa Directory: film funds, grants, festivals, labs & fellowships, markets, AI opportunities, and open calls for African filmmakers — all in one place.',
   openGraph: {

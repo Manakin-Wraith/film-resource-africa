@@ -17,10 +17,10 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const { token } = await params;
   const p = await getPublicProjectByToken(token);
-  if (!p) return { title: 'Project not found | Film Resource Africa' };
+  if (!p) return { title: 'Project not found' };
   const desc = p.logline ?? `${[p.format, p.genre].filter(Boolean).join(' · ')} — a project on Film Resource Africa.`;
   return {
-    title: `${p.title} — African film in development | Film Resource Africa`,
+    title: `${p.title} — African film in development`,
     description: desc,
     openGraph: { title: p.title, description: desc, siteName: 'Film Resource Africa' },
     twitter: { card: 'summary', title: p.title, description: desc },

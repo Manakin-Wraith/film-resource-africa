@@ -2,7 +2,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 export const metadata = {
-  title: 'Admin | Film Resource Africa',
+  title: 'Admin',
   robots: 'noindex, nofollow',
 };
 

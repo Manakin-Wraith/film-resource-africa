@@ -1,7 +1,7 @@
 import Breadcrumbs from '@/components/Breadcrumbs';
 
 export const metadata = {
-  title: 'Add Your Listing — Industry Directory | Film Resource Africa',
+  title: 'Add Your Listing — Industry Directory',
   description: 'Get discovered by filmmakers and producers. Add your production company, crew profile, service, or training program to the African film industry directory.',
   openGraph: {
     title: 'Add Your Listing — Industry Directory | Film Resource Africa',

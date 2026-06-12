@@ -7,7 +7,7 @@ import { ItemListJsonLd } from '@/components/JsonLd';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'News & Insights | Film Resource Africa',
+  title: 'News & Insights',
   description: 'Latest industry news, deadline alerts, and insights for African filmmakers and creators.',
   openGraph: {
     title: 'News & Insights | Film Resource Africa',

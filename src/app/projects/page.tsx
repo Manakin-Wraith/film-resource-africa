@@ -8,7 +8,7 @@ import NewsletterCTA from '@/components/NewsletterCTA';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Projects — African Films in Development | Film Resource Africa',
+  title: 'Projects — African Films in Development',
   description:
     'Discover African film and series projects in development — loglines, formats, and what each team is seeking, from Film Resource Africa members.',
   openGraph: {

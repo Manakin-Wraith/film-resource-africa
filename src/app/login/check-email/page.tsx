@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import Image from 'next/image';
 
-export const metadata: Metadata = { title: 'Check your email | Film Resource Africa' };
+export const metadata: Metadata = { title: 'Check your email' };
 
 export default async function CheckEmailPage({
   searchParams,
