@@ -90,3 +90,26 @@ Generic AI design is uniform; human design has opinionated moments. Add three:
 ---
 
 *Inputs: `fra-redesign-concept.html` (direction), `fra-x-afx-spec.docx` + `Design_*.md` briefs (members surfaces), `docs/ui-design-issues-2026-06-11.md` (foundation now in place).*
+
+---
+
+## Addendum (2026-06-12): opportunity detail pages supersede the modal
+
+The opportunity modal is being replaced by dedicated pages at `/opportunities/[slug]`
+(spec: `docs/superpowers/specs/2026-06-12-opportunity-detail-pages-design.md`).
+This changes the redesign inventory:
+
+- **Screen 3 of `fra-redesign-v2.html` (the modal) is superseded.** The redesign
+  target for opportunity detail is now a full page, not an overlay.
+- **The signed-off replacement mockup lives in `opportunity-page-mockup.html`** —
+  two versions of the same page:
+  - **Version A (current design)** — shipping now, so the page exists and is indexed
+    before the reskin. Mobile-verified at 390px and 320px.
+  - **Version B (warm/Fraunces)** — the redesign-phase target. Uses the exact
+    Phase B-2 token values. Editorial liberties already agreed: hero photo sits
+    *below* the title/standfirst (magazine order), deadline countdown as an ember
+    pill in the masthead, sections separated by rules instead of boxes, Insider
+    Tips as an ochre-rule italic pull-quote, related items as deadline-column rows.
+- **Phase B/C to-do:** when the token swap lands, restyle `/opportunities/[slug]`
+  to Version B. This is a contained restyle — the page structure, data, and routes
+  do not change. Add the page to the Phase B screenshot checklist (now 15 pages).
