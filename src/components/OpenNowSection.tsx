@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { ExternalLink } from 'lucide-react';
 import type { Opportunity } from '@/app/actions';
 import { getCategoryStyle } from '@/lib/categoryConfig';
@@ -7,17 +8,23 @@ import { formatDeadline } from '@/lib/dateUtils';
 import { trackOpportunityClick } from '@/lib/analytics';
 import CardVisualHeader from './CardVisualHeader';
 
-function OpenNowCard({ opp, onSelect }: { opp: Opportunity; onSelect: (o: Opportunity) => void }) {
+function OpenNowCard({ opp }: { opp: Opportunity }) {
   const deadline = opp.deadline_date ? formatDeadline(opp.deadline_date) : null;
   const catStyle = getCategoryStyle(opp.category);
   const CatIcon = catStyle.icon;
 
   return (
     <div
-      onClick={() => { trackOpportunityClick(opp.title, opp.category || '', 'Open Now'); onSelect(opp); }}
-      className="rounded-xl min-w-[268px] max-w-[300px] flex-shrink-0 snap-start overflow-hidden border border-white/[0.08] hover:border-white/[0.16] hover:-translate-y-0.5 transition-all cursor-pointer group"
+      className="relative rounded-xl min-w-[268px] max-w-[300px] flex-shrink-0 snap-start overflow-hidden border border-white/[0.08] hover:border-white/[0.16] hover:-translate-y-0.5 transition-all group"
       style={{ background: 'var(--surface)' }}
     >
+      {/* Stretched link — whole card navigates; the Apply link sits above it */}
+      <Link
+        href={`/opportunities/${opp.slug}`}
+        onClick={() => trackOpportunityClick(opp.title, opp.category || '', 'Open Now')}
+        className="absolute inset-0 z-10"
+        aria-label={opp.title}
+      />
       <CardVisualHeader
         logo={opp.logo}
         ogImage={opp.og_image_url}
@@ -48,8 +55,7 @@ function OpenNowCard({ opp, onSelect }: { opp: Opportunity; onSelect: (o: Opport
               href={opp['Apply:']}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="flex items-center gap-1 text-xs font-semibold text-primary hover:text-blue-400 transition-colors"
+              className="relative z-20 flex items-center gap-1 text-xs font-semibold text-primary hover:text-blue-400 transition-colors"
             >
               Apply <ExternalLink size={10} />
             </a>
@@ -62,10 +68,8 @@ function OpenNowCard({ opp, onSelect }: { opp: Opportunity; onSelect: (o: Opport
 
 export default function OpenNowSection({
   opportunities,
-  onSelect,
 }: {
   opportunities: Opportunity[];
-  onSelect: (opp: Opportunity) => void;
 }) {
   if (!opportunities.length) return null;
 
@@ -83,7 +87,7 @@ export default function OpenNowSection({
       </div>
       <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory -mx-4 px-4 md:-mx-0 md:px-0 scrollbar-thin">
         {opportunities.map((opp) => (
-          <OpenNowCard key={opp.id} opp={opp} onSelect={onSelect} />
+          <OpenNowCard key={opp.id} opp={opp} />
         ))}
       </div>
     </section>

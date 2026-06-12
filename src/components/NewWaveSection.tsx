@@ -1,20 +1,22 @@
 'use client';
 
+import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import type { Opportunity } from '@/app/actions';
 import { getCategoryStyle } from '@/lib/categoryConfig';
 import { formatDeadline } from '@/lib/dateUtils';
 import { trackOpportunityClick } from '@/lib/analytics';
 
-function NewWaveRow({ opp, onSelect }: { opp: Opportunity; onSelect: (o: Opportunity) => void }) {
+function NewWaveRow({ opp }: { opp: Opportunity }) {
   const deadline = opp.deadline_date ? formatDeadline(opp.deadline_date) : null;
   const catStyle = getCategoryStyle(opp.category);
   const CatIcon = catStyle.icon;
 
   return (
-    <div
-      onClick={() => { trackOpportunityClick(opp.title, opp.category || '', 'New Wave'); onSelect(opp); }}
-      className="flex items-center gap-4 py-4 border-b border-white/[0.06] last:border-0 cursor-pointer group hover:bg-white/[0.02] -mx-4 px-4 md:-mx-0 md:px-0 transition-colors rounded-sm"
+    <Link
+      href={`/opportunities/${opp.slug}`}
+      onClick={() => trackOpportunityClick(opp.title, opp.category || '', 'New Wave')}
+      className="flex items-center gap-4 py-4 border-b border-white/[0.06] last:border-0 group hover:bg-white/[0.02] -mx-4 px-4 md:-mx-0 md:px-0 transition-colors rounded-sm"
     >
       {/* Category icon pip */}
       <div className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center bg-gradient-to-br ${catStyle.headerGradient}`}>
@@ -43,16 +45,14 @@ function NewWaveRow({ opp, onSelect }: { opp: Opportunity; onSelect: (o: Opportu
         className="flex-shrink-0 group-hover:translate-x-0.5 transition-transform"
         style={{ color: 'var(--foreground-tertiary)' }}
       />
-    </div>
+    </Link>
   );
 }
 
 export default function NewWaveSection({
   opportunities,
-  onSelect,
 }: {
   opportunities: Opportunity[];
-  onSelect: (opp: Opportunity) => void;
 }) {
   if (!opportunities.length) return null;
 
@@ -73,7 +73,7 @@ export default function NewWaveSection({
       </p>
       <div>
         {opportunities.map((opp) => (
-          <NewWaveRow key={opp.id} opp={opp} onSelect={onSelect} />
+          <NewWaveRow key={opp.id} opp={opp} />
         ))}
       </div>
     </section>

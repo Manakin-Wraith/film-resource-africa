@@ -11,7 +11,6 @@ import NowScreeningSection from './NowScreeningSection';
 import NewsletterShowcase from './NewsletterShowcase';
 import ClosingSoonSection from './ClosingSoonSection';
 import DirectoryClient from './DirectoryClient';
-import OpportunityModal from './OpportunityModal';
 import ContactModal from './ContactModal';
 import BrowseByCountry from './BrowseByCountry';
 import type { Country } from '@/lib/countries';
@@ -34,7 +33,6 @@ interface HomeClientProps {
 }
 
 export default function HomeClient({ closingSoon, openNow, newWave, justAdded, news, trailers, allOpportunities, placements = [], countriesWithCounts = [] }: HomeClientProps) {
-  const [selectedOpp, setSelectedOpp] = useState<Opportunity | null>(null);
   const [isAdModalOpen, setIsAdModalOpen] = useState(false);
   const [adSource, setAdSource] = useState<string | undefined>(undefined);
 
@@ -61,16 +59,16 @@ export default function HomeClient({ closingSoon, openNow, newWave, justAdded, n
   return (
     <>
       {/* Just Added — 2-col editorial grid */}
-      <JustAddedSection opportunities={justAdded} onSelect={setSelectedOpp} />
+      <JustAddedSection opportunities={justAdded} />
 
       {/* Closing Soon — editorial featured section */}
-      <ClosingSoonSection opportunities={closingSoon} onSelect={setSelectedOpp} />
+      <ClosingSoonSection opportunities={closingSoon} />
 
       {/* Open Now — cleaned snap carousel */}
-      <OpenNowSection opportunities={openNow} onSelect={setSelectedOpp} />
+      <OpenNowSection opportunities={openNow} />
 
       {/* New Wave — editorial list */}
-      <NewWaveSection opportunities={newWave} onSelect={setSelectedOpp} />
+      <NewWaveSection opportunities={newWave} />
 
       {/* Now Screening — Trailers & First Looks */}
       {trailers.length > 0 && (
@@ -103,9 +101,6 @@ export default function HomeClient({ closingSoon, openNow, newWave, justAdded, n
         </h2>
         <DirectoryClient initialData={allOpportunities} />
       </section>
-
-      {/* Shared Modal */}
-      <OpportunityModal selectedOpp={selectedOpp} onClose={() => setSelectedOpp(null)} />
 
       {/* Sponsored / Ghost Card → Advertise inquiry modal */}
       <ContactModal

@@ -29,6 +29,7 @@ function enrichWithCountry<T extends { country_id?: string; countries?: { iso_co
 export interface Opportunity {
   id: number;
   title: string;
+  slug: string;
   "What Is It?": string;
   "For Films or Series?": string;
   "What Do You Get If Selected?": string;
@@ -125,6 +126,24 @@ export async function getOpportunities(): Promise<Opportunity[]> {
   } catch (error) {
     console.error('Failed to fetch approved from Supabase', error);
     return [];
+  }
+}
+
+export async function getOpportunityBySlug(slug: string): Promise<Opportunity | null> {
+  try {
+    const { data, error } = await supabase
+      .from('opportunities')
+      .select('*, countries(iso_code, name), members(full_name, username, avatar_url)')
+      .eq('slug', slug)
+      .eq('status', 'approved')
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!data) return null;
+    return enrichWithCountry([data])[0] as Opportunity;
+  } catch (error) {
+    console.error('Failed to fetch opportunity by slug', error);
+    return null;
   }
 }
 

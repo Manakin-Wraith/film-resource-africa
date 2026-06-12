@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { ExternalLink, Calendar } from 'lucide-react';
 import type { Opportunity } from '@/app/actions';
 import { getCategoryStyle } from '@/lib/categoryConfig';
@@ -10,20 +11,18 @@ import { trackOpportunityClick } from '@/lib/analytics';
 import CardVisualHeader from './CardVisualHeader';
 
 /* ── Featured cover-story card ─────────────────────────────────────── */
-function FeaturedCard({ opp, onSelect }: { opp: Opportunity; onSelect: (o: Opportunity) => void }) {
+function FeaturedCard({ opp }: { opp: Opportunity }) {
   const deadline = opp.deadline_date ? formatDeadline(opp.deadline_date) : null;
-
-  const handleClick = () => {
-    trackOpportunityClick(opp.title, opp.category || '', 'Closing Soon Featured');
-    onSelect(opp);
-  };
+  const href = `/opportunities/${opp.slug}`;
+  const track = () => trackOpportunityClick(opp.title, opp.category || '', 'Closing Soon Featured');
 
   return (
     <div
-      className="rounded-xl overflow-hidden border border-line cursor-pointer group"
+      className="relative rounded-xl overflow-hidden border border-line group"
       style={{ background: 'var(--surface)' }}
-      onClick={handleClick}
     >
+      {/* Stretched link — whole card navigates; inner CTAs sit above it */}
+      <Link href={href} onClick={track} className="absolute inset-0 z-10" aria-label={opp.title} />
       {/* Visual header — 4-tier fallback: og_image → logo → gradient → pattern
           Desktop gets taller via CSS without dual-mounting the component */}
       <div className="md:[&>div]:!h-56">
@@ -70,28 +69,24 @@ function FeaturedCard({ opp, onSelect }: { opp: Opportunity; onSelect: (o: Oppor
         )}
 
         {/* CTA row — full-width on mobile */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <div className="relative z-20 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           {opp['Apply:'] && (
             <a
               href={opp['Apply:']}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
               className="flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-white font-bold text-sm px-6 rounded-xl transition-all hover:-translate-y-0.5 min-h-[48px]"
             >
               Apply Now <ExternalLink size={14} />
             </a>
           )}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              trackOpportunityClick(opp.title, opp.category || '', 'Closing Soon Featured');
-              onSelect(opp);
-            }}
+          <Link
+            href={href}
+            onClick={track}
             className="flex items-center justify-center gap-2 border border-white/[0.16] hover:border-white/30 text-foreground/70 hover:text-foreground font-semibold text-sm px-6 rounded-xl transition-all min-h-[48px]"
           >
             View Details
-          </button>
+          </Link>
         </div>
       </div>
     </div>
@@ -99,18 +94,16 @@ function FeaturedCard({ opp, onSelect }: { opp: Opportunity; onSelect: (o: Oppor
 }
 
 /* ── Compact strip card ─────────────────────────────────────────────── */
-function CompactCard({ opp, onSelect }: { opp: Opportunity; onSelect: (o: Opportunity) => void }) {
+function CompactCard({ opp }: { opp: Opportunity }) {
   const deadline = opp.deadline_date ? formatDeadline(opp.deadline_date) : null;
   const catStyle = getCategoryStyle(opp.category);
   const CatIcon = catStyle.icon;
 
   return (
-    <div
-      onClick={() => {
-        trackOpportunityClick(opp.title, opp.category || '', 'Closing Soon Strip');
-        onSelect(opp);
-      }}
-      className="rounded-xl min-w-[260px] max-w-[300px] flex-shrink-0 snap-start cursor-pointer border border-white/[0.08] hover:border-white/[0.16] hover:-translate-y-0.5 transition-all group overflow-hidden"
+    <Link
+      href={`/opportunities/${opp.slug}`}
+      onClick={() => trackOpportunityClick(opp.title, opp.category || '', 'Closing Soon Strip')}
+      className="block rounded-xl min-w-[260px] max-w-[300px] flex-shrink-0 snap-start border border-white/[0.08] hover:border-white/[0.16] hover:-translate-y-0.5 transition-all group overflow-hidden"
       style={{ background: 'var(--surface)' }}
     >
       {/* Mini visual header — logo or category fallback */}
@@ -154,17 +147,15 @@ function CompactCard({ opp, onSelect }: { opp: Opportunity; onSelect: (o: Opport
           </span>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
 
 /* ── Section ────────────────────────────────────────────────────────── */
 export default function ClosingSoonSection({
   opportunities,
-  onSelect,
 }: {
   opportunities: Opportunity[];
-  onSelect: (opp: Opportunity) => void;
 }) {
   if (!opportunities.length) return null;
 
@@ -185,13 +176,13 @@ export default function ClosingSoonSection({
       </div>
 
       {/* Featured cover-story card */}
-      <FeaturedCard opp={featured} onSelect={onSelect} />
+      <FeaturedCard opp={featured} />
 
       {/* Compact strip for remaining */}
       {rest.length > 0 && (
         <div className="flex gap-4 overflow-x-auto pb-4 mt-5 snap-x snap-mandatory -mx-4 px-4 md:-mx-0 md:px-0 scrollbar-thin">
           {rest.map((opp) => (
-            <CompactCard key={opp.id} opp={opp} onSelect={onSelect} />
+            <CompactCard key={opp.id} opp={opp} />
           ))}
         </div>
       )}

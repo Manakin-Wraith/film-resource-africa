@@ -205,7 +205,7 @@ export default async function NewsArticlePage({ params }: { params: Promise<{ sl
               {relatedOpps.map((opp) => (
                 <Link
                   key={opp.id}
-                  href="/#directory"
+                  href={`/opportunities/${opp.slug}`}
                   className="p-4 rounded-xl border border-white/8 hover:border-white/16 hover:-translate-y-0.5 transition-all group"
                   style={{ background: 'var(--surface)' }}
                 >

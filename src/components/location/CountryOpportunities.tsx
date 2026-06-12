@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { Calendar, ExternalLink, Filter, Search, BadgeCheck } from 'lucide-react';
 import type { Opportunity } from '@/app/actions';
 import { formatRelativeDate, formatLocalDateTime, formatDeadline } from '@/lib/dateUtils';
@@ -97,7 +98,7 @@ export default function CountryOpportunities({ opportunities, countryName }: Cou
           >
             <div className="flex items-start justify-between gap-3 mb-3">
               <h3 className="font-bold font-heading text-base leading-snug group-hover:text-primary transition-colors">
-                {opp.title}
+                <Link href={`/opportunities/${opp.slug}`}>{opp.title}</Link>
               </h3>
               {opp.logo && (
                 <img

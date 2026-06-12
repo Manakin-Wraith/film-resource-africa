@@ -8,7 +8,7 @@ import { trackOpportunityClick } from '@/lib/analytics';
 import CardVisualHeader from './CardVisualHeader';
 import Card from '@/components/ui/Card';
 
-function JustAddedCard({ opp, onSelect }: { opp: Opportunity; onSelect: (o: Opportunity) => void }) {
+function JustAddedCard({ opp }: { opp: Opportunity }) {
   const deadline = opp.deadline_date ? formatDeadline(opp.deadline_date) : null;
   const catStyle = getCategoryStyle(opp.category);
   const CatIcon = catStyle.icon;
@@ -16,7 +16,8 @@ function JustAddedCard({ opp, onSelect }: { opp: Opportunity; onSelect: (o: Oppo
   return (
     <Card
       interactive
-      onClick={() => { trackOpportunityClick(opp.title, opp.category || '', 'Just Added'); onSelect(opp); }}
+      href={`/opportunities/${opp.slug}`}
+      onClick={() => trackOpportunityClick(opp.title, opp.category || '', 'Just Added')}
     >
       <CardVisualHeader
         logo={opp.logo}
@@ -59,10 +60,8 @@ function JustAddedCard({ opp, onSelect }: { opp: Opportunity; onSelect: (o: Oppo
 
 export default function JustAddedSection({
   opportunities,
-  onSelect,
 }: {
   opportunities: Opportunity[];
-  onSelect: (opp: Opportunity) => void;
 }) {
   if (!opportunities.length) return null;
 
@@ -80,7 +79,7 @@ export default function JustAddedSection({
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {opportunities.slice(0, 6).map((opp) => (
-          <JustAddedCard key={opp.id} opp={opp} onSelect={onSelect} />
+          <JustAddedCard key={opp.id} opp={opp} />
         ))}
       </div>
     </section>

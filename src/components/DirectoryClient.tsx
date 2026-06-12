@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Calendar, DollarSign, ExternalLink, Plus, Heart, Clock, AlertTriangle, LayoutGrid, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { Opportunity, voteOpportunity } from '@/app/actions';
-import OpportunityModal from './OpportunityModal';
 import { directoryCategories, getDirectoryStyle, getDirectoryCategoryBySlug, PUBLIC_DIRECTORY_KEYS } from '@/lib/directoryConfig';
 import { formatDeadline, isNewListing } from '@/lib/dateUtils';
 import { decodeHtmlEntities } from '@/lib/textUtils';
@@ -28,7 +27,6 @@ export default function DirectoryClient({ initialData, counts = {} }: { initialD
   const [search, setSearch] = useState('');
   // filter holds either 'All' or a directory_destination key
   const [filter, setFilter] = useState('All');
-  const [selectedOpp, setSelectedOpp] = useState<Opportunity | null>(null);
   const [opportunities, setOpportunities] = useState<Opportunity[]>(initialData);
   const [votedIds, setVotedIds] = useState<number[]>([]);
 
@@ -182,10 +180,10 @@ export default function DirectoryClient({ initialData, counts = {} }: { initialD
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.3, type: "spring", bounce: 0.3 }}
                 key={opp.id}
-                onClick={() => setSelectedOpp(opp)}
-                className={`rounded-xl flex flex-col hover:border-white/[0.16] transition-all duration-300 group cursor-pointer border border-white/[0.08] overflow-hidden relative border-l-[3px] ${catStyle.borderLeft}`}
+                className={`rounded-xl flex flex-col hover:border-white/[0.16] transition-all duration-300 group border border-white/[0.08] overflow-hidden relative border-l-[3px] ${catStyle.borderLeft}`}
                 style={{ background: 'var(--surface)' }}
               >
+                <Link href={`/opportunities/${opp.slug}`} className="flex flex-col flex-grow">
                 <CardVisualHeader
                   logo={opp.logo}
                   ogImage={opp.og_image_url}
@@ -263,6 +261,7 @@ export default function DirectoryClient({ initialData, counts = {} }: { initialD
                   <ExternalLink size={16} className="text-foreground/30 group-hover:text-primary transition-colors flex-shrink-0" />
                 </div>
                 </div>
+                </Link>
               </motion.div>
             );
           })}
@@ -279,8 +278,6 @@ export default function DirectoryClient({ initialData, counts = {} }: { initialD
           )}
         </AnimatePresence>
       </motion.div>
-
-      <OpportunityModal selectedOpp={selectedOpp} onClose={() => setSelectedOpp(null)} />
     </div>
   );
 }

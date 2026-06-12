@@ -123,5 +123,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error('Sitemap: failed to fetch countries', error);
   }
 
-  return [...staticPages, ...newsPages, ...countryPages];
+  // Opportunity detail pages
+  let opportunityPages: MetadataRoute.Sitemap = [];
+  try {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+
+    const { data: opportunities } = await supabase
+      .from('opportunities')
+      .select('slug, updated_at, created_at')
+      .eq('status', 'approved')
+      .order('id', { ascending: false });
+
+    if (opportunities) {
+      opportunityPages = opportunities.map((opp) => ({
+        url: `${baseUrl}/opportunities/${opp.slug}`,
+        lastModified: new Date(opp.updated_at || opp.created_at),
+        changeFrequency: 'weekly' as const,
+        priority: 0.7,
+      }));
+    }
+  } catch (error) {
+    console.error('Sitemap: failed to fetch opportunities', error);
+  }
+
+  return [...staticPages, ...newsPages, ...countryPages, ...opportunityPages];
 }
