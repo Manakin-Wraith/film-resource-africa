@@ -113,3 +113,22 @@ This changes the redesign inventory:
 - **Phase B/C to-do:** when the token swap lands, restyle `/opportunities/[slug]`
   to Version B. This is a contained restyle — the page structure, data, and routes
   do not change. Add the page to the Phase B screenshot checklist (now 15 pages).
+
+## Addendum (2026-06-12, later): nav simplified — update the redesign inventory again
+
+The top nav shipped its simplification ahead of the reskin (spec:
+`docs/superpowers/specs/2026-06-12-nav-simplification-design.md`):
+
+- **5 items**: Opportunities ▾ · News · Crew & Jobs · Companies · Community ▾
+  (Members + Spotlight). Tech-Pulse and Rebate Calculator are footer-only.
+- **All nav data lives in `src/lib/navConfig.ts`** — Header, MobileTabBar, and
+  Footer render from it. Phase B restyles the nav by restyling these three
+  components; the structure and labels are already final.
+- **The mockups' nav rows are outdated**: `fra-redesign-v2.html` and
+  `opportunity-page-mockup.html` still show the old 7-item nav
+  (Directory/News/Members/Tech-Pulse/Call Sheet/Industry/Spotlight). When
+  Phase B/C mockup work resumes, use the shipped 5-item nav — do not
+  resurrect Tech-Pulse/Rebate in the header.
+- This also delivered part of Phase A's subtraction goal early (fewer
+  top-level items, clearer names) and removed the dead per-request
+  `getHeaderStats()` fetch.

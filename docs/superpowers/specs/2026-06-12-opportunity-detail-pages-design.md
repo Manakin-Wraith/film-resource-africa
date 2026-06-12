@@ -1,6 +1,6 @@
 # Opportunity Detail Pages — Design
 
-**Date:** 2026-06-12 · **Status:** Approved (mockup signed off in conversation)
+**Date:** 2026-06-12 · **Status:** ✅ Shipped 2026-06-12 — DB migration applied (slug + trigger), pages live in production (`77c4df1`; site-wide title fix `b59c2b9`)
 **Goal:** Replace the `OpportunityModal` overlay with dedicated, indexable pages at `/opportunities/[slug]`. Every opportunity gets a real URL — shareable, crawlable, linkable from newsletters and news articles.
 
 ## Decisions (made with G.)

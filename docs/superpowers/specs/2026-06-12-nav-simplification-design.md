@@ -1,6 +1,6 @@
 # Nav Simplification — Design
 
-**Date:** 2026-06-12 · **Status:** Approved in conversation
+**Date:** 2026-06-12 · **Status:** ✅ Shipped 2026-06-12 — live in production (`8af5111`)
 **Goal:** Cut the top nav from 8 items to 5, rename items for first-visit clarity, and move all navigation data into one shared config so Header, MobileTabBar, and Footer stop drifting apart.
 
 ## Decisions (made with G.)

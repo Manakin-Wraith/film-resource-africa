@@ -178,7 +178,7 @@ The single most important item in a section receives a **cover story card**:
 | 12 | **News section** | Uniform card grid | Featured article (large) + secondary grid | Full-width featured | ✅ Done |
 | 13 | **SponsorTicker / NewsletterShowcase** | Gradient glow card | Spacing and context preserved; full redesign deferred | Kept functional | ⬜ Phase 5 |
 | 14 | **Header / Nav** | Glass panel | Masthead bar with publication wordmark | Minimal wordmark only | ✅ Done |
-| 15 | **OpportunityModal** | Glass panel | Editorial detail sheet — full content layout | Full-screen sheet | ⬜ Phase 4 |
+| 15 | **OpportunityModal** | Glass panel | Editorial detail sheet — full content layout | Full-screen sheet | ✅ Superseded 2026-06-12 — replaced by `/opportunities/[slug]` pages (modal deleted) |
 | 16 | **BrowseByCountry** | Card grid | Editorial map/index treatment | Clean editorial grid | ✅ Done |
 | 17 | **Footer** | Minimal | Masthead footer with publication credit | Compact, above tab bar | ⬜ Phase 5 |
 
@@ -356,8 +356,8 @@ These are reference points for the *feeling* to aim for — not to copy.
 - [ ] Light mode: is the editorial direction dark-only, or does it translate to a warm off-white light mode?
 - [ ] Film stills / editorial imagery: do we source/allow cover images for the featured card, or keep it type-and-logo?
 - [ ] Does the "New Wave: AI Filmmaking" section stay as a permanent section or become a rotating editorial theme?
-- [ ] MobileTabBar tabs: current tabs are Home / Browse / Saved / Submit. Do these map correctly to the editorial publication model, or should one tab become "Latest" (news feed)?
-- [ ] OpportunityModal on mobile: full-screen sheet (current direction) vs. navigating to a dedicated page route? A dedicated route is more shareable and better for SEO.
+- [x] MobileTabBar tabs: current tabs are Home / Browse / Saved / Submit. Do these map correctly to the editorial publication model, or should one tab become "Latest" (news feed)? **Resolved 2026-06-12: tabs are Home / Opportunities / News / Jobs / Members, driven by `src/lib/navConfig.ts`** (spec: `superpowers/specs/2026-06-12-nav-simplification-design.md`).
+- [x] OpportunityModal on mobile: full-screen sheet (current direction) vs. navigating to a dedicated page route? A dedicated route is more shareable and better for SEO. **Resolved 2026-06-12: dedicated pages shipped at `/opportunities/[slug]`; the modal is deleted entirely** (spec: `superpowers/specs/2026-06-12-opportunity-detail-pages-design.md`).
 
 ---
 
