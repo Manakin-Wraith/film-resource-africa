@@ -17,7 +17,7 @@ function OpenNowCard({ opp }: { opp: Opportunity }) {
 
   return (
     <div
-      className="relative rounded-xl min-w-[268px] max-w-[300px] flex-shrink-0 snap-start overflow-hidden border border-white/[0.08] hover:border-white/[0.16] hover:-translate-y-0.5 transition-all group"
+      className="relative rounded-xl min-w-[268px] max-w-[300px] flex-shrink-0 snap-start overflow-hidden border border-line hover:border-line-mid hover:-translate-y-0.5 transition-all group"
       style={{ background: 'var(--surface)' }}
     >
       {/* Stretched link — whole card navigates; the Apply link sits above it */}

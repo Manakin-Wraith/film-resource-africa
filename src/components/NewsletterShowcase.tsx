@@ -79,8 +79,8 @@ function EmailPreviewCard({ digest, isActive, onClick }: { digest: typeof digest
       onClick={onClick}
       className={`w-full text-left rounded-xl p-4 border transition-all ${
         isActive
-          ? 'border-white/[0.2] bg-white/[0.04]'
-          : 'border-white/[0.06] hover:border-white/[0.12] hover:bg-white/[0.02]'
+          ? 'border-line-mid bg-foreground/[0.04]'
+          : 'border-line hover:border-line-mid hover:bg-foreground/[0.04]'
       }`}
       style={isActive ? { background: 'var(--surface-raised)' } : undefined}
     >
@@ -119,7 +119,7 @@ function EmailMockup({ digest }: { digest: typeof digests[0] }) {
   return (
     <div className="rounded-2xl overflow-hidden border border-white/10 bg-surface shadow-2xl">
       {/* Email header bar */}
-      <div className="px-5 py-3 bg-white/[0.04] border-b border-white/10 flex items-center gap-3">
+      <div className="px-5 py-3 bg-foreground/[0.04] border-b border-white/10 flex items-center gap-3">
         <div className="flex gap-1.5">
           <div className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
           <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/60" />
@@ -148,7 +148,7 @@ function EmailMockup({ digest }: { digest: typeof digests[0] }) {
           const typeInfo = typeIcons[item.type] || { icon: ChevronRight, color: 'text-foreground/40' };
           const ItemIcon = typeInfo.icon;
           return (
-            <div key={i} className={`flex items-start gap-3 p-3 rounded-xl ${item.urgent ? 'bg-red-500/10 border border-red-500/15' : 'bg-white/[0.03]'}`}>
+            <div key={i} className={`flex items-start gap-3 p-3 rounded-xl ${item.urgent ? 'bg-red-500/10 border border-red-500/15' : 'bg-foreground/[0.04]'}`}>
               <ItemIcon size={14} className={`${typeInfo.color} mt-0.5 flex-shrink-0`} />
               <span className={`text-sm ${item.urgent ? 'text-foreground/90 font-medium' : 'text-foreground/60'}`}>
                 {item.text}
@@ -244,7 +244,7 @@ export default function NewsletterShowcase() {
               placeholder="your@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-white/[0.12] rounded-xl pl-10 pr-4 py-3 text-sm focus:border-primary/60 transition-colors text-foreground placeholder:text-foreground/50 min-h-[48px]"
+              className="w-full border border-line-mid rounded-xl pl-10 pr-4 py-3 text-sm focus:border-primary/60 transition-colors text-foreground placeholder:text-foreground/50 min-h-[48px]"
               style={{ background: 'var(--surface-raised)' }}
             />
           </div>

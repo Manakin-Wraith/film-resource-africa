@@ -39,7 +39,7 @@ export default function BrowseByCountry({ countries }: BrowseByCountryProps) {
           <Link
             key={country.slug}
             href={`/film-opportunities/${country.slug}`}
-            className="flex items-center gap-3 p-4 rounded-xl border border-white/[0.08] hover:border-white/[0.16] hover:-translate-y-0.5 transition-all group"
+            className="flex items-center gap-3 p-4 rounded-xl border border-line hover:border-line-mid hover:-translate-y-0.5 transition-all group"
             style={{ background: 'var(--surface)' }}
           >
             <span className="text-2xl leading-none flex-shrink-0">

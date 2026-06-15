@@ -56,7 +56,7 @@ export default function PartnersSection() {
 
   return (
     <>
-      <section className="rounded-3xl border border-white/[0.08] p-6 md:p-10 -mx-4 md:mx-0" style={{ background: 'var(--surface)' }}>
+      <section className="rounded-3xl border border-line p-6 md:p-10 -mx-4 md:mx-0" style={{ background: 'var(--surface)' }}>
         {/* Header */}
         <div className="text-center space-y-3 mb-10">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-foreground/60 uppercase tracking-widest">

@@ -64,7 +64,7 @@ function SecondaryNewsCard({ item }: { item: NewsItem }) {
   return (
     <Link
       href={href}
-      className="flex gap-3 p-4 rounded-xl border border-line hover:border-line-strong hover:bg-white/[0.02] transition-all group"
+      className="flex gap-3 p-4 rounded-xl border border-line hover:border-line-strong hover:bg-foreground/[0.04] transition-all group"
       style={{ background: 'var(--surface)' }}
     >
       <div className="relative shrink-0 w-[72px] h-[72px] rounded-lg overflow-hidden">

@@ -84,7 +84,7 @@ function FeaturedCard({ opp }: { opp: Opportunity }) {
           <Link
             href={href}
             onClick={track}
-            className="flex items-center justify-center gap-2 border border-white/[0.16] hover:border-white/30 text-foreground/70 hover:text-foreground font-semibold text-sm px-6 rounded-xl transition-all min-h-[48px]"
+            className="flex items-center justify-center gap-2 border border-line-mid hover:border-line-mid text-foreground/70 hover:text-foreground font-semibold text-sm px-6 rounded-xl transition-all min-h-[48px]"
           >
             View Details
           </Link>
@@ -104,12 +104,12 @@ function CompactCard({ opp }: { opp: Opportunity }) {
     <Link
       href={`/opportunities/${opp.slug}`}
       onClick={() => trackOpportunityClick(opp.title, opp.category || '', 'Closing Soon Strip')}
-      className="block rounded-xl min-w-[260px] max-w-[300px] flex-shrink-0 snap-start border border-white/[0.08] hover:border-white/[0.16] hover:-translate-y-0.5 transition-all group overflow-hidden"
+      className="block rounded-xl min-w-[260px] max-w-[300px] flex-shrink-0 snap-start border border-line hover:border-line-mid hover:-translate-y-0.5 transition-all group overflow-hidden"
       style={{ background: 'var(--surface)' }}
     >
       {/* Mini visual header — logo or category fallback */}
       {opp.logo ? (
-        <div className={`h-14 flex items-center px-4 bg-gradient-to-br ${catStyle.headerGradient} border-b border-white/[0.05]`}>
+        <div className={`h-14 flex items-center px-4 bg-gradient-to-br ${catStyle.headerGradient} border-b border-line`}>
           <Image
             src={opp.logo}
             alt=""
@@ -119,7 +119,7 @@ function CompactCard({ opp }: { opp: Opportunity }) {
           />
         </div>
       ) : (
-        <div className={`h-10 flex items-center px-4 gap-2 bg-gradient-to-br ${catStyle.headerGradient} border-b border-white/[0.05]`}>
+        <div className={`h-10 flex items-center px-4 gap-2 bg-gradient-to-br ${catStyle.headerGradient} border-b border-line`}>
           <CatIcon size={14} className={catStyle.color} />
           <span className={`text-[10px] font-bold uppercase tracking-wider ${catStyle.color}`}>
             {catStyle.label}
