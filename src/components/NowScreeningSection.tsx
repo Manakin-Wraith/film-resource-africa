@@ -41,14 +41,14 @@ export default function NowScreeningSection({ trailers }: NowScreeningSectionPro
         <div className="flex items-center gap-2">
           <button
             onClick={() => scroll('left')}
-            className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors"
+            className="w-9 h-9 rounded-xl bg-foreground/[0.04] border border-line flex items-center justify-center hover:bg-foreground/[0.08] transition-colors"
             aria-label="Scroll left"
           >
             <ChevronLeft size={18} className="text-foreground/60" />
           </button>
           <button
             onClick={() => scroll('right')}
-            className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors"
+            className="w-9 h-9 rounded-xl bg-foreground/[0.04] border border-line flex items-center justify-center hover:bg-foreground/[0.08] transition-colors"
             aria-label="Scroll right"
           >
             <ChevronRight size={18} className="text-foreground/60" />

@@ -58,7 +58,7 @@ export default function NewsletterCTA({
             placeholder="Get weekly deadline alerts..."
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full bg-white/5 border border-white/10 rounded-2xl pl-11 pr-4 py-3.5 text-sm focus:border-primary/60 transition-colors text-foreground placeholder:text-foreground/50"
+            className="w-full bg-foreground/[0.04] border border-line rounded-2xl pl-11 pr-4 py-3.5 text-sm focus:border-primary/60 transition-colors text-foreground placeholder:text-foreground/50"
           />
         </div>
         <button

@@ -117,9 +117,9 @@ function EmailMockup({ digest }: { digest: typeof digests[0] }) {
   };
 
   return (
-    <div className="rounded-2xl overflow-hidden border border-white/10 bg-surface shadow-2xl">
+    <div className="rounded-2xl overflow-hidden border border-line bg-surface shadow-2xl">
       {/* Email header bar */}
-      <div className="px-5 py-3 bg-foreground/[0.04] border-b border-white/10 flex items-center gap-3">
+      <div className="px-5 py-3 bg-foreground/[0.04] border-b border-line flex items-center gap-3">
         <div className="flex gap-1.5">
           <div className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
           <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/60" />
@@ -129,7 +129,7 @@ function EmailMockup({ digest }: { digest: typeof digests[0] }) {
       </div>
 
       {/* Email meta */}
-      <div className="px-5 pt-4 pb-3 border-b border-white/5">
+      <div className="px-5 pt-4 pb-3 border-b border-line">
         <div className="flex items-center gap-2 mb-2">
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white text-[10px] font-bold">
             FRA

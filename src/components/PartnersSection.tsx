@@ -59,7 +59,7 @@ export default function PartnersSection() {
       <section className="rounded-3xl border border-line p-6 md:p-10 -mx-4 md:mx-0" style={{ background: 'var(--surface)' }}>
         {/* Header */}
         <div className="text-center space-y-3 mb-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-foreground/60 uppercase tracking-widest">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-foreground/[0.04] border border-line text-xs font-medium text-foreground/60 uppercase tracking-widest">
             <Handshake size={14} className="text-primary" />
             Ecosystem
           </div>
@@ -108,7 +108,7 @@ export default function PartnersSection() {
             <span className="text-foreground/50 text-xs">or</span>
             <button
               onClick={() => openModal('advertise')}
-              className="inline-flex items-center gap-2 text-foreground/50 hover:text-foreground/80 text-sm transition-colors underline underline-offset-4 decoration-white/10 hover:decoration-white/30"
+              className="inline-flex items-center gap-2 text-foreground/50 hover:text-foreground/80 text-sm transition-colors underline underline-offset-4 decoration-foreground/10 hover:decoration-foreground/30"
             >
               Advertise your services
             </button>
