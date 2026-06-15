@@ -27,14 +27,14 @@ export default function CountryLocations({ locations, countryName }: CountryLoca
         {locations.map((location) => (
           <div
             key={location.name}
-            className="rounded-xl p-5 border border-white/[0.08] hover:border-white/[0.16] transition-all group"
+            className="rounded-xl p-5 border border-line hover:border-line-mid transition-all group"
             style={{ background: 'var(--surface)' }}
           >
             <div className="flex items-start justify-between gap-3 mb-2">
               <h3 className="font-bold font-heading text-base group-hover:text-rose-400 transition-colors leading-tight">
                 {location.name}
               </h3>
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold text-foreground/50 bg-white/5 border border-white/10 whitespace-nowrap">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold text-foreground/50 bg-foreground/[0.04] border border-line whitespace-nowrap">
                 <MapPin size={8} />
                 {location.region}
               </span>

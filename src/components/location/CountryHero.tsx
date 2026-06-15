@@ -37,12 +37,12 @@ export default function CountryHero({ country, opportunityCount }: CountryHeroPr
             <Globe size={12} />
             {country.region}
           </span>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-wider border border-white/[0.1] text-foreground/50" style={{ background: 'var(--surface)' }}>
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-wider border border-line text-foreground/50" style={{ background: 'var(--surface)' }}>
             <Film size={12} />
             {getIndustrySizeLabel(country.film_industry_size)}
           </span>
           {country.annual_productions > 0 && (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-wider border border-white/[0.1] text-foreground/50" style={{ background: 'var(--surface)' }}>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-wider border border-line text-foreground/50" style={{ background: 'var(--surface)' }}>
               <Calendar size={12} />
               ~{country.annual_productions} productions/year
             </span>
@@ -68,7 +68,7 @@ export default function CountryHero({ country, opportunityCount }: CountryHeroPr
               className={`px-4 py-2 rounded-xl text-[13px] font-semibold border transition-colors ${
                 primary
                   ? 'bg-primary border-primary text-white hover:bg-primary-hover'
-                  : 'border-white/[0.1] hover:border-white/[0.2] hover:text-foreground'
+                  : 'border-line hover:border-line-mid hover:text-foreground'
               }`}
               style={primary ? undefined : { background: 'var(--surface)', color: 'var(--foreground-secondary)' }}
             >

@@ -68,7 +68,7 @@ export default function CountryDirectory({ listings, countryName }: CountryDirec
           <h2 className="text-2xl md:text-3xl font-bold font-heading">Film Services Directory</h2>
         </div>
 
-        <div className="rounded-xl p-10 border border-white/[0.08] text-center" style={{ background: 'var(--surface)' }}>
+        <div className="rounded-xl p-10 border border-line text-center" style={{ background: 'var(--surface)' }}>
           <Globe className="w-12 h-12 text-primary/30 mx-auto mb-4" />
           <h3 className="text-xl font-heading font-bold mb-2">No listings yet for {countryName}</h3>
           <p className="text-foreground/50 mb-6 max-w-md mx-auto">
@@ -105,7 +105,7 @@ export default function CountryDirectory({ listings, countryName }: CountryDirec
           placeholder={`Search services in ${countryName}...`}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-white/5 border border-white/10 rounded-2xl pl-11 pr-5 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-foreground placeholder:text-foreground/50 text-sm"
+          className="w-full bg-foreground/[0.04] border border-line rounded-2xl pl-11 pr-5 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-foreground placeholder:text-foreground/50 text-sm"
         />
         {search && (
           <button onClick={() => setSearch('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-foreground/50 hover:text-foreground transition-colors text-xs font-medium">
@@ -120,8 +120,8 @@ export default function CountryDirectory({ listings, countryName }: CountryDirec
           onClick={() => setTypeFilter('all')}
           className={`flex items-center gap-1.5 px-4 py-2 min-h-[40px] rounded-xl font-semibold text-xs whitespace-nowrap transition-all duration-300 border ${
             typeFilter === 'all'
-              ? 'border-white/[0.2] text-foreground'
-              : 'border-white/[0.08] hover:border-white/[0.16] text-foreground/60 hover:text-foreground'
+              ? 'border-line-mid text-foreground'
+              : 'border-line hover:border-line-mid text-foreground/60 hover:text-foreground'
           }`}
         >
           <LayoutGrid size={14} />
@@ -138,11 +138,11 @@ export default function CountryDirectory({ listings, countryName }: CountryDirec
               onClick={() => setTypeFilter(key)}
               className={`flex items-center gap-1.5 px-4 py-2 min-h-[40px] rounded-xl font-semibold text-xs whitespace-nowrap transition-all duration-300 border ${
                 typeFilter === key
-                  ? 'border-white/[0.2] text-foreground'
-                  : 'border-white/[0.08] hover:border-white/[0.16] text-foreground/60 hover:text-foreground'
+                  ? 'border-line-mid text-foreground'
+                  : 'border-line hover:border-line-mid text-foreground/60 hover:text-foreground'
               }`}
             >
-              <Icon size={14} className={typeFilter === key ? 'text-white' : dt.color} />
+              <Icon size={14} className={typeFilter === key ? 'text-foreground' : dt.color} />
               {dt.label}
               <span className="text-[10px] opacity-70">{count}</span>
             </button>
@@ -156,7 +156,7 @@ export default function CountryDirectory({ listings, countryName }: CountryDirec
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs font-medium text-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/50"
+            className="bg-foreground/[0.04] border border-line rounded-xl px-3 py-2 text-xs font-medium text-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/50"
           >
             <option value="all">All Categories</option>
             {categories.map(c => <option key={c} value={c}>{c}</option>)}
@@ -181,7 +181,7 @@ export default function CountryDirectory({ listings, countryName }: CountryDirec
                 transition={{ duration: 0.3, type: 'spring', bounce: 0.3 }}
                 key={listing.id}
                 onClick={() => setSelected(listing)}
-                className="rounded-xl p-5 flex flex-col hover:border-white/[0.16] transition-all duration-200 group cursor-pointer border border-white/[0.08] overflow-hidden"
+                className="rounded-xl p-5 flex flex-col hover:border-line-mid transition-all duration-200 group cursor-pointer border border-line overflow-hidden"
                 style={{ background: 'var(--surface)' }}
               >
                 {/* Badges */}
@@ -216,11 +216,11 @@ export default function CountryDirectory({ listings, countryName }: CountryDirec
                 {/* Name + Logo */}
                 <div className="flex items-center gap-3 mb-2">
                   {listing.logo_url ? (
-                    <div className="w-10 h-10 rounded-xl border border-white/10 bg-white/5 overflow-hidden flex-shrink-0">
+                    <div className="w-10 h-10 rounded-xl border border-line bg-foreground/[0.04] overflow-hidden flex-shrink-0">
                       <img src={listing.logo_url} alt={listing.name} className="w-full h-full object-cover" />
                     </div>
                   ) : (
-                    <div className="w-10 h-10 rounded-xl border border-white/10 bg-white/5 flex items-center justify-center flex-shrink-0">
+                    <div className="w-10 h-10 rounded-xl border border-line bg-foreground/[0.04] flex items-center justify-center flex-shrink-0">
                       <DtIcon size={18} className={`${dt.color} opacity-50`} />
                     </div>
                   )}
@@ -231,11 +231,11 @@ export default function CountryDirectory({ listings, countryName }: CountryDirec
 
                 {/* Category + City */}
                 <div className="flex flex-wrap gap-1.5 mb-2">
-                  <span className="text-[10px] text-foreground/50 bg-white/5 border border-white/10 px-2 py-0.5 rounded-lg font-medium">
+                  <span className="text-[10px] text-foreground/50 bg-foreground/[0.04] border border-line px-2 py-0.5 rounded-lg font-medium">
                     {listing.category}
                   </span>
                   {listing.city && (
-                    <span className="text-[10px] text-foreground/50 bg-white/5 border border-white/10 px-2 py-0.5 rounded-lg font-medium flex items-center gap-1">
+                    <span className="text-[10px] text-foreground/50 bg-foreground/[0.04] border border-line px-2 py-0.5 rounded-lg font-medium flex items-center gap-1">
                       <MapPin size={8} />
                       {listing.city}
                     </span>
@@ -248,7 +248,7 @@ export default function CountryDirectory({ listings, countryName }: CountryDirec
                 </p>
 
                 {/* Footer */}
-                <div className="mt-auto flex items-center justify-between pt-3 border-t border-white/10">
+                <div className="mt-auto flex items-center justify-between pt-3 border-t border-line">
                   <div className="flex items-center gap-2 text-xs">
                     {listing.website && (
                       <span className="flex items-center gap-1 text-primary/70">
@@ -270,7 +270,7 @@ export default function CountryDirectory({ listings, countryName }: CountryDirec
           {filteredData.length === 0 && (
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-              className="col-span-full text-center py-12 rounded-xl border border-white/[0.06]"
+              className="col-span-full text-center py-12 rounded-xl border border-line"
               style={{ background: 'var(--surface)' }}
             >
               <Search className="w-10 h-10 text-primary/50 mx-auto mb-3" />
@@ -282,7 +282,7 @@ export default function CountryDirectory({ listings, countryName }: CountryDirec
       </motion.div>
 
       {/* Suggest a listing CTA */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-xl p-5 border border-white/[0.08]" style={{ background: 'var(--surface)' }}>
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-xl p-5 border border-line" style={{ background: 'var(--surface)' }}>
         <div>
           <p className="font-bold font-heading text-sm">Know someone in {countryName}&apos;s film industry?</p>
           <p className="text-foreground/50 text-xs">Help grow the directory — add a company, crew member, or service.</p>
