@@ -73,6 +73,30 @@ function resolveUrl(base, relative) {
   } catch { return null; }
 }
 
+// og:image content is raw HTML, so URLs arrive entity-encoded (e.g. "?w=1&amp;h=2").
+// Decode before resolving or the stored URL is requested literally and 404s.
+function decodeEntities(s) {
+  return String(s)
+    .replace(/&amp;/gi, '&').replace(/&#0*38;/g, '&').replace(/&#x0*26;/gi, '&')
+    .replace(/&quot;/gi, '"').replace(/&#0*39;/g, "'")
+    .replace(/&lt;/gi, '<').replace(/&gt;/gi, '>');
+}
+
+// Hosts whose image URLs expire (signed) or hotlink-block — they validate at
+// capture time but rot later, leaving a broken card. Skip them so the pipeline
+// falls back to a local screenshot, which never rots.
+const RISKY_IMAGE_HOSTS = ['fbcdn.net', 'cdninstagram.com', 'scontent', 'licdn.com', 'lookaside.fbsbx.com', 'pbs.twimg.com'];
+function isRiskyImageHost(url) {
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname.toLowerCase();
+    if (RISKY_IMAGE_HOSTS.some((r) => host.includes(r))) return true;
+    // Signed / expiring URLs (S3, CloudFront, GCS, generic token expiry).
+    if (/[?&](x-amz-|expires=|signature=|sig=|token=|goog-)/i.test(parsed.search)) return true;
+    return false;
+  } catch { return false; }
+}
+
 async function supabaseUpdate(table, id, updates) {
   const res = await fetch(`${supabaseUrl}/rest/v1/${table}?id=eq.${id}`, {
     method: 'PATCH',
@@ -193,8 +217,8 @@ async function fetchOgImage(applyUrl) {
     for (const pattern of patterns) {
       const match = html.match(pattern);
       if (match && match[1]) {
-        const imgUrl = resolveUrl(finalUrl, match[1]);
-        if (imgUrl && !isPlaceholder(imgUrl)) {
+        const imgUrl = resolveUrl(finalUrl, decodeEntities(match[1]));
+        if (imgUrl && !isPlaceholder(imgUrl) && !isRiskyImageHost(imgUrl)) {
           // Validate it's a real image
           try {
             const headRes = await fetch(imgUrl, {
