@@ -14,11 +14,11 @@ export default function ClosingThisWeek({ opportunities }: { opportunities: Oppo
   return (
     <aside className="md:pl-10">
       <div className="flex items-baseline justify-between pb-3 border-b border-line-strong">
-        <h3 className="font-heading font-semibold text-[19px] tracking-[-0.01em] text-foreground">Closing this week</h3>
+        <h3 className="font-heading font-semibold text-[19px] tracking-[-0.01em] text-foreground">Upcoming deadlines</h3>
         <Link href="/directory" className="text-xs text-foreground/50 hover:text-[color:var(--color-primary-text)] transition-colors">All deadlines →</Link>
       </div>
       {opportunities.length === 0 && (
-        <p className="py-4 text-[13px]" style={{ color: 'var(--foreground-tertiary)' }}>No deadlines closing this week.</p>
+        <p className="py-4 text-[13px]" style={{ color: 'var(--foreground-tertiary)' }}>No upcoming deadlines right now.</p>
       )}
       {opportunities.map((opp, i) => {
         const dl = opp.deadline_date ? formatDeadline(opp.deadline_date) : null;
