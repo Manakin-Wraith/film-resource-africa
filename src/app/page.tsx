@@ -1,4 +1,4 @@
-import { getClosingSoonOpportunities, getJustAddedOpportunities } from './actions';
+import { getClosingSoonOpportunities, getOpenOpportunities, getJustAddedOpportunities } from './actions';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import FrontPageGrid from '@/components/home/FrontPageGrid';
 import JustAddedRow from '@/components/home/JustAddedRow';
@@ -6,13 +6,21 @@ import JustAddedRow from '@/components/home/JustAddedRow';
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
-  const [closingSoon, justAdded] = await Promise.all([
+  const [closingSoon, openNow, justAdded] = await Promise.all([
     getClosingSoonOpportunities(),
+    getOpenOpportunities(),
     getJustAddedOpportunities(),
   ]);
 
   const lead = closingSoon[0] ?? justAdded[0] ?? null;
-  const closing = lead === closingSoon[0] ? closingSoon.slice(1, 7) : closingSoon.slice(0, 6);
+
+  // "Closing this week" = soonest upcoming deadlines across closing-soon + open (excluding the lead)
+  const now = Date.now();
+  const closing = [...closingSoon, ...openNow]
+    .filter((o) => o.id !== lead?.id && o.deadline_date && new Date(o.deadline_date).getTime() >= now)
+    .filter((o, i, arr) => arr.findIndex((x) => x.id === o.id) === i)
+    .sort((a, b) => new Date(a.deadline_date as string).getTime() - new Date(b.deadline_date as string).getTime())
+    .slice(0, 6);
 
   return (
     <main className="min-h-screen">
