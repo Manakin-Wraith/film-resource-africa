@@ -92,7 +92,7 @@ export default function IndustryDirectoryClient({ initialData }: { initialData: 
             />
           ))}
 
-          <div className="w-[1px] h-8 bg-white/15 mx-1 hidden md:flex self-center flex-shrink-0"></div>
+          <div className="w-[1px] h-8 bg-foreground/[0.08] mx-1 hidden md:flex self-center flex-shrink-0"></div>
 
           <Link
             href="/industry/submit"
@@ -110,7 +110,7 @@ export default function IndustryDirectoryClient({ initialData }: { initialData: 
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="border border-white/[0.12] rounded-xl px-3 py-2 text-xs font-medium focus:border-primary/50 transition-colors"
+              className="border border-line-mid rounded-xl px-3 py-2 text-xs font-medium focus:border-primary/50 transition-colors"
               style={{ background: 'var(--surface-raised)', color: 'var(--foreground-secondary)' }}
             >
               <option value="all">All Categories</option>
@@ -122,7 +122,7 @@ export default function IndustryDirectoryClient({ initialData }: { initialData: 
             <select
               value={countryFilter}
               onChange={(e) => setCountryFilter(e.target.value)}
-              className="border border-white/[0.12] rounded-xl px-3 py-2 text-xs font-medium focus:border-primary/50 transition-colors"
+              className="border border-line-mid rounded-xl px-3 py-2 text-xs font-medium focus:border-primary/50 transition-colors"
               style={{ background: 'var(--surface-raised)', color: 'var(--foreground-secondary)' }}
             >
               <option value="all">All Countries</option>
@@ -150,7 +150,7 @@ export default function IndustryDirectoryClient({ initialData }: { initialData: 
                 transition={{ duration: 0.3, type: "spring", bounce: 0.3 }}
                 key={listing.id}
                 onClick={() => setSelected(listing)}
-                className="rounded-xl p-5 flex flex-col hover:border-white/[0.16] transition-all group cursor-pointer border border-white/[0.08] overflow-hidden"
+                className="rounded-xl p-5 flex flex-col hover:border-line-mid transition-all group cursor-pointer border border-line overflow-hidden"
                 style={{ background: 'var(--surface)' }}
               >
                 {/* Top row: badges */}
@@ -186,11 +186,11 @@ export default function IndustryDirectoryClient({ initialData }: { initialData: 
                 {/* Name + Logo */}
                 <div className="flex items-center gap-3 mb-2">
                   {listing.logo_url ? (
-                    <div className="w-12 h-12 rounded-xl border border-white/10 bg-white/5 overflow-hidden flex-shrink-0">
+                    <div className="w-12 h-12 rounded-xl border border-line bg-foreground/[0.04] overflow-hidden flex-shrink-0">
                       <img src={listing.logo_url} alt={listing.name} className="w-full h-full object-cover" />
                     </div>
                   ) : (
-                    <div className="w-12 h-12 rounded-xl border border-white/10 bg-white/5 flex items-center justify-center flex-shrink-0">
+                    <div className="w-12 h-12 rounded-xl border border-line bg-foreground/[0.04] flex items-center justify-center flex-shrink-0">
                       <DtIcon size={20} className={`${dt.color} opacity-50`} />
                     </div>
                   )}
@@ -201,10 +201,10 @@ export default function IndustryDirectoryClient({ initialData }: { initialData: 
 
                 {/* Category + Location */}
                 <div className="flex flex-wrap gap-1.5 mb-3">
-                  <span className="text-xs text-foreground/50 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg font-medium">
+                  <span className="text-xs text-foreground/50 bg-foreground/[0.04] border border-line px-2.5 py-1 rounded-lg font-medium">
                     {listing.category}
                   </span>
-                  <span className="text-xs text-foreground/50 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg font-medium flex items-center gap-1">
+                  <span className="text-xs text-foreground/50 bg-foreground/[0.04] border border-line px-2.5 py-1 rounded-lg font-medium flex items-center gap-1">
                     <MapPin size={10} />
                     {listing.city ? `${listing.city}, ` : ''}{listing.country}
                   </span>
@@ -216,7 +216,7 @@ export default function IndustryDirectoryClient({ initialData }: { initialData: 
                 </p>
 
                 {/* Footer */}
-                <div className="mt-auto flex items-center justify-between pt-4 border-t border-white/10">
+                <div className="mt-auto flex items-center justify-between pt-4 border-t border-line">
                   <div className="flex items-center gap-3 text-sm">
                     {listing.website && (
                       <span className="flex items-center gap-1 text-primary/70">
@@ -238,7 +238,7 @@ export default function IndustryDirectoryClient({ initialData }: { initialData: 
           {filteredData.length === 0 && (
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-              className="col-span-full text-center py-20 rounded-xl border border-white/[0.06]"
+              className="col-span-full text-center py-20 rounded-xl border border-line"
               style={{ background: 'var(--surface)' }}
             >
               <Search className="w-12 h-12 text-primary/50 mx-auto mb-4" />

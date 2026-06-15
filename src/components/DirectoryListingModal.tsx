@@ -46,14 +46,14 @@ export default function DirectoryListingModal({ listing, onClose }: DirectoryLis
       actions={
         <button
           onClick={handleShare}
-          className="w-10 h-10 md:w-12 md:h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors border border-white/10 backdrop-blur-md"
+          className="w-10 h-10 md:w-12 md:h-12 bg-foreground/[0.04] hover:bg-foreground/[0.08] rounded-full flex items-center justify-center transition-colors border border-line backdrop-blur-md"
           aria-label="Share"
         >
           <Share2 size={18} />
         </button>
       }
       footer={
-        <div className="p-5 md:p-8 bg-black/20">
+        <div className="p-5 md:p-8 bg-foreground/[0.04]">
           <div className="flex flex-wrap items-center gap-3">
             {listing.website && (
               <a href={listing.website} target="_blank" rel="noopener noreferrer"
@@ -63,19 +63,19 @@ export default function DirectoryListingModal({ listing, onClose }: DirectoryLis
             )}
             {listing.portfolio_url && (
               <a href={listing.portfolio_url} target="_blank" rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-foreground font-semibold py-3 px-6 rounded-2xl transition-all border border-white/10 text-sm">
+                className="inline-flex items-center gap-2 bg-foreground/[0.04] hover:bg-foreground/[0.08] text-foreground font-semibold py-3 px-6 rounded-2xl transition-all border border-line text-sm">
                 <Film size={16} /> Portfolio <ExternalLink size={14} />
               </a>
             )}
             {listing.email && (
               <a href={`mailto:${listing.email}`}
-                className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-foreground font-medium py-3 px-5 rounded-2xl transition-all border border-white/10 text-sm">
+                className="inline-flex items-center gap-2 bg-foreground/[0.04] hover:bg-foreground/[0.08] text-foreground font-medium py-3 px-5 rounded-2xl transition-all border border-line text-sm">
                 <Mail size={16} /> Email
               </a>
             )}
             {listing.phone && (
               <a href={`tel:${listing.phone}`}
-                className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-foreground font-medium py-3 px-5 rounded-2xl transition-all border border-white/10 text-sm">
+                className="inline-flex items-center gap-2 bg-foreground/[0.04] hover:bg-foreground/[0.08] text-foreground font-medium py-3 px-5 rounded-2xl transition-all border border-line text-sm">
                 <Phone size={16} /> Call
               </a>
             )}
@@ -85,14 +85,14 @@ export default function DirectoryListingModal({ listing, onClose }: DirectoryLis
       }
     >
               {/* Header — 'rich profile' masthead variant: gradient wash is intentional */}
-              <div className="relative p-6 md:p-10 pb-5 md:pb-6 border-b border-white/10 bg-gradient-to-b from-primary/10 to-transparent">
+              <div className="relative p-6 md:p-10 pb-5 md:pb-6 border-b border-line bg-gradient-to-b from-primary/10 to-transparent">
                 {/* Type + Category badges */}
                 <div className="flex flex-wrap gap-2 mb-3 md:mb-4">
                   <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg font-semibold text-xs uppercase tracking-wider border ${dirType.bg} ${dirType.color}`}>
                     <DirIcon size={14} />
                     {dirType.label}
                   </span>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium text-xs border bg-white/5 border-white/10 text-foreground/60">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium text-xs border bg-foreground/[0.04] border-line text-foreground/60">
                     {listing.category}
                   </span>
                   {listing.verified && (
@@ -110,11 +110,11 @@ export default function DirectoryListingModal({ listing, onClose }: DirectoryLis
                 {/* Name + Logo */}
                 <div className="flex items-center gap-4 pr-24 md:pr-28 mb-3 md:mb-4">
                   {listing.logo_url ? (
-                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl border border-white/10 bg-white/5 overflow-hidden flex-shrink-0 shadow-lg">
+                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl border border-line bg-foreground/[0.04] overflow-hidden flex-shrink-0 shadow-lg">
                       <img src={listing.logo_url} alt={listing.name} className="w-full h-full object-cover" />
                     </div>
                   ) : (
-                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl border border-white/10 bg-white/5 flex items-center justify-center flex-shrink-0">
+                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl border border-line bg-foreground/[0.04] flex items-center justify-center flex-shrink-0">
                       <DirIcon size={28} className={`${dirType.color} opacity-40`} />
                     </div>
                   )}
@@ -287,7 +287,7 @@ export default function DirectoryListingModal({ listing, onClose }: DirectoryLis
 
                 {/* Bio (crew) */}
                 {listing.bio && (
-                  <section className="md:col-span-2 bg-gradient-to-br from-white/5 to-white/[0.02] p-5 md:p-6 rounded-2xl border border-white/10">
+                  <section className="md:col-span-2 bg-gradient-to-br from-foreground/[0.04] to-foreground/[0.02] p-5 md:p-6 rounded-2xl border border-line">
                     <h3 className="flex items-center gap-2.5 text-base font-bold font-heading mb-3 text-foreground/80">
                       <Users size={20} /> Bio
                     </h3>

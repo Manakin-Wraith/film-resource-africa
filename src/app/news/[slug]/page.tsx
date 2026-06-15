@@ -139,7 +139,7 @@ export default async function NewsArticlePage({ params }: { params: Promise<{ sl
 
         {/* Hero image */}
         {article.image_url ? (
-          <div className="relative w-full h-56 md:h-[420px] overflow-hidden rounded-xl mb-8 border border-white/8">
+          <div className="relative w-full h-56 md:h-[420px] overflow-hidden rounded-xl mb-8 border border-line">
             <Image
               src={article.image_url}
               alt={article.title}
@@ -150,13 +150,13 @@ export default async function NewsArticlePage({ params }: { params: Promise<{ sl
             />
           </div>
         ) : (
-          <div className="rounded-xl mb-8 overflow-hidden border border-white/8">
+          <div className="rounded-xl mb-8 overflow-hidden border border-line">
             <NewsImageFallback category={article.category} title={article.title} className="h-40 md:h-56" />
           </div>
         )}
 
         {/* Article body — MarkdownBody is the single typography source (no prose wrapper) */}
-        <article className="mb-10 border-t border-white/8 pt-8">
+        <article className="mb-10 border-t border-line pt-8">
           <div className="max-w-none">
             {article.content && (
               <MarkdownBody content={decodeEntities(article.content)} />
@@ -165,7 +165,7 @@ export default async function NewsArticlePage({ params }: { params: Promise<{ sl
 
           {/* Source attribution */}
           {article.url && (
-            <div className="mt-8 pt-5 border-t border-white/6">
+            <div className="mt-8 pt-5 border-t border-line">
               <p className="text-[12px]" style={{ color: 'var(--foreground-tertiary)' }}>
                 Source:{' '}
                 <TrackOutboundLink
@@ -206,7 +206,7 @@ export default async function NewsArticlePage({ params }: { params: Promise<{ sl
                 <Link
                   key={opp.id}
                   href={`/opportunities/${opp.slug}`}
-                  className="p-4 rounded-xl border border-white/8 hover:border-white/16 hover:-translate-y-0.5 transition-all group"
+                  className="p-4 rounded-xl border border-line hover:border-line-mid hover:-translate-y-0.5 transition-all group"
                   style={{ background: 'var(--surface)' }}
                 >
                   <h3 className="text-[13px] font-bold font-heading text-foreground group-hover:text-primary transition-colors leading-snug mb-2">
@@ -238,7 +238,7 @@ export default async function NewsArticlePage({ params }: { params: Promise<{ sl
                   <Link
                     key={item.id}
                     href={item.slug ? `/news/${item.slug}` : '#'}
-                    className="p-4 rounded-xl border border-white/8 hover:border-white/16 hover:-translate-y-0.5 transition-all group"
+                    className="p-4 rounded-xl border border-line hover:border-line-mid hover:-translate-y-0.5 transition-all group"
                     style={{ background: 'var(--surface)' }}
                   >
                     <div className="flex items-center gap-1.5 mb-2">

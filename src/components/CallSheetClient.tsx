@@ -73,7 +73,7 @@ export default function CallSheetClient({ initialData }: { initialData: CallShee
             );
           })}
 
-          <div className="w-[1px] h-8 bg-white/15 mx-1 hidden md:flex self-center flex-shrink-0"></div>
+          <div className="w-[1px] h-8 bg-foreground/[0.08] mx-1 hidden md:flex self-center flex-shrink-0"></div>
 
           <Link
             href="/call-sheet/submit"
@@ -112,7 +112,7 @@ export default function CallSheetClient({ initialData }: { initialData: CallShee
                 transition={{ duration: 0.3, type: 'spring', bounce: 0.3 }}
                 key={listing.id}
                 onClick={() => setSelectedListing(listing)}
-                className={`rounded-xl p-5 flex flex-col hover:border-white/[0.16] transition-all group cursor-pointer border border-white/[0.08] overflow-hidden border-l-[3px] ${catStyle.borderLeft}`}
+                className={`rounded-xl p-5 flex flex-col hover:border-line-mid transition-all group cursor-pointer border border-line overflow-hidden border-l-[3px] ${catStyle.borderLeft}`}
                 style={{ background: 'var(--surface)' }}
               >
                 {/* Badges row */}
@@ -129,7 +129,7 @@ export default function CallSheetClient({ initialData }: { initialData: CallShee
                       </span>
                     )}
                   </div>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border bg-white/5 border-white/10 text-foreground/50 flex-shrink-0">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border bg-foreground/[0.04] border-line text-foreground/50 flex-shrink-0">
                     <Clock size={12} />
                     {stageLabel}
                   </span>
@@ -161,7 +161,7 @@ export default function CallSheetClient({ initialData }: { initialData: CallShee
                 </p>
 
                 {/* Footer: Compensation + arrow */}
-                <div className="mt-auto relative z-10 flex items-center justify-between pt-4 border-t border-white/10">
+                <div className="mt-auto relative z-10 flex items-center justify-between pt-4 border-t border-line">
                   <div className="flex items-center gap-2">
                     <span className="flex items-center gap-1.5 text-callsheet text-sm font-bold">
                       <DollarSign size={14} />
@@ -179,7 +179,7 @@ export default function CallSheetClient({ initialData }: { initialData: CallShee
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="col-span-full text-center py-20 rounded-xl border border-white/[0.06]"
+              className="col-span-full text-center py-20 rounded-xl border border-line"
               style={{ background: 'var(--surface)' }}
             >
               <Search className="w-12 h-12 text-teal-500/50 mx-auto mb-4" />
