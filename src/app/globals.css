@@ -85,13 +85,10 @@ body {
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background-image:
-    radial-gradient(125% 95% at 50% 0%, rgba(9, 9, 11, 0.35) 0%, rgba(9, 9, 11, 0.78) 55%, rgba(9, 9, 11, 0.98) 100%),
-    linear-gradient(180deg, rgba(9, 9, 11, 0.68) 0%, rgba(9, 9, 11, var(--bg-scrim-strength)) 45%, rgba(9, 9, 11, 0.99) 100%),
-    url('/bg/site-cinematic.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  background:
+    radial-gradient(120% 80% at 50% -10%, rgba(217, 142, 43, 0.12) 0%, rgba(247, 243, 234, 0) 55%),
+    radial-gradient(90% 60% at 85% 110%, rgba(207, 67, 39, 0.05) 0%, rgba(247, 243, 234, 0) 60%),
+    var(--background);
 }
 
 /* ── Section anatomy ───────────────────────────────────────────────── */
@@ -189,11 +186,11 @@ body {
   border-radius: 10px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(31, 24, 19, 0.2);
   border-radius: 10px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.4);
+  background: rgba(31, 24, 19, 0.35);
 }
 
 /* ── Film grain (static — no animation) ───────────────────────────── */
@@ -202,7 +199,7 @@ body {
   content: "";
   pointer-events: none;
   z-index: var(--z-grain);
-  opacity: 0.15;
+  opacity: 0.05;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
   background-repeat: repeat;
   background-size: 256px 256px;

@@ -49,8 +49,6 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${fraunces.variable} ${jetbrainsMono.variable} font-sans antialiased text-foreground bg-background film-grain`}>
-        {/* React hoists this preload to <head> for fast first paint of the bg image */}
-        <link rel="preload" as="image" href="/bg/site-cinematic.jpg" />
         <div className="site-bg" aria-hidden="true" />
         <SiteNav />
         <div className="relative z-10 flex flex-col min-h-screen pt-(--header-h) pb-(--tabbar-h) md:pb-0">
