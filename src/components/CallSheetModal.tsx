@@ -48,12 +48,12 @@ export default function CallSheetModal({ listing, onClose }: CallSheetModalProps
               <CatIcon size={12} />
               {catStyle.label}
             </span>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border bg-white/5 border-white/10 text-foreground/60">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border bg-foreground/[0.04] border-line text-foreground/60">
               <Clock size={12} />
               {stageLabel}
             </span>
             {listing.mentorship_included && (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border bg-amber-500/10 border-amber-500/20 text-amber-400">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border bg-amber-500/10 border-amber-500/20 text-amber-700">
                 <Sparkles size={12} />
                 Mentorship Included
               </span>
@@ -69,14 +69,14 @@ export default function CallSheetModal({ listing, onClose }: CallSheetModalProps
 
         {/* Meta grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-          <div className="bg-white/5 rounded-xl p-4 border border-white/5">
+          <div className="bg-foreground/[0.04] rounded-xl p-4 border border-line">
             <div className="flex items-center gap-2 text-xs text-foreground/50 uppercase font-bold tracking-wider mb-1">
               <Building2 size={12} />
               Production Company
             </div>
             <p className="text-foreground/90 font-medium">{listing.production_company}</p>
           </div>
-          <div className="bg-white/5 rounded-xl p-4 border border-white/5">
+          <div className="bg-foreground/[0.04] rounded-xl p-4 border border-line">
             <div className="flex items-center gap-2 text-xs text-foreground/50 uppercase font-bold tracking-wider mb-1">
               <User size={12} />
               Producer
@@ -84,14 +84,14 @@ export default function CallSheetModal({ listing, onClose }: CallSheetModalProps
             <p className="text-foreground/90 font-medium">{listing.producer_name}</p>
           </div>
           <div className="bg-teal-500/10 rounded-xl p-4 border border-teal-500/10">
-            <div className="flex items-center gap-2 text-xs text-teal-400/70 uppercase font-bold tracking-wider mb-1">
+            <div className="flex items-center gap-2 text-xs text-teal-700/70 uppercase font-bold tracking-wider mb-1">
               <DollarSign size={12} />
               Compensation
             </div>
             <p className="text-teal-300 font-bold">{listing.compensation}</p>
-            <p className="text-teal-400/60 text-xs mt-0.5">{compTypeLabel}</p>
+            <p className="text-teal-700/60 text-xs mt-0.5">{compTypeLabel}</p>
           </div>
-          <div className="bg-white/5 rounded-xl p-4 border border-white/5">
+          <div className="bg-foreground/[0.04] rounded-xl p-4 border border-line">
             <div className="flex items-center gap-2 text-xs text-foreground/50 uppercase font-bold tracking-wider mb-1">
               <MapPin size={12} />
               Location
@@ -99,7 +99,7 @@ export default function CallSheetModal({ listing, onClose }: CallSheetModalProps
             <p className="text-foreground/90 font-medium">{listing.location}</p>
           </div>
           {listing.start_date && (
-            <div className="bg-white/5 rounded-xl p-4 border border-white/5">
+            <div className="bg-foreground/[0.04] rounded-xl p-4 border border-line">
               <div className="flex items-center gap-2 text-xs text-foreground/50 uppercase font-bold tracking-wider mb-1">
                 <Calendar size={12} />
                 Start Date
@@ -108,7 +108,7 @@ export default function CallSheetModal({ listing, onClose }: CallSheetModalProps
             </div>
           )}
           {listing.duration && (
-            <div className="bg-white/5 rounded-xl p-4 border border-white/5">
+            <div className="bg-foreground/[0.04] rounded-xl p-4 border border-line">
               <div className="flex items-center gap-2 text-xs text-foreground/50 uppercase font-bold tracking-wider mb-1">
                 <Clock size={12} />
                 Duration

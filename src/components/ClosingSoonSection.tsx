@@ -6,7 +6,7 @@ import { ExternalLink, Calendar } from 'lucide-react';
 import type { Opportunity } from '@/app/actions';
 import { getCategoryStyle } from '@/lib/categoryConfig';
 import { formatDeadline } from '@/lib/dateUtils';
-import { decodeHtmlEntities } from '@/lib/textUtils';
+import { decodeHtmlEntities, getApplyUrl } from '@/lib/textUtils';
 import { trackOpportunityClick } from '@/lib/analytics';
 import CardVisualHeader from './CardVisualHeader';
 
@@ -14,6 +14,7 @@ import CardVisualHeader from './CardVisualHeader';
 function FeaturedCard({ opp }: { opp: Opportunity }) {
   const deadline = opp.deadline_date ? formatDeadline(opp.deadline_date) : null;
   const href = `/opportunities/${opp.slug}`;
+  const applyUrl = getApplyUrl(opp['Apply:']);
   const track = () => trackOpportunityClick(opp.title, opp.category || '', 'Closing Soon Featured');
 
   return (
@@ -70,9 +71,9 @@ function FeaturedCard({ opp }: { opp: Opportunity }) {
 
         {/* CTA row — full-width on mobile */}
         <div className="relative z-20 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-          {opp['Apply:'] && (
+          {applyUrl && (
             <a
-              href={opp['Apply:']}
+              href={applyUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-white font-bold text-sm px-6 rounded-xl transition-all hover:-translate-y-0.5 min-h-[48px]"
@@ -83,7 +84,7 @@ function FeaturedCard({ opp }: { opp: Opportunity }) {
           <Link
             href={href}
             onClick={track}
-            className="flex items-center justify-center gap-2 border border-white/[0.16] hover:border-white/30 text-foreground/70 hover:text-foreground font-semibold text-sm px-6 rounded-xl transition-all min-h-[48px]"
+            className="flex items-center justify-center gap-2 border border-line-mid hover:border-line-strong text-foreground/70 hover:text-foreground font-semibold text-sm px-6 rounded-xl transition-all min-h-[48px]"
           >
             View Details
           </Link>
@@ -103,12 +104,12 @@ function CompactCard({ opp }: { opp: Opportunity }) {
     <Link
       href={`/opportunities/${opp.slug}`}
       onClick={() => trackOpportunityClick(opp.title, opp.category || '', 'Closing Soon Strip')}
-      className="block rounded-xl min-w-[260px] max-w-[300px] flex-shrink-0 snap-start border border-white/[0.08] hover:border-white/[0.16] hover:-translate-y-0.5 transition-all group overflow-hidden"
+      className="block rounded-xl min-w-[260px] max-w-[300px] flex-shrink-0 snap-start border border-line hover:border-line-mid hover:-translate-y-0.5 transition-all group overflow-hidden"
       style={{ background: 'var(--surface)' }}
     >
       {/* Mini visual header — logo or category fallback */}
       {opp.logo ? (
-        <div className={`h-14 flex items-center px-4 bg-gradient-to-br ${catStyle.headerGradient} border-b border-white/[0.05]`}>
+        <div className={`h-14 flex items-center px-4 bg-gradient-to-br ${catStyle.headerGradient} border-b border-line`}>
           <Image
             src={opp.logo}
             alt=""
@@ -118,7 +119,7 @@ function CompactCard({ opp }: { opp: Opportunity }) {
           />
         </div>
       ) : (
-        <div className={`h-10 flex items-center px-4 gap-2 bg-gradient-to-br ${catStyle.headerGradient} border-b border-white/[0.05]`}>
+        <div className={`h-10 flex items-center px-4 gap-2 bg-gradient-to-br ${catStyle.headerGradient} border-b border-line`}>
           <CatIcon size={14} className={catStyle.color} />
           <span className={`text-[10px] font-bold uppercase tracking-wider ${catStyle.color}`}>
             {catStyle.label}

@@ -43,10 +43,10 @@ export default function SubmitOpportunityForm({ memberName }: { memberName: stri
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="max-w-2xl mx-auto rounded-2xl p-12 text-center border border-white/[0.08] mt-20"
+          className="max-w-2xl mx-auto rounded-2xl p-12 text-center border border-line mt-20"
           style={{ background: 'var(--surface)' }}
         >
-          <div className="w-24 h-24 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mx-auto mb-8 border border-green-500/30">
+          <div className="w-24 h-24 bg-green-500/20 text-green-700 rounded-full flex items-center justify-center mx-auto mb-8 border border-green-500/30">
             <CheckCircle2 size={48} />
           </div>
           <h1 className="text-4xl font-bold font-heading text-foreground mb-6">Sent for review</h1>
@@ -56,7 +56,7 @@ export default function SubmitOpportunityForm({ memberName }: { memberName: stri
           </p>
           <Link
             href="/directory"
-            className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 px-8 py-4 rounded-2xl font-semibold transition-colors border border-white/10"
+            className="inline-flex items-center gap-2 bg-foreground/[0.04] hover:bg-foreground/[0.08] px-8 py-4 rounded-2xl font-semibold transition-colors border border-line"
           >
             <ArrowLeft size={20} />
             Back to Directory
@@ -81,7 +81,7 @@ export default function SubmitOpportunityForm({ memberName }: { memberName: stri
   ];
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-2xl p-6 md:p-12 mb-20 border border-white/[0.08]" style={{ background: 'var(--surface)' }}>
+    <form onSubmit={handleSubmit} className="rounded-2xl p-6 md:p-12 mb-20 border border-line" style={{ background: 'var(--surface)' }}>
       <p className="text-sm text-foreground/50 mb-8">Posting as <span className="font-semibold text-foreground">{memberName}</span></p>
 
       {/* Visibility control */}
@@ -97,7 +97,7 @@ export default function SubmitOpportunityForm({ memberName }: { memberName: stri
               key={val}
               onClick={() => setScope(val)}
               className={`text-left p-4 rounded-2xl border transition-all ${
-                scope === val ? 'border-primary/60 bg-primary/10' : 'border-white/[0.1] hover:border-white/20'
+                scope === val ? 'border-primary/60 bg-primary/10' : 'border-line hover:border-line-mid'
               }`}
             >
               <div className="flex items-center gap-2 font-semibold mb-1">
@@ -115,7 +115,7 @@ export default function SubmitOpportunityForm({ memberName }: { memberName: stri
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full bg-black/10 border border-white/10 hover:border-white/20 rounded-2xl px-5 py-4 focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-base"
+              className="w-full bg-foreground/[0.04] border border-line hover:border-line-mid rounded-2xl px-5 py-4 focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-base"
             >
               {directoryCategories.map((c) => (
                 <option key={c.key} value={c.key} style={{ background: 'var(--surface-raised)' }}>
@@ -128,8 +128,8 @@ export default function SubmitOpportunityForm({ memberName }: { memberName: stri
       </div>
 
       {/* Logo upload */}
-      <div className="mb-10 flex flex-col md:flex-row items-start md:items-center gap-6 bg-white/5 p-6 rounded-2xl border border-white/[0.08]">
-        <div className="w-24 h-24 bg-black/20 rounded-2xl border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-inner">
+      <div className="mb-10 flex flex-col md:flex-row items-start md:items-center gap-6 bg-foreground/[0.04] p-6 rounded-2xl border border-line">
+        <div className="w-24 h-24 bg-foreground/[0.04] rounded-2xl border border-line flex items-center justify-center overflow-hidden flex-shrink-0 shadow-inner">
           {formData.logo ? (
             <img src={formData.logo} className="w-full h-full object-contain" alt="Logo preview" />
           ) : (
@@ -152,7 +152,7 @@ export default function SubmitOpportunityForm({ memberName }: { memberName: stri
                 reader.readAsDataURL(file);
               }
             }}
-            className="mt-1 block w-full text-sm text-foreground/70 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-primary file:text-white hover:file:bg-blue-600 file:cursor-pointer file:transition-colors focus:outline-none"
+            className="mt-1 block w-full text-sm text-foreground/70 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-primary file:text-white hover:file:bg-primary-hover file:cursor-pointer file:transition-colors focus:outline-none"
           />
           <p className="text-sm opacity-60 mt-3 text-balance">Optional: a high-resolution, square logo for the organization or programme.</p>
         </div>
@@ -171,7 +171,7 @@ export default function SubmitOpportunityForm({ memberName }: { memberName: stri
                 placeholder={field.placeholder || ''}
                 value={(formData[field.key] as string) || ''}
                 onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
-                className="w-full bg-black/10 border border-white/10 hover:border-white/20 rounded-2xl px-5 py-4 focus:ring-2 focus:ring-primary focus:border-transparent min-h-[140px] transition-all text-base placeholder:opacity-40"
+                className="w-full bg-foreground/[0.04] border border-line hover:border-line-mid rounded-2xl px-5 py-4 focus:ring-2 focus:ring-primary focus:border-transparent min-h-[140px] transition-all text-base placeholder:opacity-40"
               />
             ) : (
               <input
@@ -180,7 +180,7 @@ export default function SubmitOpportunityForm({ memberName }: { memberName: stri
                 placeholder={field.placeholder || ''}
                 value={(formData[field.key] as string) || ''}
                 onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
-                className="w-full bg-black/10 border border-white/10 hover:border-white/20 rounded-2xl px-5 py-4 focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-base placeholder:opacity-40"
+                className="w-full bg-foreground/[0.04] border border-line hover:border-line-mid rounded-2xl px-5 py-4 focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-base placeholder:opacity-40"
               />
             )}
           </div>
@@ -193,7 +193,7 @@ export default function SubmitOpportunityForm({ memberName }: { memberName: stri
         </p>
       )}
 
-      <div className="mt-12 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-6">
+      <div className="mt-12 pt-8 border-t border-line flex flex-col sm:flex-row items-center justify-between gap-6">
         <p className="text-sm opacity-60 text-center sm:text-left flex items-start gap-2 max-w-md">
           <AlertCircle size={18} className="flex-shrink-0 mt-0.5 text-accent" />
           Member submissions are reviewed before publishing to keep the Directory accurate.

@@ -100,7 +100,7 @@ export default async function FilmOpportunitiesIndexPage() {
                   <Link
                     key={country.slug}
                     href={`/film-opportunities/${country.slug}`}
-                    className="rounded-xl p-4 border border-white/8 hover:border-white/16 transition-all group flex flex-col"
+                    className="rounded-xl p-4 border border-line hover:border-line-mid transition-all group flex flex-col"
                     style={{ background: 'var(--surface)' }}
                   >
                     {/* Flag + name */}

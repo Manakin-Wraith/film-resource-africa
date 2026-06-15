@@ -94,11 +94,11 @@ export default function RebateCalculatorPage() {
             {features.map(({ icon: Icon, title, description }) => (
               <div
                 key={title}
-                className="flex items-start gap-4 p-4 rounded-xl border border-white/[0.08]"
+                className="flex items-start gap-4 p-4 rounded-xl border border-line"
                 style={{ background: 'var(--surface)' }}
               >
                 <div className="w-9 h-9 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <Icon size={16} className="text-amber-400" />
+                  <Icon size={16} className="text-amber-700" />
                 </div>
                 <div>
                   <h3 className="text-[14px] font-bold text-foreground mb-1">{title}</h3>
@@ -111,7 +111,7 @@ export default function RebateCalculatorPage() {
 
         {/* Context note */}
         <section
-          className="rounded-xl p-5 border-l-4 border-amber-400/60 border border-white/[0.08]"
+          className="rounded-xl p-5 border-l-4 border-amber-400/60 border border-line"
           style={{ background: 'var(--surface)' }}
         >
           <p className="text-[13px] font-semibold text-foreground mb-2">A note on DTIC programme status</p>

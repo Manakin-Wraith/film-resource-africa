@@ -2,12 +2,12 @@ import { ExternalLink, Landmark, Banknote, Users, Award, Ticket, Link2 } from 'l
 import type { KeyResource, IndustryAssociation } from '@/lib/countries';
 
 const resourceTypeConfig: Record<string, { label: string; icon: typeof Landmark; color: string; bg: string }> = {
-  government: { label: 'Government', icon: Landmark, color: 'text-blue-400', bg: 'bg-blue-500/15 border-blue-500/25' },
-  fund: { label: 'Funding', icon: Banknote, color: 'text-green-400', bg: 'bg-green-500/15 border-green-500/25' },
-  guild: { label: 'Guild', icon: Users, color: 'text-purple-400', bg: 'bg-purple-500/15 border-purple-500/25' },
-  association: { label: 'Association', icon: Award, color: 'text-amber-400', bg: 'bg-amber-500/15 border-amber-500/25' },
-  festival_org: { label: 'Festival', icon: Ticket, color: 'text-pink-400', bg: 'bg-pink-500/15 border-pink-500/25' },
-  other: { label: 'Resource', icon: Link2, color: 'text-foreground/60', bg: 'bg-white/10 border-white/15' },
+  government: { label: 'Government', icon: Landmark, color: 'text-blue-700', bg: 'bg-blue-500/15 border-blue-500/25' },
+  fund: { label: 'Funding', icon: Banknote, color: 'text-green-700', bg: 'bg-green-500/15 border-green-500/25' },
+  guild: { label: 'Guild', icon: Users, color: 'text-purple-700', bg: 'bg-purple-500/15 border-purple-500/25' },
+  association: { label: 'Association', icon: Award, color: 'text-amber-700', bg: 'bg-amber-500/15 border-amber-500/25' },
+  festival_org: { label: 'Festival', icon: Ticket, color: 'text-pink-700', bg: 'bg-pink-500/15 border-pink-500/25' },
+  other: { label: 'Resource', icon: Link2, color: 'text-foreground/60', bg: 'bg-foreground/[0.04] border-line-mid' },
 };
 
 interface CountryResourcesProps {
@@ -23,7 +23,7 @@ export default function CountryResources({ resources, associations, countryName 
     <section id="resources-links" aria-label={`Key resources and industry bodies in ${countryName}`} className="space-y-6">
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-2xl bg-amber-500/20 flex items-center justify-center border border-amber-500/20">
-          <Link2 size={20} className="text-amber-400" />
+          <Link2 size={20} className="text-amber-700" />
         </div>
         <div>
           <h2 className="text-2xl md:text-3xl font-bold font-heading">Key Resources</h2>
@@ -42,7 +42,7 @@ export default function CountryResources({ resources, associations, countryName 
             return (
               <div
                 key={resource.name}
-                className="rounded-xl p-5 border border-white/[0.08] hover:border-white/[0.16] transition-all group"
+                className="rounded-xl p-5 border border-line hover:border-line-mid transition-all group"
               style={{ background: 'var(--surface)' }}
               >
                 <div className="flex items-start justify-between gap-3 mb-2">
@@ -89,10 +89,10 @@ export default function CountryResources({ resources, associations, countryName 
             {associations.map((assoc) => (
               <div
                 key={assoc.name}
-                className="flex items-start gap-3 p-3 rounded-xl bg-white/5 border border-white/5 hover:border-white/10 transition-all"
+                className="flex items-start gap-3 p-3 rounded-xl bg-foreground/[0.04] border border-line hover:border-line-mid transition-all"
               >
                 <div className="w-8 h-8 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <Users size={14} className="text-purple-400" />
+                  <Users size={14} className="text-purple-700" />
                 </div>
                 <div className="min-w-0">
                   <p className="font-semibold text-sm leading-tight">

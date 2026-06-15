@@ -7,7 +7,7 @@ interface CountryStatsProps {
 
 export default function CountryStats({ country }: CountryStatsProps) {
   return (
-    <section id="resources" className="rounded-xl p-6 border border-white/[0.08]" style={{ background: 'var(--surface)' }}>
+    <section id="resources" className="rounded-xl p-6 border border-line" style={{ background: 'var(--surface)' }}>
       <h2 className="text-2xl font-bold font-heading mb-6">Industry at a Glance</h2>
 
       <div className="space-y-6">
@@ -21,7 +21,7 @@ export default function CountryStats({ country }: CountryStatsProps) {
               {country.major_studios.map((studio) => (
                 <span
                   key={studio}
-                  className="px-3 py-1.5 text-xs font-medium bg-white/5 border border-white/10 rounded-lg"
+                  className="px-3 py-1.5 text-xs font-medium bg-foreground/[0.04] border border-line rounded-lg"
                 >
                   {studio}
                 </span>
@@ -83,7 +83,7 @@ export default function CountryStats({ country }: CountryStatsProps) {
               {country.co_production_treaties.map((treaty) => (
                 <div
                   key={treaty.country}
-                  className="p-2.5 rounded-xl bg-white/5 border border-white/5"
+                  className="p-2.5 rounded-xl bg-foreground/[0.04] border border-line"
                 >
                   <div className="flex items-center justify-between mb-0.5">
                     <span className="text-xs font-semibold">{treaty.country}</span>

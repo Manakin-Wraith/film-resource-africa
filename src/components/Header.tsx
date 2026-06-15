@@ -104,6 +104,7 @@ export default function Header() {
 
           {/* Auth CTA — desktop only */}
           <div className="hidden md:flex items-center gap-2 flex-shrink-0">
+            {/* Assess Your Project — hidden for now
             <Link
               href="/assess"
               className={`flex items-center px-3.5 py-2 text-[13px] font-semibold rounded-lg transition-colors whitespace-nowrap ${
@@ -113,17 +114,18 @@ export default function Header() {
             >
               Assess Your Project
             </Link>
+            */}
             {member ? (
               /* Logged-in state */
               <div className="flex items-center gap-2">
                 <Link
                   href={member.username ? `/members/${member.username}` : '/members/onboarding'}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors hover:bg-white/[0.06]"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors hover:bg-foreground/[0.04]"
                 >
                   {member.avatar_url ? (
                     <img src={member.avatar_url} alt="" className="w-7 h-7 rounded-full object-cover border border-line-strong" />
                   ) : (
-                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold bg-primary/20 border border-primary/30 text-blue-300">
+                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold bg-primary/20 border border-primary/30 text-primary-text">
                       {firstName.charAt(0)}
                     </div>
                   )}
@@ -131,7 +133,7 @@ export default function Header() {
                 </Link>
                 <button
                   onClick={handleSignOut}
-                  className="text-[12px] px-3 py-1.5 rounded-lg transition-colors hover:bg-white/[0.06]"
+                  className="text-[12px] px-3 py-1.5 rounded-lg transition-colors hover:bg-foreground/[0.04]"
                   style={{ color: 'var(--foreground-tertiary)' }}
                 >
                   Sign out
@@ -141,7 +143,7 @@ export default function Header() {
               /* Logged-out state */
               <Link
                 href="/login"
-                className="flex items-center px-4 py-2 text-[13px] font-semibold border border-line-strong text-foreground hover:bg-white/[0.06] rounded-lg transition-all"
+                className="flex items-center px-4 py-2 text-[13px] font-semibold border border-line-strong text-foreground hover:bg-foreground/[0.04] rounded-lg transition-all"
               >
                 Member login
               </Link>
@@ -163,6 +165,7 @@ export default function Header() {
         <div className={`md:hidden transition-all duration-200 ${menuOpen ? 'max-h-[calc(100dvh-var(--header-h))] opacity-100 overflow-y-auto overscroll-contain' : 'max-h-0 opacity-0 overflow-hidden'}`}>
           {/* bottom padding clears the fixed mobile tab bar so the last item (login) stays reachable */}
           <div className="border-t border-line container mx-auto px-4 py-2 pb-[calc(var(--tabbar-h)+env(safe-area-inset-bottom)+0.5rem)]">
+            {/* Assess Your Project — hidden for now
             <Link
               href="/assess"
               onClick={() => setMenuOpen(false)}
@@ -171,6 +174,7 @@ export default function Header() {
             >
               Assess Your Project
             </Link>
+            */}
 
             {groups.map((group) =>
               group.children ? (
@@ -212,7 +216,7 @@ export default function Header() {
                 <Link
                   href={member.username ? `/members/${member.username}` : '/members/onboarding'}
                   onClick={() => setMenuOpen(false)}
-                  className="flex-1 flex items-center justify-center py-3.5 text-sm font-semibold border border-line-strong text-foreground hover:bg-white/[0.06] rounded-lg min-h-[48px]"
+                  className="flex-1 flex items-center justify-center py-3.5 text-sm font-semibold border border-line-strong text-foreground hover:bg-foreground/[0.04] rounded-lg min-h-[48px]"
                 >
                   My profile
                 </Link>
@@ -228,7 +232,7 @@ export default function Header() {
               <Link
                 href="/login"
                 onClick={() => setMenuOpen(false)}
-                className="flex items-center justify-center mt-3 mb-2 py-3.5 text-sm font-semibold border border-line-strong text-foreground hover:bg-white/[0.06] rounded-lg min-h-[48px] transition-all"
+                className="flex items-center justify-center mt-3 mb-2 py-3.5 text-sm font-semibold border border-line-strong text-foreground hover:bg-foreground/[0.04] rounded-lg min-h-[48px] transition-all"
               >
                 Member login
               </Link>
@@ -308,7 +312,7 @@ function NavDropdown({ group, active }: { group: NavGroup; active: boolean }) {
                   href={href}
                   role="menuitem"
                   onClick={() => setOpen(false)}
-                  className="block px-3 py-2 rounded-lg text-[13px] font-medium transition-colors hover:bg-white/[0.06] hover:text-foreground"
+                  className="block px-3 py-2 rounded-lg text-[13px] font-medium transition-colors hover:bg-foreground/[0.04] hover:text-foreground"
                   style={{ color: 'var(--foreground-secondary)' }}
                 >
                   {label}

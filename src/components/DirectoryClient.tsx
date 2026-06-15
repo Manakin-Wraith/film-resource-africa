@@ -72,7 +72,7 @@ export default function DirectoryClient({ initialData, counts = {} }: { initialD
 
   // Chip model: 'All' + the 7 public Directory categories
   const filterChips = [
-    { key: 'All', label: 'All', shortLabel: 'All', icon: LayoutGrid, color: 'text-foreground/40', filterActive: 'from-primary to-blue-600' },
+    { key: 'All', label: 'All', shortLabel: 'All', icon: LayoutGrid, color: 'text-foreground/40', filterActive: 'from-primary to-primary-hover' },
     ...directoryCategories.map((c) => ({
       key: c.key,
       label: c.label,
@@ -140,7 +140,7 @@ export default function DirectoryClient({ initialData, counts = {} }: { initialD
             />
           ))}
 
-          <div className="w-[1px] h-8 bg-white/15 mx-1 hidden md:flex self-center flex-shrink-0"></div>
+          <div className="w-[1px] h-8 bg-foreground/[0.15] mx-1 hidden md:flex self-center flex-shrink-0"></div>
 
           <Link
             href="/submit"
@@ -180,7 +180,7 @@ export default function DirectoryClient({ initialData, counts = {} }: { initialD
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.3, type: "spring", bounce: 0.3 }}
                 key={opp.id}
-                className={`rounded-xl flex flex-col hover:border-white/[0.16] transition-all duration-300 group border border-white/[0.08] overflow-hidden relative border-l-[3px] ${catStyle.borderLeft}`}
+                className={`rounded-xl flex flex-col hover:border-line-mid transition-all duration-300 group border border-line overflow-hidden relative`}
                 style={{ background: 'var(--surface)' }}
               >
                 <Link href={`/opportunities/${opp.slug}`} className="flex flex-col flex-grow">
@@ -201,7 +201,7 @@ export default function DirectoryClient({ initialData, counts = {} }: { initialD
                       {status.label}
                     </Badge>
                     {isNewListing(opp.created_at, opp.id) && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider border bg-gradient-to-r from-blue-500/20 to-purple-500/20 border-purple-500/30 text-purple-300 animate-pulse">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider border bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-purple-500/30 text-purple-700 animate-pulse">
                         <Sparkles size={10} />
                         NEW
                       </span>
@@ -213,8 +213,8 @@ export default function DirectoryClient({ initialData, counts = {} }: { initialD
                     const isValidDate = parsed && !isNaN(parsed.getTime()) && parsed.getFullYear() > 2000;
                     if (isValidDate) {
                       const dl = formatDeadline(raw!);
-                      const urgencyColor = dl.urgency === 'critical' ? 'text-red-400' : dl.urgency === 'warning' ? 'text-amber-400' : 'text-foreground/50';
-                      const urgencyBg = dl.urgency === 'critical' ? 'bg-red-500/10 border-red-500/20' : dl.urgency === 'warning' ? 'bg-amber-500/10 border-amber-500/20' : 'bg-white/5 border-white/10';
+                      const urgencyColor = dl.urgency === 'critical' ? 'text-urgent' : dl.urgency === 'warning' ? 'text-[color:var(--color-primary-text)]' : 'text-foreground/50';
+                      const urgencyBg = dl.urgency === 'critical' ? 'bg-red-500/10 border-red-500/20' : dl.urgency === 'warning' ? 'bg-amber-500/10 border-amber-500/20' : 'bg-foreground/[0.04] border-line';
                       return (
                         <span className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border ${urgencyBg} ${urgencyColor}`}>
                           <Clock size={12} />
@@ -236,7 +236,7 @@ export default function DirectoryClient({ initialData, counts = {} }: { initialD
                     {catStyle.label}
                   </span>
                   {isFree && (
-                    <span className="text-xs text-green-400 bg-green-500/10 border border-green-500/20 px-2.5 py-1 rounded-lg font-medium flex items-center gap-1">
+                    <span className="text-xs text-[color:var(--color-moss-text)] bg-green-500/10 border border-green-500/20 px-2.5 py-1 rounded-lg font-medium flex items-center gap-1">
                       <DollarSign size={10} /> Free
                     </span>
                   )}
@@ -253,7 +253,7 @@ export default function DirectoryClient({ initialData, counts = {} }: { initialD
                   </p>
                 )}
 
-                <div className="mt-auto relative z-10 flex items-center justify-between pt-4 border-t border-white/10">
+                <div className="mt-auto relative z-10 flex items-center justify-between pt-4 border-t border-line">
                   <div className="flex items-center gap-2 text-accent text-sm font-medium">
                     <Calendar size={14} />
                     <span className="truncate max-w-[200px]">{opp["Next Deadline"]?.substring(0, 40) || "Check website"}</span>
@@ -268,7 +268,7 @@ export default function DirectoryClient({ initialData, counts = {} }: { initialD
           {filteredData.length === 0 && (
             <motion.div 
               initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-              className="col-span-full text-center py-20 rounded-xl border border-white/[0.06]"
+              className="col-span-full text-center py-20 rounded-xl border border-line"
               style={{ background: 'var(--surface)' }}
             >
               <Search className="w-12 h-12 text-primary/50 mx-auto mb-4" />

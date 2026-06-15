@@ -132,3 +132,9 @@ The top nav shipped its simplification ahead of the reskin (spec:
 - This also delivered part of Phase A's subtraction goal early (fewer
   top-level items, clearer names) and removed the dead per-request
   `getHeaderStats()` fetch.
+- **2026-06-12 (later still): the "Assess Your Project" header CTA is hidden.**
+  Both instances in `src/components/Header.tsx` (desktop CTA slot and mobile
+  dropdown) are commented out, not deleted — restore by uncommenting. The
+  `/assess` page itself stays live and reachable by direct link. Phase B/C
+  mockups should NOT show this CTA in the header; if/when PRS returns to the
+  nav it will be a deliberate re-add, not a default.

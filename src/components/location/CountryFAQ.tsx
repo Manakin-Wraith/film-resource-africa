@@ -34,7 +34,7 @@ export default function CountryFAQ({ countryName, faqs }: CountryFAQProps) {
         {faqs.map((faq, index) => (
           <details
             key={index}
-            className="rounded-xl border border-white/[0.08] group"
+            className="rounded-xl border border-line group"
             style={{ background: 'var(--surface)' }}
             {...(index === 0 ? { open: true } : {})}
           >
@@ -44,7 +44,7 @@ export default function CountryFAQ({ countryName, faqs }: CountryFAQProps) {
                 +
               </span>
             </summary>
-            <div className="px-6 pb-5 text-foreground/60 leading-relaxed text-sm border-t border-white/5 pt-4">
+            <div className="px-6 pb-5 text-foreground/60 leading-relaxed text-sm border-t border-line pt-4">
               {faq.answer}
             </div>
           </details>

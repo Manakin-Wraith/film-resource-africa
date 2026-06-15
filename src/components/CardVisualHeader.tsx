@@ -67,7 +67,7 @@ export default function CardVisualHeader({ logo, ogImage, category, title, geoSc
         </div>
         {/* Category pill in bottom-right corner */}
         <div className="absolute bottom-2.5 right-3">
-          <span className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md bg-black/50 backdrop-blur-md border border-white/10 ${catStyle.color}`}>
+          <span className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md bg-black/50 backdrop-blur-md border border-white/10 text-white/85`}>
             <CatIcon size={10} />
             {catStyle.label}
           </span>

@@ -47,7 +47,7 @@ export default async function Home() {
         {/* ── Masthead ────────────────────────────────────────────── */}
         <header className="pb-10 md:pb-14">
           {/* Top rule + rubric */}
-          <div className="border-t border-white/16 pt-4 flex items-center justify-between mb-3">
+          <div className="border-t border-line-mid pt-4 flex items-center justify-between mb-3">
             <span className="section-rubric mb-0">Film Resource Africa</span>
             <span className="section-rubric mb-0 hidden md:block">est. 2024</span>
           </div>

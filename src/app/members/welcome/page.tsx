@@ -13,7 +13,7 @@ export default function MembersWelcomePage() {
 
         <div className="flex justify-center">
           <div className="w-16 h-16 rounded-full bg-green-500/20 border border-green-500/30 flex items-center justify-center">
-            <CheckCircle2 size={32} className="text-green-400" />
+            <CheckCircle2 size={32} className="text-green-700" />
           </div>
         </div>
 
@@ -27,7 +27,7 @@ export default function MembersWelcomePage() {
         </div>
 
         <div
-          className="rounded-xl border border-white/[0.08] p-6 text-left space-y-4"
+          className="rounded-xl border border-line p-6 text-left space-y-4"
           style={{ background: 'var(--surface-raised)' }}
         >
           <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color: 'var(--foreground-tertiary)' }}>
@@ -54,13 +54,13 @@ export default function MembersWelcomePage() {
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link
             href="/"
-            className="flex items-center justify-center gap-2 px-6 py-3.5 bg-primary hover:bg-blue-600 text-white font-bold text-sm rounded-xl transition-colors"
+            className="flex items-center justify-center gap-2 px-6 py-3.5 bg-primary hover:bg-primary-hover text-white font-bold text-sm rounded-xl transition-colors"
           >
             Browse opportunities <ArrowRight size={15} />
           </Link>
           <Link
             href="/members"
-            className="flex items-center justify-center gap-2 px-6 py-3.5 font-semibold text-sm rounded-xl transition-colors border border-white/[0.12] hover:bg-white/[0.04]"
+            className="flex items-center justify-center gap-2 px-6 py-3.5 font-semibold text-sm rounded-xl transition-colors border border-line-mid hover:bg-foreground/[0.04]"
             style={{ color: 'var(--foreground-secondary)' }}
           >
             Back to Members

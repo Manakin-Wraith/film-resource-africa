@@ -71,7 +71,7 @@ function LoginForm() {
         </div>
 
         {/* Form */}
-        <div className="rounded-2xl border border-white/[0.08] p-8 space-y-5"
+        <div className="rounded-2xl border border-line p-8 space-y-5"
           style={{ background: 'var(--surface)' }}>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>

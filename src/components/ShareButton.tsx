@@ -32,7 +32,7 @@ export default function ShareButton({ title, className = '' }: { title: string; 
   return (
     <button
       onClick={handleShare}
-      className={`w-10 h-10 md:w-12 md:h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors border border-white/10 backdrop-blur-md ${className}`}
+      className={`w-10 h-10 md:w-12 md:h-12 bg-foreground/[0.06] hover:bg-foreground/[0.10] rounded-full flex items-center justify-center transition-colors border border-line backdrop-blur-md ${className}`}
       aria-label="Share this opportunity"
     >
       {copied ? <Check size={18} className="text-success" /> : <Share2 size={18} />}

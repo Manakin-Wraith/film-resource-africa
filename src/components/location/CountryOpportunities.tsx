@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Calendar, ExternalLink, Filter, Search, BadgeCheck } from 'lucide-react';
 import type { Opportunity } from '@/app/actions';
 import { formatRelativeDate, formatLocalDateTime, formatDeadline } from '@/lib/dateUtils';
+import { getApplyUrl } from '@/lib/textUtils';
 
 interface CountryOpportunitiesProps {
   opportunities: Opportunity[];
@@ -32,7 +33,7 @@ export default function CountryOpportunities({ opportunities, countryName }: Cou
         <h2 className="text-2xl font-bold font-heading mb-6">
           Opportunities in {countryName}
         </h2>
-        <div className="rounded-xl p-10 border border-white/[0.08] text-center" style={{ background: 'var(--surface)' }}>
+        <div className="rounded-xl p-10 border border-line text-center" style={{ background: 'var(--surface)' }}>
           <p className="text-foreground/50 text-lg mb-4">
             We&apos;re building our {countryName} opportunities database.
           </p>
@@ -63,7 +64,7 @@ export default function CountryOpportunities({ opportunities, countryName }: Cou
             placeholder="Search opportunities..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-foreground/50"
+            className="w-full bg-foreground/[0.04] border border-line rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-foreground/50"
           />
         </div>
         {categories.length > 2 && (
@@ -72,7 +73,7 @@ export default function CountryOpportunities({ opportunities, countryName }: Cou
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="bg-white/5 border border-white/10 rounded-xl pl-10 pr-8 py-3 text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+              className="bg-foreground/[0.04] border border-line rounded-xl pl-10 pr-8 py-3 text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
             >
               {categories.map((cat) => (
                 <option key={cat} value={cat}>
@@ -89,11 +90,12 @@ export default function CountryOpportunities({ opportunities, countryName }: Cou
         {filtered.map((opp) => {
           const deadline = opp.deadline_date ? formatDeadline(opp.deadline_date) : null;
           const showCountdown = deadline && (deadline.urgency === 'critical' || deadline.urgency === 'warning');
+          const applyUrl = getApplyUrl(opp['Apply:']);
           return (
           <div
             key={opp.id}
             id={`opp-${opp.id}`}
-            className="rounded-xl p-5 border border-white/[0.08] hover:border-white/[0.16] transition-all group"
+            className="rounded-xl p-5 border border-line hover:border-line-mid transition-all group"
             style={{ background: 'var(--surface)' }}
           >
             <div className="flex items-start justify-between gap-3 mb-3">
@@ -104,21 +106,21 @@ export default function CountryOpportunities({ opportunities, countryName }: Cou
                 <img
                   src={opp.logo}
                   alt=""
-                  className="w-10 h-10 rounded-lg object-contain flex-shrink-0 bg-white/5"
+                  className="w-10 h-10 rounded-lg object-contain flex-shrink-0 bg-foreground/[0.04]"
                 />
               )}
             </div>
 
             <div className="flex items-center gap-2 flex-wrap mb-3">
               {opp.category && (
-                <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-foreground/50 bg-white/5 px-2 py-0.5 rounded-lg">
+                <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-foreground/50 bg-foreground/[0.04] px-2 py-0.5 rounded-lg">
                   {opp.category}
                 </span>
               )}
               {opp.last_verified_at && (
                 <span
                   title={`Source last re-checked ${formatLocalDateTime(opp.last_verified_at)}`}
-                  className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-teal-400 bg-teal-500/10 border border-teal-500/20 px-2 py-0.5 rounded-lg"
+                  className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-teal-700 bg-teal-500/10 border border-teal-500/20 px-2 py-0.5 rounded-lg"
                 >
                   <BadgeCheck size={10} />
                   Verified {formatRelativeDate(opp.last_verified_at)}
@@ -127,8 +129,8 @@ export default function CountryOpportunities({ opportunities, countryName }: Cou
               {showCountdown && deadline && (
                 <span className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-lg border ${
                   deadline.urgency === 'critical'
-                    ? 'text-red-400 bg-red-500/10 border-red-500/20'
-                    : 'text-amber-400 bg-amber-500/10 border-amber-500/20'
+                    ? 'text-red-700 bg-red-500/10 border-red-500/20'
+                    : 'text-amber-700 bg-amber-500/10 border-amber-500/20'
                 }`}>
                   <Calendar size={10} />
                   {deadline.countdownText}
@@ -143,19 +145,19 @@ export default function CountryOpportunities({ opportunities, countryName }: Cou
               </p>
             )}
 
-            <div className="flex items-center justify-between mt-auto pt-3 border-t border-white/5">
+            <div className="flex items-center justify-between mt-auto pt-3 border-t border-line">
               {opp['Next Deadline'] && (
                 <span className="flex items-center gap-1.5 text-xs text-foreground/50">
                   <Calendar size={12} />
                   {opp['Next Deadline']}
                 </span>
               )}
-              {opp['Apply:'] && (
+              {applyUrl && (
                 <a
-                  href={opp['Apply:']}
+                  href={applyUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-xs font-bold text-primary hover:text-blue-400 transition-colors"
+                  className="flex items-center gap-1 text-xs font-bold text-primary hover:text-primary-hover transition-colors"
                 >
                   Apply <ExternalLink size={12} />
                 </a>

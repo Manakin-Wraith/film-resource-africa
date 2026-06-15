@@ -34,7 +34,7 @@ export default async function CheckEmailPage({
           </p>
         </div>
 
-        <div className="rounded-xl border border-white/[0.08] p-5 text-left space-y-2"
+        <div className="rounded-xl border border-line p-5 text-left space-y-2"
           style={{ background: 'var(--surface)' }}>
           <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--foreground-tertiary)' }}>
             Can&apos;t find it?

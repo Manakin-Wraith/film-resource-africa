@@ -21,7 +21,7 @@ export default function JoinToContributeCTA({
   secondaryLabel?: string;
 }) {
   return (
-    <div className="max-w-xl mx-auto rounded-2xl p-10 md:p-12 text-center border border-white/[0.08] mt-10" style={{ background: 'var(--surface)' }}>
+    <div className="max-w-xl mx-auto rounded-2xl p-10 md:p-12 text-center border border-line mt-10" style={{ background: 'var(--surface)' }}>
       <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-7 border border-primary/30 bg-primary/10 text-primary">
         <Lock size={26} />
       </div>
@@ -36,7 +36,7 @@ export default function JoinToContributeCTA({
         </Link>
         <Link
           href={secondaryHref}
-          className="w-full sm:w-auto inline-flex items-center justify-center px-7 py-3.5 rounded-xl font-semibold border border-white/[0.2] hover:bg-white/[0.06] transition-colors text-foreground"
+          className="w-full sm:w-auto inline-flex items-center justify-center px-7 py-3.5 rounded-xl font-semibold border border-line-mid hover:bg-foreground/[0.04] transition-colors text-foreground"
         >
           {secondaryLabel}
         </Link>

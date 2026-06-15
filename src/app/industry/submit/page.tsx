@@ -101,7 +101,7 @@ export default function SubmitDirectoryListingPage() {
         <div className="relative z-10 container mx-auto px-4 py-12 pt-32 md:pt-28 max-w-2xl">
           <div className="text-center space-y-6 py-20">
             <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto border border-green-500/30">
-              <CheckCircle2 size={40} className="text-green-400" />
+              <CheckCircle2 size={40} className="text-green-700" />
             </div>
             <h1 className="text-3xl font-bold font-heading">Listing Submitted!</h1>
             <p className="text-foreground/60 max-w-md mx-auto">
@@ -111,7 +111,7 @@ export default function SubmitDirectoryListingPage() {
               <Link href="/industry" className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white font-semibold py-3 px-6 rounded-2xl transition-all shadow-lg text-sm">
                 View Directory
               </Link>
-              <button onClick={() => { setSuccess(false); setFormData({}); }} className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-foreground font-semibold py-3 px-6 rounded-2xl transition-all border border-white/10 text-sm">
+              <button onClick={() => { setSuccess(false); setFormData({}); }} className="inline-flex items-center gap-2 bg-foreground/[0.04] hover:bg-foreground/[0.08] text-foreground font-semibold py-3 px-6 rounded-2xl transition-all border border-line text-sm">
                 Submit Another
               </button>
             </div>
@@ -130,7 +130,7 @@ export default function SubmitDirectoryListingPage() {
     );
   }
 
-  const inputClass = "w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-foreground placeholder:text-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-sm";
+  const inputClass = "w-full bg-foreground/[0.04] border border-line rounded-xl px-4 py-3 text-foreground placeholder:text-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-sm";
   const labelClass = "block text-sm font-semibold text-foreground/80 mb-1.5";
 
   return (
@@ -158,7 +158,7 @@ export default function SubmitDirectoryListingPage() {
                     className={`flex flex-col items-center gap-2 p-4 rounded-xl border transition-all ${
                       directoryType === key
                         ? `bg-linear-to-br ${dt.bg} ${dt.border} ring-2 ring-primary/50`
-                        : 'bg-white/5 border-white/10 hover:bg-white/10'
+                        : 'bg-foreground/[0.04] border-line hover:bg-foreground/[0.08]'
                     }`}
                   >
                     <Icon size={24} className={directoryType === key ? dt.color : 'text-foreground/40'} />
@@ -242,7 +242,7 @@ export default function SubmitDirectoryListingPage() {
               <label className={labelClass}>Logo / Image</label>
               <div className="flex items-start gap-4">
                 {/* Preview */}
-                <div className="w-20 h-20 rounded-xl border border-white/10 bg-white/5 flex items-center justify-center overflow-hidden shrink-0">
+                <div className="w-20 h-20 rounded-xl border border-line bg-foreground/[0.04] flex items-center justify-center overflow-hidden shrink-0">
                   {logoPreview ? (
                     <img src={logoPreview} alt="Logo preview" className="w-full h-full object-cover" />
                   ) : (
@@ -271,7 +271,7 @@ export default function SubmitDirectoryListingPage() {
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all text-sm font-medium text-foreground/70 hover:text-foreground"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-foreground/[0.04] hover:bg-foreground/[0.08] border border-line transition-all text-sm font-medium text-foreground/70 hover:text-foreground"
                   >
                     <Upload size={16} />
                     {logoFile ? 'Change Image' : 'Upload Image'}
@@ -282,7 +282,7 @@ export default function SubmitDirectoryListingPage() {
                       <button
                         type="button"
                         onClick={() => { setLogoFile(null); setLogoPreview(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}
-                        className="text-foreground/50 hover:text-red-400 transition-colors"
+                        className="text-foreground/50 hover:text-red-700 transition-colors"
                       >
                         <X size={14} />
                       </button>
@@ -296,8 +296,8 @@ export default function SubmitDirectoryListingPage() {
 
           {/* Type-specific fields */}
           {directoryType === 'company' && (
-            <div className="space-y-5 border-t border-white/10 pt-8">
-              <h3 className="text-lg font-bold font-heading text-blue-400">Company Details</h3>
+            <div className="space-y-5 border-t border-line pt-8">
+              <h3 className="text-lg font-bold font-heading text-blue-700">Company Details</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                   <label className={labelClass}>Speciality</label>
@@ -325,8 +325,8 @@ export default function SubmitDirectoryListingPage() {
           )}
 
           {directoryType === 'crew' && (
-            <div className="space-y-5 border-t border-white/10 pt-8">
-              <h3 className="text-lg font-bold font-heading text-green-400">Crew Profile</h3>
+            <div className="space-y-5 border-t border-line pt-8">
+              <h3 className="text-lg font-bold font-heading text-green-700">Crew Profile</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                   <label className={labelClass}>Primary Role *</label>
@@ -366,8 +366,8 @@ export default function SubmitDirectoryListingPage() {
           )}
 
           {directoryType === 'service' && (
-            <div className="space-y-5 border-t border-white/10 pt-8">
-              <h3 className="text-lg font-bold font-heading text-purple-400">Service Details</h3>
+            <div className="space-y-5 border-t border-line pt-8">
+              <h3 className="text-lg font-bold font-heading text-purple-700">Service Details</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                   <label className={labelClass}>Service Type</label>
@@ -387,8 +387,8 @@ export default function SubmitDirectoryListingPage() {
           )}
 
           {directoryType === 'agency' && (
-            <div className="space-y-5 border-t border-white/10 pt-8">
-              <h3 className="text-lg font-bold font-heading text-pink-400">Agency Details</h3>
+            <div className="space-y-5 border-t border-line pt-8">
+              <h3 className="text-lg font-bold font-heading text-pink-700">Agency Details</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                   <label className={labelClass}>Speciality</label>
@@ -407,8 +407,8 @@ export default function SubmitDirectoryListingPage() {
           )}
 
           {directoryType === 'training' && (
-            <div className="space-y-5 border-t border-white/10 pt-8">
-              <h3 className="text-lg font-bold font-heading text-amber-400">Training Details</h3>
+            <div className="space-y-5 border-t border-line pt-8">
+              <h3 className="text-lg font-bold font-heading text-amber-700">Training Details</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                   <label className={labelClass}>Program Type</label>
@@ -442,13 +442,13 @@ export default function SubmitDirectoryListingPage() {
           )}
 
           {/* Submitter email */}
-          <div className="border-t border-white/10 pt-8">
+          <div className="border-t border-line pt-8">
             <label className={labelClass}>Your Email (for updates on your listing)</label>
             <input type="email" value={formData.submitted_by_email || ''} onChange={(e) => updateField('submitted_by_email', e.target.value)} className={inputClass} placeholder="your@email.com" />
           </div>
 
           {error && (
-            <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-400 text-sm">
+            <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-700 text-sm">
               {error}
             </div>
           )}

@@ -231,7 +231,7 @@ export default async function CountryPage({ params }: PageProps) {
             />
 
             {/* CTA to main directory */}
-            <div className="rounded-xl p-6 border border-white/8 text-center" style={{ background: 'var(--surface)' }}>
+            <div className="rounded-xl p-6 border border-line text-center" style={{ background: 'var(--surface)' }}>
               <p className="text-sm mb-4" style={{ color: 'var(--foreground-secondary)' }}>
                 Looking for opportunities beyond {countryData.name}?
               </p>
@@ -262,7 +262,7 @@ export default async function CountryPage({ params }: PageProps) {
             />
 
             {/* Newsletter signup */}
-            <div className="rounded-xl p-5 border border-white/8" style={{ background: 'var(--surface)' }}>
+            <div className="rounded-xl p-5 border border-line" style={{ background: 'var(--surface)' }}>
               <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--foreground-tertiary)' }}>Stay Updated</p>
               <h3 className="text-[15px] font-bold font-heading mb-1">
                 Get {countryData.name} Updates
@@ -274,11 +274,11 @@ export default async function CountryPage({ params }: PageProps) {
             </div>
 
             {/* Link to other countries */}
-            <div className="rounded-xl p-5 border border-white/8" style={{ background: 'var(--surface)' }}>
+            <div className="rounded-xl p-5 border border-line" style={{ background: 'var(--surface)' }}>
               <p className="text-[10px] font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--foreground-tertiary)' }}>Explore</p>
               <Link
                 href="/film-opportunities"
-                className="text-primary hover:text-blue-400 text-sm font-medium transition-colors"
+                className="text-primary hover:text-primary-hover text-sm font-medium transition-colors"
               >
                 Browse all countries →
               </Link>

@@ -56,14 +56,14 @@ export default function PartnersSection() {
 
   return (
     <>
-      <section className="rounded-3xl border border-white/[0.08] p-6 md:p-10 -mx-4 md:mx-0" style={{ background: 'var(--surface)' }}>
+      <section className="rounded-3xl border border-line p-6 md:p-10 -mx-4 md:mx-0" style={{ background: 'var(--surface)' }}>
         {/* Header */}
         <div className="text-center space-y-3 mb-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-foreground/60 uppercase tracking-widest">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-foreground/[0.04] border border-line text-xs font-medium text-foreground/60 uppercase tracking-widest">
             <Handshake size={14} className="text-primary" />
             Ecosystem
           </div>
-          <h2 className="text-2xl md:text-3xl font-bold font-heading text-white">
+          <h2 className="text-2xl md:text-3xl font-bold font-heading text-foreground">
             Our Partners & Industry Network
           </h2>
           <p className="text-foreground/50 text-sm max-w-lg mx-auto">
@@ -83,7 +83,7 @@ export default function PartnersSection() {
                 <div className={`w-10 h-10 rounded-xl border ${colors.bg} flex items-center justify-center mb-3`}>
                   <cat.icon size={20} className={colors.text} />
                 </div>
-                <h3 className="font-semibold text-white text-sm md:text-base">{cat.title}</h3>
+                <h3 className="font-semibold text-foreground text-sm md:text-base">{cat.title}</h3>
                 <p className="text-foreground/50 text-xs mt-1 leading-relaxed hidden md:block">{cat.description}</p>
                 {/* Coming soon badge */}
                 <div className="absolute top-3 right-3 text-[9px] font-bold uppercase tracking-widest text-foreground/20">
@@ -108,7 +108,7 @@ export default function PartnersSection() {
             <span className="text-foreground/50 text-xs">or</span>
             <button
               onClick={() => openModal('advertise')}
-              className="inline-flex items-center gap-2 text-foreground/50 hover:text-foreground/80 text-sm transition-colors underline underline-offset-4 decoration-white/10 hover:decoration-white/30"
+              className="inline-flex items-center gap-2 text-foreground/50 hover:text-foreground/80 text-sm transition-colors underline underline-offset-4 decoration-foreground/10 hover:decoration-foreground/30"
             >
               Advertise your services
             </button>

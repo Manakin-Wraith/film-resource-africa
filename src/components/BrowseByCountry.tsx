@@ -28,7 +28,7 @@ export default function BrowseByCountry({ countries }: BrowseByCountryProps) {
         </h2>
         <Link
           href="/film-opportunities"
-          className="text-sm font-semibold text-primary hover:text-blue-400 transition-colors flex items-center gap-1 ml-4 flex-shrink-0"
+          className="text-sm font-semibold text-primary hover:text-primary-hover transition-colors flex items-center gap-1 ml-4 flex-shrink-0"
         >
           View all <ArrowRight size={12} />
         </Link>
@@ -39,7 +39,7 @@ export default function BrowseByCountry({ countries }: BrowseByCountryProps) {
           <Link
             key={country.slug}
             href={`/film-opportunities/${country.slug}`}
-            className="flex items-center gap-3 p-4 rounded-xl border border-white/[0.08] hover:border-white/[0.16] hover:-translate-y-0.5 transition-all group"
+            className="flex items-center gap-3 p-4 rounded-xl border border-line hover:border-line-mid hover:-translate-y-0.5 transition-all group"
             style={{ background: 'var(--surface)' }}
           >
             <span className="text-2xl leading-none flex-shrink-0">
@@ -61,7 +61,7 @@ export default function BrowseByCountry({ countries }: BrowseByCountryProps) {
         <div className="mt-5 text-center">
           <Link
             href="/film-opportunities"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-blue-400 transition-colors"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary-hover transition-colors"
           >
             Explore all {countries.length} countries <ArrowRight size={13} />
           </Link>

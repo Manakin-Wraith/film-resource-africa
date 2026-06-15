@@ -45,7 +45,7 @@ export interface ColorwayClasses {
 
 export const colorways: Record<Colorway, ColorwayClasses> = {
   blue: {
-    text: 'text-blue-400',
+    text: 'text-blue-700',
     bg: 'bg-blue-500/10 border-blue-500/20',
     border: 'border-blue-500/30',
     borderLeft: 'border-l-blue-500',
@@ -55,7 +55,7 @@ export const colorways: Record<Colorway, ColorwayClasses> = {
     imageFallback: 'from-blue-900/60 to-blue-950/80',
   },
   green: {
-    text: 'text-green-400',
+    text: 'text-green-700',
     bg: 'bg-green-500/10 border-green-500/20',
     border: 'border-green-500/30',
     borderLeft: 'border-l-green-500',
@@ -65,7 +65,7 @@ export const colorways: Record<Colorway, ColorwayClasses> = {
     imageFallback: 'from-green-900/60 to-green-950/80',
   },
   emerald: {
-    text: 'text-emerald-400',
+    text: 'text-emerald-700',
     bg: 'bg-emerald-500/10 border-emerald-500/20',
     border: 'border-emerald-500/30',
     borderLeft: 'border-l-emerald-500',
@@ -75,7 +75,7 @@ export const colorways: Record<Colorway, ColorwayClasses> = {
     imageFallback: 'from-emerald-900/60 to-emerald-950/80',
   },
   teal: {
-    text: 'text-teal-400',
+    text: 'text-teal-700',
     bg: 'bg-teal-500/10 border-teal-500/20',
     border: 'border-teal-500/30',
     borderLeft: 'border-l-teal-500',
@@ -85,7 +85,7 @@ export const colorways: Record<Colorway, ColorwayClasses> = {
     imageFallback: 'from-teal-900/60 to-teal-950/80',
   },
   cyan: {
-    text: 'text-cyan-400',
+    text: 'text-cyan-700',
     bg: 'bg-cyan-500/10 border-cyan-500/20',
     border: 'border-cyan-500/30',
     borderLeft: 'border-l-cyan-500',
@@ -95,7 +95,7 @@ export const colorways: Record<Colorway, ColorwayClasses> = {
     imageFallback: 'from-cyan-900/60 to-cyan-950/80',
   },
   indigo: {
-    text: 'text-indigo-400',
+    text: 'text-indigo-700',
     bg: 'bg-indigo-500/10 border-indigo-500/20',
     border: 'border-indigo-500/30',
     borderLeft: 'border-l-indigo-500',
@@ -105,7 +105,7 @@ export const colorways: Record<Colorway, ColorwayClasses> = {
     imageFallback: 'from-indigo-900/60 to-indigo-950/80',
   },
   purple: {
-    text: 'text-purple-400',
+    text: 'text-purple-700',
     bg: 'bg-purple-500/10 border-purple-500/20',
     border: 'border-purple-500/30',
     borderLeft: 'border-l-purple-500',
@@ -115,7 +115,7 @@ export const colorways: Record<Colorway, ColorwayClasses> = {
     imageFallback: 'from-purple-900/60 to-purple-950/80',
   },
   pink: {
-    text: 'text-pink-400',
+    text: 'text-pink-700',
     bg: 'bg-pink-500/10 border-pink-500/20',
     border: 'border-pink-500/30',
     borderLeft: 'border-l-pink-500',
@@ -125,7 +125,7 @@ export const colorways: Record<Colorway, ColorwayClasses> = {
     imageFallback: 'from-pink-900/60 to-pink-950/80',
   },
   rose: {
-    text: 'text-rose-400',
+    text: 'text-rose-700',
     bg: 'bg-rose-500/10 border-rose-500/20',
     border: 'border-rose-500/30',
     borderLeft: 'border-l-rose-500',
@@ -135,7 +135,7 @@ export const colorways: Record<Colorway, ColorwayClasses> = {
     imageFallback: 'from-rose-900/60 to-rose-950/80',
   },
   amber: {
-    text: 'text-amber-400',
+    text: 'text-amber-700',
     bg: 'bg-amber-500/10 border-amber-500/20',
     border: 'border-amber-500/30',
     borderLeft: 'border-l-amber-500',
@@ -145,7 +145,7 @@ export const colorways: Record<Colorway, ColorwayClasses> = {
     imageFallback: 'from-amber-900/60 to-amber-950/80',
   },
   yellow: {
-    text: 'text-yellow-400',
+    text: 'text-yellow-700',
     bg: 'bg-yellow-500/10 border-yellow-500/20',
     border: 'border-yellow-500/30',
     borderLeft: 'border-l-yellow-500',
@@ -155,7 +155,7 @@ export const colorways: Record<Colorway, ColorwayClasses> = {
     imageFallback: 'from-yellow-900/60 to-yellow-950/80',
   },
   red: {
-    text: 'text-red-400',
+    text: 'text-red-700',
     bg: 'bg-red-500/10 border-red-500/20',
     border: 'border-red-500/30',
     borderLeft: 'border-l-red-500',
@@ -166,10 +166,10 @@ export const colorways: Record<Colorway, ColorwayClasses> = {
   },
   neutral: {
     text: 'text-foreground/40',
-    bg: 'bg-white/5 border-white/10',
+    bg: 'bg-foreground/[0.04] border-line',
     border: 'border-white/10',
     borderLeft: 'border-l-white/20',
-    filterActive: 'from-primary to-blue-600',
+    filterActive: 'from-primary to-primary-hover',
     headerGradient: 'from-white/10 via-white/5 to-transparent',
     glow: 'group-hover:shadow-white/10',
     imageFallback: 'from-zinc-900/60 to-zinc-950/80',

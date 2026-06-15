@@ -45,7 +45,7 @@ export default function ContactModal({ isOpen, onClose, inquiryType = 'general',
       <div className="p-8 md:p-10">
         {success ? (
           <div className="py-12 text-center space-y-6">
-            <div className="w-20 h-20 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mx-auto border border-green-500/20">
+            <div className="w-20 h-20 bg-green-500/20 text-green-700 rounded-full flex items-center justify-center mx-auto border border-green-500/20">
               <CheckCircle2 size={40} />
             </div>
             <div className="space-y-2">

@@ -16,7 +16,7 @@ function NewWaveRow({ opp }: { opp: Opportunity }) {
     <Link
       href={`/opportunities/${opp.slug}`}
       onClick={() => trackOpportunityClick(opp.title, opp.category || '', 'New Wave')}
-      className="flex items-center gap-4 py-4 border-b border-white/[0.06] last:border-0 group hover:bg-white/[0.02] -mx-4 px-4 md:-mx-0 md:px-0 transition-colors rounded-sm"
+      className="flex items-center gap-4 py-4 border-b border-line last:border-0 group hover:bg-foreground/[0.04] -mx-4 px-4 md:-mx-0 md:px-0 transition-colors rounded-sm"
     >
       {/* Category icon pip */}
       <div className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center bg-gradient-to-br ${catStyle.headerGradient}`}>

@@ -146,7 +146,7 @@ export default function MarkdownBody({ content }: { content: string }) {
           </a>
         ),
         hr: () => (
-          <hr className="border-white/10 my-8" />
+          <hr className="border-line my-8" />
         ),
         blockquote: ({ children }) => (
           <blockquote className="border-l-4 border-primary/40 pl-6 italic text-foreground/60 my-8 text-lg">

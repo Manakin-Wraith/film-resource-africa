@@ -27,9 +27,9 @@ export type ButtonProps = ButtonOwnProps &
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary: 'bg-primary hover:bg-primary-hover text-white font-semibold',
-  outline: 'border border-line-strong text-foreground font-semibold hover:bg-white/[0.06]',
-  ghost: 'text-foreground/60 font-medium hover:text-foreground hover:bg-white/[0.06]',
-  soft: 'bg-white/5 border border-line text-foreground font-medium hover:border-line-mid hover:bg-white/[0.08]',
+  outline: 'border border-line-strong text-foreground font-semibold hover:bg-foreground/[0.06]',
+  ghost: 'text-foreground/60 font-medium hover:text-foreground hover:bg-foreground/[0.06]',
+  soft: 'bg-foreground/[0.04] border border-line text-foreground font-medium hover:border-line-mid hover:bg-foreground/[0.08]',
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
@@ -66,7 +66,7 @@ export default function Button({
   const content = (
     <>
       {loading ? (
-        <span className="w-4 h-4 border-2 border-white/30 border-t-current rounded-full animate-spin" aria-hidden />
+        <span className="w-4 h-4 border-2 border-foreground/30 border-t-current rounded-full animate-spin" aria-hidden />
       ) : (
         LeftIcon && <LeftIcon size={iconSize} aria-hidden />
       )}

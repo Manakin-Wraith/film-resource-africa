@@ -18,7 +18,7 @@ export default function TermsPage() {
     <main className="min-h-screen">
       <div className="container mx-auto px-4 pt-10 pb-20 max-w-3xl">
         {/* Header */}
-        <div className="border-t border-white/16 pt-4 mb-3">
+        <div className="border-t border-line-mid pt-4 mb-3">
           <span className="section-rubric mb-0">Legal</span>
         </div>
         <div className="h-[2px] bg-accent mb-8" />
@@ -362,7 +362,7 @@ export default function TermsPage() {
           </section>
 
           {/* Footer nav */}
-          <div className="border-t border-white/[0.08] pt-8 flex flex-wrap gap-4 text-sm">
+          <div className="border-t border-line pt-8 flex flex-wrap gap-4 text-sm">
             <Link href="/privacy" className="text-accent hover:underline">Privacy Policy</Link>
             <Link href="/" className="hover:text-foreground" style={{ color: 'var(--foreground-tertiary)' }}>← Back to Home</Link>
           </div>

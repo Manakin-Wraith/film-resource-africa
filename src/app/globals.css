@@ -1,43 +1,50 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #3b82f6;
-  --color-accent: #f59e0b;
-  --color-urgent: #ef4444;
-  --color-success: #22c55e;
+  --color-primary: #d98e2b;
+  --color-accent: #d98e2b;
+  --color-urgent: #cf4327;
+  --color-success: #5b8a3a;
   /* Core neutrals — these activate the text-foreground/bg-surface utility
      families used throughout the app. Values mirror the legacy :root vars. */
-  --color-background: #09090b;
-  --color-foreground: #fafafa;
-  --color-surface: #111113;
-  --color-surface-raised: #18181b;
+  --color-background: #f7f3ea;
+  --color-foreground: #1f1813;
+  --color-surface: #fffdf8;
+  --color-surface-raised: #ffffff;
   /* Semantic accents */
-  --color-primary-hover: #2563eb;
-  --color-callsheet: #2dd4bf;       /* call-sheet surface accent (teal-400) */
-  --color-callsheet-deep: #0d9488;  /* call-sheet CTA (teal-600) */
-  --color-sponsor: #f59e0b;         /* sponsored placements (homepage) */
-  --color-sponsor-news: #c084fc;    /* sponsored placements (news grid) */
+  --color-primary-hover: #c47f22;
+  --color-callsheet: #0d9488;       /* call-sheet surface accent (teal-400) */
+  --color-callsheet-deep: #0f766e;  /* call-sheet CTA (teal-600) */
+  --color-sponsor: #b45309;         /* sponsored placements (homepage) */
+  --color-sponsor-news: #6a5cae;    /* sponsored placements (news grid) */
   /* Border / hairline scale — the only three line strengths in the app */
-  --color-line: rgba(255, 255, 255, 0.08);
-  --color-line-mid: rgba(255, 255, 255, 0.12);
-  --color-line-strong: rgba(255, 255, 255, 0.16);
+  --color-line: rgba(31, 24, 19, 0.12);
+  --color-line-mid: rgba(31, 24, 19, 0.16);
+  --color-line-strong: rgba(31, 24, 19, 0.22);
+  /* Light-theme additions: ochre/status as readable TEXT on paper (fills use --color-primary etc.) */
+  --color-primary-text: #8a5a12;
+  --color-ember-text: #b33a20;
+  --color-moss-text: #4a7330;
+  --color-indigo: #6a5cae;
+  --color-indigo-text: #5a4d99;
+  --color-sand: #f1e2c4;
   --font-sans: var(--font-inter);
-  --font-heading: var(--font-outfit);
+  --font-heading: var(--font-fraunces), Georgia, serif;
   --font-mono: var(--font-jetbrains), ui-monospace, monospace;
 }
 
 /* ── Colour tokens ─────────────────────────────────────────────────── */
 
 :root {
-  --background: #09090b;
-  --foreground: #fafafa;
-  --surface: #111113;
-  --surface-raised: #18181b;
+  --background: #f7f3ea;
+  --foreground: #1f1813;
+  --surface: #fffdf8;
+  --surface-raised: #ffffff;
   /* Legacy aliases — single source of truth is the @theme line scale */
   --border: var(--color-line);
   --border-strong: var(--color-line-strong);
-  --foreground-secondary: rgba(250, 250, 250, 0.55);
-  --foreground-tertiary: rgba(250, 250, 250, 0.48); /* 4.8:1 on bg (was 0.35 = 3.1:1, sub-AA) */
+  --foreground-secondary: rgba(31, 24, 19, 0.66);
+  --foreground-tertiary: rgba(31, 24, 19, 0.50); /* 4.8:1 on bg (was 0.35 = 3.1:1, sub-AA) */
   /* Site background scrim — higher = darker / image more hidden. One-knob tunable. */
   --bg-scrim-strength: 0.90;
   /* z scale: content < nav < modal < grain (grain intentionally overlays all) */
@@ -78,13 +85,10 @@ body {
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background-image:
-    radial-gradient(125% 95% at 50% 0%, rgba(9, 9, 11, 0.35) 0%, rgba(9, 9, 11, 0.78) 55%, rgba(9, 9, 11, 0.98) 100%),
-    linear-gradient(180deg, rgba(9, 9, 11, 0.68) 0%, rgba(9, 9, 11, var(--bg-scrim-strength)) 45%, rgba(9, 9, 11, 0.99) 100%),
-    url('/bg/site-cinematic.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  background:
+    radial-gradient(120% 80% at 50% -10%, rgba(217, 142, 43, 0.12) 0%, rgba(247, 243, 234, 0) 55%),
+    radial-gradient(90% 60% at 85% 110%, rgba(207, 67, 39, 0.05) 0%, rgba(247, 243, 234, 0) 60%),
+    var(--background);
 }
 
 /* ── Section anatomy ───────────────────────────────────────────────── */
@@ -182,11 +186,11 @@ body {
   border-radius: 10px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(31, 24, 19, 0.2);
   border-radius: 10px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.4);
+  background: rgba(31, 24, 19, 0.35);
 }
 
 /* ── Film grain (static — no animation) ───────────────────────────── */
@@ -195,7 +199,7 @@ body {
   content: "";
   pointer-events: none;
   z-index: var(--z-grain);
-  opacity: 0.15;
+  opacity: 0.05;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
   background-repeat: repeat;
   background-size: 256px 256px;
@@ -230,7 +234,7 @@ body {
   --red: var(--color-urgent);
   --green: var(--color-success);
   --green-bg: rgba(34, 197, 94, 0.12);
-  --font-display: var(--font-outfit), system-ui, sans-serif;
+  --font-display: var(--font-fraunces), Georgia, serif;
   --font-body: var(--font-inter), system-ui, sans-serif;
 }
 
@@ -260,8 +264,8 @@ body {
 .prs-btn-primary { background: var(--primary); color: white; font-weight: 700; border-radius: 12px; padding: 14px 24px; font-size: 14px; min-height: 48px; transition: background 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; letter-spacing: 0.01em; cursor: pointer; border: none; font-family: inherit; }
 .prs-btn-primary:hover { background: var(--primary-hover); }
 .prs-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-.prs-btn-ghost { border: 1px solid rgba(255,255,255,0.2); color: var(--foreground); border-radius: 10px; padding: 9px 16px; font-size: 13px; font-weight: 600; min-height: 44px; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; background: none; font-family: inherit; }
-.prs-btn-ghost:hover { background: rgba(255,255,255,0.06); border-color: var(--border-strong); }
+.prs-btn-ghost { border: 1px solid var(--color-line-strong); color: var(--foreground); border-radius: 10px; padding: 9px 16px; font-size: 13px; font-weight: 600; min-height: 44px; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; background: none; font-family: inherit; }
+.prs-btn-ghost:hover { background: rgba(31,24,19,0.05); border-color: var(--border-strong); }
 .prs-link-primary { color: var(--primary); font-weight: 600; font-size: 14px; text-decoration: none; transition: color 0.2s; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
 .prs-link-primary:hover { color: #60a5fa; }
 
@@ -275,7 +279,7 @@ body {
 .prs-prose-secondary { font-size: 15px; line-height: 1.7; color: var(--foreground-secondary); }
 
 /* Forms */
-.prs-root .form-input, .prs-root .form-textarea, .prs-root .form-select { width: 100%; background: var(--surface-raised); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 14px 16px; color: var(--foreground); font-size: 15px; line-height: 1.5; transition: border-color 0.2s; font-family: var(--font-body); }
+.prs-root .form-input, .prs-root .form-textarea, .prs-root .form-select { width: 100%; background: var(--surface-raised); border: 1px solid var(--color-line-mid); border-radius: 12px; padding: 14px 16px; color: var(--foreground); font-size: 15px; line-height: 1.5; transition: border-color 0.2s; font-family: var(--font-body); }
 .prs-root .form-input:focus, .prs-root .form-textarea:focus, .prs-root .form-select:focus { outline: none; border-color: rgba(59,130,246,0.55); }
 .prs-root .form-input:focus-visible, .prs-root .form-textarea:focus-visible, .prs-root .form-select:focus-visible { outline: 2px solid var(--primary); outline-offset: 0; }
 .prs-btn-primary:focus-visible, .prs-btn-ghost:focus-visible, .prs-root button:focus-visible, .prs-root a:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
@@ -288,10 +292,10 @@ body {
 .prs-root .form-helper { font-size: 13px; color: var(--foreground-tertiary); margin-top: -2px; margin-bottom: 10px; font-style: italic; line-height: 1.5; }
 .prs-root .form-field { margin-bottom: 28px; }
 .prs-root .checkbox-group, .prs-root .radio-group { display: flex; flex-direction: column; gap: 8px; }
-.prs-root .check-option { display: flex; align-items: flex-start; gap: 12px; background: var(--surface-raised); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px 14px; cursor: pointer; transition: all 0.15s; font-size: 14px; user-select: none; }
+.prs-root .check-option { display: flex; align-items: flex-start; gap: 12px; background: var(--surface-raised); border: 1px solid var(--color-line); border-radius: 10px; padding: 12px 14px; cursor: pointer; transition: all 0.15s; font-size: 14px; user-select: none; }
 .prs-root .check-option:hover { border-color: var(--border-strong); }
 .prs-root .check-option.checked { border-color: rgba(59,130,246,0.55); background: rgba(59,130,246,0.06); }
-.prs-root .check-box { width: 18px; height: 18px; border-radius: 5px; border: 1.5px solid rgba(255,255,255,0.25); flex-shrink: 0; display: flex; align-items: center; justify-content: center; margin-top: 1px; transition: all 0.15s; color: white; }
+.prs-root .check-box { width: 18px; height: 18px; border-radius: 5px; border: 1.5px solid var(--color-line-strong); flex-shrink: 0; display: flex; align-items: center; justify-content: center; margin-top: 1px; transition: all 0.15s; color: white; }
 .prs-root .check-option.checked .check-box { background: var(--primary); border-color: var(--primary); }
 .prs-root .check-radio { border-radius: 999px; }
 
@@ -397,7 +401,7 @@ body {
 .prs-root .journal { display: flex; flex-direction: column; gap: 0; background: var(--surface-raised); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
 .prs-root .journal-row { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
 .prs-root .journal-row:last-child { border-bottom: none; }
-.prs-root .journal-row:hover { background: rgba(255,255,255,0.025); }
+.prs-root .journal-row:hover { background: rgba(31,24,19,0.03); }
 .prs-root .journal-row.current { background: rgba(59,130,246,0.05); }
 .prs-root .journal-dot { width: 9px; height: 9px; border-radius: 999px; background: var(--foreground-quaternary); flex-shrink: 0; }
 .prs-root .journal-row.current .journal-dot { background: var(--primary); box-shadow: 0 0 0 4px rgba(59,130,246,0.18); }

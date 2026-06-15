@@ -64,7 +64,7 @@ function SecondaryNewsCard({ item }: { item: NewsItem }) {
   return (
     <Link
       href={href}
-      className="flex gap-3 p-4 rounded-xl border border-line hover:border-line-strong hover:bg-white/[0.02] transition-all group"
+      className="flex gap-3 p-4 rounded-xl border border-line hover:border-line-strong hover:bg-foreground/[0.04] transition-all group"
       style={{ background: 'var(--surface)' }}
     >
       <div className="relative shrink-0 w-[72px] h-[72px] rounded-lg overflow-hidden">
@@ -103,7 +103,7 @@ export default function NewsSection({ news, placements = [], onSponsoredClaim }:
         </h2>
         <Link
           href="/news"
-          className="text-sm font-semibold text-primary hover:text-blue-400 transition-colors flex items-center gap-1 ml-4 shrink-0"
+          className="text-sm font-semibold text-primary hover:text-primary-hover transition-colors flex items-center gap-1 ml-4 shrink-0"
         >
           All news <ArrowRight size={12} />
         </Link>

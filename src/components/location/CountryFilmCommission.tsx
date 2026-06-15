@@ -11,10 +11,10 @@ export default function CountryFilmCommission({ commission, productionGuideUrl, 
   if (!commission) return null;
 
   return (
-    <section aria-label={`${countryName} film commission`} className="rounded-xl p-6 border border-white/[0.08]" style={{ background: 'var(--surface)' }}>
+    <section aria-label={`${countryName} film commission`} className="rounded-xl p-6 border border-line" style={{ background: 'var(--surface)' }}>
       <h3 className="flex items-center gap-2 text-lg font-bold font-heading mb-4">
         <div className="w-8 h-8 rounded-xl bg-emerald-500/20 flex items-center justify-center border border-emerald-500/20">
-          <Landmark size={16} className="text-emerald-400" />
+          <Landmark size={16} className="text-emerald-700" />
         </div>
         Film Commission
       </h3>
@@ -27,7 +27,7 @@ export default function CountryFilmCommission({ commission, productionGuideUrl, 
             href={commission.website}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 text-sm text-primary hover:text-blue-400 transition-colors"
+            className="flex items-center gap-2 text-sm text-primary hover:text-primary-hover transition-colors"
           >
             <Globe size={14} className="flex-shrink-0" />
             <span className="truncate">{commission.website.replace(/^https?:\/\//, '')}</span>
@@ -68,7 +68,7 @@ export default function CountryFilmCommission({ commission, productionGuideUrl, 
           href={productionGuideUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-4 flex items-center gap-2 w-full justify-center bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold py-2.5 px-4 rounded-xl text-sm hover:bg-emerald-500/20 transition-all"
+          className="mt-4 flex items-center gap-2 w-full justify-center bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 font-semibold py-2.5 px-4 rounded-xl text-sm hover:bg-emerald-500/20 transition-all"
         >
           <FileText size={14} />
           {countryName} Production Guide

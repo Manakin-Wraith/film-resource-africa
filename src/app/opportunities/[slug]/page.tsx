@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Calendar, DollarSign, FileText, ExternalLink, Target, FileCheck, CheckCircle2, Clock, Lightbulb, BadgeCheck } from 'lucide-react';
 import { getOpportunityBySlug, getOpportunities } from '@/app/actions';
 import { getCategoryStyle } from '@/lib/categoryConfig';
-import { decodeHtmlEntities } from '@/lib/textUtils';
+import { decodeHtmlEntities, getApplyUrl } from '@/lib/textUtils';
 import { formatRelativeDate, formatLocalDateTime, formatDeadline } from '@/lib/dateUtils';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import GeoIndicator from '@/components/GeoIndicator';
@@ -67,9 +67,7 @@ export default async function OpportunityPage({ params }: { params: Promise<{ sl
   const CatIcon = catStyle.icon;
   const isClosed = opp.application_status === 'closed';
   const deadline = opp.deadline_date ? formatDeadline(opp.deadline_date) : null;
-  const applyUrl = opp['Apply:']
-    ? (opp['Apply:'].startsWith('http') ? opp['Apply:'] : `https://${opp['Apply:']}`)
-    : null;
+  const applyUrl = getApplyUrl(opp['Apply:']);
 
   // Related: same directory category first, then same country — open listings only
   const related = allOpportunities
@@ -146,7 +144,7 @@ export default async function OpportunityPage({ params }: { params: Promise<{ sl
         <header className="pb-6 mb-6 border-b border-line">
           <div className="flex items-center gap-3 mb-4 flex-wrap">
             {!opp.og_image_url && opp.logo && (
-              <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-foreground/[0.04] border border-line flex items-center justify-center overflow-hidden flex-shrink-0">
                 <Image
                   src={opp.logo}
                   alt=""
@@ -192,7 +190,7 @@ export default async function OpportunityPage({ params }: { params: Promise<{ sl
         {/* Key facts */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
           {opp['Next Deadline'] && (
-            <div className="flex items-start gap-3 p-4 rounded-xl border border-white/[0.08]" style={{ background: 'var(--surface-raised)' }}>
+            <div className="flex items-start gap-3 p-4 rounded-xl border border-line" style={{ background: 'var(--surface-raised)' }}>
               <Calendar size={16} className="text-accent mt-0.5 flex-shrink-0" />
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--foreground-tertiary)' }}>Deadline</p>
@@ -200,7 +198,7 @@ export default async function OpportunityPage({ params }: { params: Promise<{ sl
                 {opp.last_verified_at && (
                   <p
                     title={`Source last re-checked ${formatLocalDateTime(opp.last_verified_at)}`}
-                    className="mt-1.5 inline-flex items-center gap-1 text-[11px] font-medium text-teal-400"
+                    className="mt-1.5 inline-flex items-center gap-1 text-[11px] font-medium text-teal-700"
                   >
                     <BadgeCheck size={12} />
                     Verified {formatRelativeDate(opp.last_verified_at)}
@@ -210,7 +208,7 @@ export default async function OpportunityPage({ params }: { params: Promise<{ sl
             </div>
           )}
           {opp['Cost'] && (
-            <div className="flex items-start gap-3 p-4 rounded-xl border border-white/[0.08]" style={{ background: 'var(--surface-raised)' }}>
+            <div className="flex items-start gap-3 p-4 rounded-xl border border-line" style={{ background: 'var(--surface-raised)' }}>
               <DollarSign size={16} className="text-success mt-0.5 flex-shrink-0" />
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--foreground-tertiary)' }}>Cost</p>
@@ -219,7 +217,7 @@ export default async function OpportunityPage({ params }: { params: Promise<{ sl
             </div>
           )}
           {opp['For Films or Series?'] && (
-            <div className="flex items-start gap-3 p-4 rounded-xl border border-white/[0.08]" style={{ background: 'var(--surface-raised)' }}>
+            <div className="flex items-start gap-3 p-4 rounded-xl border border-line" style={{ background: 'var(--surface-raised)' }}>
               <FileText size={16} className="text-primary mt-0.5 flex-shrink-0" />
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--foreground-tertiary)' }}>Format</p>
@@ -228,7 +226,7 @@ export default async function OpportunityPage({ params }: { params: Promise<{ sl
             </div>
           )}
           {opp['Who Can Apply / Eligibility'] && (
-            <div className="flex items-start gap-3 p-4 rounded-xl border border-white/[0.08]" style={{ background: 'var(--surface-raised)' }}>
+            <div className="flex items-start gap-3 p-4 rounded-xl border border-line" style={{ background: 'var(--surface-raised)' }}>
               <CheckCircle2 size={16} className="text-primary mt-0.5 flex-shrink-0" />
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--foreground-tertiary)' }}>Eligibility</p>
@@ -241,7 +239,7 @@ export default async function OpportunityPage({ params }: { params: Promise<{ sl
         {/* What You Get + What to Submit */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           {opp['What Do You Get If Selected?'] && (
-            <section className="p-5 rounded-xl border border-white/[0.08]" style={{ background: 'var(--surface-raised)' }}>
+            <section className="p-5 rounded-xl border border-line" style={{ background: 'var(--surface-raised)' }}>
               <h2 className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--foreground-tertiary)' }}>
                 <Target size={12} /> What You Get
               </h2>
@@ -251,7 +249,7 @@ export default async function OpportunityPage({ params }: { params: Promise<{ sl
             </section>
           )}
           {opp['What to Submit'] && (
-            <section className="p-5 rounded-xl border border-white/[0.08]" style={{ background: 'var(--surface-raised)' }}>
+            <section className="p-5 rounded-xl border border-line" style={{ background: 'var(--surface-raised)' }}>
               <h2 className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--foreground-tertiary)' }}>
                 <FileCheck size={12} /> What to Submit
               </h2>
@@ -264,7 +262,7 @@ export default async function OpportunityPage({ params }: { params: Promise<{ sl
 
         {/* Insider Tips */}
         {opp['Strongest Submission Tips'] && (
-          <section className="p-5 rounded-xl border border-white/[0.08] mb-6" style={{ background: 'var(--surface-raised)' }}>
+          <section className="p-5 rounded-xl border border-line mb-6" style={{ background: 'var(--surface-raised)' }}>
             <h2 className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--foreground-tertiary)' }}>
               <Lightbulb size={12} /> Insider Tips
             </h2>
@@ -276,7 +274,7 @@ export default async function OpportunityPage({ params }: { params: Promise<{ sl
 
         {/* Calendar Reminder */}
         {opp['CALENDAR REMINDER:'] && (
-          <div className="flex items-center gap-3 px-5 py-4 rounded-xl border border-white/[0.08] mb-8" style={{ background: 'var(--surface-raised)' }}>
+          <div className="flex items-center gap-3 px-5 py-4 rounded-xl border border-line mb-8" style={{ background: 'var(--surface-raised)' }}>
             <Clock size={16} className="text-accent flex-shrink-0" />
             <p className="text-sm font-medium" style={{ color: 'var(--foreground-secondary)' }}>
               {decodeHtmlEntities(opp['CALENDAR REMINDER:'])}
@@ -286,7 +284,7 @@ export default async function OpportunityPage({ params }: { params: Promise<{ sl
 
         {/* Apply band — closed listings keep the page but lose the CTA */}
         {isClosed || deadline?.urgency === 'passed' ? (
-          <div className="flex items-center gap-3 px-6 py-5 rounded-2xl border border-white/[0.1] mb-12" style={{ background: 'var(--surface-raised)' }}>
+          <div className="flex items-center gap-3 px-6 py-5 rounded-2xl border border-line mb-12" style={{ background: 'var(--surface-raised)' }}>
             <Clock size={18} className="flex-shrink-0" style={{ color: 'var(--foreground-tertiary)' }} />
             <div>
               <p className="text-sm font-semibold text-foreground mb-0.5">Applications are closed</p>
@@ -334,7 +332,7 @@ export default async function OpportunityPage({ params }: { params: Promise<{ sl
                   <Link
                     key={rel.id}
                     href={`/opportunities/${rel.slug}`}
-                    className="p-4 rounded-xl border border-white/8 hover:border-white/16 hover:-translate-y-0.5 transition-all group"
+                    className="p-4 rounded-xl border border-line hover:border-line-mid hover:-translate-y-0.5 transition-all group"
                     style={{ background: 'var(--surface)' }}
                   >
                     <span className={`text-[10px] font-bold uppercase tracking-wider block mb-2 ${relCat.color}`}>

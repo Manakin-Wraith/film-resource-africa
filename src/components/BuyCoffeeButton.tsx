@@ -11,7 +11,7 @@ export default function BuyCoffeeButton() {
     <div className="fixed bottom-20 md:bottom-6 right-6 z-40 flex flex-col items-end gap-2">
       {/* Tooltip */}
       {showTooltip && (
-        <div className="relative bg-white/10 backdrop-blur-xl border border-white/15 rounded-2xl p-4 shadow-2xl max-w-[260px] animate-in slide-in-from-bottom-2 fade-in duration-300">
+        <div className="relative bg-foreground/[0.04] backdrop-blur-xl border border-line-mid rounded-2xl p-4 shadow-2xl max-w-[260px] animate-in slide-in-from-bottom-2 fade-in duration-300">
           <button
             onClick={() => setShowTooltip(false)}
             className="absolute top-2 right-2 text-foreground/50 hover:text-foreground/70 transition-colors"
@@ -22,7 +22,7 @@ export default function BuyCoffeeButton() {
             We&apos;re a small team keeping this resource free for African filmmakers.
           </p>
           <p className="text-xs text-foreground/50 mt-2 flex items-center gap-1">
-            Every coffee keeps us going <Heart size={10} className="text-red-400 fill-red-400" />
+            Every coffee keeps us going <Heart size={10} className="text-red-700 fill-red-400" />
           </p>
           <a
             href="https://pay.yoco.com/celebration-house-entertainment?amount=55.00&reference=Coffee"

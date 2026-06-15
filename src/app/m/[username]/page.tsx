@@ -138,14 +138,14 @@ export default async function MemberShowcasePage(
 
         {/* ── Profile hero ──────────────────────────────────── */}
         <section
-          className="rounded-2xl border border-white/8 p-6 md:p-8"
+          className="rounded-2xl border border-line p-6 md:p-8"
           style={{ background: 'var(--surface)' }}
         >
           <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
             {/* Avatar */}
             {avatarSrc && (
               <div
-                className="shrink-0 rounded-2xl overflow-hidden border border-white/16"
+                className="shrink-0 rounded-2xl overflow-hidden border border-line-mid"
                 style={{
                   width: '140px', height: '140px',
                   background: m.logo_backdrop ? '#f5f5f5' : 'var(--surface-raised)',
@@ -245,7 +245,7 @@ export default async function MemberShowcasePage(
                 Reel
               </p>
               <div
-                className="rounded-xl overflow-hidden border border-white/8"
+                className="rounded-xl overflow-hidden border border-line"
                 style={{ aspectRatio: '16/9', position: 'relative' }}
               >
                 <iframe
@@ -265,7 +265,7 @@ export default async function MemberShowcasePage(
                 href={m.website.startsWith('http') ? m.website : `https://${m.website}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-[13px] font-semibold transition-colors border border-white/12 hover:bg-white/4"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-[13px] font-semibold transition-colors border border-line-mid hover:bg-foreground/[0.04]"
                 style={{ color: '#93c5fd' }}
               >
                 Website ↗
@@ -276,7 +276,7 @@ export default async function MemberShowcasePage(
                 href={m.reel_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-[13px] font-semibold transition-colors border border-white/12 hover:bg-white/4"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-[13px] font-semibold transition-colors border border-line-mid hover:bg-foreground/[0.04]"
                 style={{ color: 'rgba(250,250,250,0.65)' }}
               >
                 Watch reel ↗
@@ -337,7 +337,7 @@ export default async function MemberShowcasePage(
             <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto">
               <a
                 href={PAYFAST_LINKS.individualAnnual}
-                className="flex items-center justify-center gap-2 px-6 py-4 bg-primary hover:bg-blue-600 text-white font-bold text-[14px] rounded-xl transition-colors"
+                className="flex items-center justify-center gap-2 px-6 py-4 bg-primary hover:bg-primary-hover text-white font-bold text-[14px] rounded-xl transition-colors"
               >
                 Individual — R990/yr
                 <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-white/20">2 months free</span>
