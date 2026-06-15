@@ -1,87 +1,55 @@
-import {
-  getOpportunities,
-  getClosingSoonOpportunities,
-  getOpenOpportunities,
-  getNewWaveOpportunities,
-  getJustAddedOpportunities,
-  getNews,
-  getTrailers,
-  getActivePlacements,
-  getApprovedPartners,
-  getCountriesWithOpportunityCounts,
-} from './actions';
-import HomeClient from '@/components/HomeClient';
+import { getClosingSoonOpportunities, getOpenOpportunities, getJustAddedOpportunities } from './actions';
+import { daysUntil } from '@/lib/dateUtils';
 import NewsletterCTA from '@/components/NewsletterCTA';
-import SponsorTicker from '@/components/SponsorTicker';
+import FrontPageGrid from '@/components/home/FrontPageGrid';
+import JustAddedRow from '@/components/home/JustAddedRow';
 
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
-  const [
-    allOpportunities,
-    closingSoon,
-    openNow,
-    newWave,
-    justAdded,
-    news,
-    trailers,
-    placements,
-    partners,
-    countriesWithCounts,
-  ] = await Promise.all([
-    getOpportunities(),
+  const [closingSoon, openNow, justAdded] = await Promise.all([
     getClosingSoonOpportunities(),
     getOpenOpportunities(),
-    getNewWaveOpportunities(),
     getJustAddedOpportunities(),
-    getNews(),
-    getTrailers(),
-    getActivePlacements(),
-    getApprovedPartners(),
-    getCountriesWithOpportunityCounts(),
   ]);
+
+  const lead = closingSoon[0] ?? justAdded[0] ?? null;
+
+  // "Closing this week" = soonest upcoming deadlines across closing-soon + open (excluding the lead).
+  // daysUntil() compares at local start-of-day, so deadlines closing TODAY (d === 0) are kept —
+  // a raw `new Date(dateOnly) >= Date.now()` check would drop them (date-only parses to UTC midnight).
+  const closing = [...closingSoon, ...openNow]
+    .filter((o) => o.id !== lead?.id && o.deadline_date)
+    .map((o) => ({ o, d: daysUntil(o.deadline_date as string) }))
+    .filter(({ d }) => d >= 0)
+    .filter(({ o }, i, arr) => arr.findIndex((x) => x.o.id === o.id) === i)
+    .sort((a, b) => a.d - b.d)
+    .slice(0, 6)
+    .map(({ o }) => o);
 
   return (
     <main className="min-h-screen">
       <div className="container mx-auto px-4 pt-8 pb-0 md:pt-12">
-        {/* ── Masthead ────────────────────────────────────────────── */}
-        <header className="pb-10 md:pb-14">
-          {/* Top rule + rubric */}
-          <div className="border-t border-line-mid pt-4 flex items-center justify-between mb-3">
-            <span className="section-rubric mb-0">Film Resource Africa</span>
-            <span className="section-rubric mb-0 hidden md:block">est. 2024</span>
-          </div>
-          {/* Accent rule */}
-          <div className="h-[2px] bg-accent mb-8 md:mb-10" />
-
-          {/* Headline + body — stacked on mobile, split on desktop */}
-          <div className="md:grid md:grid-cols-[1fr_320px] md:gap-16 md:items-end">
-            <h1 className="text-[52px] leading-[1.02] md:text-[88px] font-extrabold font-heading tracking-tight text-foreground mb-8 md:mb-0">
-              African Film<br />Opportunities.
-            </h1>
-            <div className="md:pb-1">
-              <p className="text-[15px] md:text-base leading-relaxed mb-6" style={{ color: 'var(--foreground-secondary)' }}>
-                Screenwriting labs, co-production funds, and pitch forums — curated for African creators worldwide.
-              </p>
+        {/* ── Masthead (matches v3 redesign mockup: single "African film, funded.") ── */}
+        <header className="pt-4 md:pt-6 pb-10 md:pb-14">
+          <h1 className="font-heading font-semibold leading-[1.02] tracking-[-0.02em] text-[clamp(44px,6vw,84px)] max-w-[12ch] text-foreground">
+            African film,{' '}
+            <em className="italic font-normal bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-urgent)] bg-clip-text text-transparent">
+              funded.
+            </em>
+          </h1>
+          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between md:gap-12 border-y border-line mt-8 md:mt-10 py-5">
+            <p className="text-[15px] md:text-base leading-relaxed max-w-[52ch]" style={{ color: 'var(--foreground-secondary)' }}>
+              Screenwriting labs, co-production funds, and pitch forums — every live opportunity for African creators, verified and tracked to deadline.
+            </p>
+            <div className="w-full md:w-auto md:min-w-[360px] md:flex-shrink-0">
               <NewsletterCTA variant="hero" />
             </div>
           </div>
-
         </header>
 
-        <SponsorTicker partners={partners} />
-
-        <HomeClient
-          closingSoon={closingSoon}
-          openNow={openNow}
-          newWave={newWave}
-          justAdded={justAdded}
-          news={news}
-          trailers={trailers}
-          allOpportunities={allOpportunities}
-          placements={placements}
-          countriesWithCounts={countriesWithCounts}
-        />
+        <FrontPageGrid lead={lead} closing={closing} />
+        <JustAddedRow opportunities={justAdded.slice(0, 3)} />
       </div>
     </main>
   );
