@@ -27,7 +27,7 @@ export default function MembersWelcomePage() {
         </div>
 
         <div
-          className="rounded-xl border border-white/[0.08] p-6 text-left space-y-4"
+          className="rounded-xl border border-line p-6 text-left space-y-4"
           style={{ background: 'var(--surface-raised)' }}
         >
           <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color: 'var(--foreground-tertiary)' }}>
@@ -60,7 +60,7 @@ export default function MembersWelcomePage() {
           </Link>
           <Link
             href="/members"
-            className="flex items-center justify-center gap-2 px-6 py-3.5 font-semibold text-sm rounded-xl transition-colors border border-white/[0.12] hover:bg-white/[0.04]"
+            className="flex items-center justify-center gap-2 px-6 py-3.5 font-semibold text-sm rounded-xl transition-colors border border-line-mid hover:bg-foreground/[0.04]"
             style={{ color: 'var(--foreground-secondary)' }}
           >
             Back to Members

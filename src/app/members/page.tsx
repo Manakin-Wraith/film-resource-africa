@@ -21,7 +21,7 @@ function FoundingCounter({ count }: { count: number }) {
 
   return (
     <div
-      className="rounded-xl border border-white/8 p-6 md:p-8"
+      className="rounded-xl border border-line p-6 md:p-8"
       style={{ background: 'var(--surface-raised)' }}
     >
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
@@ -78,7 +78,7 @@ function TierComparison() {
 
         {/* ── Individual ── */}
         <div
-          className="rounded-xl border border-white/8 p-7 flex flex-col gap-5"
+          className="rounded-xl border border-line p-7 flex flex-col gap-5"
           style={{ background: 'var(--surface)' }}
         >
           <div className="flex items-center justify-between">
@@ -124,7 +124,7 @@ function TierComparison() {
           {/* Monthly CTA — secondary */}
           <a
             href={PAYFAST_LINKS.individualMonthly}
-            className="flex items-center justify-between gap-3 px-5 py-3.5 font-semibold text-sm rounded-xl transition-colors min-h-[48px] border border-white/[0.12] hover:bg-white/[0.04]"
+            className="flex items-center justify-between gap-3 px-5 py-3.5 font-semibold text-sm rounded-xl transition-colors min-h-[48px] border border-line-mid hover:bg-foreground/[0.04]"
             style={{ color: 'var(--foreground-secondary)' }}
           >
             <span>Monthly — R99/mo</span>
@@ -183,7 +183,7 @@ function TierComparison() {
           {/* Monthly CTA — secondary */}
           <a
             href={PAYFAST_LINKS.businessMonthly}
-            className="flex items-center justify-between gap-3 px-5 py-3.5 font-semibold text-sm rounded-xl transition-colors min-h-[48px] border border-white/[0.08] hover:bg-white/[0.04]"
+            className="flex items-center justify-between gap-3 px-5 py-3.5 font-semibold text-sm rounded-xl transition-colors min-h-[48px] border border-line hover:bg-foreground/[0.04]"
             style={{ color: 'var(--foreground-secondary)' }}
           >
             <span>Monthly — R225/mo</span>
@@ -238,11 +238,11 @@ function FAQ() {
         {FAQS.map((item, i) => (
           <details
             key={i}
-            className="group rounded-xl border border-white/8 overflow-hidden"
+            className="group rounded-xl border border-line overflow-hidden"
             style={{ background: 'var(--surface)' }}
           >
             <summary
-              className="flex items-center justify-between gap-4 px-5 py-4 cursor-pointer list-none select-none hover:bg-white/3 transition-colors"
+              className="flex items-center justify-between gap-4 px-5 py-4 cursor-pointer list-none select-none hover:bg-foreground/[0.04] transition-colors"
             >
               <span className="text-[14px] font-semibold font-heading text-foreground leading-snug">
                 {item.q}
@@ -284,7 +284,7 @@ function PRSExplainer() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Gate 1 */}
         <div
-          className="rounded-xl border border-white/8 p-6 space-y-4"
+          className="rounded-xl border border-line p-6 space-y-4"
           style={{ background: 'var(--surface)' }}
         >
           <div className="flex items-center justify-between">
@@ -304,7 +304,7 @@ function PRSExplainer() {
 
         {/* Gate 2 */}
         <div
-          className="rounded-xl border border-white/8 p-6 space-y-4"
+          className="rounded-xl border border-line p-6 space-y-4"
           style={{ background: 'var(--surface)' }}
         >
           <div className="flex items-center justify-between">
@@ -329,7 +329,7 @@ function PRSExplainer() {
           { label: 'Production Ready', range: '20–25', tone: 'bg-green-500/10 border-green-500/20 text-green-400' },
           { label: 'Funding Ready', range: '15–19', tone: 'bg-blue-500/10 border-blue-500/20 text-blue-400' },
           { label: 'Development Stage', range: '10–14', tone: 'bg-amber-500/10 border-amber-500/20 text-amber-400' },
-          { label: 'Early Concept', range: '0–9', tone: 'bg-white/5 border-white/10 text-foreground/40' },
+          { label: 'Early Concept', range: '0–9', tone: 'bg-foreground/[0.04] border-line text-foreground/40' },
         ].map(({ label, range, tone }) => (
           <span
             key={label}
@@ -366,7 +366,7 @@ function DirectoryTease() {
           {TEASE_MEMBERS.map((m, i) => (
             <div
               key={i}
-              className="rounded-xl border border-white/8 p-4 flex items-center gap-3"
+              className="rounded-xl border border-line p-4 flex items-center gap-3"
               style={{ background: 'var(--surface)' }}
             >
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-[13px] font-bold font-heading shrink-0 ${m.color}`}>
@@ -419,7 +419,7 @@ export default async function MembersPage() {
 
         {/* Masthead */}
         <header className="pb-10 md:pb-12">
-          <div className="border-t border-white/16 pt-4 flex items-center justify-between mb-3">
+          <div className="border-t border-line-mid pt-4 flex items-center justify-between mb-3">
             <span className="section-rubric mb-0">Members</span>
             <span className="section-rubric mb-0 hidden md:block">est. 2024</span>
           </div>
