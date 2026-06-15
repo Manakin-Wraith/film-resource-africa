@@ -58,21 +58,6 @@ export default function HomeClient({ closingSoon, openNow, newWave, justAdded, n
 
   return (
     <>
-      {/* Masthead — editorial hero */}
-      <section className="container mx-auto px-4 pt-12 md:pt-14">
-        <h1 className="font-heading font-semibold leading-[1.02] tracking-[-0.02em] text-[clamp(44px,6vw,84px)] max-w-[11ch] text-foreground">
-          African film,{' '}
-          <em className="font-normal italic bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-urgent)] bg-clip-text text-transparent">
-            funded.
-          </em>
-        </h1>
-        <div className="flex flex-wrap items-center justify-between gap-8 border-y border-line mt-8 py-4">
-          <p className="text-[16px] max-w-[52ch]" style={{ color: 'var(--foreground-secondary)' }}>
-            Screenwriting labs, co-production funds, and pitch forums — every live opportunity for African creators, verified and tracked to deadline.
-          </p>
-        </div>
-      </section>
-
       {/* Just Added — 2-col editorial grid */}
       <JustAddedSection opportunities={justAdded} />
 

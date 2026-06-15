@@ -49,8 +49,8 @@ export default function NewsletterCTA({
 
   if (variant === 'hero') {
     return (
-      <form onSubmit={handleSubscribe} className="flex flex-col gap-2.5 w-full">
-        <div className="relative w-full">
+      <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-2.5 w-full">
+        <div className="relative w-full sm:flex-1">
           <Bell size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-foreground/30" />
           <input
             type="email"
@@ -64,7 +64,7 @@ export default function NewsletterCTA({
         <button
           disabled={submitting || subscribed}
           type="submit"
-          className={`w-full px-6 py-3.5 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-lg whitespace-nowrap ${
+          className={`w-full sm:w-auto px-6 py-3.5 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-lg whitespace-nowrap ${
             subscribed
               ? 'bg-success text-white'
               : 'bg-primary hover:bg-primary-hover text-white shadow-primary/30 hover:-translate-y-0.5'
