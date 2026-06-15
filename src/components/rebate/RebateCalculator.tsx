@@ -149,7 +149,7 @@ export default function RebateCalculator() {
               />
             </div>
             {inputs.currency === 'USD' && (
-              <div className="mt-3 flex items-center gap-3 rounded-lg bg-white/[0.04] border border-white/[0.08] px-3 py-2">
+              <div className="mt-3 flex items-center gap-3 rounded-lg bg-foreground/[0.04] border border-line px-3 py-2">
                 <span className="text-xs font-medium text-foreground/60 whitespace-nowrap">FX (ZAR per USD):</span>
                 <input
                   type="number"
@@ -320,7 +320,7 @@ export default function RebateCalculator() {
               label="Service company structure"
               hint={`+${Math.round((programme.bonus?.rate ?? 0) * 100)}% bonus with black-owned SA service co.`}
             >
-              <label className="flex items-center gap-3 px-4 py-3 rounded-xl border border-white/[0.15] bg-white/[0.08] cursor-pointer hover:bg-white/[0.12] transition">
+              <label className="flex items-center gap-3 px-4 py-3 rounded-xl border border-line-mid bg-foreground/[0.04] cursor-pointer hover:bg-foreground/[0.08] transition">
                 <input
                   type="checkbox"
                   checked={!!inputs.blackOwnedServiceCo}
@@ -336,7 +336,7 @@ export default function RebateCalculator() {
             </Field>
           ) : (
             <Field label="Bonus uplift">
-              <div className="p-3 rounded-xl border border-white/10 bg-white/5 text-sm text-foreground/60">
+              <div className="p-3 rounded-xl border border-line bg-foreground/[0.04] text-sm text-foreground/60">
                 This programme has no additional bonus tier — the base rate
                 already reflects the maximum.
               </div>
@@ -344,7 +344,7 @@ export default function RebateCalculator() {
           )}
         </div>
 
-        <p className="text-xs text-foreground/50 pt-2 border-t border-white/5">
+        <p className="text-xs text-foreground/50 pt-2 border-t border-line">
           Source: <em>a Guide to the dtic Incentive Schemes 2025/26</em>. This
           is an indicative estimate, not a binding ruling.
         </p>
@@ -389,7 +389,7 @@ function Field({
 }
 
 function inputClass(extra = '') {
-  return `w-full rounded-xl bg-white/[0.08] border border-white/[0.15] focus:border-primary/60 focus:ring-2 focus:ring-primary/25 outline-none px-4 py-2.5 text-sm text-foreground placeholder:text-foreground/50 transition ${extra}`;
+  return `w-full rounded-xl bg-foreground/[0.04] border border-line-mid focus:border-primary/60 focus:ring-2 focus:ring-primary/25 outline-none px-4 py-2.5 text-sm text-foreground placeholder:text-foreground/50 transition ${extra}`;
 }
 
 function selectClass(extra = '') {
@@ -432,7 +432,7 @@ function ResultCard({
       </div>
 
       {/* Headline — Net Exposure */}
-      <div className="rounded-2xl p-5 border border-white/10 bg-gradient-to-br from-primary/10 via-transparent to-accent/10">
+      <div className="rounded-2xl p-5 border border-line bg-gradient-to-br from-primary/10 via-transparent to-accent/10">
         <div className="text-xs uppercase tracking-wider text-foreground/60 font-semibold">
           Net exposure — money you still need to find
         </div>
@@ -514,7 +514,7 @@ function ResultCard({
         </div>
       )}
 
-      <div className="pt-3 border-t border-white/5 flex items-center justify-between text-xs text-foreground/50">
+      <div className="pt-3 border-t border-line flex items-center justify-between text-xs text-foreground/50">
         <span>{programme.source}</span>
         <span>Verified {programme.verifiedOn}</span>
       </div>
@@ -538,7 +538,7 @@ function Row({
   return (
     <div
       className={`flex items-center justify-between gap-3 py-1 ${
-        strong ? 'border-t border-white/10 pt-3 mt-1 font-semibold' : ''
+        strong ? 'border-t border-line pt-3 mt-1 font-semibold' : ''
       }`}
     >
       <dt className={muted ? 'text-foreground/50' : 'text-foreground/75'}>
@@ -607,7 +607,7 @@ function NonDticLayers() {
                 {layer.note}
               </div>
             </div>
-            <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-foreground/60 whitespace-nowrap">
+            <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-foreground/[0.04] border border-line text-foreground/60 whitespace-nowrap">
               {layer.status}
             </span>
           </li>

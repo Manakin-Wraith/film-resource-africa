@@ -64,7 +64,7 @@ export default async function CommunitySpotlightPage() {
                   <Link
                     key={item.id}
                     href={href}
-                    className="rounded-xl border border-white/[0.08] hover:border-white/[0.16] transition-all group flex flex-col overflow-hidden"
+                    className="rounded-xl border border-line hover:border-line-mid transition-all group flex flex-col overflow-hidden"
                     style={{ background: 'var(--surface)' }}
                   >
                     {item.image_url && (
@@ -120,7 +120,7 @@ export default async function CommunitySpotlightPage() {
 
         {/* Empty State */}
         {spotlights.length === 0 && (
-          <div className="text-center py-14 rounded-xl border border-white/[0.08]" style={{ background: 'var(--surface)' }}>
+          <div className="text-center py-14 rounded-xl border border-line" style={{ background: 'var(--surface)' }}>
             <Star size={28} className="text-amber-400/50 mx-auto mb-4" />
             <h3 className="text-[17px] font-bold font-heading mb-2">No stories yet</h3>
             <p className="text-[14px]" style={{ color: 'var(--foreground-secondary)' }}>

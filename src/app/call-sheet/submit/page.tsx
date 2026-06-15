@@ -66,7 +66,7 @@ export default function SubmitCallSheetPage() {
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="max-w-2xl mx-auto rounded-2xl p-12 text-center border border-white/[0.08] mt-20"
+          className="max-w-2xl mx-auto rounded-2xl p-12 text-center border border-line mt-20"
           style={{ background: 'var(--surface)' }}
         >
           <div className="w-24 h-24 bg-teal-500/20 text-teal-400 rounded-full flex items-center justify-center mx-auto mb-8 border border-teal-500/30">
@@ -78,7 +78,7 @@ export default function SubmitCallSheetPage() {
           </p>
           <Link
             href="/call-sheet"
-            className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 px-8 py-4 rounded-2xl font-semibold transition-colors border border-white/10"
+            className="inline-flex items-center gap-2 bg-foreground/[0.04] hover:bg-foreground/[0.08] px-8 py-4 rounded-2xl font-semibold transition-colors border border-line"
           >
             <ArrowLeft size={20} />
             Back to The Call Sheet
@@ -112,7 +112,7 @@ export default function SubmitCallSheetPage() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="rounded-2xl p-6 md:p-12 mb-20 border border-white/[0.08]" style={{ background: 'var(--surface)' }}>
+        <form onSubmit={handleSubmit} className="rounded-2xl p-6 md:p-12 mb-20 border border-line" style={{ background: 'var(--surface)' }}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8">
             {/* Role Title */}
             <div>
@@ -125,7 +125,7 @@ export default function SubmitCallSheetPage() {
                 placeholder="e.g. Director of Photography"
                 value={formData.title || ''}
                 onChange={(e) => set('title', e.target.value)}
-                className="w-full bg-black/10 border border-white/10 hover:border-white/20 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all text-base placeholder:opacity-40"
+                className="w-full bg-foreground/[0.04] border border-line hover:border-line-mid rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all text-base placeholder:opacity-40"
               />
             </div>
 
@@ -140,7 +140,7 @@ export default function SubmitCallSheetPage() {
                 placeholder="e.g. Shadows of the Karoo"
                 value={formData.production_title || ''}
                 onChange={(e) => set('production_title', e.target.value)}
-                className="w-full bg-black/10 border border-white/10 hover:border-white/20 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all text-base placeholder:opacity-40"
+                className="w-full bg-foreground/[0.04] border border-line hover:border-line-mid rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all text-base placeholder:opacity-40"
               />
             </div>
 
@@ -155,7 +155,7 @@ export default function SubmitCallSheetPage() {
                 placeholder="e.g. Cape Light Films"
                 value={formData.production_company || ''}
                 onChange={(e) => set('production_company', e.target.value)}
-                className="w-full bg-black/10 border border-white/10 hover:border-white/20 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all text-base placeholder:opacity-40"
+                className="w-full bg-foreground/[0.04] border border-line hover:border-line-mid rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all text-base placeholder:opacity-40"
               />
             </div>
 
@@ -170,7 +170,7 @@ export default function SubmitCallSheetPage() {
                 placeholder="e.g. Thandi Mokoena"
                 value={formData.producer_name || ''}
                 onChange={(e) => set('producer_name', e.target.value)}
-                className="w-full bg-black/10 border border-white/10 hover:border-white/20 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all text-base placeholder:opacity-40"
+                className="w-full bg-foreground/[0.04] border border-line hover:border-line-mid rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all text-base placeholder:opacity-40"
               />
             </div>
 
@@ -185,7 +185,7 @@ export default function SubmitCallSheetPage() {
                 placeholder="e.g. thandi@capelightfilms.co.za"
                 value={formData.producer_email || ''}
                 onChange={(e) => set('producer_email', e.target.value)}
-                className="w-full bg-black/10 border border-white/10 hover:border-white/20 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all text-base placeholder:opacity-40"
+                className="w-full bg-foreground/[0.04] border border-line hover:border-line-mid rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all text-base placeholder:opacity-40"
               />
               <p className="text-xs opacity-40 mt-2">For admin contact only — not shown publicly.</p>
             </div>
@@ -199,7 +199,7 @@ export default function SubmitCallSheetPage() {
                 required
                 value={formData.category || ''}
                 onChange={(e) => set('category', e.target.value)}
-                className="w-full bg-black/10 border border-white/10 hover:border-white/20 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all text-base appearance-none"
+                className="w-full bg-foreground/[0.04] border border-line hover:border-line-mid rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all text-base appearance-none"
               >
                 <option value="" disabled>Select a category</option>
                 {categories.map((c) => (
@@ -218,7 +218,7 @@ export default function SubmitCallSheetPage() {
                 placeholder="Describe the role, responsibilities, and what you're looking for..."
                 value={formData.description || ''}
                 onChange={(e) => set('description', e.target.value)}
-                className="w-full bg-black/10 border border-white/10 hover:border-white/20 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent min-h-[140px] transition-all text-base placeholder:opacity-40"
+                className="w-full bg-foreground/[0.04] border border-line hover:border-line-mid rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent min-h-[140px] transition-all text-base placeholder:opacity-40"
               />
             </div>
 
@@ -233,7 +233,7 @@ export default function SubmitCallSheetPage() {
                 placeholder="e.g. R2,500/day, $500/week, Negotiable"
                 value={formData.compensation || ''}
                 onChange={(e) => set('compensation', e.target.value)}
-                className="w-full bg-black/10 border border-white/10 hover:border-white/20 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all text-base placeholder:opacity-40"
+                className="w-full bg-foreground/[0.04] border border-line hover:border-line-mid rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all text-base placeholder:opacity-40"
               />
             </div>
 
@@ -246,7 +246,7 @@ export default function SubmitCallSheetPage() {
                 required
                 value={formData.compensation_type || 'paid'}
                 onChange={(e) => set('compensation_type', e.target.value)}
-                className="w-full bg-black/10 border border-white/10 hover:border-white/20 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all text-base appearance-none"
+                className="w-full bg-foreground/[0.04] border border-line hover:border-line-mid rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all text-base appearance-none"
               >
                 {compensationTypes.map((ct) => (
                   <option key={ct.value} value={ct.value}>{ct.label}</option>
@@ -265,7 +265,7 @@ export default function SubmitCallSheetPage() {
                 placeholder="e.g. Cape Town, South Africa"
                 value={formData.location || ''}
                 onChange={(e) => set('location', e.target.value)}
-                className="w-full bg-black/10 border border-white/10 hover:border-white/20 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all text-base placeholder:opacity-40"
+                className="w-full bg-foreground/[0.04] border border-line hover:border-line-mid rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all text-base placeholder:opacity-40"
               />
             </div>
 
@@ -278,7 +278,7 @@ export default function SubmitCallSheetPage() {
                 required
                 value={formData.project_stage || 'pre-production'}
                 onChange={(e) => set('project_stage', e.target.value)}
-                className="w-full bg-black/10 border border-white/10 hover:border-white/20 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all text-base appearance-none"
+                className="w-full bg-foreground/[0.04] border border-line hover:border-line-mid rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all text-base appearance-none"
               >
                 {projectStages.map((ps) => (
                   <option key={ps.value} value={ps.value}>{ps.label}</option>
@@ -293,7 +293,7 @@ export default function SubmitCallSheetPage() {
                 placeholder="Experience level, specific skills, gear requirements, languages..."
                 value={formData.requirements || ''}
                 onChange={(e) => set('requirements', e.target.value)}
-                className="w-full bg-black/10 border border-white/10 hover:border-white/20 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent min-h-[100px] transition-all text-base placeholder:opacity-40"
+                className="w-full bg-foreground/[0.04] border border-line hover:border-line-mid rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent min-h-[100px] transition-all text-base placeholder:opacity-40"
               />
             </div>
 
@@ -305,7 +305,7 @@ export default function SubmitCallSheetPage() {
                 placeholder="e.g. April 2026, TBC"
                 value={formData.start_date || ''}
                 onChange={(e) => set('start_date', e.target.value)}
-                className="w-full bg-black/10 border border-white/10 hover:border-white/20 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all text-base placeholder:opacity-40"
+                className="w-full bg-foreground/[0.04] border border-line hover:border-line-mid rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all text-base placeholder:opacity-40"
               />
             </div>
 
@@ -317,7 +317,7 @@ export default function SubmitCallSheetPage() {
                 placeholder="e.g. 6 weeks, 3 months"
                 value={formData.duration || ''}
                 onChange={(e) => set('duration', e.target.value)}
-                className="w-full bg-black/10 border border-white/10 hover:border-white/20 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all text-base placeholder:opacity-40"
+                className="w-full bg-foreground/[0.04] border border-line hover:border-line-mid rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all text-base placeholder:opacity-40"
               />
             </div>
 
@@ -329,7 +329,7 @@ export default function SubmitCallSheetPage() {
                 placeholder="https://..."
                 value={formData.application_url || ''}
                 onChange={(e) => set('application_url', e.target.value)}
-                className="w-full bg-black/10 border border-white/10 hover:border-white/20 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all text-base placeholder:opacity-40"
+                className="w-full bg-foreground/[0.04] border border-line hover:border-line-mid rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all text-base placeholder:opacity-40"
               />
               <p className="text-xs opacity-40 mt-2">If blank, applicants will be directed to email the producer.</p>
             </div>
@@ -342,7 +342,7 @@ export default function SubmitCallSheetPage() {
                 placeholder="e.g. capelightfilms.co.za"
                 value={formData.website || ''}
                 onChange={(e) => set('website', e.target.value)}
-                className="w-full bg-black/10 border border-white/10 hover:border-white/20 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all text-base placeholder:opacity-40"
+                className="w-full bg-foreground/[0.04] border border-line hover:border-line-mid rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all text-base placeholder:opacity-40"
               />
             </div>
 
@@ -353,7 +353,7 @@ export default function SubmitCallSheetPage() {
                   type="checkbox"
                   checked={formData.mentorship_included || false}
                   onChange={(e) => set('mentorship_included', e.target.checked)}
-                  className="w-5 h-5 rounded-md bg-black/10 border border-white/20 text-teal-500 focus:ring-teal-500 focus:ring-offset-0 cursor-pointer"
+                  className="w-5 h-5 rounded-md bg-foreground/[0.04] border border-line-mid text-teal-500 focus:ring-teal-500 focus:ring-offset-0 cursor-pointer"
                 />
                 <span className="font-semibold group-hover:text-teal-400 transition-colors">
                   This role includes mentorship
@@ -364,7 +364,7 @@ export default function SubmitCallSheetPage() {
           </div>
 
           {/* Submit */}
-          <div className="mt-12 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="mt-12 pt-8 border-t border-line flex flex-col sm:flex-row items-center justify-between gap-6">
             <p className="text-sm opacity-60 text-center sm:text-left flex items-start gap-2 max-w-md">
               <AlertCircle size={18} className="flex-shrink-0 mt-0.5 text-teal-400" />
               All listings are reviewed before publishing. Unpaid roles are not accepted.

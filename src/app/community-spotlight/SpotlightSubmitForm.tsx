@@ -14,7 +14,7 @@ const spotlightCategories = [
   { value: 'other', label: 'Other News', emoji: '📣' },
 ];
 
-const inputClass = "w-full border border-white/[0.12] rounded-xl px-4 py-3 text-sm focus:border-amber-500/40 transition-colors text-foreground placeholder:text-foreground/50 bg-white/[0.04]";
+const inputClass = "w-full border border-line-mid rounded-xl px-4 py-3 text-sm focus:border-amber-500/40 transition-colors text-foreground placeholder:text-foreground/50 bg-foreground/[0.04]";
 
 export default function SpotlightSubmitForm() {
   const [formData, setFormData] = useState<Record<string, string>>({});
@@ -99,7 +99,7 @@ export default function SpotlightSubmitForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-xl p-6 md:p-8 border border-white/[0.08]"
+      className="rounded-xl p-6 md:p-8 border border-line"
       style={{ background: 'var(--surface)' }}
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -167,14 +167,14 @@ export default function SpotlightSubmitForm() {
         <div>
           <label className="block text-sm font-semibold mb-1.5">Image</label>
           {imagePreview ? (
-            <div className="relative rounded-xl overflow-hidden border border-white/[0.1]">
+            <div className="relative rounded-xl overflow-hidden border border-line">
               <Image src={imagePreview} alt="Preview" width={400} height={160} className="w-full h-36 object-cover" />
               <button type="button" onClick={removeImage} className="absolute top-2 right-2 w-7 h-7 bg-black/60 hover:bg-black/80 rounded-lg flex items-center justify-center transition-colors">
                 <X size={14} />
               </button>
             </div>
           ) : (
-            <button type="button" onClick={() => fileInputRef.current?.click()} className="w-full h-36 border border-dashed border-white/[0.16] hover:border-amber-500/30 rounded-xl flex flex-col items-center justify-center gap-2 transition-colors group cursor-pointer" style={{ background: 'var(--surface-raised)' }}>
+            <button type="button" onClick={() => fileInputRef.current?.click()} className="w-full h-36 border border-dashed border-line-mid hover:border-amber-500/30 rounded-xl flex flex-col items-center justify-center gap-2 transition-colors group cursor-pointer" style={{ background: 'var(--surface-raised)' }}>
               <Upload size={18} className="text-foreground/30 group-hover:text-amber-400 transition-colors" />
               <span className="text-[12px]" style={{ color: 'var(--foreground-tertiary)' }}>Upload a photo (max 5MB)</span>
             </button>
@@ -191,7 +191,7 @@ export default function SpotlightSubmitForm() {
         </div>
       )}
 
-      <div className="mt-8 pt-6 border-t border-white/[0.08] flex flex-col sm:flex-row items-center justify-between gap-5">
+      <div className="mt-8 pt-6 border-t border-line flex flex-col sm:flex-row items-center justify-between gap-5">
         <p className="text-[13px] flex items-start gap-2 max-w-md" style={{ color: 'var(--foreground-secondary)' }}>
           <Star size={15} className="flex-shrink-0 mt-0.5 text-amber-400" />
           Submissions are reviewed before publishing. Approved stories are featured on the site and in the weekly newsletter.
