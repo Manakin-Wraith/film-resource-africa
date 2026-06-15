@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Calendar, ExternalLink, Filter, Search, BadgeCheck } from 'lucide-react';
 import type { Opportunity } from '@/app/actions';
 import { formatRelativeDate, formatLocalDateTime, formatDeadline } from '@/lib/dateUtils';
+import { getApplyUrl } from '@/lib/textUtils';
 
 interface CountryOpportunitiesProps {
   opportunities: Opportunity[];
@@ -89,6 +90,7 @@ export default function CountryOpportunities({ opportunities, countryName }: Cou
         {filtered.map((opp) => {
           const deadline = opp.deadline_date ? formatDeadline(opp.deadline_date) : null;
           const showCountdown = deadline && (deadline.urgency === 'critical' || deadline.urgency === 'warning');
+          const applyUrl = getApplyUrl(opp['Apply:']);
           return (
           <div
             key={opp.id}
@@ -150,9 +152,9 @@ export default function CountryOpportunities({ opportunities, countryName }: Cou
                   {opp['Next Deadline']}
                 </span>
               )}
-              {opp['Apply:'] && (
+              {applyUrl && (
                 <a
-                  href={opp['Apply:']}
+                  href={applyUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-1 text-xs font-bold text-primary hover:text-blue-400 transition-colors"

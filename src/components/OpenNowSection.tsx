@@ -5,6 +5,7 @@ import { ExternalLink } from 'lucide-react';
 import type { Opportunity } from '@/app/actions';
 import { getCategoryStyle } from '@/lib/categoryConfig';
 import { formatDeadline } from '@/lib/dateUtils';
+import { getApplyUrl } from '@/lib/textUtils';
 import { trackOpportunityClick } from '@/lib/analytics';
 import CardVisualHeader from './CardVisualHeader';
 
@@ -12,6 +13,7 @@ function OpenNowCard({ opp }: { opp: Opportunity }) {
   const deadline = opp.deadline_date ? formatDeadline(opp.deadline_date) : null;
   const catStyle = getCategoryStyle(opp.category);
   const CatIcon = catStyle.icon;
+  const applyUrl = getApplyUrl(opp['Apply:']);
 
   return (
     <div
@@ -50,9 +52,9 @@ function OpenNowCard({ opp }: { opp: Opportunity }) {
               {catStyle.label}
             </span>
           </div>
-          {opp['Apply:'] && (
+          {applyUrl && (
             <a
-              href={opp['Apply:']}
+              href={applyUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="relative z-20 flex items-center gap-1 text-xs font-semibold text-primary hover:text-blue-400 transition-colors"

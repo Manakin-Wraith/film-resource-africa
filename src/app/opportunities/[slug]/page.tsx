@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Calendar, DollarSign, FileText, ExternalLink, Target, FileCheck, CheckCircle2, Clock, Lightbulb, BadgeCheck } from 'lucide-react';
 import { getOpportunityBySlug, getOpportunities } from '@/app/actions';
 import { getCategoryStyle } from '@/lib/categoryConfig';
-import { decodeHtmlEntities } from '@/lib/textUtils';
+import { decodeHtmlEntities, getApplyUrl } from '@/lib/textUtils';
 import { formatRelativeDate, formatLocalDateTime, formatDeadline } from '@/lib/dateUtils';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import GeoIndicator from '@/components/GeoIndicator';
@@ -67,9 +67,7 @@ export default async function OpportunityPage({ params }: { params: Promise<{ sl
   const CatIcon = catStyle.icon;
   const isClosed = opp.application_status === 'closed';
   const deadline = opp.deadline_date ? formatDeadline(opp.deadline_date) : null;
-  const applyUrl = opp['Apply:']
-    ? (opp['Apply:'].startsWith('http') ? opp['Apply:'] : `https://${opp['Apply:']}`)
-    : null;
+  const applyUrl = getApplyUrl(opp['Apply:']);
 
   // Related: same directory category first, then same country — open listings only
   const related = allOpportunities
