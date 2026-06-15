@@ -31,7 +31,7 @@ export default function GhostCard({ variant, sectionLabel, valueProp, slotsAvail
       >
         {/* Available ribbon */}
         <div className="absolute top-3 right-3 z-10">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-[10px] font-bold uppercase tracking-wider border bg-amber-500/15 border-amber-500/25 text-amber-400">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-[10px] font-bold uppercase tracking-wider border bg-amber-500/15 border-amber-500/25 text-amber-700">
             Available
           </span>
         </div>
@@ -114,7 +114,7 @@ export function NewsGhostCard({ variant, sectionLabel, valueProp, slotsAvailable
             Your Logo
           </span>
           <div className="absolute top-3 right-3">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-[10px] font-bold uppercase tracking-wider border bg-amber-500/15 border-amber-500/25 text-amber-400 backdrop-blur-sm">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-[10px] font-bold uppercase tracking-wider border bg-amber-500/15 border-amber-500/25 text-amber-700 backdrop-blur-sm">
               Available
             </span>
           </div>

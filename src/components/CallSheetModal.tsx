@@ -53,7 +53,7 @@ export default function CallSheetModal({ listing, onClose }: CallSheetModalProps
               {stageLabel}
             </span>
             {listing.mentorship_included && (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border bg-amber-500/10 border-amber-500/20 text-amber-400">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border bg-amber-500/10 border-amber-500/20 text-amber-700">
                 <Sparkles size={12} />
                 Mentorship Included
               </span>

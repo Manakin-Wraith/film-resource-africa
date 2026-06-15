@@ -112,7 +112,7 @@ export default function CallSheetClient({ initialData }: { initialData: CallShee
                 transition={{ duration: 0.3, type: 'spring', bounce: 0.3 }}
                 key={listing.id}
                 onClick={() => setSelectedListing(listing)}
-                className={`rounded-xl p-5 flex flex-col hover:border-line-mid transition-all group cursor-pointer border border-line overflow-hidden border-l-[3px] ${catStyle.borderLeft}`}
+                className={`rounded-xl p-5 flex flex-col hover:border-line-mid transition-all group cursor-pointer border border-line overflow-hidden`}
                 style={{ background: 'var(--surface)' }}
               >
                 {/* Badges row */}
@@ -123,7 +123,7 @@ export default function CallSheetClient({ initialData }: { initialData: CallShee
                       {catStyle.label}
                     </span>
                     {listing.mentorship_included && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider border bg-amber-500/10 border-amber-500/20 text-amber-400">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider border bg-amber-500/10 border-amber-500/20 text-amber-700">
                         <Sparkles size={10} />
                         Mentorship
                       </span>

@@ -46,7 +46,7 @@ export default function SubmitOpportunityForm({ memberName }: { memberName: stri
           className="max-w-2xl mx-auto rounded-2xl p-12 text-center border border-line mt-20"
           style={{ background: 'var(--surface)' }}
         >
-          <div className="w-24 h-24 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mx-auto mb-8 border border-green-500/30">
+          <div className="w-24 h-24 bg-green-500/20 text-green-700 rounded-full flex items-center justify-center mx-auto mb-8 border border-green-500/30">
             <CheckCircle2 size={48} />
           </div>
           <h1 className="text-4xl font-bold font-heading text-foreground mb-6">Sent for review</h1>

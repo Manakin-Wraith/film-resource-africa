@@ -441,7 +441,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                         const updated = await updateOpportunity(opp.id, { status: 'approved' });
                         setData(data.map(o => o.id === opp.id ? updated : o));
                         router.refresh();
-                      }} className="px-3 py-1.5 bg-green-500/20 text-green-400 hover:bg-green-500/30 rounded-lg transition-colors font-medium text-sm flex items-center gap-2 mr-2 border border-green-500/20">
+                      }} className="px-3 py-1.5 bg-green-500/20 text-green-700 hover:bg-green-500/30 rounded-lg transition-colors font-medium text-sm flex items-center gap-2 mr-2 border border-green-500/20">
                         <CheckCircle2 size={16} />
                         Approve
                       </button>
@@ -492,9 +492,9 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                     <td className="p-4 opacity-80 text-sm">{listing.city ? `${listing.city}, ` : ''}{listing.country}</td>
                     <td className="p-4">
                       <span className={`px-2 py-1 rounded-lg text-xs font-bold ${
-                        listing.status === 'approved' ? 'bg-green-500/20 text-green-400' :
-                        listing.status === 'pending' ? 'bg-amber-500/20 text-amber-400' :
-                        'bg-red-500/10 text-red-400'
+                        listing.status === 'approved' ? 'bg-green-500/20 text-green-700' :
+                        listing.status === 'pending' ? 'bg-amber-500/20 text-amber-700' :
+                        'bg-red-500/10 text-red-700'
                       }`}>
                         {listing.status}
                       </span>
@@ -506,7 +506,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                           const updated = await updateDirectoryListing(listing.id, { status: 'approved' });
                           setDirData(dirData.map(l => l.id === listing.id ? updated : l));
                           router.refresh();
-                        }} className="px-3 py-1.5 bg-green-500/20 text-green-400 hover:bg-green-500/30 rounded-lg transition-colors font-medium text-sm flex items-center gap-2 mr-2 border border-green-500/20">
+                        }} className="px-3 py-1.5 bg-green-500/20 text-green-700 hover:bg-green-500/30 rounded-lg transition-colors font-medium text-sm flex items-center gap-2 mr-2 border border-green-500/20">
                           <CheckCircle2 size={16} />
                           Approve
                         </button>
@@ -567,8 +567,8 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                   <td className="p-4 text-teal-400 font-medium text-sm">{listing.compensation}</td>
                   <td className="p-4">
                     <span className={`px-2 py-1 rounded-lg text-xs font-bold ${
-                      listing.status === 'approved' ? 'bg-green-500/20 text-green-400' :
-                      listing.status === 'pending' ? 'bg-amber-500/20 text-amber-400' :
+                      listing.status === 'approved' ? 'bg-green-500/20 text-green-700' :
+                      listing.status === 'pending' ? 'bg-amber-500/20 text-amber-700' :
                       'bg-foreground/[0.04] text-foreground/50'
                     }`}>
                       {listing.status}
@@ -581,7 +581,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                         const updated = await updateCallSheetListing(listing.id, { status: 'approved' });
                         setCsData(csData.map(l => l.id === listing.id ? updated : l));
                         router.refresh();
-                      }} className="px-3 py-1.5 bg-green-500/20 text-green-400 hover:bg-green-500/30 rounded-lg transition-colors font-medium text-sm flex items-center gap-2 mr-2 border border-green-500/20">
+                      }} className="px-3 py-1.5 bg-green-500/20 text-green-700 hover:bg-green-500/30 rounded-lg transition-colors font-medium text-sm flex items-center gap-2 mr-2 border border-green-500/20">
                         <CheckCircle2 size={16} />
                         Approve
                       </button>
@@ -646,19 +646,19 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                     {p.bundle === 'growth' && <Crown size={12} className="inline ml-1.5 text-blue-400" />}
                   </td>
                   <td className="p-4">
-                    <span className={`px-2 py-1 rounded-lg text-xs font-bold ${p.bundle === 'headline' ? 'bg-amber-500/20 text-amber-400' : p.bundle === 'growth' ? 'bg-blue-500/20 text-blue-400' : 'bg-foreground/[0.04] text-foreground/60'}`}>
+                    <span className={`px-2 py-1 rounded-lg text-xs font-bold ${p.bundle === 'headline' ? 'bg-amber-500/20 text-amber-700' : p.bundle === 'growth' ? 'bg-blue-500/20 text-blue-700' : 'bg-foreground/[0.04] text-foreground/60'}`}>
                       {p.bundle || 'starter'}
                     </span>
                   </td>
                   <td className="p-4">
                     <div className="flex flex-wrap gap-1">
-                      <span className="px-1.5 py-0.5 rounded text-xs font-bold bg-green-500/15 text-green-400">Ticker</span>
-                      {(p.bundle === 'growth' || p.bundle === 'headline') && <span className="px-1.5 py-0.5 rounded text-xs font-bold bg-purple-500/15 text-purple-400">News Card</span>}
-                      <span className="px-1.5 py-0.5 rounded text-xs font-bold bg-cyan-500/15 text-cyan-400">{p.newsletter_type === 'spotlight' ? 'NL Spotlight' : 'NL Mention'}</span>
+                      <span className="px-1.5 py-0.5 rounded text-xs font-bold bg-green-500/15 text-green-700">Ticker</span>
+                      {(p.bundle === 'growth' || p.bundle === 'headline') && <span className="px-1.5 py-0.5 rounded text-xs font-bold bg-purple-500/15 text-purple-700">News Card</span>}
+                      <span className="px-1.5 py-0.5 rounded text-xs font-bold bg-cyan-500/15 text-cyan-700">{p.newsletter_type === 'spotlight' ? 'NL Spotlight' : 'NL Mention'}</span>
                     </div>
                   </td>
                   <td className="p-4">
-                    <span className={`px-2 py-1 rounded-lg text-xs font-bold ${p.status === 'approved' ? 'bg-green-500/20 text-green-400' : p.status === 'pending' ? 'bg-amber-500/20 text-amber-400' : 'bg-red-500/10 text-red-400'}`}>
+                    <span className={`px-2 py-1 rounded-lg text-xs font-bold ${p.status === 'approved' ? 'bg-green-500/20 text-green-700' : p.status === 'pending' ? 'bg-amber-500/20 text-amber-700' : 'bg-red-500/10 text-red-700'}`}>
                       {p.status}
                     </span>
                   </td>
@@ -771,7 +771,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
               <div className="flex items-center gap-2 mb-4">
                 <FileText size={18} className="text-purple-400" />
                 <h3 className="text-lg font-bold font-heading">Company Profile Card</h3>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-400 font-bold">News Card</span>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-700 font-bold">News Card</span>
               </div>
               <p className="text-sm opacity-50 mb-6">This powers your branded profile card in the Latest News section — your mini storefront.</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1059,7 +1059,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                       <span>{item.title}</span>
                       {item.is_truncated && (
                         <span
-                          className="px-1.5 py-0.5 rounded text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/30 uppercase tracking-wider"
+                          className="px-1.5 py-0.5 rounded text-xs font-bold bg-red-500/20 text-red-700 border border-red-500/30 uppercase tracking-wider"
                           title="Body looks paywall-truncated. Fix the content and clear this flag (or re-run the enricher) before publishing."
                         >
                           Truncated
@@ -1080,8 +1080,8 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                   </td>
                   <td className="p-4">
                     <span className={`px-2 py-1 rounded-lg text-xs font-bold ${
-                      item.category === 'community_spotlight' ? 'bg-yellow-500/20 text-yellow-400' :
-                      item.category === 'industry_news' ? 'bg-blue-500/20 text-blue-400' :
+                      item.category === 'community_spotlight' ? 'bg-yellow-500/20 text-yellow-700' :
+                      item.category === 'industry_news' ? 'bg-blue-500/20 text-blue-700' :
                       'bg-foreground/[0.04] text-foreground/60'
                     }`}>
                       {item.category === 'community_spotlight' ? 'Spotlight' : item.category}
@@ -1089,10 +1089,10 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                   </td>
                   <td className="p-4">
                     <span className={`px-2 py-1 rounded-lg text-xs font-bold ${
-                      item.status === 'published' ? 'bg-green-500/20 text-green-400' :
-                      item.status === 'pending' ? 'bg-amber-500/20 text-amber-400' :
+                      item.status === 'published' ? 'bg-green-500/20 text-green-700' :
+                      item.status === 'pending' ? 'bg-amber-500/20 text-amber-700' :
                       item.status === 'archived' ? 'bg-foreground/[0.08] text-foreground/60' :
-                      'bg-red-500/10 text-red-400'
+                      'bg-red-500/10 text-red-700'
                     }`}>
                       {item.status || 'published'}
                     </span>
@@ -1104,7 +1104,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                         const updated = await updateNewsItem(item.id, { status: 'published' });
                         setNData(nData.map(n => n.id === item.id ? updated : n));
                         router.refresh();
-                      }} className="px-3 py-1.5 bg-green-500/20 text-green-400 hover:bg-green-500/30 rounded-lg transition-colors font-medium text-sm flex items-center gap-2 border border-green-500/20">
+                      }} className="px-3 py-1.5 bg-green-500/20 text-green-700 hover:bg-green-500/30 rounded-lg transition-colors font-medium text-sm flex items-center gap-2 border border-green-500/20">
                         <CheckCircle2 size={16} />
                         Publish
                       </button>
@@ -1120,7 +1120,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                           setNData(nData.map(n => n.id === item.id ? updated : n));
                           router.refresh();
                         }}
-                        className="px-3 py-1.5 bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 rounded-lg transition-colors font-medium text-sm flex items-center gap-2 border border-amber-500/30"
+                        className="px-3 py-1.5 bg-amber-500/20 text-amber-700 hover:bg-amber-500/30 rounded-lg transition-colors font-medium text-sm flex items-center gap-2 border border-amber-500/30"
                         title="Clear the truncated flag so this row can be published"
                       >
                         Clear truncated
@@ -1141,7 +1141,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                         const updated = await updateNewsItem(item.id, { status: 'published' });
                         setNData(nData.map(n => n.id === item.id ? updated : n));
                         router.refresh();
-                      }} className="px-3 py-1.5 bg-green-500/20 text-green-400 hover:bg-green-500/30 rounded-lg transition-colors font-medium text-sm border border-green-500/20">
+                      }} className="px-3 py-1.5 bg-green-500/20 text-green-700 hover:bg-green-500/30 rounded-lg transition-colors font-medium text-sm border border-green-500/20">
                         Re-publish
                       </button>
                     )}

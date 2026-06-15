@@ -180,7 +180,7 @@ export default function DirectoryClient({ initialData, counts = {} }: { initialD
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.3, type: "spring", bounce: 0.3 }}
                 key={opp.id}
-                className={`rounded-xl flex flex-col hover:border-line-mid transition-all duration-300 group border border-line overflow-hidden relative border-l-[3px] ${catStyle.borderLeft}`}
+                className={`rounded-xl flex flex-col hover:border-line-mid transition-all duration-300 group border border-line overflow-hidden relative`}
                 style={{ background: 'var(--surface)' }}
               >
                 <Link href={`/opportunities/${opp.slug}`} className="flex flex-col flex-grow">

@@ -68,7 +68,7 @@ export default function CountryFilmCommission({ commission, productionGuideUrl, 
           href={productionGuideUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-4 flex items-center gap-2 w-full justify-center bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold py-2.5 px-4 rounded-xl text-sm hover:bg-emerald-500/20 transition-all"
+          className="mt-4 flex items-center gap-2 w-full justify-center bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 font-semibold py-2.5 px-4 rounded-xl text-sm hover:bg-emerald-500/20 transition-all"
         >
           <FileText size={14} />
           {countryName} Production Guide

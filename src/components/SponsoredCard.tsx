@@ -64,7 +64,7 @@ export default function SponsoredCard({
           className="ghost-card-branded relative rounded-xl min-w-[320px] max-w-[360px] flex-shrink-0 snap-start cursor-pointer border border-amber-500/20 hover:border-amber-500/40 transition-all duration-300 group flex flex-col overflow-hidden hover:-translate-y-1 hover:shadow-[0_16px_32px_-10px_rgba(245,158,11,0.2)]"
         >
           <div className="absolute top-3 right-3 z-10">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-[10px] font-bold uppercase tracking-wider border bg-amber-500/15 border-amber-500/25 text-amber-400">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-[10px] font-bold uppercase tracking-wider border bg-amber-500/15 border-amber-500/25 text-amber-700">
               Sponsored
             </span>
           </div>
@@ -150,7 +150,7 @@ export default function SponsoredCard({
         className="ghost-card-branded relative rounded-xl min-w-[320px] max-w-[360px] flex-shrink-0 snap-start cursor-pointer border border-amber-500/20 hover:border-amber-500/40 transition-all duration-300 group flex flex-col overflow-hidden hover:-translate-y-1 hover:shadow-[0_16px_32px_-10px_rgba(245,158,11,0.2)]"
       >
         <div className="absolute top-3 right-3 z-10">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-[10px] font-bold uppercase tracking-wider border bg-amber-500/15 border-amber-500/25 text-amber-400">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-[10px] font-bold uppercase tracking-wider border bg-amber-500/15 border-amber-500/25 text-amber-700">
             Available
           </span>
         </div>
@@ -251,7 +251,7 @@ export function NewsSponsoredCard({
             </div>
           )}
           <div className="absolute top-3 right-3 z-10">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-[10px] font-bold uppercase tracking-wider border bg-purple-500/15 border-purple-500/25 text-purple-400 backdrop-blur-sm">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-[10px] font-bold uppercase tracking-wider border bg-purple-500/15 border-purple-500/25 text-purple-700 backdrop-blur-sm">
               Partner Profile
             </span>
           </div>
@@ -277,7 +277,7 @@ export function NewsSponsoredCard({
           {services.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mb-4">
               {services.slice(0, 5).map(s => (
-                <span key={s} className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-purple-500/10 border border-purple-500/15 text-purple-400">
+                <span key={s} className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-purple-500/10 border border-purple-500/15 text-purple-700">
                   {s}
                 </span>
               ))}
@@ -294,7 +294,7 @@ export function NewsSponsoredCard({
                 e.stopPropagation();
                 onClaim(placement);
               }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-500/15 border border-purple-500/25 text-purple-400 text-xs font-bold hover:bg-purple-500/25 transition-all"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-500/15 border border-purple-500/25 text-purple-700 text-xs font-bold hover:bg-purple-500/25 transition-all"
             >
               {ctaText} <ExternalLink size={12} />
             </a>
@@ -330,7 +330,7 @@ export function NewsSponsoredCard({
               </span>
             )}
             <div className="absolute top-3 right-3">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-[10px] font-bold uppercase tracking-wider border bg-amber-500/15 border-amber-500/25 text-amber-400 backdrop-blur-sm">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-[10px] font-bold uppercase tracking-wider border bg-amber-500/15 border-amber-500/25 text-amber-700 backdrop-blur-sm">
                 Sponsored
               </span>
             </div>
@@ -400,7 +400,7 @@ export function NewsSponsoredCard({
         <div className="relative w-full h-44 ghost-card-shimmer flex items-center justify-center overflow-hidden">
           <span className="text-[11px] font-bold uppercase tracking-[3px] text-amber-500/25">Your Logo</span>
           <div className="absolute top-3 right-3">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-[10px] font-bold uppercase tracking-wider border bg-amber-500/15 border-amber-500/25 text-amber-400 backdrop-blur-sm">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-[10px] font-bold uppercase tracking-wider border bg-amber-500/15 border-amber-500/25 text-amber-700 backdrop-blur-sm">
               Available
             </span>
           </div>

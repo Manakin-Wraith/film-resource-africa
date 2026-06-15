@@ -2,11 +2,11 @@ import { ExternalLink, Landmark, Banknote, Users, Award, Ticket, Link2 } from 'l
 import type { KeyResource, IndustryAssociation } from '@/lib/countries';
 
 const resourceTypeConfig: Record<string, { label: string; icon: typeof Landmark; color: string; bg: string }> = {
-  government: { label: 'Government', icon: Landmark, color: 'text-blue-400', bg: 'bg-blue-500/15 border-blue-500/25' },
-  fund: { label: 'Funding', icon: Banknote, color: 'text-green-400', bg: 'bg-green-500/15 border-green-500/25' },
-  guild: { label: 'Guild', icon: Users, color: 'text-purple-400', bg: 'bg-purple-500/15 border-purple-500/25' },
-  association: { label: 'Association', icon: Award, color: 'text-amber-400', bg: 'bg-amber-500/15 border-amber-500/25' },
-  festival_org: { label: 'Festival', icon: Ticket, color: 'text-pink-400', bg: 'bg-pink-500/15 border-pink-500/25' },
+  government: { label: 'Government', icon: Landmark, color: 'text-blue-700', bg: 'bg-blue-500/15 border-blue-500/25' },
+  fund: { label: 'Funding', icon: Banknote, color: 'text-green-700', bg: 'bg-green-500/15 border-green-500/25' },
+  guild: { label: 'Guild', icon: Users, color: 'text-purple-700', bg: 'bg-purple-500/15 border-purple-500/25' },
+  association: { label: 'Association', icon: Award, color: 'text-amber-700', bg: 'bg-amber-500/15 border-amber-500/25' },
+  festival_org: { label: 'Festival', icon: Ticket, color: 'text-pink-700', bg: 'bg-pink-500/15 border-pink-500/25' },
   other: { label: 'Resource', icon: Link2, color: 'text-foreground/60', bg: 'bg-foreground/[0.04] border-line-mid' },
 };
 

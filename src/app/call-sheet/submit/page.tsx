@@ -69,7 +69,7 @@ export default function SubmitCallSheetPage() {
           className="max-w-2xl mx-auto rounded-2xl p-12 text-center border border-line mt-20"
           style={{ background: 'var(--surface)' }}
         >
-          <div className="w-24 h-24 bg-teal-500/20 text-teal-400 rounded-full flex items-center justify-center mx-auto mb-8 border border-teal-500/30">
+          <div className="w-24 h-24 bg-teal-500/20 text-teal-700 rounded-full flex items-center justify-center mx-auto mb-8 border border-teal-500/30">
             <CheckCircle2 size={48} />
           </div>
           <h1 className="text-4xl font-bold font-heading text-foreground mb-6">Listing Submitted!</h1>

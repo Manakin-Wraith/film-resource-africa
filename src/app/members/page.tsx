@@ -140,7 +140,7 @@ function TierComparison() {
           }}
         >
           <div className="flex items-center justify-between">
-            <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase tracking-wider border bg-amber-500/10 border-amber-500/20 text-amber-400">
+            <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase tracking-wider border bg-amber-500/10 border-amber-500/20 text-amber-700">
               Business
             </span>
           </div>
@@ -161,7 +161,7 @@ function TierComparison() {
               'No commission, ever',
             ].map((item) => (
               <li key={item} className="flex items-start gap-2.5 text-[13px]" style={{ color: 'var(--foreground-secondary)' }}>
-                <ChevronRight size={14} className="text-amber-400 mt-0.5 shrink-0" />
+                <ChevronRight size={14} className="text-amber-700 mt-0.5 shrink-0" />
                 {item}
               </li>
             ))}
@@ -326,9 +326,9 @@ function PRSExplainer() {
       {/* Score band legend */}
       <div className="flex flex-wrap gap-2 mt-5">
         {[
-          { label: 'Production Ready', range: '20–25', tone: 'bg-green-500/10 border-green-500/20 text-green-400' },
-          { label: 'Funding Ready', range: '15–19', tone: 'bg-blue-500/10 border-blue-500/20 text-blue-400' },
-          { label: 'Development Stage', range: '10–14', tone: 'bg-amber-500/10 border-amber-500/20 text-amber-400' },
+          { label: 'Production Ready', range: '20–25', tone: 'bg-green-500/10 border-green-500/20 text-green-700' },
+          { label: 'Funding Ready', range: '15–19', tone: 'bg-blue-500/10 border-blue-500/20 text-blue-700' },
+          { label: 'Development Stage', range: '10–14', tone: 'bg-amber-500/10 border-amber-500/20 text-amber-700' },
           { label: 'Early Concept', range: '0–9', tone: 'bg-foreground/[0.04] border-line text-foreground/40' },
         ].map(({ label, range, tone }) => (
           <span

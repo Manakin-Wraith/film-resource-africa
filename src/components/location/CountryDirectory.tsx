@@ -9,9 +9,9 @@ import DirectoryListingModal from '@/components/DirectoryListingModal';
 import { directoryTypes, getDirectoryType, getCategoriesForType } from '@/lib/industryDirectoryConfig';
 
 const availabilityConfig: Record<string, { label: string; color: string; bg: string }> = {
-  available: { label: 'Available', color: 'text-green-400', bg: 'bg-green-500/20 border-green-500/30' },
-  busy: { label: 'Busy', color: 'text-red-400', bg: 'bg-red-500/20 border-red-500/30' },
-  selective: { label: 'Selective', color: 'text-amber-400', bg: 'bg-amber-500/20 border-amber-500/30' },
+  available: { label: 'Available', color: 'text-green-700', bg: 'bg-green-500/20 border-green-500/30' },
+  busy: { label: 'Busy', color: 'text-red-700', bg: 'bg-red-500/20 border-red-500/30' },
+  selective: { label: 'Selective', color: 'text-amber-700', bg: 'bg-amber-500/20 border-amber-500/30' },
 };
 
 interface CountryDirectoryProps {
@@ -192,12 +192,12 @@ export default function CountryDirectory({ listings, countryName }: CountryDirec
                       {dt.label.split(' ')[0]}
                     </span>
                     {listing.verified && (
-                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-xl text-[10px] font-bold border bg-blue-500/20 border-blue-500/30 text-blue-400">
+                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-xl text-[10px] font-bold border bg-blue-500/20 border-blue-500/30 text-blue-700">
                         <CheckCircle2 size={10} />
                       </span>
                     )}
                     {listing.featured && (
-                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-xl text-[10px] font-bold border bg-amber-500/20 border-amber-500/30 text-amber-400">
+                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-xl text-[10px] font-bold border bg-amber-500/20 border-amber-500/30 text-amber-700">
                         <Star size={10} />
                       </span>
                     )}

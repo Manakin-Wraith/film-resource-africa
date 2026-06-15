@@ -120,7 +120,7 @@ export default function CountryOpportunities({ opportunities, countryName }: Cou
               {opp.last_verified_at && (
                 <span
                   title={`Source last re-checked ${formatLocalDateTime(opp.last_verified_at)}`}
-                  className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-teal-400 bg-teal-500/10 border border-teal-500/20 px-2 py-0.5 rounded-lg"
+                  className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-teal-700 bg-teal-500/10 border border-teal-500/20 px-2 py-0.5 rounded-lg"
                 >
                   <BadgeCheck size={10} />
                   Verified {formatRelativeDate(opp.last_verified_at)}
@@ -129,8 +129,8 @@ export default function CountryOpportunities({ opportunities, countryName }: Cou
               {showCountdown && deadline && (
                 <span className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-lg border ${
                   deadline.urgency === 'critical'
-                    ? 'text-red-400 bg-red-500/10 border-red-500/20'
-                    : 'text-amber-400 bg-amber-500/10 border-amber-500/20'
+                    ? 'text-red-700 bg-red-500/10 border-red-500/20'
+                    : 'text-amber-700 bg-amber-500/10 border-amber-500/20'
                 }`}>
                   <Calendar size={10} />
                   {deadline.countdownText}
