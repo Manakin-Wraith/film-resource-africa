@@ -268,8 +268,8 @@ function NextStepsPanel({
     <div
       style={{
         marginTop: 40, marginBottom: 8, borderRadius: 18, padding: '26px 24px',
-        border: '1px solid rgba(255,255,255,0.1)',
-        background: 'linear-gradient(180deg, rgba(59,130,246,0.07), transparent 70%), rgba(255,255,255,0.02)',
+        border: '1px solid var(--color-line)',
+        background: 'linear-gradient(180deg, rgba(59,130,246,0.07), transparent 70%), rgba(31,24,19,0.03)',
       }}
     >
       <div className="section-rubric" style={{ marginBottom: 6 }}>What’s next</div>
@@ -299,8 +299,8 @@ function NextStepsPanel({
               disabled={pending}
               className={`flex flex-col items-center gap-[5px] px-2 py-3 rounded-xl border transition-colors disabled:cursor-default ${
                 active
-                  ? 'border-primary/60 bg-primary/15 text-white'
-                  : 'border-line-mid bg-white/[0.02] text-(--foreground-secondary) cursor-pointer'
+                  ? 'border-primary/60 bg-primary/15 text-primary-text'
+                  : 'border-line-mid bg-foreground/[0.04] text-(--foreground-secondary) cursor-pointer'
               }`}
             >
               <Icon size={16} />

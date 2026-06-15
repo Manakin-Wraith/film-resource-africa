@@ -72,14 +72,14 @@ export default function AdminClient({ initialData, callSheetData = [], directory
   if (editingId || isAdding) {
     return (
       <div className="glass-card p-6 rounded-2xl relative z-20">
-        <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
+        <div className="flex justify-between items-center mb-6 border-b border-line pb-4">
           <h2 className="text-2xl font-bold font-heading">{editingId ? 'Edit Entry' : 'Add New Entry'}</h2>
-          <button onClick={() => { setEditingId(null); setIsAdding(false); }} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+          <button onClick={() => { setEditingId(null); setIsAdding(false); }} className="p-2 hover:bg-foreground/[0.08] rounded-full transition-colors">
             <X size={24} />
           </button>
         </div>
-        <div className="mb-6 flex items-center gap-6 bg-white/5 p-4 rounded-2xl border border-white/10">
-          <div className="w-16 h-16 bg-black/20 rounded-2xl border border-white/10 flex items-center justify-center overflow-hidden shrink-0">
+        <div className="mb-6 flex items-center gap-6 bg-foreground/[0.04] p-4 rounded-2xl border border-line">
+          <div className="w-16 h-16 bg-foreground/[0.08] rounded-2xl border border-line flex items-center justify-center overflow-hidden shrink-0">
              {formData.logo ? (
                <img src={formData.logo} className="w-full h-full object-contain" alt="Logo preview" />
              ) : (
@@ -120,21 +120,21 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                 <textarea 
                   value={(formData[field] as string) || ''}
                   onChange={e => setFormData({ ...formData, [field]: e.target.value })}
-                  className="w-full bg-black/5 border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary min-h-[120px]"
+                  className="w-full bg-foreground/[0.04] border border-line-mid rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary min-h-[120px]"
                 />
               ) : (
-                <input 
+                <input
                   type="text"
                   value={(formData[field] as string) || ''}
                   onChange={e => setFormData({ ...formData, [field]: e.target.value })}
-                  className="w-full bg-black/5 border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full bg-foreground/[0.04] border border-line-mid rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               )}
             </div>
           ))}
         </div>
         <div className="mt-8 flex justify-end gap-4">
-          <button onClick={() => { setEditingId(null); setIsAdding(false); }} className="px-6 py-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors font-medium">
+          <button onClick={() => { setEditingId(null); setIsAdding(false); }} className="px-6 py-2 rounded-xl bg-foreground/[0.04] hover:bg-foreground/[0.08] transition-colors font-medium">
             Cancel
           </button>
           <button onClick={handleSave} className="px-6 py-2 rounded-xl bg-primary hover:bg-primary-dark text-white transition-colors font-medium">
@@ -155,9 +155,9 @@ export default function AdminClient({ initialData, callSheetData = [], directory
   if (editingCsId) {
     return (
       <div className="glass-card p-6 rounded-2xl relative z-20">
-        <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
+        <div className="flex justify-between items-center mb-6 border-b border-line pb-4">
           <h2 className="text-2xl font-bold font-heading">Edit Call Sheet Listing</h2>
-          <button onClick={() => { setEditingCsId(null); setCsFormData({}); }} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+          <button onClick={() => { setEditingCsId(null); setCsFormData({}); }} className="p-2 hover:bg-foreground/[0.08] rounded-full transition-colors">
             <X size={24} />
           </button>
         </div>
@@ -169,14 +169,14 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                 <textarea
                   value={(csFormData[field] as string) || ''}
                   onChange={e => setCsFormData({ ...csFormData, [field]: e.target.value })}
-                  className="w-full bg-black/5 border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-teal-500 min-h-[120px]"
+                  className="w-full bg-foreground/[0.04] border border-line-mid rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-teal-500 min-h-[120px]"
                 />
               ) : (
                 <input
                   type="text"
                   value={(csFormData[field] as string) || ''}
                   onChange={e => setCsFormData({ ...csFormData, [field]: e.target.value })}
-                  className="w-full bg-black/5 border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  className="w-full bg-foreground/[0.04] border border-line-mid rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-teal-500"
                 />
               )}
             </div>
@@ -194,7 +194,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
           </div>
         </div>
         <div className="mt-8 flex justify-end gap-4">
-          <button onClick={() => { setEditingCsId(null); setCsFormData({}); }} className="px-6 py-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors font-medium">
+          <button onClick={() => { setEditingCsId(null); setCsFormData({}); }} className="px-6 py-2 rounded-xl bg-foreground/[0.04] hover:bg-foreground/[0.08] transition-colors font-medium">
             Cancel
           </button>
           <button onClick={async () => {
@@ -228,9 +228,9 @@ export default function AdminClient({ initialData, callSheetData = [], directory
   if (editingDirId) {
     return (
       <div className="glass-card p-6 rounded-2xl relative z-20">
-        <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
+        <div className="flex justify-between items-center mb-6 border-b border-line pb-4">
           <h2 className="text-2xl font-bold font-heading">Edit Directory Listing</h2>
-          <button onClick={() => { setEditingDirId(null); setDirFormData({}); }} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+          <button onClick={() => { setEditingDirId(null); setDirFormData({}); }} className="p-2 hover:bg-foreground/[0.08] rounded-full transition-colors">
             <X size={24} />
           </button>
         </div>
@@ -242,13 +242,13 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                 <textarea
                   value={(dirFormData[field] as string) || ''}
                   onChange={e => setDirFormData({ ...dirFormData, [field]: e.target.value })}
-                  className="w-full bg-black/5 border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 min-h-[120px]"
+                  className="w-full bg-foreground/[0.04] border border-line-mid rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 min-h-[120px]"
                 />
               ) : field === 'directory_type' ? (
                 <select
                   value={(dirFormData.directory_type as string) || ''}
                   onChange={e => setDirFormData({ ...dirFormData, directory_type: e.target.value as DirectoryListing['directory_type'] })}
-                  className="w-full bg-black/5 border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full bg-foreground/[0.04] border border-line-mid rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 >
                   <option value="company">Production Company</option>
                   <option value="crew">Crew</option>
@@ -261,7 +261,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                   type="text"
                   value={(dirFormData[field] as string) || ''}
                   onChange={e => setDirFormData({ ...dirFormData, [field]: e.target.value })}
-                  className="w-full bg-black/5 border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full bg-foreground/[0.04] border border-line-mid rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
               )}
             </div>
@@ -277,14 +277,14 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                   <textarea
                     value={(dirFormData[field] as string) || ''}
                     onChange={e => setDirFormData({ ...dirFormData, [field]: e.target.value })}
-                    className="w-full bg-black/5 border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 min-h-[80px]"
+                    className="w-full bg-foreground/[0.04] border border-line-mid rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 min-h-[80px]"
                   />
                 ) : (
                   <input
                     type="text"
                     value={String(dirFormData[field] || '')}
                     onChange={e => setDirFormData({ ...dirFormData, [field]: e.target.value })}
-                    className="w-full bg-black/5 border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full bg-foreground/[0.04] border border-line-mid rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
                   />
                 )}
               </div>
@@ -302,7 +302,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
           </label>
         </div>
         <div className="mt-8 flex justify-end gap-4">
-          <button onClick={() => { setEditingDirId(null); setDirFormData({}); }} className="px-6 py-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors font-medium">
+          <button onClick={() => { setEditingDirId(null); setDirFormData({}); }} className="px-6 py-2 rounded-xl bg-foreground/[0.04] hover:bg-foreground/[0.08] transition-colors font-medium">
             Cancel
           </button>
           <button onClick={async () => {
@@ -329,7 +329,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
   return (
     <div className="space-y-6 relative z-20">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div className="flex bg-white/5 p-1 rounded-xl border border-white/10 flex-wrap">
+        <div className="flex bg-foreground/[0.04] p-1 rounded-xl border border-line flex-wrap">
           <button 
             onClick={() => setActiveTab('approved')}
             className={`px-6 py-2 rounded-lg font-medium transition-colors ${activeTab === 'approved' ? 'bg-primary text-white shadow-lg' : 'text-foreground/60 hover:text-foreground'}`}
@@ -377,7 +377,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
           >
             <Handshake size={16} />
             Partners
-            <span className="bg-white/20 text-foreground/60 text-xs px-2 py-0.5 rounded-full">
+            <span className="bg-foreground/[0.08] text-foreground/60 text-xs px-2 py-0.5 rounded-full">
               {pData.filter(p => p.status === 'approved').length}
             </span>
           </button>
@@ -419,7 +419,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
         <div className="overflow-x-auto glass-card rounded-2xl">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-white/10">
+              <tr className="border-b border-line">
                 <th className="p-4 font-heading text-sm opacity-60 uppercase tracking-wider">Title</th>
                 <th className="p-4 font-heading text-sm opacity-60 uppercase tracking-wider">Format</th>
                 <th className="p-4 font-heading text-sm opacity-60 uppercase tracking-wider">Votes</th>
@@ -429,7 +429,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
             </thead>
             <tbody>
               {data.filter(opp => (activeTab === 'approved' ? opp.status !== 'pending' : opp.status === 'pending')).map(opp => (
-                <tr key={opp.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                <tr key={opp.id} className="border-b border-line hover:bg-foreground/[0.04] transition-colors">
                   <td className="p-4 font-medium">{opp.title}</td>
                   <td className="p-4 opacity-80 text-sm">{opp["For Films or Series?"] || 'N/A'}</td>
                   <td className="p-4 font-bold text-accent">{opp.votes || 0}</td>
@@ -468,7 +468,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
         <div className="overflow-x-auto glass-card rounded-2xl">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-white/10">
+              <tr className="border-b border-line">
                 <th className="p-4 font-heading text-sm opacity-60 uppercase tracking-wider">Name</th>
                 <th className="p-4 font-heading text-sm opacity-60 uppercase tracking-wider">Type</th>
                 <th className="p-4 font-heading text-sm opacity-60 uppercase tracking-wider">Category</th>
@@ -481,7 +481,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
               {dirData.map(listing => {
                 const typeLabels: Record<string, string> = { company: 'Company', crew: 'Crew', service: 'Service', training: 'Training', agency: 'Agency' };
                 return (
-                  <tr key={listing.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                  <tr key={listing.id} className="border-b border-line hover:bg-foreground/[0.04] transition-colors">
                     <td className="p-4 font-medium">
                       {listing.name}
                       {listing.featured && <span className="ml-2 text-amber-400 text-xs">★</span>}
@@ -517,7 +517,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                           const updated = await updateDirectoryListing(listing.id, { status: 'rejected' });
                           setDirData(dirData.map(l => l.id === listing.id ? updated : l));
                           router.refresh();
-                        }} className="px-3 py-1.5 bg-white/10 text-foreground/60 hover:bg-white/20 rounded-lg transition-colors font-medium text-sm mr-2 border border-white/10">
+                        }} className="px-3 py-1.5 bg-foreground/[0.04] text-foreground/60 hover:bg-foreground/[0.08] rounded-lg transition-colors font-medium text-sm mr-2 border border-line">
                           Reject
                         </button>
                       )}
@@ -549,7 +549,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
         <div className="overflow-x-auto glass-card rounded-2xl">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-white/10">
+              <tr className="border-b border-line">
                 <th className="p-4 font-heading text-sm opacity-60 uppercase tracking-wider">Role</th>
                 <th className="p-4 font-heading text-sm opacity-60 uppercase tracking-wider">Production</th>
                 <th className="p-4 font-heading text-sm opacity-60 uppercase tracking-wider">Company</th>
@@ -560,7 +560,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
             </thead>
             <tbody>
               {csData.map(listing => (
-                <tr key={listing.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                <tr key={listing.id} className="border-b border-line hover:bg-foreground/[0.04] transition-colors">
                   <td className="p-4 font-medium">{listing.title}</td>
                   <td className="p-4 opacity-80 text-sm">{listing.production_title}</td>
                   <td className="p-4 opacity-80 text-sm">{listing.production_company}</td>
@@ -569,7 +569,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                     <span className={`px-2 py-1 rounded-lg text-xs font-bold ${
                       listing.status === 'approved' ? 'bg-green-500/20 text-green-400' :
                       listing.status === 'pending' ? 'bg-amber-500/20 text-amber-400' :
-                      'bg-white/10 text-foreground/50'
+                      'bg-foreground/[0.04] text-foreground/50'
                     }`}>
                       {listing.status}
                     </span>
@@ -592,7 +592,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                         const updated = await updateCallSheetListing(listing.id, { status: 'closed' });
                         setCsData(csData.map(l => l.id === listing.id ? updated : l));
                         router.refresh();
-                      }} className="px-3 py-1.5 bg-white/10 text-foreground/60 hover:bg-white/20 rounded-lg transition-colors font-medium text-sm mr-2 border border-white/10">
+                      }} className="px-3 py-1.5 bg-foreground/[0.04] text-foreground/60 hover:bg-foreground/[0.08] rounded-lg transition-colors font-medium text-sm mr-2 border border-line">
                         Close
                       </button>
                     )}
@@ -622,7 +622,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
         <div className="overflow-x-auto glass-card rounded-2xl">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-white/10">
+              <tr className="border-b border-line">
                 <th className="p-4 font-heading text-sm opacity-60 uppercase tracking-wider">Logo</th>
                 <th className="p-4 font-heading text-sm opacity-60 uppercase tracking-wider">Name</th>
                 <th className="p-4 font-heading text-sm opacity-60 uppercase tracking-wider">Bundle</th>
@@ -634,9 +634,9 @@ export default function AdminClient({ initialData, callSheetData = [], directory
             </thead>
             <tbody>
               {pData.map(p => (
-                <tr key={p.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                <tr key={p.id} className="border-b border-line hover:bg-foreground/[0.04] transition-colors">
                   <td className="p-4">
-                    <div className="w-10 h-10 rounded-lg overflow-hidden bg-white/10 border border-white/10">
+                    <div className="w-10 h-10 rounded-lg overflow-hidden bg-foreground/[0.04] border border-line">
                       <img src={p.logo_url} alt={p.name} className="w-full h-full object-contain" />
                     </div>
                   </td>
@@ -646,7 +646,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                     {p.bundle === 'growth' && <Crown size={12} className="inline ml-1.5 text-blue-400" />}
                   </td>
                   <td className="p-4">
-                    <span className={`px-2 py-1 rounded-lg text-xs font-bold ${p.bundle === 'headline' ? 'bg-amber-500/20 text-amber-400' : p.bundle === 'growth' ? 'bg-blue-500/20 text-blue-400' : 'bg-white/10 text-foreground/60'}`}>
+                    <span className={`px-2 py-1 rounded-lg text-xs font-bold ${p.bundle === 'headline' ? 'bg-amber-500/20 text-amber-400' : p.bundle === 'growth' ? 'bg-blue-500/20 text-blue-400' : 'bg-foreground/[0.04] text-foreground/60'}`}>
                       {p.bundle || 'starter'}
                     </span>
                   </td>
@@ -691,16 +691,16 @@ export default function AdminClient({ initialData, callSheetData = [], directory
         const bundle = partnerForm.bundle || 'starter';
         const hasProfileCard = bundle === 'growth' || bundle === 'headline';
         const bundleConfig = {
-          starter: { label: 'Starter — R300/mo', color: 'border-white/20', desc: 'Ticker placement + Newsletter mention', tier: 'partner' as const, newsletter: 'mention' as const },
+          starter: { label: 'Starter — R300/mo', color: 'border-line-mid', desc: 'Ticker placement + Newsletter mention', tier: 'partner' as const, newsletter: 'mention' as const },
           growth: { label: 'Growth — R800/mo', color: 'border-blue-500', desc: 'Sponsor ticker + News profile card + Newsletter mention', tier: 'sponsor' as const, newsletter: 'mention' as const },
           headline: { label: 'Headline — R1,200/mo', color: 'border-amber-500', desc: 'Sponsor ticker + News profile card + Newsletter spotlight', tier: 'sponsor' as const, newsletter: 'spotlight' as const },
         };
         const cfg = bundleConfig[bundle];
         return (
         <div className="glass-card p-6 rounded-2xl relative z-20">
-          <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
+          <div className="flex justify-between items-center mb-6 border-b border-line pb-4">
             <h2 className="text-2xl font-bold font-heading">{editingPartnerId ? 'Edit Partner' : 'Add New Partner'}</h2>
-            <button onClick={() => { setIsAddingPartner(false); setEditingPartnerId(null); setPartnerForm({}); setPartnerLogoFile(null); setPartnerLogoPreview(null); setFeaturedImageFile(null); setFeaturedImagePreview(null); }} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+            <button onClick={() => { setIsAddingPartner(false); setEditingPartnerId(null); setPartnerForm({}); setPartnerLogoFile(null); setPartnerLogoPreview(null); setFeaturedImageFile(null); setFeaturedImagePreview(null); }} className="p-2 hover:bg-foreground/[0.08] rounded-full transition-colors">
               <X size={24} />
             </button>
           </div>
@@ -710,7 +710,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
             <label className="block text-sm font-medium opacity-80 mb-3">Select Bundle *</label>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {(Object.keys(bundleConfig) as Array<keyof typeof bundleConfig>).map(key => (
-                <button key={key} onClick={() => setPartnerForm({ ...partnerForm, bundle: key })} className={`p-4 rounded-xl border-2 text-left transition-all ${bundle === key ? bundleConfig[key].color + ' bg-white/5 ring-1 ring-white/20' : 'border-white/10 hover:border-white/20'}`}>
+                <button key={key} onClick={() => setPartnerForm({ ...partnerForm, bundle: key })} className={`p-4 rounded-xl border-2 text-left transition-all ${bundle === key ? bundleConfig[key].color + ' bg-foreground/[0.04] ring-1 ring-line-mid' : 'border-line hover:border-line-mid'}`}>
                   <div className="flex items-center gap-2 mb-1">
                     {key === 'headline' ? <Sparkles size={16} className="text-amber-400" /> : key === 'growth' ? <Crown size={16} className="text-blue-400" /> : <Package size={16} className="text-foreground/50" />}
                     <span className="font-bold text-sm capitalize">{key}</span>
@@ -725,18 +725,18 @@ export default function AdminClient({ initialData, callSheetData = [], directory
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium opacity-80 mb-2">Partner Name *</label>
-              <input type="text" value={partnerForm.name || ''} onChange={e => setPartnerForm({ ...partnerForm, name: e.target.value })} className="w-full bg-black/5 border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="e.g. SlateOne Studio" />
+              <input type="text" value={partnerForm.name || ''} onChange={e => setPartnerForm({ ...partnerForm, name: e.target.value })} className="w-full bg-foreground/[0.04] border border-line-mid rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="e.g. SlateOne Studio" />
             </div>
             <div>
               <label className="block text-sm font-medium opacity-80 mb-2">Website</label>
-              <input type="url" value={partnerForm.website || ''} onChange={e => setPartnerForm({ ...partnerForm, website: e.target.value })} className="w-full bg-black/5 border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="https://..." />
+              <input type="url" value={partnerForm.website || ''} onChange={e => setPartnerForm({ ...partnerForm, website: e.target.value })} className="w-full bg-foreground/[0.04] border border-line-mid rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="https://..." />
             </div>
             <div>
               <label className="block text-sm font-medium opacity-80 mb-2">Sort Order</label>
-              <input type="number" value={partnerForm.sort_order ?? 0} onChange={e => setPartnerForm({ ...partnerForm, sort_order: parseInt(e.target.value) || 0 })} className="w-full bg-black/5 border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-500" />
+              <input type="number" value={partnerForm.sort_order ?? 0} onChange={e => setPartnerForm({ ...partnerForm, sort_order: parseInt(e.target.value) || 0 })} className="w-full bg-foreground/[0.04] border border-line-mid rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-500" />
             </div>
             <div className="flex items-end">
-              <div className="px-4 py-3 rounded-xl bg-white/5 border border-white/10 w-full">
+              <div className="px-4 py-3 rounded-xl bg-foreground/[0.04] border border-line w-full">
                 <p className="text-xs opacity-40 mb-1">Auto-set from bundle</p>
                 <p className="text-sm"><span className="font-medium">Tier:</span> <span className={cfg.tier === 'sponsor' ? 'text-amber-400' : 'text-foreground/60'}>{cfg.tier}</span> · <span className="font-medium">Newsletter:</span> <span className={cfg.newsletter === 'spotlight' ? 'text-amber-400' : 'text-foreground/60'}>{cfg.newsletter}</span></p>
               </div>
@@ -744,7 +744,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
             <div className="md:col-span-2">
               <label className="block text-sm font-medium opacity-80 mb-2">Logo *</label>
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-xl border border-white/10 bg-white/5 overflow-hidden flex items-center justify-center shrink-0">
+                <div className="w-16 h-16 rounded-xl border border-line bg-foreground/[0.04] overflow-hidden flex items-center justify-center shrink-0">
                   {partnerLogoPreview ? (
                     <img src={partnerLogoPreview} alt="Preview" className="w-full h-full object-contain" />
                   ) : (
@@ -767,7 +767,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
 
           {/* Company Profile section — Growth & Headline only */}
           {hasProfileCard && (
-            <div className="mt-8 pt-6 border-t border-white/10">
+            <div className="mt-8 pt-6 border-t border-line">
               <div className="flex items-center gap-2 mb-4">
                 <FileText size={18} className="text-purple-400" />
                 <h3 className="text-lg font-bold font-heading">Company Profile Card</h3>
@@ -777,26 +777,26 @@ export default function AdminClient({ initialData, callSheetData = [], directory
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium opacity-80 mb-2">About *</label>
-                  <textarea value={partnerForm.about || ''} onChange={e => setPartnerForm({ ...partnerForm, about: e.target.value })} className="w-full bg-black/5 border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 min-h-[100px]" placeholder="2-3 sentences about your company. What do you do? Who do you serve?" />
+                  <textarea value={partnerForm.about || ''} onChange={e => setPartnerForm({ ...partnerForm, about: e.target.value })} className="w-full bg-foreground/[0.04] border border-line-mid rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 min-h-[100px]" placeholder="2-3 sentences about your company. What do you do? Who do you serve?" />
                   <p className="text-xs opacity-40 mt-1">{(partnerForm.about || '').length}/300 characters recommended</p>
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium opacity-80 mb-2">Services / Specialities</label>
-                  <input type="text" value={partnerForm.services || ''} onChange={e => setPartnerForm({ ...partnerForm, services: e.target.value })} className="w-full bg-black/5 border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Post-Production, VFX, Color Grading, Sound Design" />
+                  <input type="text" value={partnerForm.services || ''} onChange={e => setPartnerForm({ ...partnerForm, services: e.target.value })} className="w-full bg-foreground/[0.04] border border-line-mid rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Post-Production, VFX, Color Grading, Sound Design" />
                   <p className="text-xs opacity-40 mt-1">Comma-separated — displayed as tags on the profile card</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium opacity-80 mb-2">CTA Button Text</label>
-                  <input type="text" value={partnerForm.cta_text || ''} onChange={e => setPartnerForm({ ...partnerForm, cta_text: e.target.value })} className="w-full bg-black/5 border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Visit Website" />
+                  <input type="text" value={partnerForm.cta_text || ''} onChange={e => setPartnerForm({ ...partnerForm, cta_text: e.target.value })} className="w-full bg-foreground/[0.04] border border-line-mid rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Visit Website" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium opacity-80 mb-2">CTA Link URL</label>
-                  <input type="url" value={partnerForm.cta_url || ''} onChange={e => setPartnerForm({ ...partnerForm, cta_url: e.target.value })} className="w-full bg-black/5 border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="https://..." />
+                  <input type="url" value={partnerForm.cta_url || ''} onChange={e => setPartnerForm({ ...partnerForm, cta_url: e.target.value })} className="w-full bg-foreground/[0.04] border border-line-mid rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="https://..." />
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium opacity-80 mb-2">Featured Image (optional)</label>
                   <div className="flex items-center gap-4">
-                    <div className="w-24 h-14 rounded-xl border border-white/10 bg-white/5 overflow-hidden flex items-center justify-center shrink-0">
+                    <div className="w-24 h-14 rounded-xl border border-line bg-foreground/[0.04] overflow-hidden flex items-center justify-center shrink-0">
                       {featuredImagePreview || partnerForm.featured_image_url ? (
                         <img src={featuredImagePreview || partnerForm.featured_image_url || ''} alt="Featured" className="w-full h-full object-cover" />
                       ) : (
@@ -820,7 +820,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
           )}
 
           <div className="mt-8 flex justify-end gap-4">
-            <button onClick={() => { setIsAddingPartner(false); setEditingPartnerId(null); setPartnerForm({}); setPartnerLogoFile(null); setPartnerLogoPreview(null); setFeaturedImageFile(null); setFeaturedImagePreview(null); }} className="px-6 py-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors font-medium">
+            <button onClick={() => { setIsAddingPartner(false); setEditingPartnerId(null); setPartnerForm({}); setPartnerLogoFile(null); setPartnerLogoPreview(null); setFeaturedImageFile(null); setFeaturedImagePreview(null); }} className="px-6 py-2 rounded-xl bg-foreground/[0.04] hover:bg-foreground/[0.08] transition-colors font-medium">
               Cancel
             </button>
             <button disabled={partnerSaving} onClick={async () => {
@@ -892,9 +892,9 @@ export default function AdminClient({ initialData, callSheetData = [], directory
         const newsTextFields: (keyof NewsItem)[] = ['title', 'summary', 'content', 'slug', 'url', 'project_name'];
         return (
           <div className="glass-card p-6 rounded-2xl relative z-20">
-            <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
+            <div className="flex justify-between items-center mb-6 border-b border-line pb-4">
               <h2 className="text-2xl font-bold font-heading">Edit Spotlight Submission</h2>
-              <button onClick={() => { setEditingNewsId(null); setNewsFormData({}); setNewsImageFile(null); setNewsImagePreview(null); }} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+              <button onClick={() => { setEditingNewsId(null); setNewsFormData({}); setNewsImageFile(null); setNewsImagePreview(null); }} className="p-2 hover:bg-foreground/[0.08] rounded-full transition-colors">
                 <X size={24} />
               </button>
             </div>
@@ -906,14 +906,14 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                     <textarea
                       value={(newsFormData[field] as string) || ''}
                       onChange={e => setNewsFormData({ ...newsFormData, [field]: e.target.value })}
-                      className="w-full bg-black/5 border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-500 min-h-[120px]"
+                      className="w-full bg-foreground/[0.04] border border-line-mid rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-500 min-h-[120px]"
                     />
                   ) : (
                     <input
                       type="text"
                       value={(newsFormData[field] as string) || ''}
                       onChange={e => setNewsFormData({ ...newsFormData, [field]: e.target.value })}
-                      className="w-full bg-black/5 border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                      className="w-full bg-foreground/[0.04] border border-line-mid rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-500"
                     />
                   )}
                 </div>
@@ -923,7 +923,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
               <div className="col-span-1 md:col-span-2">
                 <label className="block text-sm font-medium opacity-80 mb-2">Article Image</label>
                 <div className="flex items-start gap-4">
-                  <div className="w-32 h-20 bg-black/20 rounded-xl border border-white/10 flex items-center justify-center overflow-hidden shrink-0">
+                  <div className="w-32 h-20 bg-foreground/[0.08] rounded-xl border border-line flex items-center justify-center overflow-hidden shrink-0">
                     {(newsImagePreview || newsFormData.image_url) ? (
                       <img src={newsImagePreview || newsFormData.image_url} className="w-full h-full object-cover" alt="Article image" />
                     ) : (
@@ -931,7 +931,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                     )}
                   </div>
                   <div className="flex-1 space-y-2">
-                    <label className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 cursor-pointer transition-colors text-sm w-fit">
+                    <label className="flex items-center gap-2 px-4 py-2 rounded-xl bg-foreground/[0.04] hover:bg-foreground/[0.08] border border-line cursor-pointer transition-colors text-sm w-fit">
                       <Upload size={16} />
                       {newsImageUploading ? 'Uploading...' : 'Upload Image'}
                       <input
@@ -965,7 +965,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                       placeholder="Or paste image URL..."
                       value={(newsFormData.image_url as string) || ''}
                       onChange={e => { setNewsFormData({ ...newsFormData, image_url: e.target.value }); setNewsImagePreview(null); setNewsImageFile(null); }}
-                      className="w-full bg-black/5 border border-white/20 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500 text-sm"
+                      className="w-full bg-foreground/[0.04] border border-line-mid rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500 text-sm"
                     />
                     {newsFormData.image_url && (
                       <button onClick={() => { setNewsFormData({ ...newsFormData, image_url: '' }); setNewsImagePreview(null); setNewsImageFile(null); }} className="text-xs text-red-400 hover:text-red-300">
@@ -981,7 +981,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                 <select
                   value={(newsFormData.category as string) || 'community_spotlight'}
                   onChange={e => setNewsFormData({ ...newsFormData, category: e.target.value as NewsItem['category'] })}
-                  className="w-full bg-black/5 border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                  className="w-full bg-foreground/[0.04] border border-line-mid rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-500"
                 >
                   <option value="community_spotlight">Community Spotlight</option>
                   <option value="industry_news">Industry News</option>
@@ -993,13 +993,13 @@ export default function AdminClient({ initialData, callSheetData = [], directory
               </div>
             </div>
             {newsFormData.submitted_by_name && (
-              <div className="mt-4 p-3 bg-white/5 rounded-xl border border-white/10 text-sm text-foreground/60">
+              <div className="mt-4 p-3 bg-foreground/[0.04] rounded-xl border border-line text-sm text-foreground/60">
                 Submitted by: <strong className="text-foreground/80">{newsFormData.submitted_by_name}</strong>
                 {newsFormData.submitted_by_email && <> ({newsFormData.submitted_by_email})</>}
               </div>
             )}
             <div className="mt-8 flex justify-end gap-4">
-              <button onClick={() => { setEditingNewsId(null); setNewsFormData({}); setNewsImageFile(null); setNewsImagePreview(null); }} className="px-6 py-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors font-medium">
+              <button onClick={() => { setEditingNewsId(null); setNewsFormData({}); setNewsImageFile(null); setNewsImagePreview(null); }} className="px-6 py-2 rounded-xl bg-foreground/[0.04] hover:bg-foreground/[0.08] transition-colors font-medium">
                 Cancel
               </button>
               <button onClick={async () => {
@@ -1024,7 +1024,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
       {activeTab === 'spotlight' && !editingNewsId && (
         <div className="glass-card rounded-2xl">
           {/* Status filter — review published / pending / archived (relevance-hidden) / rejected */}
-          <div className="flex flex-wrap items-center gap-2 p-4 border-b border-white/10">
+          <div className="flex flex-wrap items-center gap-2 p-4 border-b border-line">
             {(['all', 'published', 'pending', 'archived', 'rejected'] as const).map(f => {
               const count = f === 'all' ? nData.length : nData.filter(n => (n.status || 'published') === f).length;
               return (
@@ -1032,7 +1032,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                   key={f}
                   onClick={() => setNewsFilter(f)}
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors capitalize ${
-                    newsFilter === f ? 'bg-purple-600 text-white shadow-lg' : 'text-foreground/60 hover:text-foreground bg-white/5'
+                    newsFilter === f ? 'bg-purple-600 text-white shadow-lg' : 'text-foreground/60 hover:text-foreground bg-foreground/[0.04]'
                   }`}
                 >
                   {f} <span className="opacity-60">({count})</span>
@@ -1043,7 +1043,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
           <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-white/10">
+              <tr className="border-b border-line">
                 <th className="p-4 font-heading text-sm opacity-60 uppercase tracking-wider">Title</th>
                 <th className="p-4 font-heading text-sm opacity-60 uppercase tracking-wider">Submitted By</th>
                 <th className="p-4 font-heading text-sm opacity-60 uppercase tracking-wider">Category</th>
@@ -1053,7 +1053,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
             </thead>
             <tbody>
               {nData.filter(n => newsFilter === 'all' || (n.status || 'published') === newsFilter).map(item => (
-                <tr key={item.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                <tr key={item.id} className="border-b border-line hover:bg-foreground/[0.04] transition-colors">
                   <td className="p-4">
                     <div className="font-medium flex items-center gap-2">
                       <span>{item.title}</span>
@@ -1082,7 +1082,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                     <span className={`px-2 py-1 rounded-lg text-xs font-bold ${
                       item.category === 'community_spotlight' ? 'bg-yellow-500/20 text-yellow-400' :
                       item.category === 'industry_news' ? 'bg-blue-500/20 text-blue-400' :
-                      'bg-white/10 text-foreground/60'
+                      'bg-foreground/[0.04] text-foreground/60'
                     }`}>
                       {item.category === 'community_spotlight' ? 'Spotlight' : item.category}
                     </span>
@@ -1091,7 +1091,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                     <span className={`px-2 py-1 rounded-lg text-xs font-bold ${
                       item.status === 'published' ? 'bg-green-500/20 text-green-400' :
                       item.status === 'pending' ? 'bg-amber-500/20 text-amber-400' :
-                      item.status === 'archived' ? 'bg-slate-500/20 text-slate-300' :
+                      item.status === 'archived' ? 'bg-foreground/[0.08] text-foreground/60' :
                       'bg-red-500/10 text-red-400'
                     }`}>
                       {item.status || 'published'}
@@ -1132,7 +1132,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                         const updated = await updateNewsItem(item.id, { status: 'rejected' });
                         setNData(nData.map(n => n.id === item.id ? updated : n));
                         router.refresh();
-                      }} className="px-3 py-1.5 bg-white/10 text-foreground/60 hover:bg-white/20 rounded-lg transition-colors font-medium text-sm border border-white/10">
+                      }} className="px-3 py-1.5 bg-foreground/[0.04] text-foreground/60 hover:bg-foreground/[0.08] rounded-lg transition-colors font-medium text-sm border border-line">
                         Unpublish
                       </button>
                     )}

@@ -36,7 +36,7 @@ export default async function AdminPage() {
   return (
     <main className="min-h-screen bg-background relative z-10 p-8">
       <div className="max-w-7xl mx-auto">
-        <header className="mb-8 flex justify-between items-center bg-white/5 p-6 rounded-2xl glass-panel">
+        <header className="mb-8 flex justify-between items-center bg-foreground/[0.04] p-6 rounded-2xl glass-panel">
           <div>
             <h1 className="text-3xl font-bold font-heading text-primary">Admin Dashboard</h1>
             <p className="text-sm opacity-60">Manage your directory entries</p>
