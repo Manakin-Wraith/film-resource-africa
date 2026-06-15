@@ -23,7 +23,7 @@ export default function CountryResources({ resources, associations, countryName 
     <section id="resources-links" aria-label={`Key resources and industry bodies in ${countryName}`} className="space-y-6">
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-2xl bg-amber-500/20 flex items-center justify-center border border-amber-500/20">
-          <Link2 size={20} className="text-amber-400" />
+          <Link2 size={20} className="text-amber-700" />
         </div>
         <div>
           <h2 className="text-2xl md:text-3xl font-bold font-heading">Key Resources</h2>
@@ -92,7 +92,7 @@ export default function CountryResources({ resources, associations, countryName 
                 className="flex items-start gap-3 p-3 rounded-xl bg-foreground/[0.04] border border-line hover:border-line-mid transition-all"
               >
                 <div className="w-8 h-8 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <Users size={14} className="text-purple-400" />
+                  <Users size={14} className="text-purple-700" />
                 </div>
                 <div className="min-w-0">
                   <p className="font-semibold text-sm leading-tight">

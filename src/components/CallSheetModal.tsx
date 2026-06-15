@@ -84,12 +84,12 @@ export default function CallSheetModal({ listing, onClose }: CallSheetModalProps
             <p className="text-foreground/90 font-medium">{listing.producer_name}</p>
           </div>
           <div className="bg-teal-500/10 rounded-xl p-4 border border-teal-500/10">
-            <div className="flex items-center gap-2 text-xs text-teal-400/70 uppercase font-bold tracking-wider mb-1">
+            <div className="flex items-center gap-2 text-xs text-teal-700/70 uppercase font-bold tracking-wider mb-1">
               <DollarSign size={12} />
               Compensation
             </div>
             <p className="text-teal-300 font-bold">{listing.compensation}</p>
-            <p className="text-teal-400/60 text-xs mt-0.5">{compTypeLabel}</p>
+            <p className="text-teal-700/60 text-xs mt-0.5">{compTypeLabel}</p>
           </div>
           <div className="bg-foreground/[0.04] rounded-xl p-4 border border-line">
             <div className="flex items-center gap-2 text-xs text-foreground/50 uppercase font-bold tracking-wider mb-1">

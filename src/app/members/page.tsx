@@ -315,7 +315,7 @@ function PRSExplainer() {
           <ul className="space-y-2">
             {['Chain of title & rights', 'Budget structure & schedule', 'Key team attached', 'Locations, permits & compliance'].map((item) => (
               <li key={item} className="flex items-center gap-2 text-[13px]" style={{ color: 'var(--foreground-secondary)' }}>
-                <span className="w-1 h-1 rounded-full text-amber-400 bg-amber-400 shrink-0" />
+                <span className="w-1 h-1 rounded-full text-amber-700 bg-amber-400 shrink-0" />
                 {item}
               </li>
             ))}

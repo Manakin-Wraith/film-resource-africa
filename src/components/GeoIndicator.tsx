@@ -34,7 +34,7 @@ const GEO_CONFIG: Record<string, { emoji: string; label: string; color: string; 
   // emoji/label resolved from countryIso/countryName; 📍 covers missing iso
   country_specific: { emoji: '📍', label: 'Country-specific', color: 'text-emerald-700', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
   pan_african: { emoji: '🌍', label: 'Africa', color: 'text-amber-700', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
-  international: { emoji: '🌐', label: 'International', color: 'text-sky-400', bg: 'bg-sky-500/10', border: 'border-sky-500/20' },
+  international: { emoji: '🌐', label: 'International', color: 'text-sky-700', bg: 'bg-sky-500/10', border: 'border-sky-500/20' },
 };
 
 export default function GeoIndicator({ geoScope, countryIso, countryName, variant = 'pill', className = '' }: GeoIndicatorProps) {

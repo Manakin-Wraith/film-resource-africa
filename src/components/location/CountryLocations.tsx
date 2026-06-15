@@ -13,7 +13,7 @@ export default function CountryLocations({ locations, countryName }: CountryLoca
     <section id="locations" aria-label={`Filming locations in ${countryName}`} className="space-y-6">
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-2xl bg-rose-500/20 flex items-center justify-center border border-rose-500/20">
-          <MapPin size={20} className="text-rose-400" />
+          <MapPin size={20} className="text-rose-700" />
         </div>
         <div>
           <h2 className="text-2xl md:text-3xl font-bold font-heading">Filming Locations</h2>
@@ -31,7 +31,7 @@ export default function CountryLocations({ locations, countryName }: CountryLoca
             style={{ background: 'var(--surface)' }}
           >
             <div className="flex items-start justify-between gap-3 mb-2">
-              <h3 className="font-bold font-heading text-base group-hover:text-rose-400 transition-colors leading-tight">
+              <h3 className="font-bold font-heading text-base group-hover:text-rose-700 transition-colors leading-tight">
                 {location.name}
               </h3>
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold text-foreground/50 bg-foreground/[0.04] border border-line whitespace-nowrap">

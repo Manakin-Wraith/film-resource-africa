@@ -45,7 +45,7 @@ export default function GhostCard({ variant, sectionLabel, valueProp, slotsAvail
 
         {/* Body */}
         <div className="p-6 flex flex-col flex-grow">
-          <h3 className="text-lg font-bold font-heading mb-1 text-amber-400/80 group-hover:text-amber-400 transition-colors">
+          <h3 className="text-lg font-bold font-heading mb-1 text-amber-700/80 group-hover:text-amber-700 transition-colors">
             Your Brand Here
           </h3>
           <p className="text-foreground/40 text-sm leading-relaxed flex-grow mb-4">
@@ -56,7 +56,7 @@ export default function GhostCard({ variant, sectionLabel, valueProp, slotsAvail
             <span className="text-[11px] font-medium text-foreground/30">
               {slotsAvailable} of 3 spots available
             </span>
-            <span className="inline-flex items-center gap-1.5 text-amber-400 text-xs font-bold uppercase tracking-wide opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <span className="inline-flex items-center gap-1.5 text-amber-700 text-xs font-bold uppercase tracking-wide opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               Claim <ArrowRight size={12} />
             </span>
           </div>
@@ -74,10 +74,10 @@ export default function GhostCard({ variant, sectionLabel, valueProp, slotsAvail
     >
       {/* Icon */}
       <div className="w-12 h-12 rounded-2xl border-2 border-dashed border-line-mid group-hover:border-amber-500/40 flex items-center justify-center mb-4 transition-all duration-300 group-hover:bg-amber-500/5">
-        <Plus size={20} className="text-foreground/20 group-hover:text-amber-400 transition-colors" />
+        <Plus size={20} className="text-foreground/20 group-hover:text-amber-700 transition-colors" />
       </div>
 
-      <h3 className="text-sm font-bold font-heading text-foreground/30 group-hover:text-amber-400/80 transition-colors mb-1">
+      <h3 className="text-sm font-bold font-heading text-foreground/30 group-hover:text-amber-700/80 transition-colors mb-1">
         Your Brand Here
       </h3>
 
@@ -86,7 +86,7 @@ export default function GhostCard({ variant, sectionLabel, valueProp, slotsAvail
       </p>
 
       {/* CTA — reveals on hover */}
-      <span className="inline-flex items-center gap-1.5 text-amber-400 text-[10px] font-bold uppercase tracking-wider opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+      <span className="inline-flex items-center gap-1.5 text-amber-700 text-[10px] font-bold uppercase tracking-wider opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
         Become a Partner <ArrowRight size={10} />
       </span>
 
@@ -121,7 +121,7 @@ export function NewsGhostCard({ variant, sectionLabel, valueProp, slotsAvailable
         </div>
 
         <div className="p-6 flex flex-col flex-grow">
-          <h3 className="text-lg font-bold font-heading mb-2 text-amber-400/80 group-hover:text-amber-400 transition-colors leading-snug">
+          <h3 className="text-lg font-bold font-heading mb-2 text-amber-700/80 group-hover:text-amber-700 transition-colors leading-snug">
             Your Brand Here
           </h3>
           <p className="text-foreground/40 text-sm leading-relaxed flex-grow mb-4">
@@ -129,7 +129,7 @@ export function NewsGhostCard({ variant, sectionLabel, valueProp, slotsAvailable
           </p>
           <div className="flex items-center justify-between mt-auto">
             <span className="text-[11px] text-foreground/25">{slotsAvailable}/3 spots</span>
-            <span className="inline-flex items-center gap-2 text-amber-400 text-sm font-semibold group-hover:gap-3 transition-all">
+            <span className="inline-flex items-center gap-2 text-amber-700 text-sm font-semibold group-hover:gap-3 transition-all">
               Claim this spot <ArrowRight size={14} />
             </span>
           </div>
@@ -147,10 +147,10 @@ export function NewsGhostCard({ variant, sectionLabel, valueProp, slotsAvailable
     >
       <div className="p-8 flex flex-col items-center justify-center flex-grow">
         <div className="w-14 h-14 rounded-2xl border-2 border-dashed border-line-mid group-hover:border-amber-500/40 flex items-center justify-center mb-5 transition-all duration-300 group-hover:bg-amber-500/5">
-          <Plus size={24} className="text-foreground/20 group-hover:text-amber-400 transition-colors" />
+          <Plus size={24} className="text-foreground/20 group-hover:text-amber-700 transition-colors" />
         </div>
 
-        <h3 className="text-base font-bold font-heading text-foreground/30 group-hover:text-amber-400/80 transition-colors mb-2">
+        <h3 className="text-base font-bold font-heading text-foreground/30 group-hover:text-amber-700/80 transition-colors mb-2">
           Your Brand Here
         </h3>
 
@@ -158,7 +158,7 @@ export function NewsGhostCard({ variant, sectionLabel, valueProp, slotsAvailable
           {resolvedValueProp}
         </p>
 
-        <span className="inline-flex items-center gap-1.5 text-amber-400 text-[10px] font-bold uppercase tracking-wider opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+        <span className="inline-flex items-center gap-1.5 text-amber-700 text-[10px] font-bold uppercase tracking-wider opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
           Become a Partner <ArrowRight size={10} />
         </span>
 

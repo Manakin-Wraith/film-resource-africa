@@ -31,7 +31,7 @@ export default function NowScreeningSection({ trailers }: NowScreeningSectionPro
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-pink-500/20 flex items-center justify-center border border-pink-500/20">
-            <Clapperboard size={20} className="text-pink-400" />
+            <Clapperboard size={20} className="text-pink-700" />
           </div>
           <div>
             <h2 className="text-2xl md:text-3xl font-bold font-heading">Now Screening</h2>
@@ -55,7 +55,7 @@ export default function NowScreeningSection({ trailers }: NowScreeningSectionPro
           </button>
           <Link
             href="/news?filter=trailer"
-            className="hidden sm:inline-flex text-sm font-semibold text-pink-400 hover:text-pink-300 transition-colors items-center gap-1 ml-2"
+            className="hidden sm:inline-flex text-sm font-semibold text-pink-700 hover:text-pink-300 transition-colors items-center gap-1 ml-2"
           >
             View all <ArrowRight size={14} />
           </Link>
@@ -111,7 +111,7 @@ export default function NowScreeningSection({ trailers }: NowScreeningSectionPro
 
               {/* Text content */}
               <div className="p-4 flex flex-col flex-grow">
-                <h3 className="text-sm font-bold font-heading leading-snug group-hover:text-pink-400 transition-colors line-clamp-2 mb-2">
+                <h3 className="text-sm font-bold font-heading leading-snug group-hover:text-pink-700 transition-colors line-clamp-2 mb-2">
                   {item.title}
                 </h3>
                 <span className="text-foreground/50 text-xs mt-auto">

@@ -13,7 +13,7 @@ export default function MembersWelcomePage() {
 
         <div className="flex justify-center">
           <div className="w-16 h-16 rounded-full bg-green-500/20 border border-green-500/30 flex items-center justify-center">
-            <CheckCircle2 size={32} className="text-green-400" />
+            <CheckCircle2 size={32} className="text-green-700" />
           </div>
         </div>
 

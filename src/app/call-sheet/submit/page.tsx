@@ -101,10 +101,10 @@ export default function SubmitCallSheetPage() {
     <main className="min-h-screen bg-background relative z-10 p-4 md:p-8 pt-20">
       <div className="max-w-4xl mx-auto">
         <div className="mb-10 flex flex-col items-center text-center">
-          <Link href="/call-sheet" className="inline-flex items-center gap-2 text-teal-400 hover:text-teal-300 font-medium mb-6 transition-colors self-start md:self-auto">
+          <Link href="/call-sheet" className="inline-flex items-center gap-2 text-teal-700 hover:text-teal-300 font-medium mb-6 transition-colors self-start md:self-auto">
             <ArrowLeft size={18} /> Back to The Call Sheet
           </Link>
-          <h1 className="text-4xl md:text-5xl font-bold font-heading mb-4 text-balance text-teal-400">
+          <h1 className="text-4xl md:text-5xl font-bold font-heading mb-4 text-balance text-teal-700">
             Post a Listing
           </h1>
           <p className="text-lg text-foreground/60 max-w-2xl text-balance">
@@ -355,7 +355,7 @@ export default function SubmitCallSheetPage() {
                   onChange={(e) => set('mentorship_included', e.target.checked)}
                   className="w-5 h-5 rounded-md bg-foreground/[0.04] border border-line-mid text-teal-500 focus:ring-teal-500 focus:ring-offset-0 cursor-pointer"
                 />
-                <span className="font-semibold group-hover:text-teal-400 transition-colors">
+                <span className="font-semibold group-hover:text-teal-700 transition-colors">
                   This role includes mentorship
                 </span>
               </label>
@@ -366,7 +366,7 @@ export default function SubmitCallSheetPage() {
           {/* Submit */}
           <div className="mt-12 pt-8 border-t border-line flex flex-col sm:flex-row items-center justify-between gap-6">
             <p className="text-sm opacity-60 text-center sm:text-left flex items-start gap-2 max-w-md">
-              <AlertCircle size={18} className="flex-shrink-0 mt-0.5 text-teal-400" />
+              <AlertCircle size={18} className="flex-shrink-0 mt-0.5 text-teal-700" />
               All listings are reviewed before publishing. Unpaid roles are not accepted.
             </p>
             <button

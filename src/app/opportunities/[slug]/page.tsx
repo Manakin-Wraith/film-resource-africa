@@ -198,7 +198,7 @@ export default async function OpportunityPage({ params }: { params: Promise<{ sl
                 {opp.last_verified_at && (
                   <p
                     title={`Source last re-checked ${formatLocalDateTime(opp.last_verified_at)}`}
-                    className="mt-1.5 inline-flex items-center gap-1 text-[11px] font-medium text-teal-400"
+                    className="mt-1.5 inline-flex items-center gap-1 text-[11px] font-medium text-teal-700"
                   >
                     <BadgeCheck size={12} />
                     Verified {formatRelativeDate(opp.last_verified_at)}

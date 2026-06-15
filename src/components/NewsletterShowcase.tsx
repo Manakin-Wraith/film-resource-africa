@@ -15,7 +15,7 @@ const digests = [
     gradient: 'from-blue-500/20 to-blue-600/5',
     border: 'border-blue-500/20',
     iconBg: 'bg-blue-500/20',
-    iconColor: 'text-blue-400',
+    iconColor: 'text-blue-700',
     badge: 'bg-blue-500/20 text-blue-300',
     preview: {
       subject: 'FRA Weekly: 12 New Opportunities + 3 Closing This Week',
@@ -37,7 +37,7 @@ const digests = [
     gradient: 'from-amber-500/20 to-orange-600/5',
     border: 'border-amber-500/20',
     iconBg: 'bg-amber-500/20',
-    iconColor: 'text-amber-400',
+    iconColor: 'text-amber-700',
     badge: 'bg-amber-500/20 text-amber-300',
     preview: {
       subject: '🔥 Breaking: Cannes Announces Africa Selection + New Fund',
@@ -58,7 +58,7 @@ const digests = [
     gradient: 'from-purple-500/20 to-pink-600/5',
     border: 'border-purple-500/20',
     iconBg: 'bg-purple-500/20',
-    iconColor: 'text-purple-400',
+    iconColor: 'text-purple-700',
     badge: 'bg-purple-500/20 text-purple-300',
     preview: {
       subject: 'Spotlight: How Wanjiku Landed Her First Netflix Deal',
@@ -104,16 +104,16 @@ function EmailPreviewCard({ digest, isActive, onClick }: { digest: typeof digest
 
 function EmailMockup({ digest }: { digest: typeof digests[0] }) {
   const typeIcons: Record<string, { icon: typeof Mail; color: string }> = {
-    deadline: { icon: Calendar, color: 'text-red-400' },
-    new: { icon: Star, color: 'text-blue-400' },
-    news: { icon: TrendingUp, color: 'text-amber-400' },
-    tip: { icon: ChevronRight, color: 'text-green-400' },
-    breaking: { icon: Flame, color: 'text-orange-400' },
-    fund: { icon: Star, color: 'text-green-400' },
-    alert: { icon: Calendar, color: 'text-yellow-400' },
-    story: { icon: Users, color: 'text-purple-400' },
-    interview: { icon: Mail, color: 'text-pink-400' },
-    community: { icon: Users, color: 'text-indigo-400' },
+    deadline: { icon: Calendar, color: 'text-red-700' },
+    new: { icon: Star, color: 'text-blue-700' },
+    news: { icon: TrendingUp, color: 'text-amber-700' },
+    tip: { icon: ChevronRight, color: 'text-green-700' },
+    breaking: { icon: Flame, color: 'text-orange-700' },
+    fund: { icon: Star, color: 'text-green-700' },
+    alert: { icon: Calendar, color: 'text-yellow-700' },
+    story: { icon: Users, color: 'text-purple-700' },
+    interview: { icon: Mail, color: 'text-pink-700' },
+    community: { icon: Users, color: 'text-indigo-700' },
   };
 
   return (

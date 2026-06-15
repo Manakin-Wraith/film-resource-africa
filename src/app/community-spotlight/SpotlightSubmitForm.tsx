@@ -175,7 +175,7 @@ export default function SpotlightSubmitForm() {
             </div>
           ) : (
             <button type="button" onClick={() => fileInputRef.current?.click()} className="w-full h-36 border border-dashed border-line-mid hover:border-amber-500/30 rounded-xl flex flex-col items-center justify-center gap-2 transition-colors group cursor-pointer" style={{ background: 'var(--surface-raised)' }}>
-              <Upload size={18} className="text-foreground/30 group-hover:text-amber-400 transition-colors" />
+              <Upload size={18} className="text-foreground/30 group-hover:text-amber-700 transition-colors" />
               <span className="text-[12px]" style={{ color: 'var(--foreground-tertiary)' }}>Upload a photo (max 5MB)</span>
             </button>
           )}
@@ -193,7 +193,7 @@ export default function SpotlightSubmitForm() {
 
       <div className="mt-8 pt-6 border-t border-line flex flex-col sm:flex-row items-center justify-between gap-5">
         <p className="text-[13px] flex items-start gap-2 max-w-md" style={{ color: 'var(--foreground-secondary)' }}>
-          <Star size={15} className="flex-shrink-0 mt-0.5 text-amber-400" />
+          <Star size={15} className="flex-shrink-0 mt-0.5 text-amber-700" />
           Submissions are reviewed before publishing. Approved stories are featured on the site and in the weekly newsletter.
         </p>
         <button

@@ -86,7 +86,7 @@ export default function SponsoredCard({
           </div>
 
           <div className="p-6 flex flex-col flex-grow">
-            <h3 className="text-lg font-bold font-heading mb-1 text-amber-400/80 group-hover:text-amber-400 transition-colors">
+            <h3 className="text-lg font-bold font-heading mb-1 text-amber-700/80 group-hover:text-amber-700 transition-colors">
               {placement.partner_name}
             </h3>
             <p className="text-foreground/50 text-sm leading-relaxed flex-grow mb-4">
@@ -96,7 +96,7 @@ export default function SponsoredCard({
               <span className="text-[11px] font-medium text-foreground/50">
                 Sponsored
               </span>
-              <span className="inline-flex items-center gap-1.5 text-amber-400 text-xs font-bold uppercase tracking-wide opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <span className="inline-flex items-center gap-1.5 text-amber-700 text-xs font-bold uppercase tracking-wide opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 {placement.cta_text || 'Learn More'} <ArrowRight size={12} />
               </span>
             </div>
@@ -122,17 +122,17 @@ export default function SponsoredCard({
           />
         ) : (
           <div className="w-12 h-12 rounded-2xl border-2 border-dashed border-line-mid group-hover:border-amber-500/40 flex items-center justify-center mb-4 transition-all duration-300 group-hover:bg-amber-500/5">
-            <span className="text-[10px] font-bold text-foreground/30 group-hover:text-amber-400 transition-colors">AD</span>
+            <span className="text-[10px] font-bold text-foreground/30 group-hover:text-amber-700 transition-colors">AD</span>
           </div>
         )}
 
-        <h3 className="text-sm font-bold font-heading text-foreground/40 group-hover:text-amber-400/80 transition-colors mb-1">
+        <h3 className="text-sm font-bold font-heading text-foreground/40 group-hover:text-amber-700/80 transition-colors mb-1">
           {placement.partner_name}
         </h3>
         <p className="text-foreground/25 text-xs leading-relaxed max-w-[200px] mb-3 group-hover:text-foreground/40 transition-colors">
           {placement.cta_text || sectionValueProps[sectionLabel] || 'Partner with Film Resource Africa'}
         </p>
-        <span className="inline-flex items-center gap-1.5 text-amber-400 text-[10px] font-bold uppercase tracking-wider opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+        <span className="inline-flex items-center gap-1.5 text-amber-700 text-[10px] font-bold uppercase tracking-wider opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
           {placement.cta_text || 'Learn More'} <ArrowRight size={10} />
         </span>
         <span className="absolute bottom-4 right-4 text-[10px] text-foreground/15">
@@ -158,7 +158,7 @@ export default function SponsoredCard({
           <span className="text-[11px] font-bold uppercase tracking-[3px] text-amber-500/25">Your Logo</span>
         </div>
         <div className="p-6 flex flex-col flex-grow">
-          <h3 className="text-lg font-bold font-heading mb-1 text-amber-400/80 group-hover:text-amber-400 transition-colors">
+          <h3 className="text-lg font-bold font-heading mb-1 text-amber-700/80 group-hover:text-amber-700 transition-colors">
             Your Brand Here
           </h3>
           <p className="text-foreground/40 text-sm leading-relaxed flex-grow mb-4">
@@ -166,7 +166,7 @@ export default function SponsoredCard({
           </p>
           <div className="flex items-center justify-between mt-auto pt-4 border-t border-line">
             <span className="text-[11px] font-medium text-foreground/30">{slotsAvailable} of 3 spots available</span>
-            <span className="inline-flex items-center gap-1.5 text-amber-400 text-xs font-bold uppercase tracking-wide opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <span className="inline-flex items-center gap-1.5 text-amber-700 text-xs font-bold uppercase tracking-wide opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               Claim <ArrowRight size={12} />
             </span>
           </div>
@@ -183,15 +183,15 @@ export default function SponsoredCard({
       style={{ minHeight: 220 }}
     >
       <div className="w-12 h-12 rounded-2xl border-2 border-dashed border-line-mid group-hover:border-amber-500/40 flex items-center justify-center mb-4 transition-all duration-300 group-hover:bg-amber-500/5">
-        <Plus size={20} className="text-foreground/20 group-hover:text-amber-400 transition-colors" />
+        <Plus size={20} className="text-foreground/20 group-hover:text-amber-700 transition-colors" />
       </div>
-      <h3 className="text-sm font-bold font-heading text-foreground/30 group-hover:text-amber-400/80 transition-colors mb-1">
+      <h3 className="text-sm font-bold font-heading text-foreground/30 group-hover:text-amber-700/80 transition-colors mb-1">
         Your Brand Here
       </h3>
       <p className="text-foreground/20 text-xs leading-relaxed max-w-[200px] mb-3 group-hover:text-foreground/40 transition-colors">
         {sectionValueProps[sectionLabel] || 'Partner with Film Resource Africa'}
       </p>
-      <span className="inline-flex items-center gap-1.5 text-amber-400 text-[10px] font-bold uppercase tracking-wider opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+      <span className="inline-flex items-center gap-1.5 text-amber-700 text-[10px] font-bold uppercase tracking-wider opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
         Become a Partner <ArrowRight size={10} />
       </span>
       <span className="absolute bottom-4 right-4 text-[10px] text-foreground/15 group-hover:text-foreground/30 transition-colors">
@@ -246,7 +246,7 @@ export function NewsSponsoredCard({
               {placement.partner_logo_url ? (
                 <Image src={placement.partner_logo_url} alt={placement.partner_name} width={120} height={40} className="object-contain max-h-[40px] opacity-60" />
               ) : (
-                <span className="text-[11px] font-bold uppercase tracking-[3px] text-purple-400/40">{placement.partner_name}</span>
+                <span className="text-[11px] font-bold uppercase tracking-[3px] text-purple-700/40">{placement.partner_name}</span>
               )}
             </div>
           )}
@@ -266,7 +266,7 @@ export function NewsSponsoredCard({
         </div>
 
         <div className="p-6 flex flex-col flex-grow">
-          <h3 className="text-lg font-bold font-heading mb-2 text-foreground group-hover:text-purple-400 transition-colors leading-snug">
+          <h3 className="text-lg font-bold font-heading mb-2 text-foreground group-hover:text-purple-700 transition-colors leading-snug">
             {placement.partner_name}
           </h3>
           <p className="text-foreground/60 text-sm leading-relaxed mb-4">
@@ -336,7 +336,7 @@ export function NewsSponsoredCard({
             </div>
           </div>
           <div className="p-6 flex flex-col flex-grow">
-            <h3 className="text-lg font-bold font-heading mb-2 text-amber-400/80 group-hover:text-amber-400 transition-colors leading-snug">
+            <h3 className="text-lg font-bold font-heading mb-2 text-amber-700/80 group-hover:text-amber-700 transition-colors leading-snug">
               {placement.partner_name}
             </h3>
             <p className="text-foreground/50 text-sm leading-relaxed flex-grow mb-4">
@@ -344,7 +344,7 @@ export function NewsSponsoredCard({
             </p>
             <div className="flex items-center justify-between mt-auto">
               <span className="text-[11px] text-foreground/50">Sponsored</span>
-              <span className="inline-flex items-center gap-2 text-amber-400 text-sm font-semibold group-hover:gap-3 transition-all">
+              <span className="inline-flex items-center gap-2 text-amber-700 text-sm font-semibold group-hover:gap-3 transition-all">
                 {placement.cta_text || 'Learn More'} <ArrowRight size={14} />
               </span>
             </div>
@@ -371,16 +371,16 @@ export function NewsSponsoredCard({
             />
           ) : (
             <div className="w-14 h-14 rounded-2xl border-2 border-dashed border-line-mid group-hover:border-amber-500/40 flex items-center justify-center mb-5 transition-all duration-300 group-hover:bg-amber-500/5">
-              <span className="text-xs font-bold text-foreground/30 group-hover:text-amber-400 transition-colors">AD</span>
+              <span className="text-xs font-bold text-foreground/30 group-hover:text-amber-700 transition-colors">AD</span>
             </div>
           )}
-          <h3 className="text-base font-bold font-heading text-foreground/40 group-hover:text-amber-400/80 transition-colors mb-2">
+          <h3 className="text-base font-bold font-heading text-foreground/40 group-hover:text-amber-700/80 transition-colors mb-2">
             {placement.partner_name}
           </h3>
           <p className="text-foreground/25 text-xs leading-relaxed max-w-[220px] mb-4 group-hover:text-foreground/40 transition-colors">
             {placement.cta_text || sectionValueProps[sectionLabel] || 'Partner with Film Resource Africa'}
           </p>
-          <span className="inline-flex items-center gap-1.5 text-amber-400 text-[10px] font-bold uppercase tracking-wider opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+          <span className="inline-flex items-center gap-1.5 text-amber-700 text-[10px] font-bold uppercase tracking-wider opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
             {placement.cta_text || 'Learn More'} <ArrowRight size={10} />
           </span>
           <span className="absolute bottom-4 right-4 text-[10px] text-foreground/15">Sponsored</span>
@@ -406,7 +406,7 @@ export function NewsSponsoredCard({
           </div>
         </div>
         <div className="p-6 flex flex-col flex-grow">
-          <h3 className="text-lg font-bold font-heading mb-2 text-amber-400/80 group-hover:text-amber-400 transition-colors leading-snug">
+          <h3 className="text-lg font-bold font-heading mb-2 text-amber-700/80 group-hover:text-amber-700 transition-colors leading-snug">
             Your Brand Here
           </h3>
           <p className="text-foreground/40 text-sm leading-relaxed flex-grow mb-4">
@@ -414,7 +414,7 @@ export function NewsSponsoredCard({
           </p>
           <div className="flex items-center justify-between mt-auto">
             <span className="text-[11px] text-foreground/25">{slotsAvailable}/3 spots</span>
-            <span className="inline-flex items-center gap-2 text-amber-400 text-sm font-semibold group-hover:gap-3 transition-all">
+            <span className="inline-flex items-center gap-2 text-amber-700 text-sm font-semibold group-hover:gap-3 transition-all">
               Claim this spot <ArrowRight size={14} />
             </span>
           </div>
@@ -434,16 +434,16 @@ export function NewsSponsoredCard({
       <div className="relative w-full h-44 ghost-card-shimmer overflow-hidden flex items-center justify-center">
         <div className="relative flex flex-col items-center gap-3">
           <div className="w-16 h-16 rounded-2xl bg-amber-500/15 border border-amber-400/30 flex items-center justify-center group-hover:scale-110 group-hover:bg-amber-500/25 transition-all duration-300">
-            <Plus size={28} className="text-amber-400" />
+            <Plus size={28} className="text-amber-700" />
           </div>
-          <span className="text-[11px] font-bold uppercase tracking-[4px] text-amber-400/50 group-hover:text-amber-400/80 transition-colors">
+          <span className="text-[11px] font-bold uppercase tracking-[4px] text-amber-700/50 group-hover:text-amber-700/80 transition-colors">
             Your Logo Here
           </span>
         </div>
       </div>
 
       <div className="p-6 flex flex-col flex-grow">
-        <h3 className="text-xl font-bold font-heading mb-2 text-amber-400">
+        <h3 className="text-xl font-bold font-heading mb-2 text-amber-700">
           Get Your Brand Seen
         </h3>
         <p className="text-foreground/50 text-sm leading-relaxed mb-5">

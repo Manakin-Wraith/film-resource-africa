@@ -22,7 +22,7 @@ export default function BuyCoffeeButton() {
             We&apos;re a small team keeping this resource free for African filmmakers.
           </p>
           <p className="text-xs text-foreground/50 mt-2 flex items-center gap-1">
-            Every coffee keeps us going <Heart size={10} className="text-red-400 fill-red-400" />
+            Every coffee keeps us going <Heart size={10} className="text-red-700 fill-red-400" />
           </p>
           <a
             href="https://pay.yoco.com/celebration-house-entertainment?amount=55.00&reference=Coffee"

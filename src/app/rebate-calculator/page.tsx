@@ -98,7 +98,7 @@ export default function RebateCalculatorPage() {
                 style={{ background: 'var(--surface)' }}
               >
                 <div className="w-9 h-9 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <Icon size={16} className="text-amber-400" />
+                  <Icon size={16} className="text-amber-700" />
                 </div>
                 <div>
                   <h3 className="text-[14px] font-bold text-foreground mb-1">{title}</h3>

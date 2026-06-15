@@ -268,7 +268,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
           ))}
         </div>
         <details className="mt-6">
-          <summary className="cursor-pointer text-sm font-medium text-purple-400 hover:text-purple-300 transition-colors">Type-specific fields</summary>
+          <summary className="cursor-pointer text-sm font-medium text-purple-700 hover:text-purple-300 transition-colors">Type-specific fields</summary>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
             {dirExtraFields.map(field => (
               <div key={field}>
@@ -484,8 +484,8 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                   <tr key={listing.id} className="border-b border-line hover:bg-foreground/[0.04] transition-colors">
                     <td className="p-4 font-medium">
                       {listing.name}
-                      {listing.featured && <span className="ml-2 text-amber-400 text-xs">★</span>}
-                      {listing.verified && <span className="ml-1 text-blue-400 text-xs">✓</span>}
+                      {listing.featured && <span className="ml-2 text-amber-700 text-xs">★</span>}
+                      {listing.verified && <span className="ml-1 text-blue-700 text-xs">✓</span>}
                     </td>
                     <td className="p-4 opacity-80 text-sm">{typeLabels[listing.directory_type] || listing.directory_type}</td>
                     <td className="p-4 opacity-80 text-sm">{listing.category}</td>
@@ -564,7 +564,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                   <td className="p-4 font-medium">{listing.title}</td>
                   <td className="p-4 opacity-80 text-sm">{listing.production_title}</td>
                   <td className="p-4 opacity-80 text-sm">{listing.production_company}</td>
-                  <td className="p-4 text-teal-400 font-medium text-sm">{listing.compensation}</td>
+                  <td className="p-4 text-teal-700 font-medium text-sm">{listing.compensation}</td>
                   <td className="p-4">
                     <span className={`px-2 py-1 rounded-lg text-xs font-bold ${
                       listing.status === 'approved' ? 'bg-green-500/20 text-green-700' :
@@ -642,8 +642,8 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                   </td>
                   <td className="p-4 font-medium">
                     {p.name}
-                    {p.bundle === 'headline' && <Sparkles size={12} className="inline ml-1.5 text-amber-400" />}
-                    {p.bundle === 'growth' && <Crown size={12} className="inline ml-1.5 text-blue-400" />}
+                    {p.bundle === 'headline' && <Sparkles size={12} className="inline ml-1.5 text-amber-700" />}
+                    {p.bundle === 'growth' && <Crown size={12} className="inline ml-1.5 text-blue-700" />}
                   </td>
                   <td className="p-4">
                     <span className={`px-2 py-1 rounded-lg text-xs font-bold ${p.bundle === 'headline' ? 'bg-amber-500/20 text-amber-700' : p.bundle === 'growth' ? 'bg-blue-500/20 text-blue-700' : 'bg-foreground/[0.04] text-foreground/60'}`}>
@@ -712,7 +712,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
               {(Object.keys(bundleConfig) as Array<keyof typeof bundleConfig>).map(key => (
                 <button key={key} onClick={() => setPartnerForm({ ...partnerForm, bundle: key })} className={`p-4 rounded-xl border-2 text-left transition-all ${bundle === key ? bundleConfig[key].color + ' bg-foreground/[0.04] ring-1 ring-line-mid' : 'border-line hover:border-line-mid'}`}>
                   <div className="flex items-center gap-2 mb-1">
-                    {key === 'headline' ? <Sparkles size={16} className="text-amber-400" /> : key === 'growth' ? <Crown size={16} className="text-blue-400" /> : <Package size={16} className="text-foreground/50" />}
+                    {key === 'headline' ? <Sparkles size={16} className="text-amber-700" /> : key === 'growth' ? <Crown size={16} className="text-blue-700" /> : <Package size={16} className="text-foreground/50" />}
                     <span className="font-bold text-sm capitalize">{key}</span>
                   </div>
                   <p className="text-xs opacity-50 mt-1">{bundleConfig[key].desc}</p>
@@ -738,7 +738,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
             <div className="flex items-end">
               <div className="px-4 py-3 rounded-xl bg-foreground/[0.04] border border-line w-full">
                 <p className="text-xs opacity-40 mb-1">Auto-set from bundle</p>
-                <p className="text-sm"><span className="font-medium">Tier:</span> <span className={cfg.tier === 'sponsor' ? 'text-amber-400' : 'text-foreground/60'}>{cfg.tier}</span> · <span className="font-medium">Newsletter:</span> <span className={cfg.newsletter === 'spotlight' ? 'text-amber-400' : 'text-foreground/60'}>{cfg.newsletter}</span></p>
+                <p className="text-sm"><span className="font-medium">Tier:</span> <span className={cfg.tier === 'sponsor' ? 'text-amber-700' : 'text-foreground/60'}>{cfg.tier}</span> · <span className="font-medium">Newsletter:</span> <span className={cfg.newsletter === 'spotlight' ? 'text-amber-700' : 'text-foreground/60'}>{cfg.newsletter}</span></p>
               </div>
             </div>
             <div className="md:col-span-2">
@@ -769,7 +769,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
           {hasProfileCard && (
             <div className="mt-8 pt-6 border-t border-line">
               <div className="flex items-center gap-2 mb-4">
-                <FileText size={18} className="text-purple-400" />
+                <FileText size={18} className="text-purple-700" />
                 <h3 className="text-lg font-bold font-heading">Company Profile Card</h3>
                 <span className="text-xs px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-700 font-bold">News Card</span>
               </div>
@@ -968,7 +968,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                       className="w-full bg-foreground/[0.04] border border-line-mid rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500 text-sm"
                     />
                     {newsFormData.image_url && (
-                      <button onClick={() => { setNewsFormData({ ...newsFormData, image_url: '' }); setNewsImagePreview(null); setNewsImageFile(null); }} className="text-xs text-red-400 hover:text-red-300">
+                      <button onClick={() => { setNewsFormData({ ...newsFormData, image_url: '' }); setNewsImagePreview(null); setNewsImageFile(null); }} className="text-xs text-red-700 hover:text-red-300">
                         Remove image
                       </button>
                     )}

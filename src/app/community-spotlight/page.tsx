@@ -80,7 +80,7 @@ export default async function CommunitySpotlightPage() {
                     )}
                     <div className="p-5 flex flex-col flex-grow">
                       <div className="flex items-center gap-3 mb-3">
-                        <span className="editorial-label text-amber-400">
+                        <span className="editorial-label text-amber-700">
                           <Star size={10} className="inline mr-1" />
                           Spotlight
                         </span>
@@ -89,12 +89,12 @@ export default async function CommunitySpotlightPage() {
                         </span>
                       </div>
 
-                      <h3 className="text-[16px] font-bold font-heading leading-snug text-foreground group-hover:text-amber-400 transition-colors mb-2">
+                      <h3 className="text-[16px] font-bold font-heading leading-snug text-foreground group-hover:text-amber-700 transition-colors mb-2">
                         {item.title}
                       </h3>
 
                       {item.project_name && (
-                        <p className="text-[12px] font-medium mb-2 text-amber-400/70">{item.project_name}</p>
+                        <p className="text-[12px] font-medium mb-2 text-amber-700/70">{item.project_name}</p>
                       )}
 
                       <p className="text-[13px] leading-relaxed flex-grow mb-4 line-clamp-3" style={{ color: 'var(--foreground-secondary)' }}>
@@ -107,7 +107,7 @@ export default async function CommunitySpotlightPage() {
                         </p>
                       )}
 
-                      <span className="inline-flex items-center gap-1.5 text-amber-400 text-[13px] font-semibold mt-auto group-hover:gap-2.5 transition-all">
+                      <span className="inline-flex items-center gap-1.5 text-amber-700 text-[13px] font-semibold mt-auto group-hover:gap-2.5 transition-all">
                         Read story <ArrowRight size={13} />
                       </span>
                     </div>
@@ -121,7 +121,7 @@ export default async function CommunitySpotlightPage() {
         {/* Empty State */}
         {spotlights.length === 0 && (
           <div className="text-center py-14 rounded-xl border border-line" style={{ background: 'var(--surface)' }}>
-            <Star size={28} className="text-amber-400/50 mx-auto mb-4" />
+            <Star size={28} className="text-amber-700/50 mx-auto mb-4" />
             <h3 className="text-[17px] font-bold font-heading mb-2">No stories yet</h3>
             <p className="text-[14px]" style={{ color: 'var(--foreground-secondary)' }}>
               Be the first to share your story with the African film community.

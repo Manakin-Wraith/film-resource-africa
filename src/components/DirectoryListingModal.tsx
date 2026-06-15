@@ -159,7 +159,7 @@ export default function DirectoryListingModal({ listing, onClose }: DirectoryLis
                   <div className="flex items-start gap-3 bg-green-500/10 border border-green-500/20 rounded-2xl p-4">
                     <div className="mt-0.5 p-2 bg-green-500/20 rounded-xl"><DollarSign size={18} className="text-green-700" /></div>
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-wider text-green-400/80 mb-1">Day Rate</p>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-green-700/80 mb-1">Day Rate</p>
                       <p className="text-sm font-medium text-foreground/90">{listing.day_rate_range}</p>
                     </div>
                   </div>
@@ -170,7 +170,7 @@ export default function DirectoryListingModal({ listing, onClose }: DirectoryLis
                   <div className="flex items-start gap-3 bg-blue-500/10 border border-blue-500/20 rounded-2xl p-4">
                     <div className="mt-0.5 p-2 bg-blue-500/20 rounded-xl"><Briefcase size={18} className="text-blue-700" /></div>
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-wider text-blue-400/80 mb-1">Company Size</p>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-blue-700/80 mb-1">Company Size</p>
                       <p className="text-sm font-medium text-foreground/90">{sizeLabels[listing.company_size]}</p>
                     </div>
                   </div>
@@ -192,7 +192,7 @@ export default function DirectoryListingModal({ listing, onClose }: DirectoryLis
                   <div className="flex items-start gap-3 bg-purple-500/10 border border-purple-500/20 rounded-2xl p-4">
                     <div className="mt-0.5 p-2 bg-purple-500/20 rounded-xl"><DollarSign size={18} className="text-purple-700" /></div>
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-wider text-purple-400/80 mb-1">Pricing</p>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-purple-700/80 mb-1">Pricing</p>
                       <p className="text-sm font-medium text-foreground/90">{pricingLabels[listing.pricing_tier]}</p>
                     </div>
                   </div>
@@ -203,7 +203,7 @@ export default function DirectoryListingModal({ listing, onClose }: DirectoryLis
                   <div className="flex items-start gap-3 bg-green-500/10 border border-green-500/20 rounded-2xl p-4">
                     <div className="mt-0.5 p-2 bg-green-500/20 rounded-xl"><DollarSign size={18} className="text-green-700" /></div>
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-wider text-green-400/80 mb-1">Cost</p>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-green-700/80 mb-1">Cost</p>
                       <p className="text-sm font-medium text-foreground/90">{listing.cost}</p>
                     </div>
                   </div>
@@ -214,7 +214,7 @@ export default function DirectoryListingModal({ listing, onClose }: DirectoryLis
                   <div className="flex items-start gap-3 bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4">
                     <div className="mt-0.5 p-2 bg-amber-500/20 rounded-xl"><Clock size={18} className="text-amber-700" /></div>
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-wider text-amber-400/80 mb-1">Duration</p>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-amber-700/80 mb-1">Duration</p>
                       <p className="text-sm font-medium text-foreground/90">{listing.duration}</p>
                     </div>
                   </div>
@@ -237,7 +237,7 @@ export default function DirectoryListingModal({ listing, onClose }: DirectoryLis
                 {/* Crew: role + credits */}
                 {listing.role && (
                   <section className="bg-gradient-to-br from-green-500/10 to-emerald-500/5 p-5 md:p-6 rounded-2xl border border-green-500/15">
-                    <h3 className="flex items-center gap-2.5 text-base font-bold font-heading mb-3 text-green-400">
+                    <h3 className="flex items-center gap-2.5 text-base font-bold font-heading mb-3 text-green-700">
                       <Users size={20} /> Role
                     </h3>
                     <p className="text-sm font-semibold text-foreground/90 mb-1">{listing.role}</p>
@@ -249,7 +249,7 @@ export default function DirectoryListingModal({ listing, onClose }: DirectoryLis
 
                 {listing.credits && (
                   <section className="bg-gradient-to-br from-amber-500/10 to-orange-500/5 p-5 md:p-6 rounded-2xl border border-amber-500/15">
-                    <h3 className="flex items-center gap-2.5 text-base font-bold font-heading mb-3 text-amber-400">
+                    <h3 className="flex items-center gap-2.5 text-base font-bold font-heading mb-3 text-amber-700">
                       <Award size={20} /> Credits
                     </h3>
                     <p className="text-sm leading-relaxed text-foreground/75">{listing.credits}</p>
@@ -259,7 +259,7 @@ export default function DirectoryListingModal({ listing, onClose }: DirectoryLis
                 {/* Company: speciality + notable projects */}
                 {listing.speciality && (
                   <section className="bg-gradient-to-br from-blue-500/10 to-cyan-500/5 p-5 md:p-6 rounded-2xl border border-blue-500/15">
-                    <h3 className="flex items-center gap-2.5 text-base font-bold font-heading mb-3 text-blue-400">
+                    <h3 className="flex items-center gap-2.5 text-base font-bold font-heading mb-3 text-blue-700">
                       <Film size={20} /> Speciality
                     </h3>
                     <p className="text-sm leading-relaxed text-foreground/75">{listing.speciality}</p>
@@ -268,7 +268,7 @@ export default function DirectoryListingModal({ listing, onClose }: DirectoryLis
 
                 {listing.notable_projects && (
                   <section className="bg-gradient-to-br from-purple-500/10 to-violet-500/5 p-5 md:p-6 rounded-2xl border border-purple-500/15">
-                    <h3 className="flex items-center gap-2.5 text-base font-bold font-heading mb-3 text-purple-400">
+                    <h3 className="flex items-center gap-2.5 text-base font-bold font-heading mb-3 text-purple-700">
                       <Award size={20} /> Notable Projects
                     </h3>
                     <p className="text-sm leading-relaxed text-foreground/75">{listing.notable_projects}</p>
@@ -278,7 +278,7 @@ export default function DirectoryListingModal({ listing, onClose }: DirectoryLis
                 {/* Training: accreditation */}
                 {listing.accreditation && (
                   <section className="bg-gradient-to-br from-amber-500/10 to-orange-500/5 p-5 md:p-6 rounded-2xl border border-amber-500/15">
-                    <h3 className="flex items-center gap-2.5 text-base font-bold font-heading mb-3 text-amber-400">
+                    <h3 className="flex items-center gap-2.5 text-base font-bold font-heading mb-3 text-amber-700">
                       <GraduationCap size={20} /> Accreditation
                     </h3>
                     <p className="text-sm leading-relaxed text-foreground/75">{listing.accreditation}</p>

@@ -101,7 +101,7 @@ export default function SubmitDirectoryListingPage() {
         <div className="relative z-10 container mx-auto px-4 py-12 pt-32 md:pt-28 max-w-2xl">
           <div className="text-center space-y-6 py-20">
             <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto border border-green-500/30">
-              <CheckCircle2 size={40} className="text-green-400" />
+              <CheckCircle2 size={40} className="text-green-700" />
             </div>
             <h1 className="text-3xl font-bold font-heading">Listing Submitted!</h1>
             <p className="text-foreground/60 max-w-md mx-auto">
@@ -282,7 +282,7 @@ export default function SubmitDirectoryListingPage() {
                       <button
                         type="button"
                         onClick={() => { setLogoFile(null); setLogoPreview(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}
-                        className="text-foreground/50 hover:text-red-400 transition-colors"
+                        className="text-foreground/50 hover:text-red-700 transition-colors"
                       >
                         <X size={14} />
                       </button>
@@ -297,7 +297,7 @@ export default function SubmitDirectoryListingPage() {
           {/* Type-specific fields */}
           {directoryType === 'company' && (
             <div className="space-y-5 border-t border-line pt-8">
-              <h3 className="text-lg font-bold font-heading text-blue-400">Company Details</h3>
+              <h3 className="text-lg font-bold font-heading text-blue-700">Company Details</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                   <label className={labelClass}>Speciality</label>
@@ -326,7 +326,7 @@ export default function SubmitDirectoryListingPage() {
 
           {directoryType === 'crew' && (
             <div className="space-y-5 border-t border-line pt-8">
-              <h3 className="text-lg font-bold font-heading text-green-400">Crew Profile</h3>
+              <h3 className="text-lg font-bold font-heading text-green-700">Crew Profile</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                   <label className={labelClass}>Primary Role *</label>
@@ -367,7 +367,7 @@ export default function SubmitDirectoryListingPage() {
 
           {directoryType === 'service' && (
             <div className="space-y-5 border-t border-line pt-8">
-              <h3 className="text-lg font-bold font-heading text-purple-400">Service Details</h3>
+              <h3 className="text-lg font-bold font-heading text-purple-700">Service Details</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                   <label className={labelClass}>Service Type</label>
@@ -388,7 +388,7 @@ export default function SubmitDirectoryListingPage() {
 
           {directoryType === 'agency' && (
             <div className="space-y-5 border-t border-line pt-8">
-              <h3 className="text-lg font-bold font-heading text-pink-400">Agency Details</h3>
+              <h3 className="text-lg font-bold font-heading text-pink-700">Agency Details</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                   <label className={labelClass}>Speciality</label>
@@ -408,7 +408,7 @@ export default function SubmitDirectoryListingPage() {
 
           {directoryType === 'training' && (
             <div className="space-y-5 border-t border-line pt-8">
-              <h3 className="text-lg font-bold font-heading text-amber-400">Training Details</h3>
+              <h3 className="text-lg font-bold font-heading text-amber-700">Training Details</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                   <label className={labelClass}>Program Type</label>

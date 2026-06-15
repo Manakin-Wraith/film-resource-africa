@@ -10,17 +10,17 @@ export default function CountryPracticalInfo({ info, countryName }: CountryPract
   if (!info) return null;
 
   const items = [
-    { icon: Banknote, label: 'Currency', value: info.currency, color: 'text-green-400' },
-    { icon: Languages, label: 'Languages', value: info.languages.join(', '), color: 'text-blue-400' },
-    { icon: Clock, label: 'Timezone', value: info.timezone, color: 'text-amber-400' },
-    { icon: Zap, label: 'Power', value: info.power_standard, color: 'text-yellow-400' },
+    { icon: Banknote, label: 'Currency', value: info.currency, color: 'text-green-700' },
+    { icon: Languages, label: 'Languages', value: info.languages.join(', '), color: 'text-blue-700' },
+    { icon: Clock, label: 'Timezone', value: info.timezone, color: 'text-amber-700' },
+    { icon: Zap, label: 'Power', value: info.power_standard, color: 'text-yellow-700' },
   ];
 
   return (
     <section aria-label={`Practical production information for ${countryName}`} className="rounded-xl p-6 border border-line" style={{ background: 'var(--surface)' }}>
       <h3 className="flex items-center gap-2 text-lg font-bold font-heading mb-4">
         <div className="w-8 h-8 rounded-xl bg-blue-500/20 flex items-center justify-center border border-blue-500/20">
-          <Info size={16} className="text-blue-400" />
+          <Info size={16} className="text-blue-700" />
         </div>
         Production Quick Ref
       </h3>
@@ -40,7 +40,7 @@ export default function CountryPracticalInfo({ info, countryName }: CountryPract
 
         {info.visa_info && (
           <div className="flex items-start gap-3">
-            <div className="flex-shrink-0 mt-0.5 text-rose-400">
+            <div className="flex-shrink-0 mt-0.5 text-rose-700">
               <Plane size={14} />
             </div>
             <div className="min-w-0">
