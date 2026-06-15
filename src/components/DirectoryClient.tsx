@@ -213,7 +213,7 @@ export default function DirectoryClient({ initialData, counts = {} }: { initialD
                     const isValidDate = parsed && !isNaN(parsed.getTime()) && parsed.getFullYear() > 2000;
                     if (isValidDate) {
                       const dl = formatDeadline(raw!);
-                      const urgencyColor = dl.urgency === 'critical' ? 'text-urgent' : dl.urgency === 'warning' ? 'text-[color:var(--color-amber-text)]' : 'text-foreground/50';
+                      const urgencyColor = dl.urgency === 'critical' ? 'text-urgent' : dl.urgency === 'warning' ? 'text-[color:var(--color-primary-text)]' : 'text-foreground/50';
                       const urgencyBg = dl.urgency === 'critical' ? 'bg-red-500/10 border-red-500/20' : dl.urgency === 'warning' ? 'bg-amber-500/10 border-amber-500/20' : 'bg-foreground/[0.04] border-line';
                       return (
                         <span className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border ${urgencyBg} ${urgencyColor}`}>
