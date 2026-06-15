@@ -120,7 +120,7 @@ export default function Header() {
               <div className="flex items-center gap-2">
                 <Link
                   href={member.username ? `/members/${member.username}` : '/members/onboarding'}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors hover:bg-white/[0.06]"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors hover:bg-foreground/[0.04]"
                 >
                   {member.avatar_url ? (
                     <img src={member.avatar_url} alt="" className="w-7 h-7 rounded-full object-cover border border-line-strong" />
@@ -133,7 +133,7 @@ export default function Header() {
                 </Link>
                 <button
                   onClick={handleSignOut}
-                  className="text-[12px] px-3 py-1.5 rounded-lg transition-colors hover:bg-white/[0.06]"
+                  className="text-[12px] px-3 py-1.5 rounded-lg transition-colors hover:bg-foreground/[0.04]"
                   style={{ color: 'var(--foreground-tertiary)' }}
                 >
                   Sign out
@@ -143,7 +143,7 @@ export default function Header() {
               /* Logged-out state */
               <Link
                 href="/login"
-                className="flex items-center px-4 py-2 text-[13px] font-semibold border border-line-strong text-foreground hover:bg-white/[0.06] rounded-lg transition-all"
+                className="flex items-center px-4 py-2 text-[13px] font-semibold border border-line-strong text-foreground hover:bg-foreground/[0.04] rounded-lg transition-all"
               >
                 Member login
               </Link>
@@ -216,7 +216,7 @@ export default function Header() {
                 <Link
                   href={member.username ? `/members/${member.username}` : '/members/onboarding'}
                   onClick={() => setMenuOpen(false)}
-                  className="flex-1 flex items-center justify-center py-3.5 text-sm font-semibold border border-line-strong text-foreground hover:bg-white/[0.06] rounded-lg min-h-[48px]"
+                  className="flex-1 flex items-center justify-center py-3.5 text-sm font-semibold border border-line-strong text-foreground hover:bg-foreground/[0.04] rounded-lg min-h-[48px]"
                 >
                   My profile
                 </Link>
@@ -232,7 +232,7 @@ export default function Header() {
               <Link
                 href="/login"
                 onClick={() => setMenuOpen(false)}
-                className="flex items-center justify-center mt-3 mb-2 py-3.5 text-sm font-semibold border border-line-strong text-foreground hover:bg-white/[0.06] rounded-lg min-h-[48px] transition-all"
+                className="flex items-center justify-center mt-3 mb-2 py-3.5 text-sm font-semibold border border-line-strong text-foreground hover:bg-foreground/[0.04] rounded-lg min-h-[48px] transition-all"
               >
                 Member login
               </Link>
@@ -312,7 +312,7 @@ function NavDropdown({ group, active }: { group: NavGroup; active: boolean }) {
                   href={href}
                   role="menuitem"
                   onClick={() => setOpen(false)}
-                  className="block px-3 py-2 rounded-lg text-[13px] font-medium transition-colors hover:bg-white/[0.06] hover:text-foreground"
+                  className="block px-3 py-2 rounded-lg text-[13px] font-medium transition-colors hover:bg-foreground/[0.04] hover:text-foreground"
                   style={{ color: 'var(--foreground-secondary)' }}
                 >
                   {label}
