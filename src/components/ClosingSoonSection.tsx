@@ -84,7 +84,7 @@ function FeaturedCard({ opp }: { opp: Opportunity }) {
           <Link
             href={href}
             onClick={track}
-            className="flex items-center justify-center gap-2 border border-line-mid hover:border-line-mid text-foreground/70 hover:text-foreground font-semibold text-sm px-6 rounded-xl transition-all min-h-[48px]"
+            className="flex items-center justify-center gap-2 border border-line-mid hover:border-line-strong text-foreground/70 hover:text-foreground font-semibold text-sm px-6 rounded-xl transition-all min-h-[48px]"
           >
             View Details
           </Link>
