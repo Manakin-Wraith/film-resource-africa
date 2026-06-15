@@ -337,7 +337,7 @@ export default async function MemberShowcasePage(
             <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto">
               <a
                 href={PAYFAST_LINKS.individualAnnual}
-                className="flex items-center justify-center gap-2 px-6 py-4 bg-primary hover:bg-blue-600 text-white font-bold text-[14px] rounded-xl transition-colors"
+                className="flex items-center justify-center gap-2 px-6 py-4 bg-primary hover:bg-primary-hover text-white font-bold text-[14px] rounded-xl transition-colors"
               >
                 Individual — R990/yr
                 <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-white/20">2 months free</span>

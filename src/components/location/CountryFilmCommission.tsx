@@ -27,7 +27,7 @@ export default function CountryFilmCommission({ commission, productionGuideUrl, 
             href={commission.website}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 text-sm text-primary hover:text-blue-400 transition-colors"
+            className="flex items-center gap-2 text-sm text-primary hover:text-primary-hover transition-colors"
           >
             <Globe size={14} className="flex-shrink-0" />
             <span className="truncate">{commission.website.replace(/^https?:\/\//, '')}</span>

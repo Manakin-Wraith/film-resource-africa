@@ -299,7 +299,7 @@ export default function CountryDirectory({ listings, countryName }: CountryDirec
       <div className="text-center">
         <Link
           href="/industry"
-          className="text-primary hover:text-blue-400 text-sm font-medium transition-colors"
+          className="text-primary hover:text-primary-hover text-sm font-medium transition-colors"
         >
           View the full Africa-wide Industry Directory &rarr;
         </Link>

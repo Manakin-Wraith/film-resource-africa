@@ -54,7 +54,7 @@ export default function MembersWelcomePage() {
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link
             href="/"
-            className="flex items-center justify-center gap-2 px-6 py-3.5 bg-primary hover:bg-blue-600 text-white font-bold text-sm rounded-xl transition-colors"
+            className="flex items-center justify-center gap-2 px-6 py-3.5 bg-primary hover:bg-primary-hover text-white font-bold text-sm rounded-xl transition-colors"
           >
             Browse opportunities <ArrowRight size={15} />
           </Link>

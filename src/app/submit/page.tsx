@@ -13,7 +13,7 @@ export default async function SubmitPage() {
     <main className="min-h-screen relative z-10 p-4 md:p-8 pt-20">
       <div className="max-w-4xl mx-auto">
         <div className="mb-10 flex flex-col items-center text-center">
-          <Link href="/directory" className="inline-flex items-center gap-2 text-primary hover:text-blue-400 font-medium mb-6 transition-colors self-start md:self-auto">
+          <Link href="/directory" className="inline-flex items-center gap-2 text-primary hover:text-primary-hover font-medium mb-6 transition-colors self-start md:self-auto">
             <ArrowLeft size={18} /> Back to Directory
           </Link>
           <h1 className="text-4xl md:text-5xl font-bold font-heading mb-4 text-balance">

@@ -57,7 +57,7 @@ function OpenNowCard({ opp }: { opp: Opportunity }) {
               href={applyUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="relative z-20 flex items-center gap-1 text-xs font-semibold text-primary hover:text-blue-400 transition-colors"
+              className="relative z-20 flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary-hover transition-colors"
             >
               Apply <ExternalLink size={10} />
             </a>

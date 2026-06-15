@@ -106,7 +106,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                 file:rounded-xl file:border-0
                 file:text-sm file:font-semibold
                 file:bg-primary file:text-white
-                hover:file:bg-blue-600 file:cursor-pointer file:transition-colors"
+                hover:file:bg-primary-hover file:cursor-pointer file:transition-colors"
             />
             <p className="text-xs opacity-60 mt-2">Uploading an image will securely store it as part of the directory data.</p>
           </div>
@@ -446,7 +446,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                         Approve
                       </button>
                     )}
-                    <button onClick={() => handleEdit(opp)} className="p-2 text-blue-500 hover:bg-blue-500/10 rounded-lg transition-colors" title="Edit">
+                    <button onClick={() => handleEdit(opp)} className="p-2 text-[color:var(--color-primary-text)] hover:bg-primary/10 rounded-lg transition-colors" title="Edit">
                       <Edit2 size={18} />
                     </button>
                     <button onClick={() => handleDelete(opp.id)} className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors" title="Delete">
@@ -521,7 +521,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                           Reject
                         </button>
                       )}
-                      <button onClick={() => { setEditingDirId(listing.id); setDirFormData(listing); }} className="p-2 text-blue-500 hover:bg-blue-500/10 rounded-lg transition-colors" title="Edit">
+                      <button onClick={() => { setEditingDirId(listing.id); setDirFormData(listing); }} className="p-2 text-[color:var(--color-primary-text)] hover:bg-primary/10 rounded-lg transition-colors" title="Edit">
                         <Edit2 size={18} />
                       </button>
                       <button onClick={async () => {
@@ -596,7 +596,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                         Close
                       </button>
                     )}
-                    <button onClick={() => { setEditingCsId(listing.id); setCsFormData(listing); }} className="p-2 text-blue-500 hover:bg-blue-500/10 rounded-lg transition-colors" title="Edit">
+                    <button onClick={() => { setEditingCsId(listing.id); setCsFormData(listing); }} className="p-2 text-[color:var(--color-primary-text)] hover:bg-primary/10 rounded-lg transition-colors" title="Edit">
                       <Edit2 size={18} />
                     </button>
                     <button onClick={async () => {
@@ -664,7 +664,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                   </td>
                   <td className="p-4 text-sm text-foreground/50">{p.sort_order}</td>
                   <td className="p-4 flex justify-end gap-2 items-center">
-                    <button onClick={() => { setEditingPartnerId(p.id); setPartnerForm(p); setPartnerLogoPreview(p.logo_url); setPartnerLogoFile(null); }} className="p-2 text-blue-500 hover:bg-blue-500/10 rounded-lg transition-colors" title="Edit">
+                    <button onClick={() => { setEditingPartnerId(p.id); setPartnerForm(p); setPartnerLogoPreview(p.logo_url); setPartnerLogoFile(null); }} className="p-2 text-[color:var(--color-primary-text)] hover:bg-primary/10 rounded-lg transition-colors" title="Edit">
                       <Edit2 size={18} />
                     </button>
                     <button onClick={async () => {
@@ -1157,7 +1157,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                         Restore
                       </button>
                     )}
-                    <button onClick={() => { setEditingNewsId(item.id); setNewsFormData(item); }} className="p-2 text-blue-500 hover:bg-blue-500/10 rounded-lg transition-colors" title="Edit">
+                    <button onClick={() => { setEditingNewsId(item.id); setNewsFormData(item); }} className="p-2 text-[color:var(--color-primary-text)] hover:bg-primary/10 rounded-lg transition-colors" title="Edit">
                       <Edit2 size={18} />
                     </button>
                     <button onClick={async () => {

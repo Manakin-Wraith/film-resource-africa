@@ -82,7 +82,7 @@ function TierComparison() {
           style={{ background: 'var(--surface)' }}
         >
           <div className="flex items-center justify-between">
-            <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase tracking-wider border bg-blue-500/10 border-blue-500/20 text-blue-400">
+            <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase tracking-wider border bg-primary/10 border-primary/20 text-[color:var(--color-primary-text)]">
               Individual
             </span>
           </div>
@@ -103,7 +103,7 @@ function TierComparison() {
               '10% commission on placement only — nothing if you don\'t get placed',
             ].map((item) => (
               <li key={item} className="flex items-start gap-2.5 text-[13px]" style={{ color: 'var(--foreground-secondary)' }}>
-                <ChevronRight size={14} className="text-blue-400 mt-0.5 shrink-0" />
+                <ChevronRight size={14} className="text-[color:var(--color-primary-text)] mt-0.5 shrink-0" />
                 {item}
               </li>
             ))}
@@ -112,7 +112,7 @@ function TierComparison() {
           {/* Annual CTA — primary */}
           <a
             href={PAYFAST_LINKS.individualAnnual}
-            className="flex items-center justify-between gap-3 px-5 py-4 bg-primary hover:bg-blue-600 text-white font-bold text-sm rounded-xl transition-colors min-h-[56px]"
+            className="flex items-center justify-between gap-3 px-5 py-4 bg-primary hover:bg-primary-hover text-white font-bold text-sm rounded-xl transition-colors min-h-[56px]"
           >
             <span>Annual — R990/yr</span>
             <span className="flex items-center gap-2">
@@ -394,7 +394,7 @@ function DirectoryTease() {
           </p>
           <Link
             href="/members#pricing"
-            className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-blue-600 text-white font-bold text-sm rounded-xl transition-colors"
+            className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary-hover text-white font-bold text-sm rounded-xl transition-colors"
           >
             Choose your tier
           </Link>

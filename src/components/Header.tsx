@@ -125,7 +125,7 @@ export default function Header() {
                   {member.avatar_url ? (
                     <img src={member.avatar_url} alt="" className="w-7 h-7 rounded-full object-cover border border-line-strong" />
                   ) : (
-                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold bg-primary/20 border border-primary/30 text-blue-300">
+                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold bg-primary/20 border border-primary/30 text-primary-text">
                       {firstName.charAt(0)}
                     </div>
                   )}

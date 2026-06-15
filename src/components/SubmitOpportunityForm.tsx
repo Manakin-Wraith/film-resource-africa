@@ -152,7 +152,7 @@ export default function SubmitOpportunityForm({ memberName }: { memberName: stri
                 reader.readAsDataURL(file);
               }
             }}
-            className="mt-1 block w-full text-sm text-foreground/70 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-primary file:text-white hover:file:bg-blue-600 file:cursor-pointer file:transition-colors focus:outline-none"
+            className="mt-1 block w-full text-sm text-foreground/70 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-primary file:text-white hover:file:bg-primary-hover file:cursor-pointer file:transition-colors focus:outline-none"
           />
           <p className="text-sm opacity-60 mt-3 text-balance">Optional: a high-resolution, square logo for the organization or programme.</p>
         </div>

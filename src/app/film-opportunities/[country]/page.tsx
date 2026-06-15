@@ -278,7 +278,7 @@ export default async function CountryPage({ params }: PageProps) {
               <p className="text-[10px] font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--foreground-tertiary)' }}>Explore</p>
               <Link
                 href="/film-opportunities"
-                className="text-primary hover:text-blue-400 text-sm font-medium transition-colors"
+                className="text-primary hover:text-primary-hover text-sm font-medium transition-colors"
               >
                 Browse all countries →
               </Link>

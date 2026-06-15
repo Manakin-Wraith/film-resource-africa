@@ -103,7 +103,7 @@ export default function NewsSection({ news, placements = [], onSponsoredClaim }:
         </h2>
         <Link
           href="/news"
-          className="text-sm font-semibold text-primary hover:text-blue-400 transition-colors flex items-center gap-1 ml-4 shrink-0"
+          className="text-sm font-semibold text-primary hover:text-primary-hover transition-colors flex items-center gap-1 ml-4 shrink-0"
         >
           All news <ArrowRight size={12} />
         </Link>

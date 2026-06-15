@@ -72,7 +72,7 @@ export default function DirectoryClient({ initialData, counts = {} }: { initialD
 
   // Chip model: 'All' + the 7 public Directory categories
   const filterChips = [
-    { key: 'All', label: 'All', shortLabel: 'All', icon: LayoutGrid, color: 'text-foreground/40', filterActive: 'from-primary to-blue-600' },
+    { key: 'All', label: 'All', shortLabel: 'All', icon: LayoutGrid, color: 'text-foreground/40', filterActive: 'from-primary to-primary-hover' },
     ...directoryCategories.map((c) => ({
       key: c.key,
       label: c.label,

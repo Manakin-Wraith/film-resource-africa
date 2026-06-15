@@ -157,7 +157,7 @@ export default function CountryOpportunities({ opportunities, countryName }: Cou
                   href={applyUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-xs font-bold text-primary hover:text-blue-400 transition-colors"
+                  className="flex items-center gap-1 text-xs font-bold text-primary hover:text-primary-hover transition-colors"
                 >
                   Apply <ExternalLink size={12} />
                 </a>

@@ -28,7 +28,7 @@ export default function BrowseByCountry({ countries }: BrowseByCountryProps) {
         </h2>
         <Link
           href="/film-opportunities"
-          className="text-sm font-semibold text-primary hover:text-blue-400 transition-colors flex items-center gap-1 ml-4 flex-shrink-0"
+          className="text-sm font-semibold text-primary hover:text-primary-hover transition-colors flex items-center gap-1 ml-4 flex-shrink-0"
         >
           View all <ArrowRight size={12} />
         </Link>
@@ -61,7 +61,7 @@ export default function BrowseByCountry({ countries }: BrowseByCountryProps) {
         <div className="mt-5 text-center">
           <Link
             href="/film-opportunities"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-blue-400 transition-colors"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary-hover transition-colors"
           >
             Explore all {countries.length} countries <ArrowRight size={13} />
           </Link>
