@@ -264,8 +264,8 @@ body {
 .prs-btn-primary { background: var(--primary); color: white; font-weight: 700; border-radius: 12px; padding: 14px 24px; font-size: 14px; min-height: 48px; transition: background 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; letter-spacing: 0.01em; cursor: pointer; border: none; font-family: inherit; }
 .prs-btn-primary:hover { background: var(--primary-hover); }
 .prs-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-.prs-btn-ghost { border: 1px solid rgba(255,255,255,0.2); color: var(--foreground); border-radius: 10px; padding: 9px 16px; font-size: 13px; font-weight: 600; min-height: 44px; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; background: none; font-family: inherit; }
-.prs-btn-ghost:hover { background: rgba(255,255,255,0.06); border-color: var(--border-strong); }
+.prs-btn-ghost { border: 1px solid var(--color-line-strong); color: var(--foreground); border-radius: 10px; padding: 9px 16px; font-size: 13px; font-weight: 600; min-height: 44px; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; background: none; font-family: inherit; }
+.prs-btn-ghost:hover { background: rgba(31,24,19,0.05); border-color: var(--border-strong); }
 .prs-link-primary { color: var(--primary); font-weight: 600; font-size: 14px; text-decoration: none; transition: color 0.2s; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
 .prs-link-primary:hover { color: #60a5fa; }
 
@@ -279,7 +279,7 @@ body {
 .prs-prose-secondary { font-size: 15px; line-height: 1.7; color: var(--foreground-secondary); }
 
 /* Forms */
-.prs-root .form-input, .prs-root .form-textarea, .prs-root .form-select { width: 100%; background: var(--surface-raised); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 14px 16px; color: var(--foreground); font-size: 15px; line-height: 1.5; transition: border-color 0.2s; font-family: var(--font-body); }
+.prs-root .form-input, .prs-root .form-textarea, .prs-root .form-select { width: 100%; background: var(--surface-raised); border: 1px solid var(--color-line-mid); border-radius: 12px; padding: 14px 16px; color: var(--foreground); font-size: 15px; line-height: 1.5; transition: border-color 0.2s; font-family: var(--font-body); }
 .prs-root .form-input:focus, .prs-root .form-textarea:focus, .prs-root .form-select:focus { outline: none; border-color: rgba(59,130,246,0.55); }
 .prs-root .form-input:focus-visible, .prs-root .form-textarea:focus-visible, .prs-root .form-select:focus-visible { outline: 2px solid var(--primary); outline-offset: 0; }
 .prs-btn-primary:focus-visible, .prs-btn-ghost:focus-visible, .prs-root button:focus-visible, .prs-root a:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
@@ -292,10 +292,10 @@ body {
 .prs-root .form-helper { font-size: 13px; color: var(--foreground-tertiary); margin-top: -2px; margin-bottom: 10px; font-style: italic; line-height: 1.5; }
 .prs-root .form-field { margin-bottom: 28px; }
 .prs-root .checkbox-group, .prs-root .radio-group { display: flex; flex-direction: column; gap: 8px; }
-.prs-root .check-option { display: flex; align-items: flex-start; gap: 12px; background: var(--surface-raised); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px 14px; cursor: pointer; transition: all 0.15s; font-size: 14px; user-select: none; }
+.prs-root .check-option { display: flex; align-items: flex-start; gap: 12px; background: var(--surface-raised); border: 1px solid var(--color-line); border-radius: 10px; padding: 12px 14px; cursor: pointer; transition: all 0.15s; font-size: 14px; user-select: none; }
 .prs-root .check-option:hover { border-color: var(--border-strong); }
 .prs-root .check-option.checked { border-color: rgba(59,130,246,0.55); background: rgba(59,130,246,0.06); }
-.prs-root .check-box { width: 18px; height: 18px; border-radius: 5px; border: 1.5px solid rgba(255,255,255,0.25); flex-shrink: 0; display: flex; align-items: center; justify-content: center; margin-top: 1px; transition: all 0.15s; color: white; }
+.prs-root .check-box { width: 18px; height: 18px; border-radius: 5px; border: 1.5px solid var(--color-line-strong); flex-shrink: 0; display: flex; align-items: center; justify-content: center; margin-top: 1px; transition: all 0.15s; color: white; }
 .prs-root .check-option.checked .check-box { background: var(--primary); border-color: var(--primary); }
 .prs-root .check-radio { border-radius: 999px; }
 
@@ -401,7 +401,7 @@ body {
 .prs-root .journal { display: flex; flex-direction: column; gap: 0; background: var(--surface-raised); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
 .prs-root .journal-row { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
 .prs-root .journal-row:last-child { border-bottom: none; }
-.prs-root .journal-row:hover { background: rgba(255,255,255,0.025); }
+.prs-root .journal-row:hover { background: rgba(31,24,19,0.03); }
 .prs-root .journal-row.current { background: rgba(59,130,246,0.05); }
 .prs-root .journal-dot { width: 9px; height: 9px; border-radius: 999px; background: var(--foreground-quaternary); flex-shrink: 0; }
 .prs-root .journal-row.current .journal-dot { background: var(--primary); box-shadow: 0 0 0 4px rgba(59,130,246,0.18); }
