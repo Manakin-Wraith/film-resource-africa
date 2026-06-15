@@ -45,7 +45,7 @@ export default function Footer() {
 
   return (
     <>
-      <footer className="relative z-20 border-t border-line py-12 pb-24 md:pb-16">
+      <footer className="relative z-20 py-12 pb-24 md:pb-16">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-10 items-start text-center md:text-left">
 
