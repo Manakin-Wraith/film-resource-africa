@@ -2,7 +2,7 @@
    Everything is nested under .tp-root so it can't leak into the rest of the app
    (the design redefines .container / .section-rule / .section-rubric, which the
    global stylesheet also owns). Tokens (--background, --primary, etc.) and the
-   Inter/Outfit fonts come from globals.css + layout.tsx. JetBrains Mono is added
+   Inter/Fraunces fonts come from globals.css + layout.tsx. JetBrains Mono is added
    as --font-mono in layout.tsx. */
 
 /* DESIGN-SYSTEM EXEMPTION: like .prs-root, this namespace keeps its class
@@ -11,7 +11,7 @@
    --tp-soon-* are local derived tints of the accent for the coming-soon
    treatment. */
 .tp-root {
-  --font-heading: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-fraunces), Georgia, serif;
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --surface-raised-2: #222226;
   --primary: var(--color-primary);

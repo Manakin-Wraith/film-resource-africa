@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter, Outfit, JetBrains_Mono } from 'next/font/google';
+import { Inter, Fraunces, JetBrains_Mono } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
 import './globals.css';
 import Footer from '@/components/Footer';
@@ -7,7 +7,7 @@ import SiteNav from '@/components/SiteNav';
 import MobileTabBar from '@/components/MobileTabBar';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
-const outfit = Outfit({ subsets: ['latin'], variable: '--font-outfit' });
+const fraunces = Fraunces({ subsets: ['latin'], axes: ['opsz'], style: ['normal', 'italic'], variable: '--font-fraunces' });
 const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-jetbrains' });
 
 export const metadata: Metadata = {
@@ -48,7 +48,7 @@ export default async function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${outfit.variable} ${jetbrainsMono.variable} font-sans antialiased text-foreground bg-background film-grain`}>
+      <body className={`${inter.variable} ${fraunces.variable} ${jetbrainsMono.variable} font-sans antialiased text-foreground bg-background film-grain`}>
         {/* React hoists this preload to <head> for fast first paint of the bg image */}
         <link rel="preload" as="image" href="/bg/site-cinematic.jpg" />
         <div className="site-bg" aria-hidden="true" />

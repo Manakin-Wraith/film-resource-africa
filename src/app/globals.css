@@ -29,7 +29,7 @@
   --color-indigo-text: #5a4d99;
   --color-sand: #f1e2c4;
   --font-sans: var(--font-inter);
-  --font-heading: var(--font-outfit);
+  --font-heading: var(--font-fraunces), Georgia, serif;
   --font-mono: var(--font-jetbrains), ui-monospace, monospace;
 }
 
@@ -237,7 +237,7 @@ body {
   --red: var(--color-urgent);
   --green: var(--color-success);
   --green-bg: rgba(34, 197, 94, 0.12);
-  --font-display: var(--font-outfit), system-ui, sans-serif;
+  --font-display: var(--font-fraunces), Georgia, serif;
   --font-body: var(--font-inter), system-ui, sans-serif;
 }
 

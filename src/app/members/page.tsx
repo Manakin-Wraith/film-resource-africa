@@ -249,7 +249,7 @@ function FAQ() {
               </span>
               <span
                 className="text-[22px] font-bold shrink-0 transition-transform duration-200 group-open:rotate-45"
-                style={{ color: '#f59e0b', lineHeight: 1, fontFamily: 'var(--font-outfit)' }}
+                style={{ color: '#f59e0b', lineHeight: 1, fontFamily: 'var(--font-fraunces)' }}
               >
                 +
               </span>
