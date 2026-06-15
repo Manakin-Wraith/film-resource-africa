@@ -1,41 +1,18 @@
-import {
-  getOpportunities,
-  getClosingSoonOpportunities,
-  getOpenOpportunities,
-  getNewWaveOpportunities,
-  getJustAddedOpportunities,
-  getNews,
-  getTrailers,
-  getActivePlacements,
-  getCountriesWithOpportunityCounts,
-} from './actions';
-import HomeClient from '@/components/HomeClient';
+import { getClosingSoonOpportunities, getJustAddedOpportunities } from './actions';
 import NewsletterCTA from '@/components/NewsletterCTA';
+import FrontPageGrid from '@/components/home/FrontPageGrid';
+import JustAddedRow from '@/components/home/JustAddedRow';
 
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
-  const [
-    allOpportunities,
-    closingSoon,
-    openNow,
-    newWave,
-    justAdded,
-    news,
-    trailers,
-    placements,
-    countriesWithCounts,
-  ] = await Promise.all([
-    getOpportunities(),
+  const [closingSoon, justAdded] = await Promise.all([
     getClosingSoonOpportunities(),
-    getOpenOpportunities(),
-    getNewWaveOpportunities(),
     getJustAddedOpportunities(),
-    getNews(),
-    getTrailers(),
-    getActivePlacements(),
-    getCountriesWithOpportunityCounts(),
   ]);
+
+  const lead = closingSoon[0] ?? justAdded[0] ?? null;
+  const closing = lead === closingSoon[0] ? closingSoon.slice(1, 7) : closingSoon.slice(0, 6);
 
   return (
     <main className="min-h-screen">
@@ -58,17 +35,8 @@ export default async function Home() {
           </div>
         </header>
 
-        <HomeClient
-          closingSoon={closingSoon}
-          openNow={openNow}
-          newWave={newWave}
-          justAdded={justAdded}
-          news={news}
-          trailers={trailers}
-          allOpportunities={allOpportunities}
-          placements={placements}
-          countriesWithCounts={countriesWithCounts}
-        />
+        <FrontPageGrid lead={lead} closing={closing} />
+        <JustAddedRow opportunities={justAdded.slice(0, 3)} />
       </div>
     </main>
   );
