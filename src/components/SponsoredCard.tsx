@@ -92,7 +92,7 @@ export default function SponsoredCard({
             <p className="text-foreground/50 text-sm leading-relaxed flex-grow mb-4">
               {placement.cta_text || sectionValueProps[sectionLabel] || 'Partner with Film Resource Africa'}
             </p>
-            <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/10">
+            <div className="flex items-center justify-between mt-auto pt-4 border-t border-line">
               <span className="text-[11px] font-medium text-foreground/50">
                 Sponsored
               </span>
@@ -121,7 +121,7 @@ export default function SponsoredCard({
             className="object-contain max-h-[30px] mb-4 opacity-50 group-hover:opacity-80 transition-opacity"
           />
         ) : (
-          <div className="w-12 h-12 rounded-2xl border-2 border-dashed border-white/15 group-hover:border-amber-500/40 flex items-center justify-center mb-4 transition-all duration-300 group-hover:bg-amber-500/5">
+          <div className="w-12 h-12 rounded-2xl border-2 border-dashed border-line-mid group-hover:border-amber-500/40 flex items-center justify-center mb-4 transition-all duration-300 group-hover:bg-amber-500/5">
             <span className="text-[10px] font-bold text-foreground/30 group-hover:text-amber-400 transition-colors">AD</span>
           </div>
         )}
@@ -164,7 +164,7 @@ export default function SponsoredCard({
           <p className="text-foreground/40 text-sm leading-relaxed flex-grow mb-4">
             {sectionValueProps[sectionLabel] || 'Partner with Film Resource Africa'}
           </p>
-          <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/10">
+          <div className="flex items-center justify-between mt-auto pt-4 border-t border-line">
             <span className="text-[11px] font-medium text-foreground/30">{slotsAvailable} of 3 spots available</span>
             <span className="inline-flex items-center gap-1.5 text-amber-400 text-xs font-bold uppercase tracking-wide opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               Claim <ArrowRight size={12} />
@@ -179,10 +179,10 @@ export default function SponsoredCard({
   return (
     <div
       onClick={() => onClaim(null)}
-      className="ghost-card-minimal relative rounded-xl min-w-[320px] max-w-[360px] flex-shrink-0 snap-start cursor-pointer border-2 border-dashed border-white/10 hover:border-amber-500/30 transition-all duration-300 group flex flex-col items-center justify-center text-center p-8 opacity-60 hover:opacity-100 hover:shadow-[0_16px_32px_-10px_rgba(245,158,11,0.12)]"
+      className="ghost-card-minimal relative rounded-xl min-w-[320px] max-w-[360px] flex-shrink-0 snap-start cursor-pointer border-2 border-dashed border-line hover:border-amber-500/30 transition-all duration-300 group flex flex-col items-center justify-center text-center p-8 opacity-60 hover:opacity-100 hover:shadow-[0_16px_32px_-10px_rgba(245,158,11,0.12)]"
       style={{ minHeight: 220 }}
     >
-      <div className="w-12 h-12 rounded-2xl border-2 border-dashed border-white/15 group-hover:border-amber-500/40 flex items-center justify-center mb-4 transition-all duration-300 group-hover:bg-amber-500/5">
+      <div className="w-12 h-12 rounded-2xl border-2 border-dashed border-line-mid group-hover:border-amber-500/40 flex items-center justify-center mb-4 transition-all duration-300 group-hover:bg-amber-500/5">
         <Plus size={20} className="text-foreground/20 group-hover:text-amber-400 transition-colors" />
       </div>
       <h3 className="text-sm font-bold font-heading text-foreground/30 group-hover:text-amber-400/80 transition-colors mb-1">
@@ -284,7 +284,7 @@ export function NewsSponsoredCard({
             </div>
           )}
 
-          <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/10">
+          <div className="flex items-center justify-between mt-auto pt-4 border-t border-line">
             <span className="text-[11px] text-foreground/50">Sponsored</span>
             <a
               href={ctaUrl}
@@ -370,7 +370,7 @@ export function NewsSponsoredCard({
               className="object-contain max-h-[40px] mb-5 opacity-50 group-hover:opacity-80 transition-opacity"
             />
           ) : (
-            <div className="w-14 h-14 rounded-2xl border-2 border-dashed border-white/15 group-hover:border-amber-500/40 flex items-center justify-center mb-5 transition-all duration-300 group-hover:bg-amber-500/5">
+            <div className="w-14 h-14 rounded-2xl border-2 border-dashed border-line-mid group-hover:border-amber-500/40 flex items-center justify-center mb-5 transition-all duration-300 group-hover:bg-amber-500/5">
               <span className="text-xs font-bold text-foreground/30 group-hover:text-amber-400 transition-colors">AD</span>
             </div>
           )}

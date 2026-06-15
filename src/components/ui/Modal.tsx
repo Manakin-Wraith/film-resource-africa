@@ -41,7 +41,7 @@ export function ModalCloseButton({ onClick, label = 'Close' }: { onClick: () => 
     <button
       onClick={onClick}
       aria-label={label}
-      className="w-10 h-10 md:w-12 md:h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors border border-white/10 backdrop-blur-md"
+      className="w-10 h-10 md:w-12 md:h-12 bg-foreground/[0.06] hover:bg-foreground/[0.10] rounded-full flex items-center justify-center transition-colors border border-line backdrop-blur-md"
     >
       <X size={20} aria-hidden />
     </button>
@@ -140,7 +140,7 @@ export default function Modal({
                 className="flex justify-center pt-3 pb-1 cursor-grab active:cursor-grabbing touch-none"
                 onPointerDown={(e) => dragControls.start(e)}
               >
-                <div className="w-10 h-1 rounded-full bg-white/20" />
+                <div className="w-10 h-1 rounded-full bg-foreground/20" />
               </div>
             )}
 

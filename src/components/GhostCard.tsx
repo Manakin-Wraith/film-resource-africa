@@ -52,7 +52,7 @@ export default function GhostCard({ variant, sectionLabel, valueProp, slotsAvail
             {resolvedValueProp}
           </p>
 
-          <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/10">
+          <div className="flex items-center justify-between mt-auto pt-4 border-t border-line">
             <span className="text-[11px] font-medium text-foreground/30">
               {slotsAvailable} of 3 spots available
             </span>
@@ -69,11 +69,11 @@ export default function GhostCard({ variant, sectionLabel, valueProp, slotsAvail
   return (
     <div
       onClick={onClaim}
-      className="ghost-card-minimal relative rounded-xl min-w-[320px] max-w-[360px] flex-shrink-0 snap-start cursor-pointer border-2 border-dashed border-white/10 hover:border-amber-500/30 transition-all duration-300 group flex flex-col items-center justify-center text-center p-8 opacity-60 hover:opacity-100 hover:shadow-[0_16px_32px_-10px_rgba(245,158,11,0.12)]"
+      className="ghost-card-minimal relative rounded-xl min-w-[320px] max-w-[360px] flex-shrink-0 snap-start cursor-pointer border-2 border-dashed border-line hover:border-amber-500/30 transition-all duration-300 group flex flex-col items-center justify-center text-center p-8 opacity-60 hover:opacity-100 hover:shadow-[0_16px_32px_-10px_rgba(245,158,11,0.12)]"
       style={{ minHeight: 220 }}
     >
       {/* Icon */}
-      <div className="w-12 h-12 rounded-2xl border-2 border-dashed border-white/15 group-hover:border-amber-500/40 flex items-center justify-center mb-4 transition-all duration-300 group-hover:bg-amber-500/5">
+      <div className="w-12 h-12 rounded-2xl border-2 border-dashed border-line-mid group-hover:border-amber-500/40 flex items-center justify-center mb-4 transition-all duration-300 group-hover:bg-amber-500/5">
         <Plus size={20} className="text-foreground/20 group-hover:text-amber-400 transition-colors" />
       </div>
 
@@ -142,11 +142,11 @@ export function NewsGhostCard({ variant, sectionLabel, valueProp, slotsAvailable
   return (
     <div
       onClick={onClaim}
-      className="ghost-card-minimal rounded-xl border-2 border-dashed border-white/10 hover:border-amber-500/30 transition-all duration-300 group flex flex-col items-center justify-center text-center cursor-pointer opacity-60 hover:opacity-100 overflow-hidden"
+      className="ghost-card-minimal rounded-xl border-2 border-dashed border-line hover:border-amber-500/30 transition-all duration-300 group flex flex-col items-center justify-center text-center cursor-pointer opacity-60 hover:opacity-100 overflow-hidden"
       style={{ minHeight: 320, background: 'var(--surface)' }}
     >
       <div className="p-8 flex flex-col items-center justify-center flex-grow">
-        <div className="w-14 h-14 rounded-2xl border-2 border-dashed border-white/15 group-hover:border-amber-500/40 flex items-center justify-center mb-5 transition-all duration-300 group-hover:bg-amber-500/5">
+        <div className="w-14 h-14 rounded-2xl border-2 border-dashed border-line-mid group-hover:border-amber-500/40 flex items-center justify-center mb-5 transition-all duration-300 group-hover:bg-amber-500/5">
           <Plus size={24} className="text-foreground/20 group-hover:text-amber-400 transition-colors" />
         </div>
 

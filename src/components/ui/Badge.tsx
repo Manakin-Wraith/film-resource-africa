@@ -35,7 +35,7 @@ const statusFill: Partial<Record<Colorway, string>> = {
   blue: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
   teal: 'bg-teal-500/20 text-teal-400 border-teal-500/30',
   purple: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-  neutral: 'bg-white/5 text-foreground/50 border-white/10',
+  neutral: 'bg-foreground/[0.04] text-foreground/50 border-line',
 };
 
 export default function Badge({
@@ -51,7 +51,7 @@ export default function Badge({
     variant === 'status'
       ? (statusFill[colorway] ?? statusFill.neutral)
       : variant === 'meta'
-        ? `bg-white/5 border-white/10 ${colorway === 'neutral' ? 'text-foreground/60' : k.text}`
+        ? `bg-foreground/[0.04] border-line ${colorway === 'neutral' ? 'text-foreground/60' : k.text}`
         : `${k.bg} ${k.text}`;
 
   return (

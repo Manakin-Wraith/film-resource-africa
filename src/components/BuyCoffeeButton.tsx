@@ -11,7 +11,7 @@ export default function BuyCoffeeButton() {
     <div className="fixed bottom-20 md:bottom-6 right-6 z-40 flex flex-col items-end gap-2">
       {/* Tooltip */}
       {showTooltip && (
-        <div className="relative bg-white/10 backdrop-blur-xl border border-white/15 rounded-2xl p-4 shadow-2xl max-w-[260px] animate-in slide-in-from-bottom-2 fade-in duration-300">
+        <div className="relative bg-foreground/[0.04] backdrop-blur-xl border border-line-mid rounded-2xl p-4 shadow-2xl max-w-[260px] animate-in slide-in-from-bottom-2 fade-in duration-300">
           <button
             onClick={() => setShowTooltip(false)}
             className="absolute top-2 right-2 text-foreground/50 hover:text-foreground/70 transition-colors"
