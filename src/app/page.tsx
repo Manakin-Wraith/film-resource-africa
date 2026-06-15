@@ -1,4 +1,5 @@
 import { getClosingSoonOpportunities, getOpenOpportunities, getJustAddedOpportunities } from './actions';
+import { daysUntil } from '@/lib/dateUtils';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import FrontPageGrid from '@/components/home/FrontPageGrid';
 import JustAddedRow from '@/components/home/JustAddedRow';
@@ -14,13 +15,17 @@ export default async function Home() {
 
   const lead = closingSoon[0] ?? justAdded[0] ?? null;
 
-  // "Closing this week" = soonest upcoming deadlines across closing-soon + open (excluding the lead)
-  const now = Date.now();
+  // "Closing this week" = soonest upcoming deadlines across closing-soon + open (excluding the lead).
+  // daysUntil() compares at local start-of-day, so deadlines closing TODAY (d === 0) are kept —
+  // a raw `new Date(dateOnly) >= Date.now()` check would drop them (date-only parses to UTC midnight).
   const closing = [...closingSoon, ...openNow]
-    .filter((o) => o.id !== lead?.id && o.deadline_date && new Date(o.deadline_date).getTime() >= now)
-    .filter((o, i, arr) => arr.findIndex((x) => x.id === o.id) === i)
-    .sort((a, b) => new Date(a.deadline_date as string).getTime() - new Date(b.deadline_date as string).getTime())
-    .slice(0, 6);
+    .filter((o) => o.id !== lead?.id && o.deadline_date)
+    .map((o) => ({ o, d: daysUntil(o.deadline_date as string) }))
+    .filter(({ d }) => d >= 0)
+    .filter(({ o }, i, arr) => arr.findIndex((x) => x.o.id === o.id) === i)
+    .sort((a, b) => a.d - b.d)
+    .slice(0, 6)
+    .map(({ o }) => o);
 
   return (
     <main className="min-h-screen">

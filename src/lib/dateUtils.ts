@@ -79,14 +79,24 @@ export function formatLocalDateTime(dateStr: string): string {
   });
 }
 
-/** Calculate days remaining until a deadline. Returns negative if past. */
+/**
+ * Calendar days from today until a deadline, in the user's local time.
+ * Today = 0, tomorrow = 1, yesterday = -1 (negative = past).
+ *
+ * Both dates are normalised to local start-of-day before comparing, so the
+ * result is a truthful whole-day count — NOT inflated. (The previous version
+ * compared the deadline's end-of-day against today's start-of-day with
+ * Math.ceil, which overstated every result by one: a deadline *today* read as
+ * "tomorrow", and one that closed *yesterday* read as "Closes today!".)
+ */
 export function daysUntil(dateStr: string): number {
   const deadline = new Date(dateStr);
   const now = new Date();
-  // Reset to midnight for day-level comparison
-  deadline.setHours(23, 59, 59, 999);
+  deadline.setHours(0, 0, 0, 0);
   now.setHours(0, 0, 0, 0);
-  return Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  // round() (not floor/ceil) absorbs DST hour shifts that would otherwise
+  // push an exact day-boundary to x.96 / x.04.
+  return Math.round((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 }
 
 const NEW_WINDOW_DAYS = 14;
