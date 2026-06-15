@@ -1,26 +1,33 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #3b82f6;
-  --color-accent: #f59e0b;
-  --color-urgent: #ef4444;
-  --color-success: #22c55e;
+  --color-primary: #d98e2b;
+  --color-accent: #d98e2b;
+  --color-urgent: #cf4327;
+  --color-success: #5b8a3a;
   /* Core neutrals — these activate the text-foreground/bg-surface utility
      families used throughout the app. Values mirror the legacy :root vars. */
-  --color-background: #09090b;
-  --color-foreground: #fafafa;
-  --color-surface: #111113;
-  --color-surface-raised: #18181b;
+  --color-background: #f7f3ea;
+  --color-foreground: #1f1813;
+  --color-surface: #fffdf8;
+  --color-surface-raised: #ffffff;
   /* Semantic accents */
-  --color-primary-hover: #2563eb;
-  --color-callsheet: #2dd4bf;       /* call-sheet surface accent (teal-400) */
-  --color-callsheet-deep: #0d9488;  /* call-sheet CTA (teal-600) */
-  --color-sponsor: #f59e0b;         /* sponsored placements (homepage) */
-  --color-sponsor-news: #c084fc;    /* sponsored placements (news grid) */
+  --color-primary-hover: #c47f22;
+  --color-callsheet: #0d9488;       /* call-sheet surface accent (teal-400) */
+  --color-callsheet-deep: #0f766e;  /* call-sheet CTA (teal-600) */
+  --color-sponsor: #b45309;         /* sponsored placements (homepage) */
+  --color-sponsor-news: #6a5cae;    /* sponsored placements (news grid) */
   /* Border / hairline scale — the only three line strengths in the app */
-  --color-line: rgba(255, 255, 255, 0.08);
-  --color-line-mid: rgba(255, 255, 255, 0.12);
-  --color-line-strong: rgba(255, 255, 255, 0.16);
+  --color-line: rgba(31, 24, 19, 0.12);
+  --color-line-mid: rgba(31, 24, 19, 0.16);
+  --color-line-strong: rgba(31, 24, 19, 0.22);
+  /* Light-theme additions: ochre/status as readable TEXT on paper (fills use --color-primary etc.) */
+  --color-primary-text: #8a5a12;
+  --color-ember-text: #b33a20;
+  --color-moss-text: #4a7330;
+  --color-indigo: #6a5cae;
+  --color-indigo-text: #5a4d99;
+  --color-sand: #f1e2c4;
   --font-sans: var(--font-inter);
   --font-heading: var(--font-outfit);
   --font-mono: var(--font-jetbrains), ui-monospace, monospace;
@@ -29,15 +36,15 @@
 /* ── Colour tokens ─────────────────────────────────────────────────── */
 
 :root {
-  --background: #09090b;
-  --foreground: #fafafa;
-  --surface: #111113;
-  --surface-raised: #18181b;
+  --background: #f7f3ea;
+  --foreground: #1f1813;
+  --surface: #fffdf8;
+  --surface-raised: #ffffff;
   /* Legacy aliases — single source of truth is the @theme line scale */
   --border: var(--color-line);
   --border-strong: var(--color-line-strong);
-  --foreground-secondary: rgba(250, 250, 250, 0.55);
-  --foreground-tertiary: rgba(250, 250, 250, 0.48); /* 4.8:1 on bg (was 0.35 = 3.1:1, sub-AA) */
+  --foreground-secondary: rgba(31, 24, 19, 0.66);
+  --foreground-tertiary: rgba(31, 24, 19, 0.50); /* 4.8:1 on bg (was 0.35 = 3.1:1, sub-AA) */
   /* Site background scrim — higher = darker / image more hidden. One-knob tunable. */
   --bg-scrim-strength: 0.90;
   /* z scale: content < nav < modal < grain (grain intentionally overlays all) */
