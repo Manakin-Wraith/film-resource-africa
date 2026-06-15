@@ -63,7 +63,7 @@ export default function PartnersSection() {
             <Handshake size={14} className="text-primary" />
             Ecosystem
           </div>
-          <h2 className="text-2xl md:text-3xl font-bold font-heading text-white">
+          <h2 className="text-2xl md:text-3xl font-bold font-heading text-foreground">
             Our Partners & Industry Network
           </h2>
           <p className="text-foreground/50 text-sm max-w-lg mx-auto">
@@ -83,7 +83,7 @@ export default function PartnersSection() {
                 <div className={`w-10 h-10 rounded-xl border ${colors.bg} flex items-center justify-center mb-3`}>
                   <cat.icon size={20} className={colors.text} />
                 </div>
-                <h3 className="font-semibold text-white text-sm md:text-base">{cat.title}</h3>
+                <h3 className="font-semibold text-foreground text-sm md:text-base">{cat.title}</h3>
                 <p className="text-foreground/50 text-xs mt-1 leading-relaxed hidden md:block">{cat.description}</p>
                 {/* Coming soon badge */}
                 <div className="absolute top-3 right-3 text-[9px] font-bold uppercase tracking-widest text-foreground/20">
