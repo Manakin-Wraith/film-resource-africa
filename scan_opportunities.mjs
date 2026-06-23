@@ -93,7 +93,9 @@ function isTruncatedContent(content, url) {
   // quote, a closing bracket, or an ellipsis. This is the strongest single signal — the
   // Deadline `…Disney+ to` failure was a 1534-char body that slipped past an earlier
   // length-gated version of this rule.
-  const trimmed = text.replace(/\s+$/, '');
+  // Trailing markdown emphasis (*italic.* / _foo._) is not a truncation signal —
+  // check the punctuation inside it.
+  const trimmed = text.replace(/\s+$/, '').replace(/[*_]+$/, '');
   const lastChar = trimmed.slice(-1);
   const terminal = /[.!?\u2026)\]"'\u201d\u2019\u00bb\u300d\u300f]/;   // . ! ? … ) ] " ' ” ’ » 」 』
   if (!terminal.test(lastChar)) return true;
@@ -1860,7 +1862,14 @@ async function enrichWithPlaywright(forceVerifyIds = []) {
         }
       }
     } catch (err) {
-      console.log(`  ✗ [${item.id}] ${item.title.slice(0, 40)} — ${err.message.slice(0, 60)}`);
+      // Bump enrich_attempts even on throw, so paywall/SPA pages that consistently fail
+      // navigation get sealed after MAX_ENRICH_ATTEMPTS instead of looping every run.
+      const MAX_ENRICH_ATTEMPTS = 3;
+      const attempts = (item.enrich_attempts || 0) + 1;
+      const patch = { enrich_attempts: attempts };
+      if (attempts >= MAX_ENRICH_ATTEMPTS) patch.enriched_at = new Date().toISOString();
+      try { await supabaseUpdate('news', item.id, patch); } catch { /* ignore secondary failure */ }
+      console.log(`  ✗ [${item.id}] ${item.title.slice(0, 40)} — ${err.message.slice(0, 60)} (attempt ${attempts}/${MAX_ENRICH_ATTEMPTS}${attempts >= MAX_ENRICH_ATTEMPTS ? ', sealed' : ''})`);
     } finally {
       if (page) await page.close().catch(() => {});
     }
@@ -1869,9 +1878,13 @@ async function enrichWithPlaywright(forceVerifyIds = []) {
 
   // ── Phase B: Enrich opportunity fields ──────────────────────────────────
   console.log('\n🎭 Playwright enrichment — opportunity fields...');
+  const OPP_MAX_ENRICH_ATTEMPTS = 3;
   const allOpps = await supabaseGet('opportunities',
-    `select=id,title,status,"What Is It?","Apply:","For Films or Series?","Next Deadline","Who Can Apply / Eligibility","What Do You Get If Selected?","Cost","What to Submit",category,africa_relevance,enriched_at&order=id.desc&limit=200`);
-  const needsEnrich = allOpps.filter(o => !o.enriched_at && (
+    `select=id,title,status,"What Is It?","Apply:","For Films or Series?","Next Deadline","Who Can Apply / Eligibility","What Do You Get If Selected?","Cost","What to Submit",category,africa_relevance,enriched_at,enrich_attempts&order=id.desc&limit=200`);
+  // A row needs enrichment when any core box is still placeholder. Re-queue rows that already
+  // had a stamp on them too, as long as they're within the attempt budget — previously a single
+  // empty/failed pass sealed them forever (silent catch + always-set enriched_at).
+  const needsEnrich = allOpps.filter(o => ((o.enrich_attempts || 0) < OPP_MAX_ENRICH_ATTEMPTS) && (
     (o['For Films or Series?'] === 'To be confirmed') ||
     (o['For Films or Series?'] === 'TBC') ||
     (o['Next Deadline'] === 'To be confirmed') ||
@@ -1884,14 +1897,37 @@ async function enrichWithPlaywright(forceVerifyIds = []) {
   ));
   console.log(`   ${needsEnrich.length} opportunities need field enrichment`);
 
+  // Normalize an Apply: value to a fetchable URL. Many seed rows store bare domains
+  // (e.g. `berlinale.de/en/wcf`) or compound strings — Playwright throws on these.
+  function normalizeApplyUrl(raw) {
+    if (!raw || typeof raw !== 'string') return null;
+    // Strip everything after a '|' separator (some rows pack 2+ URLs in one field).
+    let u = raw.split('|')[0].trim();
+    if (!u) return null;
+    if (/^https?:\/\//i.test(u)) return u;
+    // Reject anything that doesn't look like a domain at all.
+    if (!/^[a-z0-9][a-z0-9.\-]*\.[a-z]{2,}/i.test(u)) return null;
+    return 'https://' + u.replace(/^\/+/, '');
+  }
+
   let oppsEnriched = 0;
   for (const opp of needsEnrich) {
-    const url = opp['Apply:'];
-    if (!url) continue;
+    const rawUrl = opp['Apply:'];
+    const url = normalizeApplyUrl(rawUrl);
+    const attempts = (opp.enrich_attempts || 0) + 1;
+    const sealedNow = attempts >= OPP_MAX_ENRICH_ATTEMPTS;
+    if (!url) {
+      // Unparseable Apply: value — bump attempts so it eventually seals out of the queue.
+      const patch = { enrich_attempts: attempts };
+      if (sealedNow) patch.enriched_at = new Date().toISOString();
+      await supabaseUpdate('opportunities', opp.id, patch);
+      console.log(`  · [${opp.id}] ${opp.title.slice(0, 50)} — unparseable Apply: "${(rawUrl || '').slice(0, 40)}" (attempt ${attempts}/${OPP_MAX_ENRICH_ATTEMPTS}${sealedNow ? ', sealed' : ''})`);
+      continue;
+    }
     // Playwright hands PDFs to the browser's built-in viewer, so the DOM has no readable
     // body — enrichment can never succeed. Seal enriched_at so it stops re-queuing forever.
     if (url.toLowerCase().split('?')[0].endsWith('.pdf')) {
-      await supabaseUpdate('opportunities', opp.id, { enriched_at: new Date().toISOString() });
+      await supabaseUpdate('opportunities', opp.id, { enriched_at: new Date().toISOString(), enrich_attempts: attempts });
       console.log(`  · [${opp.id}] ${opp.title.slice(0, 50)} — PDF, skipped (needs manual/pdf-parse)`);
       continue;
     }
@@ -1928,9 +1964,12 @@ async function enrichWithPlaywright(forceVerifyIds = []) {
         return extractText(document.body).replace(/\s+/g, ' ').trim().slice(0, 7000);
       });
 
-      // Bot/challenge page — skip
+      // Bot/challenge page — bump attempts so it seals after MAX instead of looping forever.
       if (/verif(y|ying) you are|cloudflare|just a moment|enable javascript/i.test(pageText.slice(0, 300))) {
-        console.log(`  ⚠ [${opp.id}] Bot wall detected — skipping`);
+        const patch = { enrich_attempts: attempts };
+        if (sealedNow) patch.enriched_at = new Date().toISOString();
+        await supabaseUpdate('opportunities', opp.id, patch);
+        console.log(`  ⚠ [${opp.id}] Bot wall detected — attempt ${attempts}/${OPP_MAX_ENRICH_ATTEMPTS}${sealedNow ? ', sealed' : ''}`);
         continue;
       }
 
@@ -1992,16 +2031,25 @@ async function enrichWithPlaywright(forceVerifyIds = []) {
         }
       }
 
-      updates.enriched_at = new Date().toISOString();
+      updates.enrich_attempts = attempts;
+      const gotRealFields = Object.keys(updates).some(k => k !== 'enrich_attempts' && k !== 'status');
+      // Only stamp enriched_at when we actually filled something — or we've exhausted the
+      // attempt budget. An empty pass on attempts 1–2 leaves enriched_at null so the row
+      // re-queues next run (the previous code sealed it after a single empty pass).
+      if (gotRealFields || sealedNow) updates.enriched_at = new Date().toISOString();
       await supabaseUpdate('opportunities', opp.id, updates);
-      if (Object.keys(updates).length > 1) {
-        console.log(`  ✅ [${opp.id}] ${opp.title.slice(0, 50)} — ${Object.keys(updates).filter(k => k !== 'enriched_at').join(', ')}`);
+      if (gotRealFields) {
+        console.log(`  ✅ [${opp.id}] ${opp.title.slice(0, 50)} — ${Object.keys(updates).filter(k => k !== 'enriched_at' && k !== 'enrich_attempts').join(', ')}`);
         oppsEnriched++;
       } else {
-        console.log(`  · [${opp.id}] ${opp.title.slice(0, 50)} — no fields extracted, marked done`);
+        console.log(`  · [${opp.id}] ${opp.title.slice(0, 50)} — no fields extracted (attempt ${attempts}/${OPP_MAX_ENRICH_ATTEMPTS}${sealedNow ? ', sealed' : ''})`);
       }
     } catch (err) {
-      // silent — many pages will fail; leave enriched_at null so it retries next run
+      // Bump attempts on throw too so silently-failing pages eventually seal.
+      const patch = { enrich_attempts: attempts };
+      if (sealedNow) patch.enriched_at = new Date().toISOString();
+      try { await supabaseUpdate('opportunities', opp.id, patch); } catch { /* ignore secondary failure */ }
+      console.log(`  ✗ [${opp.id}] ${opp.title.slice(0, 50)} — ${(err.message || '').slice(0, 60)} (attempt ${attempts}/${OPP_MAX_ENRICH_ATTEMPTS}${sealedNow ? ', sealed' : ''})`);
     } finally {
       if (page) await page.close().catch(() => {});
     }
@@ -2630,9 +2678,21 @@ async function main() {
   if (!DRY_RUN) {
     console.log('\n🗑  Checking for expired pending opportunities...');
     await flagExpiredPendingOpps();
-    // Always enrich when new news was inserted (content + images for pending articles)
-    // Full opportunity enrichment only with --enrich flag
-    if (newsInserted > 0 || oppsInserted > 0 || ENRICH) {
+    // Drain the enrichment backlog every run — even on quiet scans where nothing new was
+    // inserted. Phase A/B/C self-filter by attempt budget and cadence, so running them
+    // always is cheap and stops thin/truncated/TBC rows from being stranded indefinitely.
+    // Previously this was gated on newsInserted>0 || oppsInserted>0 || ENRICH, which left
+    // the backlog frozen whenever a scan day found nothing fresh.
+    const hasBacklog = await (async () => {
+      try {
+        const [n, o] = await Promise.all([
+          supabaseGet('news', 'select=id&status=eq.pending&limit=1'),
+          supabaseGet('opportunities', `select=id&enrich_attempts=lt.3&"Next Deadline"=in.("TBC","To be confirmed")&limit=1`),
+        ]);
+        return (n && n.length > 0) || (o && o.length > 0);
+      } catch { return false; }
+    })();
+    if (newsInserted > 0 || oppsInserted > 0 || ENRICH || hasBacklog) {
       // Stage 3 — roll-forward triggers: match this run's "now open" signals (opportunity leads
       // + news) to existing closed/expired programmes, and force those into the re-verify batch.
       let forceVerifyIds = [];
