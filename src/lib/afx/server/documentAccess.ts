@@ -35,14 +35,26 @@ export async function resolveDocAccess(): Promise<DocAccess | null> {
 export const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** A document storage key is owned + well-formed iff it is exactly
- *  `${producerId}/<uuid>/<uuid>.<ext>` with no path-traversal segment. */
+ *  `${producerId}/<caseStudyUuid|entity>/<docUuid>.<ext>` with no traversal. */
 export function isOwnedDocPath(path: string, producerId: string): boolean {
   if (path.includes('..')) return false;
-  // Self-guard: producerId is interpolated into the RegExp below, so it must be
-  // a bare UUID (no regex metachars). Rejecting here keeps the ownership
-  // guarantee local — it no longer rests on the caller passing a clean value.
   if (!UUID_RE.test(producerId)) return false;
   const uuid = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
-  const re = new RegExp(`^${producerId}/${uuid}/${uuid}\\.[a-z0-9]+$`, 'i');
+  const re = new RegExp(`^${producerId}/(?:entity|${uuid})/${uuid}\\.[a-z0-9]+$`, 'i');
   return re.test(path);
+}
+
+/** True iff the producer has an OPEN (submitted/under_review) submission for the
+ *  given target. `targetId` is the case-study id, or null for the entity. */
+export async function hasOpenSubmission(producerId: string, kind: 'case_study' | 'entity', targetId: string | null): Promise<boolean> {
+  let q = afxAdmin
+    .from('afx_vetting_submissions')
+    .select('id')
+    .eq('producer_id', producerId)
+    .eq('kind', kind)
+    .in('status', ['submitted', 'under_review'])
+    .limit(1);
+  q = targetId ? q.eq('target_id', targetId) : q.is('target_id', null);
+  const { data } = await q;
+  return !!(data && data.length > 0);
 }

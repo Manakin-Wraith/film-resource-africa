@@ -1,18 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { AFX_DOCS_BUCKET, afxAdmin, resolveDocAccess, UUID_RE } from '@/lib/afx/server/documentAccess';
-import { ALLOWED_DOC_TYPES, MAX_DOC_BYTES, DOCUMENT_CATEGORIES } from '@/lib/afx/documents';
-import type { AfxDocument, DocumentCategory } from '@/lib/afx/types';
+import { AFX_DOCS_BUCKET, afxAdmin, resolveDocAccess, UUID_RE, hasOpenSubmission } from '@/lib/afx/server/documentAccess';
+import { ALLOWED_DOC_TYPES, MAX_DOC_BYTES, DOCUMENT_CATEGORIES, ENTITY_DOCUMENT_CATEGORIES } from '@/lib/afx/documents';
+import type { AfxDocument, DocumentCategory, EntityDocumentCategory } from '@/lib/afx/types';
 
 export async function POST(req: NextRequest) {
   const form = await req.formData();
   const file = form.get('file') as File | null;
+  const scope = (form.get('scope') as string | null) ?? 'case_study';
   const caseStudyId = form.get('caseStudyId') as string | null;
   const category = form.get('category') as string | null;
 
-  if (!file || !caseStudyId || !category) {
-    return NextResponse.json({ error: 'Missing file, caseStudyId or category' }, { status: 400 });
+  if (!file || !category) {
+    return NextResponse.json({ error: 'Missing file or category' }, { status: 400 });
   }
-  if (!(DOCUMENT_CATEGORIES as readonly string[]).includes(category)) {
+  if (scope !== 'case_study' && scope !== 'entity') {
+    return NextResponse.json({ error: 'Invalid scope' }, { status: 400 });
+  }
+  const allowedCats = scope === 'entity' ? ENTITY_DOCUMENT_CATEGORIES : DOCUMENT_CATEGORIES;
+  if (!(allowedCats as readonly string[]).includes(category)) {
     return NextResponse.json({ error: 'Invalid category' }, { status: 400 });
   }
 
@@ -20,8 +25,21 @@ export async function POST(req: NextRequest) {
   if (!access) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   if (!access.ndaSigned) return NextResponse.json({ error: 'NDA must be signed to upload documents' }, { status: 403 });
 
-  if (!UUID_RE.test(caseStudyId)) {
-    return NextResponse.json({ error: 'Invalid caseStudyId' }, { status: 400 });
+  // Resolve the path segment + enforce the edit-lock for this target.
+  let segment: string;
+  if (scope === 'entity') {
+    if (await hasOpenSubmission(access.producerId, 'entity', null)) {
+      return NextResponse.json({ error: 'Entity is locked for review — withdraw to edit' }, { status: 409 });
+    }
+    segment = 'entity';
+  } else {
+    if (!caseStudyId || !UUID_RE.test(caseStudyId)) {
+      return NextResponse.json({ error: 'Invalid caseStudyId' }, { status: 400 });
+    }
+    if (await hasOpenSubmission(access.producerId, 'case_study', caseStudyId)) {
+      return NextResponse.json({ error: 'Case study is locked for review — withdraw to edit' }, { status: 409 });
+    }
+    segment = caseStudyId;
   }
 
   if (!ALLOWED_DOC_TYPES.includes(file.type)) {
@@ -33,7 +51,7 @@ export async function POST(req: NextRequest) {
 
   const docId = crypto.randomUUID();
   const ext = file.name.split('.').pop()?.toLowerCase().replace(/[^a-z0-9]/g, '') || 'bin';
-  const path = `${access.producerId}/${caseStudyId}/${docId}.${ext}`;
+  const path = `${access.producerId}/${segment}/${docId}.${ext}`;
   const buffer = Buffer.from(await file.arrayBuffer());
 
   const { error } = await afxAdmin.storage.from(AFX_DOCS_BUCKET).upload(path, buffer, { contentType: file.type, upsert: false });
@@ -43,7 +61,7 @@ export async function POST(req: NextRequest) {
   }
 
   const doc: AfxDocument = {
-    id: docId, path, filename: file.name, category: category as DocumentCategory,
+    id: docId, path, filename: file.name, category: category as DocumentCategory | EntityDocumentCategory,
     sizeBytes: file.size, contentType: file.type, uploadedAt: new Date().toISOString(),
   };
   return NextResponse.json({ doc });
