@@ -169,7 +169,7 @@ export default function ProducerProfileClient({ initial }: { initial: ProducerPr
           color: saveStatus === 'error' ? '#c0392b' : '#5E6066',
           boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
         }}>
-          {saveStatus === 'saving' ? 'Saving…' : saveStatus === 'saved' ? 'Saved' : 'Couldn't save — your last edit will retry on the next change'}
+          {saveStatus === 'saving' ? 'Saving…' : saveStatus === 'saved' ? 'Saved' : "Couldn’t save — your last edit will retry on the next change"}
         </div>
       )}
     </div>

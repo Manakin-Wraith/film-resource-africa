@@ -18,15 +18,6 @@ export interface ProjectRow {
   exact: Project['exact'] | null;
 }
 
-/** A fresh, type-valid empty profile (spec §3 defaults). */
-export function emptyProducerProfile(id: string): ProducerProfile {
-  return {
-    id, name: '', company: '', bio: '', careerStage: '',
-    ratingBand: 'D', relationships: [], slate: [],
-    entityK2: false, consentK4: false, ndaSigned: false,
-  };
-}
-
 function projectFromRow(row: ProjectRow): Project {
   return row.exact == null ? { ...row.body } : { ...row.body, exact: row.exact };
 }
