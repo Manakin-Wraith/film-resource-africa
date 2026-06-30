@@ -182,7 +182,7 @@ export interface EvidenceLink {
 }
 
 export type DocumentCategory =
-  | 'budget' | 'chain_of_title' | 'financing_agreement'
+  | 'budget' | 'chain_of_title' | 'waterfall' | 'financing_agreement'
   | 'distribution_agreement' | 'completion_bond' | 'audit' | 'other';
 
 /** Confidential supporting document attached to a case study. Producer + FRA

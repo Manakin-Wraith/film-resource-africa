@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react';
 import type { AfxDocument, DocumentCategory } from '@/lib/afx/types';
-import { DOCUMENT_CATEGORIES, DOCUMENT_CATEGORY_LABELS, ALLOWED_DOC_TYPES, MAX_DOC_BYTES } from '@/lib/afx/documents';
+import { DOCUMENT_CATEGORIES, DOCUMENT_CATEGORY_LABELS, ALLOWED_DOC_TYPES, MAX_DOC_BYTES, REQUIRED_DOCUMENT_CATEGORIES, missingRequiredDocs } from '@/lib/afx/documents';
 
 const mono = 'var(--afx-mono)';
 
@@ -82,8 +82,28 @@ export default function AfxDocumentUpload({ caseStudyId, docs, onAdd, onUpdate, 
     }
   }
 
+  const missing = missingRequiredDocs(docs);
+  const ready = missing.length === 0;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {/* Required-proof readiness — the gate the S2 submit-for-vetting flow checks. */}
+      <div style={{ border: `1px solid ${ready ? '#CDEAD5' : '#F0DCA8'}`, background: ready ? '#F2FBF4' : '#FDF8EC', borderRadius: 10, padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ fontFamily: mono, fontSize: 10.5, fontWeight: 700, letterSpacing: '0.02em', color: ready ? '#2E7D46' : '#9A6B1E' }}>
+          {ready ? '✓ Vetting-ready — all required proof attached' : `Not yet vetting-ready — ${missing.length} required document${missing.length > 1 ? 's' : ''} missing`}
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+          {REQUIRED_DOCUMENT_CATEGORIES.map((c) => {
+            const have = !missing.includes(c);
+            return (
+              <span key={c} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontFamily: mono, fontSize: 10, color: have ? '#2E7D46' : '#8A8C82', background: '#fff', border: `1px solid ${have ? '#CDEAD5' : '#E4E2DC'}`, borderRadius: 999, padding: '3px 9px' }}>
+                <span aria-hidden>{have ? '✓' : '○'}</span>{DOCUMENT_CATEGORY_LABELS[c]}
+              </span>
+            );
+          })}
+        </div>
+      </div>
+
       {docs.map((d) => (
         <div key={d.id} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <div style={{ flex: 1, minWidth: 0 }}>

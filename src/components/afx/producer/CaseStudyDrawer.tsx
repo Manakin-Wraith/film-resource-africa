@@ -152,7 +152,7 @@ export default function CaseStudyDrawer({ initial, isNew, ndaSigned, defaultCurr
               />
             ) : (
               <div style={{ fontSize: 12.5, color: '#9A9CA3', border: '1px dashed #DAD7D0', borderRadius: 8, padding: '12px 14px' }}>
-                Sign the FRA NDA to attach confidential documents (budget, chain of title, agreements).
+                Sign the FRA NDA to attach confidential documents (budget, chain of title, waterfall, agreements). A case study can&rsquo;t be made vetting-ready until its required proof is attached.
               </div>
             )}
           </Field>
