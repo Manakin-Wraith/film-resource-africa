@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useDebouncedAutosave } from './useDebouncedAutosave';
 import { persistProfileAction, submitForVettingAction, withdrawVettingAction } from './actions';
-import { openCaseSubmission } from '@/lib/afx/vetting';
-import type { ProducerProfile, Project, ExactFigures, ExactMoney, AfxCurrency, VettingSubmission } from '@/lib/afx/types';
+import { openCaseSubmission, openEntitySubmission, latestEntitySubmission } from '@/lib/afx/vetting';
+import type { ProducerProfile, Project, ExactFigures, ExactMoney, AfxCurrency, VettingSubmission, EntityDocumentCategory, AfxDocument } from '@/lib/afx/types';
 import { liveProjects } from '@/lib/afx/aggregates';
 import { meetsCorePackaging } from '@/lib/afx/constants';
 import AfxTopBar from '@/components/afx/AfxTopBar';
@@ -18,6 +18,7 @@ import AccountVisibility from '@/components/afx/producer/AccountVisibility';
 import FunderPreview from '@/components/afx/producer/FunderPreview';
 import { toFunderView } from '@/lib/afx/funderView';
 import CaseStudyDrawer from '@/components/afx/producer/CaseStudyDrawer';
+import EntityVettingPanel from '@/components/afx/producer/EntityVettingPanel';
 import { newCaseStudy } from '@/lib/afx/caseStudy';
 
 const mono = 'var(--afx-mono)';
@@ -82,6 +83,27 @@ export default function ProducerProfileClient({ initial, initialSubmissions }: {
       else setActionError(res.error ?? 'Withdraw failed');
     } catch {
       setActionError('Could not withdraw — please try again');
+    } finally {
+      setVettingBusy(false);
+    }
+  };
+
+  const onAddEntityDoc = (doc: AfxDocument) => setDraft((d) => ({ ...d, entityDocs: [...(d.entityDocs ?? []), doc] }));
+  const onUpdateEntityDoc = (id: string, patch: { category: EntityDocumentCategory }) =>
+    setDraft((d) => ({ ...d, entityDocs: (d.entityDocs ?? []).map((x) => (x.id === id ? { ...x, ...patch } : x)) }));
+  const onRemoveEntityDoc = (id: string) => setDraft((d) => ({ ...d, entityDocs: (d.entityDocs ?? []).filter((x) => x.id !== id) }));
+
+  const onSubmitEntity = async () => {
+    if (vettingBusy) return;
+    setVettingBusy(true);
+    setActionError(null);
+    try {
+      await persistProfileAction(draft);               // flush entityDocs + K2 before server gate
+      const res = await submitForVettingAction({ kind: 'entity' });
+      if (res.ok) setSubmissions((s) => [...s, res.submission]);
+      else setActionError(res.error ?? 'Submit failed');
+    } catch {
+      setActionError('Could not submit for vetting — please try again');
     } finally {
       setVettingBusy(false);
     }
@@ -183,6 +205,23 @@ export default function ProducerProfileClient({ initial, initialSubmissions }: {
             <AggregatesPanel draft={draft} />
             <NdaUpgrade signed={!!draft.ndaSigned} onToggle={toggleNda} />
             <AccountVisibility draft={draft} onToggleK2={() => setDraft((d) => ({ ...d, entityK2: !d.entityK2 }))} onToggleK4={() => setDraft((d) => ({ ...d, consentK4: !d.consentK4 }))} />
+            {(() => {
+              const open = openEntitySubmission(submissions);
+              return (
+                <EntityVettingPanel
+                  draft={draft}
+                  submission={latestEntitySubmission(submissions)}
+                  locked={!!open}
+                  ndaSigned={!!draft.ndaSigned}
+                  busy={vettingBusy}
+                  onAddDoc={onAddEntityDoc}
+                  onUpdateDoc={onUpdateEntityDoc}
+                  onRemoveDoc={onRemoveEntityDoc}
+                  onSubmit={onSubmitEntity}
+                  onWithdraw={open ? () => onWithdrawSubmission(open.id) : () => {}}
+                />
+              );
+            })()}
           </div>
         )}
       </main>
