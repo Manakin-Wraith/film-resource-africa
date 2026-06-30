@@ -1,4 +1,6 @@
 import type { Provenance, RatingBand, Visibility, ProducerProfile } from './types';
+import { liveProjects, caseStudies } from './aggregates';
+import type { Project } from './types';
 
 /* ---------- Deal Display ---------- */
 
@@ -45,12 +47,26 @@ export const PROVENANCE_META: Record<Provenance, { label: string; varName: strin
 
 /* ---------- Cockpit visibility ---------- */
 
-/** Derive funder visibility from active project count + consent gate. */
+/** A live project is screenable when it has core deal facts + packaging
+ *  (≥ director and writer attached, and a funding plan). Spec §4. */
+export function meetsCorePackaging(pr: Project): boolean {
+  const ask = pr.ask;
+  if (!ask) return false;
+  const hasDirector = ask.packaging.some((a) => /director/i.test(a.role) && a.name.trim() !== '' && a.name !== '—');
+  const hasWriter = ask.packaging.some((a) => /writer/i.test(a.role) && a.name.trim() !== '' && a.name !== '—');
+  const hasFundingPlan = ask.capitalStack.gapPct < 100 && ask.fundingSecuredBand.trim() !== '';
+  return hasDirector && hasWriter && hasFundingPlan;
+}
+
+export function meetsGoLive(p: ProducerProfile): boolean {
+  return p.entityK2 && p.consentK4 && liveProjects(p).some(meetsCorePackaging);
+}
+
 export function deriveVisibility(p: ProducerProfile): Visibility {
-  const active = p.projects.filter((pr) => !pr.archived);
-  if (!p.consentK4) return 'hidden';
-  if (active.length === 0) return 'hidden';
-  if (active.length === 1) return 'one-away';
+  const screenable = liveProjects(p).filter(meetsCorePackaging);
+  if (!p.consentK4 || !p.entityK2) return 'hidden';
+  if (screenable.length === 0) return 'hidden';
+  if (screenable.length === 1) return 'one-away';
   return 'live';
 }
 
@@ -63,12 +79,12 @@ export const VISIBILITY_META: Record<Visibility, { label: string; tone: string }
 /** Top next-best actions for the cockpit status header. */
 export function nextBestActions(p: ProducerProfile): string[] {
   const out: string[] = [];
-  const active = p.projects.filter((pr) => !pr.archived);
-  if (active.length < 2) out.push('Add a second project to diversify your slate and climb the default sort.');
-  const selfBands = Object.values(p.bands).filter((b) => b.provenance === 'self').length;
-  if (selfBands > 0) out.push(`Request verification on ${selfBands} self-reported band${selfBands > 1 ? 's' : ''} to lift your rating.`);
-  const selfCredits = p.filmography.filter((f) => f.recoupmentBand.provenance === 'self' || f.budgetBand.provenance === 'self').length;
-  if (selfCredits > 0) out.push(`Confirm ${selfCredits} unverified credit${selfCredits > 1 ? 's' : ''} in your filmography.`);
+  const live = liveProjects(p);
+  const screenable = live.filter(meetsCorePackaging);
+  if (screenable.length < 2) out.push('Add another live project to diversify your slate and climb the default sort.');
+  const selfStudies = caseStudies(p).filter((s) => s.outcomes?.recoupment.provenance === 'self' || s.budgetBand.provenance === 'self').length;
+  if (selfStudies > 0) out.push(`Confirm ${selfStudies} self-reported case stud${selfStudies > 1 ? 'ies' : 'y'} to lift your rating.`);
+  if (!p.ndaSigned) out.push('Sign the FRA NDA to add exact figures and raise verification confidence.');
   if (!p.entityK2) out.push('Complete your legal entity (K2) to remove the rating cap.');
   if (!p.consentK4) out.push('Grant transparency consent (K4) to become visible to funders.');
   out.push('Attach a sales agent to your strongest project to raise packaging strength.');
