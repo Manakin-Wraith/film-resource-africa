@@ -200,6 +200,28 @@ export interface ProjectAsk {
   comps?: { title: string; note: string }[];
 }
 
+/** Currencies a producer may enter exact figures in. SA-first. */
+export type AfxCurrency = 'USD' | 'ZAR';
+
+/** One private exact figure: the amount exactly as entered, in its own
+ *  currency. No FX normalisation — stored as typed. */
+export interface ExactMoney {
+  amount: number;
+  currency: AfxCurrency;
+}
+
+/** Private exact figures unlocked by the FRA↔producer NDA. Held confidentially:
+ *  funders still see only bands. A budget exact raises `budgetBand` provenance
+ *  self→confirmed; the live-only figures are private supporting data. */
+export interface ExactFigures {
+  /** case_study + live — exact total budget. */
+  budget?: ExactMoney;
+  /** live — exact amount of financing secured to date. */
+  fundingSecured?: ExactMoney;
+  /** live — exact capital-stack legs, substantiating the % bands. */
+  capitalStack?: { equity?: ExactMoney; soft?: ExactMoney; debt?: ExactMoney; gap?: ExactMoney };
+}
+
 export interface Project {
   id: string;
   status: ProjectStatus;
@@ -210,8 +232,9 @@ export interface Project {
   year?: number;
   jurisdiction: string[];
   budgetBand: Provenanced<string>;
-  /** NDA-gated exact figure. Private — never serialised to the funder view. */
-  exactBudget?: number;
+  /** NDA-gated exact figures. Private — NEVER serialised to the funder view.
+   *  Keys map to the band/financial fields they substantiate. */
+  exact?: ExactFigures;
   outcomes?: ProjectOutcomes;   // when status === 'case_study'
   ask?: ProjectAsk;             // when status === 'live'
   /** id of the matching DealEntity in afxSeed.projects for the live deal overlay. */
