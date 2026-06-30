@@ -185,7 +185,10 @@ export interface ProducerProfile {
   filmography: FilmographyRow[];
   relationships: Relationship[];
   bands: ProducerBands;
-  projects: ProfileProject[];
+  projects: ProfileProject[]; // deprecated — removed in Task 11 once `slate` is the sole project array
+  /** Unified case-study + live projects. Named `slate` to coexist additively
+   *  with the deprecated `projects: ProfileProject[]` during migration. */
+  slate?: Project[];
   ndaSigned?: boolean;
   entityK2: boolean; // legal entity gate
   consentK4: boolean; // transparency/reporting consent gate
