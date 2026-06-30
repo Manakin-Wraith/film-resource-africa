@@ -41,19 +41,7 @@ function projectToRow(producerId: string, p: Project): ProjectRow {
 
 /** Stitch a producer row + its project rows into the cockpit ProducerProfile. */
 export function rowsToProfile(producer: ProducerRow, projects: ProjectRow[]): ProducerProfile {
-  return {
-    id: producer.id,
-    name: producer.profile.name,
-    company: producer.profile.company,
-    bio: producer.profile.bio,
-    careerStage: producer.profile.careerStage,
-    ratingBand: producer.profile.ratingBand,
-    relationships: producer.profile.relationships,
-    slate: projects.map(projectFromRow),
-    entityK2: producer.profile.entityK2,
-    consentK4: producer.profile.consentK4,
-    ndaSigned: producer.profile.ndaSigned,
-  };
+  return { ...producer.profile, id: producer.id, slate: projects.map(projectFromRow) };
 }
 
 /** Split a ProducerProfile into the producer-level blob + project rows for upsert. */
