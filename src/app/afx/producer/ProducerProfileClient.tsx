@@ -21,10 +21,10 @@ export default function ProducerProfileClient({ initial }: { initial: ProducerPr
   const [draft, setDraft] = useState<ProducerProfile>(() => structuredClone(initial));
   const [previewMode, setPreviewMode] = useState<'data' | 'funder'>('data');
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
-  const [reverted, setReverted] = useState<Record<string, boolean>>({});
+  const [reverted, setReverted] = useState<Record<string, Provenance>>({});
   const [counter, setCounter] = useState(0);
 
-  const flagRevert = (k: string) => setReverted((r) => ({ ...r, [k]: true }));
+  const flagRevert = (k: string, from: Provenance) => setReverted((r) => ({ ...r, [k]: from }));
   const slate = draft.slate ?? [];
 
   const onIdentity = (patch: Partial<Pick<ProducerProfile, 'name' | 'company' | 'bio' | 'location'>>) =>
@@ -36,11 +36,11 @@ export default function ProducerProfileClient({ initial }: { initial: ProducerPr
       slate: (d.slate ?? []).map((p): Project => {
         if (p.id !== projectId) return p;
         if (field === 'budget') {
-          if (isDowngrade(p.budgetBand.provenance)) flagRevert(`${projectId}:budget`);
+          if (isDowngrade(p.budgetBand.provenance)) flagRevert(`${projectId}:budget`, p.budgetBand.provenance);
           return { ...p, budgetBand: { value, provenance: 'self' } };
         }
         if (!p.outcomes) return p;
-        if (isDowngrade(p.outcomes[field].provenance)) flagRevert(`${projectId}:${field}`);
+        if (isDowngrade(p.outcomes[field].provenance)) flagRevert(`${projectId}:${field}`, p.outcomes[field].provenance);
         return { ...p, outcomes: { ...p.outcomes, [field]: { value, provenance: 'self' } } };
       }),
     }));

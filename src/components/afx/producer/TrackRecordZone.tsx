@@ -1,6 +1,6 @@
 'use client';
 
-import type { ProducerProfile, Project } from '@/lib/afx/types';
+import type { ProducerProfile, Project, Provenance } from '@/lib/afx/types';
 import { caseStudies } from '@/lib/afx/aggregates';
 import ProvenanceBadge from '@/components/afx/primitives/ProvenanceBadge';
 import { SectionCard } from './cockpitUi';
@@ -10,7 +10,8 @@ const mono = 'var(--afx-mono)';
 interface Props {
   draft: ProducerProfile;
   onOutcomeField: (projectId: string, field: 'recoupment' | 'bondUsed' | 'budget', value: string) => void;
-  reverted: Record<string, boolean>;
+  /** Keyed `${projectId}:${field}` → the prior provenance an edit dropped from. */
+  reverted: Record<string, Provenance>;
 }
 
 export default function TrackRecordZone({ draft, onOutcomeField, reverted }: Props) {
@@ -38,7 +39,7 @@ function Empty() {
   );
 }
 
-function CaseStudyCard({ study, onField, reverted }: { study: Project; onField: (f: 'recoupment' | 'bondUsed' | 'budget', v: string) => void; reverted: Record<string, boolean> }) {
+function CaseStudyCard({ study, onField, reverted }: { study: Project; onField: (f: 'recoupment' | 'bondUsed' | 'budget', v: string) => void; reverted: Record<string, Provenance> }) {
   const o = study.outcomes;
   return (
     <div style={{ border: '1px solid #EAE8E3', borderRadius: 12, padding: 16, background: '#fff', display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -47,11 +48,11 @@ function CaseStudyCard({ study, onField, reverted }: { study: Project; onField: 
         <div style={{ fontFamily: mono, fontSize: 11, color: '#9A9CA3', marginTop: 3 }}>{study.year} · {study.format} · {study.role}</div>
       </div>
 
-      <OutcomeRow label="Budget" value={study.budgetBand.value} provenance={study.budgetBand.provenance} reverted={!!reverted[`${study.id}:budget`]} onChange={(v) => onField('budget', v)} />
+      <OutcomeRow label="Budget" value={study.budgetBand.value} provenance={study.budgetBand.provenance} revertedFrom={reverted[`${study.id}:budget`]} onChange={(v) => onField('budget', v)} />
       {o ? (
         <>
-          <OutcomeRow label="Recoupment" value={o.recoupment.value} provenance={o.recoupment.provenance} reverted={!!reverted[`${study.id}:recoupment`]} onChange={(v) => onField('recoupment', v)} />
-          <OutcomeRow label="Completion bond" value={o.bondUsed.value} provenance={o.bondUsed.provenance} reverted={!!reverted[`${study.id}:bondUsed`]} onChange={(v) => onField('bondUsed', v)} />
+          <OutcomeRow label="Recoupment" value={o.recoupment.value} provenance={o.recoupment.provenance} revertedFrom={reverted[`${study.id}:recoupment`]} onChange={(v) => onField('recoupment', v)} />
+          <OutcomeRow label="Completion bond" value={o.bondUsed.value} provenance={o.bondUsed.provenance} revertedFrom={reverted[`${study.id}:bondUsed`]} onChange={(v) => onField('bondUsed', v)} />
           <div>
             <Tag label="Distribution" />
             <div style={{ fontSize: 12.5, color: '#5E6066', marginTop: 4 }}>{o.distribution.map((d) => d.name).join(', ') || '—'}</div>
@@ -72,12 +73,12 @@ function Tag({ label }: { label: string }) {
   return <span style={{ fontFamily: mono, fontSize: 8.5, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#A7A99F' }}>{label}</span>;
 }
 
-function OutcomeRow({ label, value, provenance, reverted, onChange }: { label: string; value: string; provenance: 'self' | 'confirmed' | 'verified'; reverted: boolean; onChange: (v: string) => void }) {
+function OutcomeRow({ label, value, provenance, revertedFrom, onChange }: { label: string; value: string; provenance: Provenance; revertedFrom?: Provenance; onChange: (v: string) => void }) {
   return (
     <div>
       <Tag label={label} />
       <input value={value} onChange={(e) => onChange(e.target.value)} style={{ width: '100%', fontFamily: 'var(--afx-body)', fontSize: 12.5, border: '1px solid #E4E2DC', borderRadius: 7, padding: '6px 9px', background: '#fff', outline: 'none', marginTop: 4 }} />
-      <div style={{ marginTop: 6 }}><ProvenanceBadge provenance={provenance} reverted={reverted} size="sm" /></div>
+      <div style={{ marginTop: 6 }}><ProvenanceBadge provenance={provenance} revertedFrom={revertedFrom} size="sm" /></div>
     </div>
   );
 }

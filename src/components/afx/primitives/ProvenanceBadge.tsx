@@ -3,13 +3,14 @@ import { PROVENANCE_META } from '@/lib/afx/constants';
 
 interface Props {
   provenance: Provenance;
-  /** Show a "reverted" hint when an edit dropped a verified/confirmed field. */
-  reverted?: boolean;
+  /** The prior provenance an edit just dropped from — shows a "reverted" hint
+   *  naming the actual prior level (e.g. confirmed vs verified). */
+  revertedFrom?: Provenance;
   size?: 'sm' | 'md';
 }
 
 /** self-reported (amber) / confirmed (blue) / verified (green) badge. */
-export default function ProvenanceBadge({ provenance, reverted, size = 'md' }: Props) {
+export default function ProvenanceBadge({ provenance, revertedFrom, size = 'md' }: Props) {
   const meta = PROVENANCE_META[provenance];
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
@@ -25,9 +26,9 @@ export default function ProvenanceBadge({ provenance, reverted, size = 'md' }: P
         <span style={{ width: 6, height: 6, borderRadius: '50%', background: meta.varName }} />
         {meta.label}
       </span>
-      {reverted ? (
+      {revertedFrom ? (
         <span style={{ fontSize: 10.5, fontStyle: 'italic', color: 'var(--afx-prov-self)' }}>
-          was verified → now self-reported
+          was {PROVENANCE_META[revertedFrom].label.toLowerCase()} → now self-reported
         </span>
       ) : null}
     </span>
