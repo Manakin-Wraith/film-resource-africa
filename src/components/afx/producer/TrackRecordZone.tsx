@@ -1,6 +1,6 @@
 'use client';
 
-import type { ProducerProfile, Project, Provenance } from '@/lib/afx/types';
+import type { ProducerProfile, Project, Provenance, ExactMoney, AfxCurrency } from '@/lib/afx/types';
 import { caseStudies } from '@/lib/afx/aggregates';
 import ProvenanceBadge from '@/components/afx/primitives/ProvenanceBadge';
 import { SectionCard } from './cockpitUi';
@@ -12,9 +12,13 @@ interface Props {
   onOutcomeField: (projectId: string, field: 'recoupment' | 'bondUsed' | 'budget', value: string) => void;
   /** Keyed `${projectId}:${field}` → the prior provenance an edit dropped from. */
   reverted: Record<string, Provenance>;
+  onExact: (projectId: string, field: 'budget' | 'fundingSecured' | 'equity' | 'soft' | 'debt' | 'gap', value: ExactMoney | undefined) => void;
+  ndaSigned: boolean;
+  defaultCurrency: AfxCurrency;
 }
 
-export default function TrackRecordZone({ draft, onOutcomeField, reverted }: Props) {
+export default function TrackRecordZone({ draft, onOutcomeField, reverted, onExact, ndaSigned, defaultCurrency }: Props) {
+  void onExact; void ndaSigned; void defaultCurrency;
   const studies = caseStudies(draft);
   return (
     <SectionCard title="Track Record" hint="case studies — your proof, judged for experience">

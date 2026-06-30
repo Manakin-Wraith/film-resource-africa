@@ -1,6 +1,6 @@
 'use client';
 
-import type { ProducerProfile, Project } from '@/lib/afx/types';
+import type { ProducerProfile, Project, ExactMoney, AfxCurrency } from '@/lib/afx/types';
 import { liveProjects } from '@/lib/afx/aggregates';
 import { meetsCorePackaging } from '@/lib/afx/constants';
 import { afxSeed } from '@/lib/afx/seed';
@@ -15,9 +15,13 @@ interface Props {
   draft: ProducerProfile;
   onAddProject: () => void;
   onArchive: (id: string) => void;
+  onExact: (projectId: string, field: 'budget' | 'fundingSecured' | 'equity' | 'soft' | 'debt' | 'gap', value: ExactMoney | undefined) => void;
+  ndaSigned: boolean;
+  defaultCurrency: AfxCurrency;
 }
 
-export default function LiveSlateZone({ draft, onAddProject, onArchive }: Props) {
+export default function LiveSlateZone({ draft, onAddProject, onArchive, onExact, ndaSigned, defaultCurrency }: Props) {
+  void onExact; void ndaSigned; void defaultCurrency;
   const live = liveProjects(draft);
   const screenable = live.filter(meetsCorePackaging);
   return (
