@@ -158,6 +158,9 @@ export interface ProducerProfile {
   ndaSigned: boolean;
   entityK2: boolean; // legal entity gate
   consentK4: boolean; // transparency/reporting consent gate
+  /** Producer-level confidential company documents (entity vetting). Isolated:
+   *  persisted in afx_producers.entity_docs, never in the profile blob, never funder-visible. */
+  entityDocs?: AfxDocument[];
 }
 
 /* ---------- Unified Project (case study ⇄ live ask) ---------- */
@@ -185,17 +188,41 @@ export type DocumentCategory =
   | 'budget' | 'chain_of_title' | 'waterfall' | 'financing_agreement'
   | 'distribution_agreement' | 'completion_bond' | 'audit' | 'other';
 
-/** Confidential supporting document attached to a case study. Producer + FRA
- *  only — NEVER funder-visible. The file lives in the private `afx-documents`
- *  bucket; this is just the metadata, persisted in the isolated `docs` column. */
+/** Producer/company-level confidential document categories (entity vetting). */
+export type EntityDocumentCategory =
+  | 'company_registration' | 'director_id' | 'tax_registration'
+  | 'bbbee_certificate' | 'good_standing' | 'other';
+
+/** Confidential supporting document. Producer + FRA only — NEVER funder-visible.
+ *  Lives in the private `afx-documents` bucket; this is just the metadata,
+ *  persisted in an isolated column (`afx_projects.docs` or `afx_producers.entity_docs`). */
 export interface AfxDocument {
   id: string;            // crypto.randomUUID()
-  path: string;          // storage key: producerId/caseStudyId/docId.ext
+  path: string;          // storage key: producerId/<caseStudyId|entity>/docId.ext
   filename: string;      // original name, for display
-  category: DocumentCategory;
+  category: DocumentCategory | EntityDocumentCategory;
   sizeBytes: number;
   contentType: string;
   uploadedAt: string;    // ISO timestamp
+}
+
+/* ---------- Vetting submissions (S2 producer side) ---------- */
+
+export type VettingKind = 'case_study' | 'entity';
+export type VettingStatus =
+  | 'submitted' | 'under_review' | 'verified' | 'changes_requested' | 'withdrawn';
+
+/** A producer's request for FRA to vet a case study or their entity.
+ *  `targetId` is the case-study project id, or null for an entity submission.
+ *  `reviewerNotes`/`decidedAt` are written by the FRA slice; rendered here. */
+export interface VettingSubmission {
+  id: string;
+  kind: VettingKind;
+  targetId: string | null;
+  status: VettingStatus;
+  reviewerNotes?: string;
+  submittedAt: string;
+  decidedAt?: string;
 }
 
 export interface PackagingAttachment {

@@ -1,8 +1,9 @@
 'use client';
 
-import type { ProducerProfile, Project } from '@/lib/afx/types';
+import type { ProducerProfile, Project, VettingSubmission } from '@/lib/afx/types';
 import { caseStudies } from '@/lib/afx/aggregates';
 import { missingRequiredDocs } from '@/lib/afx/documents';
+import { latestCaseSubmission, VETTING_STATUS_META } from '@/lib/afx/vetting';
 import ProvenanceBadge from '@/components/afx/primitives/ProvenanceBadge';
 import { SectionCard, GhostButton } from './cockpitUi';
 
@@ -10,11 +11,12 @@ const mono = 'var(--afx-mono)';
 
 interface Props {
   draft: ProducerProfile;
+  submissions: VettingSubmission[];
   onAdd: () => void;
   onEdit: (id: string) => void;
 }
 
-export default function TrackRecordZone({ draft, onAdd, onEdit }: Props) {
+export default function TrackRecordZone({ draft, submissions, onAdd, onEdit }: Props) {
   const studies = caseStudies(draft);
   return (
     <SectionCard title="Track Record" hint="case studies — your proof, judged for experience"
@@ -23,7 +25,7 @@ export default function TrackRecordZone({ draft, onAdd, onEdit }: Props) {
         <Empty onAdd={onAdd} />
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(320px,1fr))', gap: 14 }}>
-          {studies.map((s) => <SummaryCard key={s.id} study={s} onEdit={() => onEdit(s.id)} />)}
+          {studies.map((s) => <SummaryCard key={s.id} study={s} submission={latestCaseSubmission(submissions, s.id)} onEdit={() => onEdit(s.id)} />)}
         </div>
       )}
     </SectionCard>
@@ -39,7 +41,7 @@ function Empty({ onAdd }: { onAdd: () => void }) {
   );
 }
 
-function SummaryCard({ study, onEdit }: { study: Project; onEdit: () => void }) {
+function SummaryCard({ study, submission, onEdit }: { study: Project; submission: VettingSubmission | undefined; onEdit: () => void }) {
   const o = study.outcomes;
   const distCount = o?.distribution.filter((d) => d.name.trim() !== '').length ?? 0;
   const festCount = o?.festivalsAwards.filter((f) => f.trim() !== '').length ?? 0;
@@ -63,6 +65,9 @@ function SummaryCard({ study, onEdit }: { study: Project; onEdit: () => void }) 
         {docMissing.length === 0
           ? <StatusChip ink="#2E7D46" bg="#F2FBF4" border="#CDEAD5">✓ Proof attached</StatusChip>
           : <StatusChip ink="#9A6B1E" bg="#FDF8EC" border="#F0DCA8">Unproven · {docMissing.length} required doc{docMissing.length > 1 ? 's' : ''} missing</StatusChip>}
+        {submission && submission.status !== 'withdrawn'
+          ? <StatusChip ink={VETTING_STATUS_META[submission.status].ink} bg={VETTING_STATUS_META[submission.status].bg} border={VETTING_STATUS_META[submission.status].border}>{VETTING_STATUS_META[submission.status].label}</StatusChip>
+          : null}
         {distCount > 0 ? <Chip>{distCount} distribution</Chip> : null}
         {festCount > 0 ? <Chip>{festCount} festival{festCount > 1 ? 's' : ''}</Chip> : null}
         {evCount > 0 ? <Chip>{evCount} link{evCount > 1 ? 's' : ''}</Chip> : null}

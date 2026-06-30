@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { useDebouncedAutosave } from './useDebouncedAutosave';
-import { persistProfileAction } from './actions';
-import type { ProducerProfile, Project, ExactFigures, ExactMoney, AfxCurrency } from '@/lib/afx/types';
+import { persistProfileAction, submitForVettingAction, withdrawVettingAction } from './actions';
+import { openCaseSubmission, openEntitySubmission, latestEntitySubmission } from '@/lib/afx/vetting';
+import type { ProducerProfile, Project, ExactFigures, ExactMoney, AfxCurrency, VettingSubmission, EntityDocumentCategory, AfxDocument } from '@/lib/afx/types';
 import { liveProjects } from '@/lib/afx/aggregates';
 import { meetsCorePackaging } from '@/lib/afx/constants';
 import AfxTopBar from '@/components/afx/AfxTopBar';
@@ -17,18 +18,22 @@ import AccountVisibility from '@/components/afx/producer/AccountVisibility';
 import FunderPreview from '@/components/afx/producer/FunderPreview';
 import { toFunderView } from '@/lib/afx/funderView';
 import CaseStudyDrawer from '@/components/afx/producer/CaseStudyDrawer';
+import EntityVettingPanel from '@/components/afx/producer/EntityVettingPanel';
 import { newCaseStudy } from '@/lib/afx/caseStudy';
 
 const mono = 'var(--afx-mono)';
 type ExactKey = 'budget' | 'fundingSecured' | 'equity' | 'soft' | 'debt' | 'gap';
 
-export default function ProducerProfileClient({ initial }: { initial: ProducerProfile }) {
+export default function ProducerProfileClient({ initial, initialSubmissions }: { initial: ProducerProfile; initialSubmissions: VettingSubmission[] }) {
   const [draft, setDraft] = useState<ProducerProfile>(() => structuredClone(initial));
+  const [submissions, setSubmissions] = useState<VettingSubmission[]>(() => structuredClone(initialSubmissions));
   const saveStatus = useDebouncedAutosave(draft, persistProfileAction);
   const [previewMode, setPreviewMode] = useState<'data' | 'funder'>('data');
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
   const [counter, setCounter] = useState(0);
   const [editing, setEditing] = useState<{ study: Project; isNew: boolean } | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [vettingBusy, setVettingBusy] = useState(false);
 
   const slate = draft.slate ?? [];
 
@@ -51,6 +56,61 @@ export default function ProducerProfileClient({ initial }: { initial: ProducerPr
   const onRemoveCaseStudy = (id: string) => {
     setDraft((d) => ({ ...d, slate: (d.slate ?? []).filter((p) => p.id !== id) }));
     setEditing(null);
+  };
+
+  const onSubmitCaseStudy = async (study: Project) => {
+    if (vettingBusy) return;
+    setVettingBusy(true);
+    setActionError(null);
+    try {
+      const list = draft.slate ?? [];
+      const exists = list.some((p) => p.id === study.id);
+      const nextDraft = { ...draft, slate: exists ? list.map((p) => (p.id === study.id ? study : p)) : [...list, study] };
+      setDraft(nextDraft);
+      await persistProfileAction(nextDraft);            // persist the MERGED draft (incl. drawer's doc uploads) before the gate
+      const res = await submitForVettingAction({ kind: 'case_study', targetId: study.id });
+      if (res.ok) { setSubmissions((s) => [...s, res.submission]); setEditing(null); }
+      else setActionError(res.error ?? 'Could not submit for vetting');
+    } catch {
+      setActionError('Could not submit for vetting — please try again');
+    } finally {
+      setVettingBusy(false);
+    }
+  };
+  const onWithdrawSubmission = async (submissionId: string) => {
+    if (vettingBusy) return;
+    setVettingBusy(true);
+    setActionError(null);
+    try {
+      const res = await withdrawVettingAction({ submissionId });
+      if (res.ok) setSubmissions((s) => s.map((x) => (x.id === submissionId ? { ...x, status: 'withdrawn' } : x)));
+      else setActionError(res.error ?? 'Withdraw failed');
+    } catch {
+      setActionError('Could not withdraw — please try again');
+    } finally {
+      setVettingBusy(false);
+    }
+  };
+
+  const onAddEntityDoc = (doc: AfxDocument) => setDraft((d) => ({ ...d, entityDocs: [...(d.entityDocs ?? []), doc] }));
+  const onUpdateEntityDoc = (id: string, patch: { category: EntityDocumentCategory }) =>
+    setDraft((d) => ({ ...d, entityDocs: (d.entityDocs ?? []).map((x) => (x.id === id ? { ...x, ...patch } : x)) }));
+  const onRemoveEntityDoc = (id: string) => setDraft((d) => ({ ...d, entityDocs: (d.entityDocs ?? []).filter((x) => x.id !== id) }));
+
+  const onSubmitEntity = async () => {
+    if (vettingBusy) return;
+    setVettingBusy(true);
+    setActionError(null);
+    try {
+      await persistProfileAction(draft);               // flush entityDocs + K2 before server gate
+      const res = await submitForVettingAction({ kind: 'entity' });
+      if (res.ok) setSubmissions((s) => [...s, res.submission]);
+      else setActionError(res.error ?? 'Submit failed');
+    } catch {
+      setActionError('Could not submit for vetting — please try again');
+    } finally {
+      setVettingBusy(false);
+    }
   };
 
   const localCurrency: AfxCurrency = (draft.location ?? '').trim().endsWith('ZA') ? 'ZAR' : 'USD';
@@ -144,11 +204,28 @@ export default function ProducerProfileClient({ initial }: { initial: ProducerPr
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <IdentityPanel draft={draft} onIdentity={onIdentity} />
             {/* Two-zone hard requirement: Track Record BEFORE Live Slate (spec §2.1) */}
-            <TrackRecordZone draft={draft} onAdd={onAddCaseStudy} onEdit={onEditCaseStudy} />
+            <TrackRecordZone draft={draft} submissions={submissions} onAdd={onAddCaseStudy} onEdit={onEditCaseStudy} />
             <LiveSlateZone draft={draft} onAddProject={onAddProject} onArchive={onArchive} onExact={onExact} ndaSigned={!!draft.ndaSigned} defaultCurrency={localCurrency} />
             <AggregatesPanel draft={draft} />
             <NdaUpgrade signed={!!draft.ndaSigned} onToggle={toggleNda} />
             <AccountVisibility draft={draft} onToggleK2={() => setDraft((d) => ({ ...d, entityK2: !d.entityK2 }))} onToggleK4={() => setDraft((d) => ({ ...d, consentK4: !d.consentK4 }))} />
+            {(() => {
+              const open = openEntitySubmission(submissions);
+              return (
+                <EntityVettingPanel
+                  draft={draft}
+                  submission={latestEntitySubmission(submissions)}
+                  locked={!!open}
+                  ndaSigned={!!draft.ndaSigned}
+                  busy={vettingBusy}
+                  onAddDoc={onAddEntityDoc}
+                  onUpdateDoc={onUpdateEntityDoc}
+                  onRemoveDoc={onRemoveEntityDoc}
+                  onSubmit={onSubmitEntity}
+                  onWithdraw={open ? () => onWithdrawSubmission(open.id) : () => {}}
+                />
+              );
+            })()}
           </div>
         )}
       </main>
@@ -161,16 +238,38 @@ export default function ProducerProfileClient({ initial }: { initial: ProducerPr
         />
       ) : null}
 
-      {editing ? (
-        <CaseStudyDrawer
-          initial={editing.study}
-          isNew={editing.isNew}
-          ndaSigned={!!draft.ndaSigned}
-          defaultCurrency={localCurrency}
-          onSave={onSaveCaseStudy}
-          onClose={() => setEditing(null)}
-          onRemove={editing.isNew ? undefined : () => onRemoveCaseStudy(editing.study.id)}
-        />
+      {editing ? (() => {
+        const open = openCaseSubmission(submissions, editing.study.id);
+        return (
+          <CaseStudyDrawer
+            initial={editing.study}
+            isNew={editing.isNew}
+            ndaSigned={!!draft.ndaSigned}
+            defaultCurrency={localCurrency}
+            submission={open}
+            locked={!!open}
+            busy={vettingBusy}
+            onSave={onSaveCaseStudy}
+            onClose={() => setEditing(null)}
+            onRemove={editing.isNew ? undefined : () => onRemoveCaseStudy(editing.study.id)}
+            onSubmit={onSubmitCaseStudy}
+            onWithdraw={open ? () => onWithdrawSubmission(open.id) : undefined}
+          />
+        );
+      })() : null}
+
+      {actionError ? (
+        <div role="alert" onClick={() => setActionError(null)} style={{
+          position: 'fixed', left: 16, bottom: 16, zIndex: 90,
+          fontFamily: 'var(--afx-mono)', fontSize: 11, letterSpacing: '0.04em',
+          padding: '7px 12px', borderRadius: 8, cursor: 'pointer',
+          border: '1px solid #c0392b',
+          background: '#fdecea',
+          color: '#c0392b',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
+        }}>
+          {actionError}
+        </div>
       ) : null}
 
       {saveStatus !== 'idle' && (
