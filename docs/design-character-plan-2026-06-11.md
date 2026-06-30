@@ -89,7 +89,7 @@ Generic AI design is uniform; human design has opinionated moments. Add three:
 
 ---
 
-*Inputs: `fra-redesign-concept.html` (direction), `fra-x-afx-spec.docx` + `Design_*.md` briefs (members surfaces), `docs/ui-design-issues-2026-06-11.md` (foundation now in place).*
+*Inputs: `fra-redesign-concept.html` (direction), `FRA-x-AFX-spec.md` + `Design_*.md` briefs (members surfaces), `docs/ui-design-issues-2026-06-11.md` (foundation now in place).*
 
 ---
 

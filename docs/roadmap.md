@@ -3,7 +3,7 @@
 *The African film industry's discovery layer, powered by its finance-ready marketplace.*
 
 **Last updated:** 4 June 2026
-**Reference specs:** [`fra-x-afx-spec.docx`](../fra-x-afx-spec.docx) · [`rebate-calculator-spec.docx`](../rebate-calculator-spec.docx) · [FRA × AFX Google Doc](https://docs.google.com/document/d/1QbgijOc18HFSw25H3lOVXCQMRd6GLrSsfm1ERdokHks/edit)
+**Reference specs:** [`FRA-x-AFX-spec.md`](../../../OBSIDIAN_app/OBSIDIAN_vault/PI_Brain/projects/Film-Resource-Africa/FRA-x-AFX-spec.md) · [`rebate-calculator-spec.docx`](../rebate-calculator-spec.docx) · [FRA × AFX Google Doc](https://docs.google.com/document/d/1QbgijOc18HFSw25H3lOVXCQMRd6GLrSsfm1ERdokHks/edit)
 
 ---
 
@@ -88,6 +88,10 @@ Both layers share accounts, project data model, and brand — AFX is the paywall
 - [x] **Stage 3 — roll-forward triggers** (shipped 2026-06-04). A scan's "now open" signals (opportunity leads + news, opening-keyword-filtered) are matched to existing closed/expired programmes by own-domain (excluding generic platforms) or distinctive multi-token name, and forced into the Phase-C re-verify batch immediately. Reopen stays admin-gated, so a false match only costs one scrape.
 
 **Other discovery-engine items:**
+- [ ] **Apply-link rot remediation.** Code fix shipped 2026-06-15 (`getApplyUrl` extracts the first real URL from freeform `Apply:` fields; was rendering `about:blank#blocked` when the field was prose). A full scan of all 278 opportunities then surfaced link-rot in the *destinations* themselves. Find current official URLs and patch:
+  - **Open/upcoming, user-facing (priority):** `acp-eu-culture-programme` [44] (domain dead), `runway-hundred-film-fund` [50] (404), `1-billion-followers-summit` [52] (domain dead), `mip-africa`/`fameweekafrica` [56] (expired SSL cert), `carthage-film-festival-jcc` [60] (domain dead), `west-african-funding-summit` [137] (domain dead), `afac-nacp` [130] (cert chain, news link).
+  - **Data error:** `jumpstart` [33] — `Apply:` has domains mid-string (not at start) so none is extracted; field reads "If re-launched…" — confirm programme still runs. `dfm-access` [32] — `Apply:` field holds eligibility text, not a URL (closed, so no button shows).
+  - ~15 more dead destinations sit on **closed/rejected** opps where no Apply button renders — lower priority.
 - [ ] News relevance is keyword-based; consider an LLM relevance pass for edge cases (e.g. SA-specific acronyms like SABC/ANC the keyword list misses).
 - [ ] Admin: when an admin approves/keeps a flagged opp, set `review_locked_at` so future re-verify never re-flags it (currently approved-status is the implicit lock).
 - [ ] PDF opportunity pages: dedicated `pdf-parse` enrichment pass (Playwright can't read PDF bodies).
@@ -113,6 +117,6 @@ Both layers share accounts, project data model, and brand — AFX is the paywall
 ## Reference
 
 - [AFX executive summary (Google Doc)](https://docs.google.com/document/d/1QbgijOc18HFSw25H3lOVXCQMRd6GLrSsfm1ERdokHks/edit)
-- [`fra-x-afx-spec.docx`](../fra-x-afx-spec.docx) — the strategic one-pager
+- [`FRA-x-AFX-spec.md`](../../../OBSIDIAN_app/OBSIDIAN_vault/PI_Brain/projects/Film-Resource-Africa/FRA-x-AFX-spec.md) — the strategic one-pager
 - [`rebate-calculator-spec.docx`](../rebate-calculator-spec.docx) — the Phase 1 wedge, fully scoped
 - [`fra-redesign-concept.html`](../fra-redesign-concept.html) — UI direction for the FRA layer
