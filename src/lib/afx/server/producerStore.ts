@@ -1,10 +1,10 @@
 import 'server-only';
 import { createSupabaseServerClient, getSessionUser } from '@/lib/supabase/server';
-import type { ProducerProfile } from '@/lib/afx/types';
-import { rowsToProfile, profileToRows, type ProducerRow, type ProjectRow } from '@/lib/afx/persistence';
+import type { ProducerProfile, VettingSubmission } from '@/lib/afx/types';
+import { rowsToProfile, profileToRows, submissionFromRow, type ProducerRow, type ProjectRow, type VettingSubmissionRow } from '@/lib/afx/persistence';
 
 /** Activate-or-load. Returns null when the user is authenticated but not invited. */
-export async function loadProducerState(): Promise<{ profile: ProducerProfile } | null> {
+export async function loadProducerState(): Promise<{ profile: ProducerProfile; submissions: VettingSubmission[] } | null> {
   const supabase = await createSupabaseServerClient();
   // Idempotent: returns existing producer, creates one if invited, or null if not invited.
   const { data: producer, error } = await supabase.rpc('redeem_afx_invite').single<ProducerRow>();
@@ -14,7 +14,14 @@ export async function loadProducerState(): Promise<{ profile: ProducerProfile } 
     .from('afx_projects')
     .select('id, producer_id, status, deal_ref, body, exact, docs')
     .eq('producer_id', producer.id);
-  return { profile: rowsToProfile(producer, (projects ?? []) as ProjectRow[]) };
+  const { data: subs } = await supabase
+    .from('afx_vetting_submissions')
+    .select('id, producer_id, kind, target_id, status, reviewer_notes, submitted_at, decided_at')
+    .eq('producer_id', producer.id);
+  return {
+    profile: rowsToProfile(producer, (projects ?? []) as ProjectRow[]),
+    submissions: ((subs ?? []) as VettingSubmissionRow[]).map(submissionFromRow),
+  };
 }
 
 /** Full-document upsert of the caller's profile (RLS scopes everything to them). */

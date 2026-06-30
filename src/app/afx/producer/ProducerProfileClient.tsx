@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useDebouncedAutosave } from './useDebouncedAutosave';
 import { persistProfileAction } from './actions';
-import type { ProducerProfile, Project, ExactFigures, ExactMoney, AfxCurrency } from '@/lib/afx/types';
+import type { ProducerProfile, Project, ExactFigures, ExactMoney, AfxCurrency, VettingSubmission } from '@/lib/afx/types';
 import { liveProjects } from '@/lib/afx/aggregates';
 import { meetsCorePackaging } from '@/lib/afx/constants';
 import AfxTopBar from '@/components/afx/AfxTopBar';
@@ -22,8 +22,9 @@ import { newCaseStudy } from '@/lib/afx/caseStudy';
 const mono = 'var(--afx-mono)';
 type ExactKey = 'budget' | 'fundingSecured' | 'equity' | 'soft' | 'debt' | 'gap';
 
-export default function ProducerProfileClient({ initial }: { initial: ProducerProfile }) {
+export default function ProducerProfileClient({ initial, initialSubmissions }: { initial: ProducerProfile; initialSubmissions: VettingSubmission[] }) {
   const [draft, setDraft] = useState<ProducerProfile>(() => structuredClone(initial));
+  const [submissions, setSubmissions] = useState<VettingSubmission[]>(() => structuredClone(initialSubmissions));
   const saveStatus = useDebouncedAutosave(draft, persistProfileAction);
   const [previewMode, setPreviewMode] = useState<'data' | 'funder'>('data');
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
