@@ -40,7 +40,7 @@ function Empty({ onAdd }: { onAdd: () => void }) {
 
 function SummaryCard({ study, onEdit }: { study: Project; onEdit: () => void }) {
   const o = study.outcomes;
-  const distCount = o?.distribution.length ?? 0;
+  const distCount = o?.distribution.filter((d) => d.name.trim() !== '').length ?? 0;
   const festCount = o?.festivalsAwards.filter((f) => f.trim() !== '').length ?? 0;
   const evCount = study.evidence?.length ?? 0;
   return (
