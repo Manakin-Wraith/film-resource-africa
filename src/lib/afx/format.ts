@@ -54,6 +54,6 @@ export function parseMoney(input: string): number | undefined {
   if (!Number.isFinite(n)) return undefined;
   if (match[2] === 'k') n *= 1e3;
   if (match[2] === 'm') n *= 1e6;
-  if (n < 0) return undefined;
+  if (n <= 0) return undefined; // reject 0 and negatives — an exact figure must be a real amount
   return n;
 }

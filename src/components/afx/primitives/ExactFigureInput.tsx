@@ -83,7 +83,7 @@ export default function ExactFigureInput({ value, onCommit, gated, label, defaul
         value={text}
         onChange={(e) => setText(e.target.value)}
         onKeyDown={(e) => { if (e.key === 'Enter') commit(); if (e.key === 'Escape') setOpen(false); }}
-        placeholder={`exact ${label}`}
+        placeholder={`exact ${label} — e.g. 1.45m`}
         style={{
           flex: 1, minWidth: 110, fontFamily: mono, fontSize: 12, border: '1px solid #E4E2DC', borderRadius: 7,
           padding: '5px 9px', background: '#fff', outline: 'none',
