@@ -29,19 +29,24 @@ export async function persistProfile(profile: ProducerProfile): Promise<void> {
 
   const { profile: profileBlob, projects } = profileToRows({ ...profile, id: producer.id });
 
-  await supabase.from('afx_producers')
+  const { error: updateErr } = await supabase.from('afx_producers')
     .update({ profile: profileBlob, updated_at: new Date().toISOString() })
     .eq('id', producer.id);
+  if (updateErr) throw new Error(`producer update failed: ${updateErr.message}`);
 
   if (projects.length > 0) {
-    await supabase.from('afx_projects').upsert(
+    const { error: upsertErr } = await supabase.from('afx_projects').upsert(
       projects.map((p) => ({ ...p, producer_id: producer.id, updated_at: new Date().toISOString() })),
       { onConflict: 'id' },
     );
+    if (upsertErr) throw new Error(`projects upsert failed: ${upsertErr.message}`);
   }
   // delete rows the producer removed this session
   const keepIds = projects.map((p) => p.id);
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (keepIds.some((id) => !UUID_RE.test(id))) throw new Error('invalid project id in slate');
   let del = supabase.from('afx_projects').delete().eq('producer_id', producer.id);
   if (keepIds.length > 0) del = del.not('id', 'in', `(${keepIds.join(',')})`);
-  await del;
+  const { error: deleteErr } = await del;
+  if (deleteErr) throw new Error(`projects delete failed: ${deleteErr.message}`);
 }
