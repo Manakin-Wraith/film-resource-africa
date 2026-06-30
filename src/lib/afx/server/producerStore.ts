@@ -12,7 +12,7 @@ export async function loadProducerState(): Promise<{ profile: ProducerProfile } 
   if (error || !producer || typeof producer.id !== 'string') return null;
   const { data: projects } = await supabase
     .from('afx_projects')
-    .select('id, producer_id, status, deal_ref, body, exact')
+    .select('id, producer_id, status, deal_ref, body, exact, docs')
     .eq('producer_id', producer.id);
   return { profile: rowsToProfile(producer, (projects ?? []) as ProjectRow[]) };
 }

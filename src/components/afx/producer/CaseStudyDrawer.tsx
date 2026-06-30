@@ -7,7 +7,9 @@ import {
   addDistribution, updateDistribution, removeDistribution,
   addFestival, updateFestival, removeFestival,
   addEvidence, updateEvidence, removeEvidence,
+  addDocument, updateDocument, removeDocument,
 } from '@/lib/afx/caseStudy';
+import AfxDocumentUpload from './AfxDocumentUpload';
 import {
   CASE_STUDY_FORMATS, RECOUPMENT_OPTIONS, BOND_OPTIONS, DISTRIBUTION_TYPES,
   JURISDICTION_OPTIONS, EVIDENCE_CLAIM_LABELS,
@@ -136,6 +138,23 @@ export default function CaseStudyDrawer({ initial, isNew, ndaSigned, defaultCurr
               ))}
               <GhostButton onClick={() => setStudy((s) => addEvidence(s))} tone="accent">+ Add link</GhostButton>
             </div>
+          </Field>
+
+          {/* Confidential documents — NDA-gated */}
+          <Field label="Confidential documents">
+            {ndaSigned ? (
+              <AfxDocumentUpload
+                caseStudyId={study.id}
+                docs={study.docs ?? []}
+                onAdd={(doc) => setStudy((s) => addDocument(s, doc))}
+                onUpdate={(id, patch) => setStudy((s) => updateDocument(s, id, patch))}
+                onRemove={(id) => setStudy((s) => removeDocument(s, id))}
+              />
+            ) : (
+              <div style={{ fontSize: 12.5, color: '#9A9CA3', border: '1px dashed #DAD7D0', borderRadius: 8, padding: '12px 14px' }}>
+                Sign the FRA NDA to attach confidential documents (budget, chain of title, waterfall, agreements). A case study can&rsquo;t be made vetting-ready until its required proof is attached.
+              </div>
+            )}
           </Field>
         </div>
 

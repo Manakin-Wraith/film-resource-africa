@@ -1,4 +1,4 @@
-import type { Project, EvidenceLink, ExactMoney, ExactFigures } from './types';
+import type { Project, EvidenceLink, ExactMoney, ExactFigures, AfxDocument } from './types';
 
 /** A blank case study — all Provenanced fields 'self', empty outcomes/evidence, no exact. */
 export function newCaseStudy(): Project {
@@ -93,4 +93,14 @@ export function updateEvidence(s: Project, id: string, patch: Partial<Omit<Evide
 }
 export function removeEvidence(s: Project, id: string): Project {
   return { ...s, evidence: (s.evidence ?? []).filter((e) => e.id !== id) };
+}
+
+export function addDocument(s: Project, doc: AfxDocument): Project {
+  return { ...s, docs: [...(s.docs ?? []), doc] };
+}
+export function updateDocument(s: Project, id: string, patch: Partial<Pick<AfxDocument, 'category'>>): Project {
+  return { ...s, docs: (s.docs ?? []).map((d) => (d.id === id ? { ...d, ...patch } : d)) };
+}
+export function removeDocument(s: Project, id: string): Project {
+  return { ...s, docs: (s.docs ?? []).filter((d) => d.id !== id) };
 }

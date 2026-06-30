@@ -181,6 +181,23 @@ export interface EvidenceLink {
   supports: EvidenceClaim;
 }
 
+export type DocumentCategory =
+  | 'budget' | 'chain_of_title' | 'waterfall' | 'financing_agreement'
+  | 'distribution_agreement' | 'completion_bond' | 'audit' | 'other';
+
+/** Confidential supporting document attached to a case study. Producer + FRA
+ *  only — NEVER funder-visible. The file lives in the private `afx-documents`
+ *  bucket; this is just the metadata, persisted in the isolated `docs` column. */
+export interface AfxDocument {
+  id: string;            // crypto.randomUUID()
+  path: string;          // storage key: producerId/caseStudyId/docId.ext
+  filename: string;      // original name, for display
+  category: DocumentCategory;
+  sizeBytes: number;
+  contentType: string;
+  uploadedAt: string;    // ISO timestamp
+}
+
 export interface PackagingAttachment {
   role: string;
   name: string;
@@ -247,6 +264,9 @@ export interface Project {
   /** Producer-attached supporting links, each tagged to the claim it backs.
    *  Non-exact (shareable proof) — persisted in body, NOT in the NDA `exact` column. */
   evidence?: EvidenceLink[];
+  /** Confidential documents — isolated like `exact`; persisted in the `docs`
+   *  column, NEVER in `body`, NEVER serialized to the funder view. */
+  docs?: AfxDocument[];
   outcomes?: ProjectOutcomes;   // when status === 'case_study'
   ask?: ProjectAsk;             // when status === 'live'
   /** id of the matching DealEntity in afxSeed.projects for the live deal overlay. */

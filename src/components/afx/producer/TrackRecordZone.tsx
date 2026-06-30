@@ -2,6 +2,7 @@
 
 import type { ProducerProfile, Project } from '@/lib/afx/types';
 import { caseStudies } from '@/lib/afx/aggregates';
+import { missingRequiredDocs } from '@/lib/afx/documents';
 import ProvenanceBadge from '@/components/afx/primitives/ProvenanceBadge';
 import { SectionCard, GhostButton } from './cockpitUi';
 
@@ -43,6 +44,7 @@ function SummaryCard({ study, onEdit }: { study: Project; onEdit: () => void }) 
   const distCount = o?.distribution.filter((d) => d.name.trim() !== '').length ?? 0;
   const festCount = o?.festivalsAwards.filter((f) => f.trim() !== '').length ?? 0;
   const evCount = study.evidence?.length ?? 0;
+  const docMissing = missingRequiredDocs(study.docs);
   return (
     <button onClick={onEdit}
       style={{ textAlign: 'left', cursor: 'pointer', border: '1px solid #EAE8E3', borderRadius: 12, padding: 16, background: '#fff', display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -58,6 +60,9 @@ function SummaryCard({ study, onEdit }: { study: Project; onEdit: () => void }) 
       {o ? <Row label="Bond" value={o.bondUsed.value || '—'} /> : null}
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 2 }}>
+        {docMissing.length === 0
+          ? <StatusChip ink="#2E7D46" bg="#F2FBF4" border="#CDEAD5">✓ Proof attached</StatusChip>
+          : <StatusChip ink="#9A6B1E" bg="#FDF8EC" border="#F0DCA8">Unproven · {docMissing.length} required doc{docMissing.length > 1 ? 's' : ''} missing</StatusChip>}
         {distCount > 0 ? <Chip>{distCount} distribution</Chip> : null}
         {festCount > 0 ? <Chip>{festCount} festival{festCount > 1 ? 's' : ''}</Chip> : null}
         {evCount > 0 ? <Chip>{evCount} link{evCount > 1 ? 's' : ''}</Chip> : null}
@@ -78,6 +83,10 @@ function Row({ label, value, badge }: { label: string; value: string; badge?: Re
       </div>
     </div>
   );
+}
+
+function StatusChip({ children, ink, bg, border }: { children: React.ReactNode; ink: string; bg: string; border: string }) {
+  return <span style={{ fontFamily: mono, fontSize: 9.5, fontWeight: 700, letterSpacing: '0.04em', color: ink, background: bg, border: `1px solid ${border}`, borderRadius: 999, padding: '2px 8px' }}>{children}</span>;
 }
 
 function Chip({ children }: { children: React.ReactNode }) {

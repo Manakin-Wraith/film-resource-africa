@@ -1,4 +1,4 @@
-import type { ProducerProfile, Project } from './types';
+import type { ProducerProfile, Project, AfxDocument } from './types';
 
 /** DB row shapes (subset of columns the mappers read/write). */
 export interface ProducerRow {
@@ -12,21 +12,24 @@ export interface ProjectRow {
   producer_id: string;
   status: Project['status'];
   deal_ref: string | null;
-  /** Project minus `exact`. Retains status/dealRef so the type round-trips;
-   *  the status/deal_ref columns mirror these for indexing. */
-  body: Omit<Project, 'exact'>;
+  /** Project minus the two isolated lanes (`exact`, `docs`). */
+  body: Omit<Project, 'exact' | 'docs'>;
   exact: Project['exact'] | null;
+  docs: AfxDocument[] | null;
 }
 
 function projectFromRow(row: ProjectRow): Project {
-  return row.exact == null ? { ...row.body } : { ...row.body, exact: row.exact };
+  const p: Project = { ...row.body };
+  if (row.exact != null) p.exact = row.exact;
+  if (row.docs != null) p.docs = row.docs;
+  return p;
 }
 
 function projectToRow(producerId: string, p: Project): ProjectRow {
-  const { exact, ...body } = p;
+  const { exact, docs, ...body } = p;
   return {
     id: p.id, producer_id: producerId, status: p.status,
-    deal_ref: p.dealRef ?? null, body, exact: exact ?? null,
+    deal_ref: p.dealRef ?? null, body, exact: exact ?? null, docs: docs ?? null,
   };
 }
 
