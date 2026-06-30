@@ -53,10 +53,9 @@ export async function persistProfile(profile: ProducerProfile): Promise<void> {
     const { data: stored } = await supabase
       .from('afx_producers').select('profile, entity_docs').eq('id', producer.id)
       .single<{ profile: Record<string, unknown>; entity_docs: AfxDocument[] | null }>();
-    if (stored) {
-      for (const f of VETTED_ENTITY_FIELDS) (profileBlob as Record<string, unknown>)[f] = stored.profile?.[f];
-      entityDocsToWrite = stored.entity_docs;
-    }
+    if (!stored) throw new Error('entity locked but stored profile unavailable');
+    for (const f of VETTED_ENTITY_FIELDS) (profileBlob as Record<string, unknown>)[f] = stored.profile?.[f];
+    entityDocsToWrite = stored.entity_docs;
   }
 
   const { error: updateErr } = await supabase.from('afx_producers')

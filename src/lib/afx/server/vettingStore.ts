@@ -47,6 +47,7 @@ export async function submitForVetting(input: { kind: VettingKind; targetId?: st
     if ((error as { code?: string }).code === '23505') return { ok: false, error: 'Already submitted for vetting' };
     return { ok: false, error: 'Could not submit for vetting' };
   }
+  if (!data) return { ok: false, error: 'Could not retrieve submission after insert' };
   return { ok: true, submission: submissionFromRow(data) };
 }
 
