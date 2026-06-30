@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { ProducerProfile, Provenance, Project } from '@/lib/afx/types';
+import type { ProducerProfile, Provenance, Project, ExactFigures, ExactMoney, AfxCurrency } from '@/lib/afx/types';
 import { liveProjects } from '@/lib/afx/aggregates';
 import { meetsCorePackaging } from '@/lib/afx/constants';
 import AfxTopBar from '@/components/afx/AfxTopBar';
@@ -16,6 +16,7 @@ import FunderPreview from '@/components/afx/producer/FunderPreview';
 
 const mono = 'var(--afx-mono)';
 const isDowngrade = (p: Provenance) => p === 'verified' || p === 'confirmed';
+type ExactKey = 'budget' | 'fundingSecured' | 'equity' | 'soft' | 'debt' | 'gap';
 
 export default function ProducerProfileClient({ initial }: { initial: ProducerProfile }) {
   const [draft, setDraft] = useState<ProducerProfile>(() => structuredClone(initial));
@@ -42,6 +43,43 @@ export default function ProducerProfileClient({ initial }: { initial: ProducerPr
         if (!p.outcomes) return p;
         if (isDowngrade(p.outcomes[field].provenance)) flagRevert(`${projectId}:${field}`, p.outcomes[field].provenance);
         return { ...p, outcomes: { ...p.outcomes, [field]: { value, provenance: 'self' } } };
+      }),
+    }));
+  };
+
+  const localCurrency: AfxCurrency = (draft.location ?? '').trim().endsWith('ZA') ? 'ZAR' : 'USD';
+
+  const onExact = (projectId: string, field: ExactKey, value: ExactMoney | undefined) => {
+    setDraft((d) => ({
+      ...d,
+      slate: (d.slate ?? []).map((p): Project => {
+        if (p.id !== projectId) return p;
+        const exact: ExactFigures = { ...p.exact };
+
+        if (field === 'budget' || field === 'fundingSecured') {
+          if (value === undefined) delete exact[field];
+          else exact[field] = value;
+        } else {
+          // capital-stack leg
+          const cs = { ...exact.capitalStack };
+          if (value === undefined) delete cs[field];
+          else cs[field] = value;
+          exact.capitalStack = Object.keys(cs).length ? cs : undefined;
+        }
+
+        // Budget exact raises/lowers the band provenance (Global Constraints).
+        let budgetBand = p.budgetBand;
+        if (field === 'budget') {
+          if (value !== undefined && p.budgetBand.provenance === 'self') budgetBand = { ...p.budgetBand, provenance: 'confirmed' };
+          if (value === undefined && p.budgetBand.provenance === 'confirmed') budgetBand = { ...p.budgetBand, provenance: 'self' };
+        }
+
+        const cleaned: ExactFigures = {};
+        if (exact.budget !== undefined) cleaned.budget = exact.budget;
+        if (exact.fundingSecured !== undefined) cleaned.fundingSecured = exact.fundingSecured;
+        if (exact.capitalStack) cleaned.capitalStack = exact.capitalStack;
+
+        return { ...p, budgetBand, exact: Object.keys(cleaned).length ? cleaned : undefined };
       }),
     }));
   };
@@ -100,8 +138,8 @@ export default function ProducerProfileClient({ initial }: { initial: ProducerPr
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <IdentityPanel draft={draft} onIdentity={onIdentity} />
             {/* Two-zone hard requirement: Track Record BEFORE Live Slate (spec §2.1) */}
-            <TrackRecordZone draft={draft} onOutcomeField={onOutcomeField} reverted={reverted} />
-            <LiveSlateZone draft={draft} onAddProject={onAddProject} onArchive={onArchive} />
+            <TrackRecordZone draft={draft} onOutcomeField={onOutcomeField} reverted={reverted} onExact={onExact} ndaSigned={!!draft.ndaSigned} defaultCurrency={localCurrency} />
+            <LiveSlateZone draft={draft} onAddProject={onAddProject} onArchive={onArchive} onExact={onExact} ndaSigned={!!draft.ndaSigned} defaultCurrency={localCurrency} />
             <AggregatesPanel draft={draft} />
             <NdaUpgrade signed={!!draft.ndaSigned} onToggle={toggleNda} />
             <AccountVisibility draft={draft} onToggleK2={() => setDraft((d) => ({ ...d, entityK2: !d.entityK2 }))} onToggleK4={() => setDraft((d) => ({ ...d, consentK4: !d.consentK4 }))} />
