@@ -51,6 +51,7 @@ export default function AfxDocumentUpload({ caseStudyId, docs, onAdd, onUpdate, 
   }
 
   async function view(doc: AfxDocument) {
+    setError('');
     try {
       const res = await fetch('/api/afx/documents/sign', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },

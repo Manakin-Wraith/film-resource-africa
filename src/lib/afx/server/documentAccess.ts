@@ -38,8 +38,11 @@ export const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f
  *  `${producerId}/<uuid>/<uuid>.<ext>` with no path-traversal segment. */
 export function isOwnedDocPath(path: string, producerId: string): boolean {
   if (path.includes('..')) return false;
+  // Self-guard: producerId is interpolated into the RegExp below, so it must be
+  // a bare UUID (no regex metachars). Rejecting here keeps the ownership
+  // guarantee local — it no longer rests on the caller passing a clean value.
+  if (!UUID_RE.test(producerId)) return false;
   const uuid = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
-  // producerId is a server-derived UUID (no regex metachars), safe to interpolate.
   const re = new RegExp(`^${producerId}/${uuid}/${uuid}\\.[a-z0-9]+$`, 'i');
   return re.test(path);
 }
