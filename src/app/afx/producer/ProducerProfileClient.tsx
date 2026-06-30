@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { useDebouncedAutosave } from './useDebouncedAutosave';
+import { persistProfileAction } from './actions';
 import type { ProducerProfile, Provenance, Project, ExactFigures, ExactMoney, AfxCurrency } from '@/lib/afx/types';
 import { liveProjects } from '@/lib/afx/aggregates';
 import { meetsCorePackaging } from '@/lib/afx/constants';
@@ -21,6 +23,7 @@ type ExactKey = 'budget' | 'fundingSecured' | 'equity' | 'soft' | 'debt' | 'gap'
 
 export default function ProducerProfileClient({ initial }: { initial: ProducerProfile }) {
   const [draft, setDraft] = useState<ProducerProfile>(() => structuredClone(initial));
+  useDebouncedAutosave(draft, persistProfileAction);
   const [previewMode, setPreviewMode] = useState<'data' | 'funder'>('data');
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
   const [reverted, setReverted] = useState<Record<string, Provenance>>({});
@@ -93,7 +96,7 @@ export default function ProducerProfileClient({ initial }: { initial: ProducerPr
       slate: [
         ...(d.slate ?? []),
         {
-          id: `np${n}`, status: 'live', title: `New project ${n}`, format: 'feature', role: 'Producer', jurisdiction: ['ZA'],
+          id: crypto.randomUUID(), status: 'live', title: `New project ${n}`, format: 'feature', role: 'Producer', jurisdiction: ['ZA'],
           budgetBand: { value: '$0.5–2M', provenance: 'self' },
           ask: { logline: '', stage: 'development', commercialPath: 'Festival-driven', fundingSecuredBand: '<40% secured', capitalStack: { equityPct: 20, softPct: 0, debtPct: 0, gapPct: 80 }, packaging: [{ role: 'Director', name: '—', status: 'wishlist' }, { role: 'Writer', name: '—', status: 'wishlist' }] },
         },
