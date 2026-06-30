@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useDebouncedAutosave } from './useDebouncedAutosave';
 import { persistProfileAction } from './actions';
-import type { ProducerProfile, Provenance, Project, ExactFigures, ExactMoney, AfxCurrency } from '@/lib/afx/types';
+import type { ProducerProfile, Project, ExactFigures, ExactMoney, AfxCurrency } from '@/lib/afx/types';
 import { liveProjects } from '@/lib/afx/aggregates';
 import { meetsCorePackaging } from '@/lib/afx/constants';
 import AfxTopBar from '@/components/afx/AfxTopBar';
@@ -16,9 +16,10 @@ import NdaUpgrade from '@/components/afx/producer/NdaUpgrade';
 import AccountVisibility from '@/components/afx/producer/AccountVisibility';
 import FunderPreview from '@/components/afx/producer/FunderPreview';
 import { toFunderView } from '@/lib/afx/funderView';
+import CaseStudyDrawer from '@/components/afx/producer/CaseStudyDrawer';
+import { newCaseStudy } from '@/lib/afx/caseStudy';
 
 const mono = 'var(--afx-mono)';
-const isDowngrade = (p: Provenance) => p === 'verified' || p === 'confirmed';
 type ExactKey = 'budget' | 'fundingSecured' | 'equity' | 'soft' | 'debt' | 'gap';
 
 export default function ProducerProfileClient({ initial }: { initial: ProducerProfile }) {
@@ -26,29 +27,30 @@ export default function ProducerProfileClient({ initial }: { initial: ProducerPr
   const saveStatus = useDebouncedAutosave(draft, persistProfileAction);
   const [previewMode, setPreviewMode] = useState<'data' | 'funder'>('data');
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
-  const [reverted, setReverted] = useState<Record<string, Provenance>>({});
   const [counter, setCounter] = useState(0);
+  const [editing, setEditing] = useState<{ study: Project; isNew: boolean } | null>(null);
 
-  const flagRevert = (k: string, from: Provenance) => setReverted((r) => ({ ...r, [k]: from }));
   const slate = draft.slate ?? [];
 
   const onIdentity = (patch: Partial<Pick<ProducerProfile, 'name' | 'company' | 'bio' | 'location'>>) =>
     setDraft((d) => ({ ...d, ...patch }));
 
-  const onOutcomeField = (projectId: string, field: 'recoupment' | 'bondUsed' | 'budget', value: string) => {
-    setDraft((d) => ({
-      ...d,
-      slate: (d.slate ?? []).map((p): Project => {
-        if (p.id !== projectId) return p;
-        if (field === 'budget') {
-          if (isDowngrade(p.budgetBand.provenance)) flagRevert(`${projectId}:budget`, p.budgetBand.provenance);
-          return { ...p, budgetBand: { value, provenance: 'self' } };
-        }
-        if (!p.outcomes) return p;
-        if (isDowngrade(p.outcomes[field].provenance)) flagRevert(`${projectId}:${field}`, p.outcomes[field].provenance);
-        return { ...p, outcomes: { ...p.outcomes, [field]: { value, provenance: 'self' } } };
-      }),
-    }));
+  const onAddCaseStudy = () => setEditing({ study: newCaseStudy(), isNew: true });
+  const onEditCaseStudy = (id: string) => {
+    const found = (draft.slate ?? []).find((p) => p.id === id);
+    if (found) setEditing({ study: structuredClone(found), isNew: false });
+  };
+  const onSaveCaseStudy = (study: Project) => {
+    setDraft((d) => {
+      const list = d.slate ?? [];
+      const exists = list.some((p) => p.id === study.id);
+      return { ...d, slate: exists ? list.map((p) => (p.id === study.id ? study : p)) : [...list, study] };
+    });
+    setEditing(null);
+  };
+  const onRemoveCaseStudy = (id: string) => {
+    setDraft((d) => ({ ...d, slate: (d.slate ?? []).filter((p) => p.id !== id) }));
+    setEditing(null);
   };
 
   const localCurrency: AfxCurrency = (draft.location ?? '').trim().endsWith('ZA') ? 'ZAR' : 'USD';
@@ -142,7 +144,7 @@ export default function ProducerProfileClient({ initial }: { initial: ProducerPr
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <IdentityPanel draft={draft} onIdentity={onIdentity} />
             {/* Two-zone hard requirement: Track Record BEFORE Live Slate (spec §2.1) */}
-            <TrackRecordZone draft={draft} onOutcomeField={onOutcomeField} reverted={reverted} onExact={onExact} ndaSigned={!!draft.ndaSigned} defaultCurrency={localCurrency} />
+            <TrackRecordZone draft={draft} onAdd={onAddCaseStudy} onEdit={onEditCaseStudy} />
             <LiveSlateZone draft={draft} onAddProject={onAddProject} onArchive={onArchive} onExact={onExact} ndaSigned={!!draft.ndaSigned} defaultCurrency={localCurrency} />
             <AggregatesPanel draft={draft} />
             <NdaUpgrade signed={!!draft.ndaSigned} onToggle={toggleNda} />
@@ -156,6 +158,18 @@ export default function ProducerProfileClient({ initial }: { initial: ProducerPr
           title={slate.find((p) => p.id === pendingDelete)?.title ?? 'this project'}
           onCancel={() => setPendingDelete(null)}
           onConfirm={() => { archiveNow(pendingDelete); setPendingDelete(null); }}
+        />
+      ) : null}
+
+      {editing ? (
+        <CaseStudyDrawer
+          initial={editing.study}
+          isNew={editing.isNew}
+          ndaSigned={!!draft.ndaSigned}
+          defaultCurrency={localCurrency}
+          onSave={onSaveCaseStudy}
+          onClose={() => setEditing(null)}
+          onRemove={editing.isNew ? undefined : () => onRemoveCaseStudy(editing.study.id)}
         />
       ) : null}
 

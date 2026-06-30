@@ -1,91 +1,85 @@
 'use client';
 
-import type { ProducerProfile, Project, Provenance, ExactMoney, AfxCurrency } from '@/lib/afx/types';
+import type { ProducerProfile, Project } from '@/lib/afx/types';
 import { caseStudies } from '@/lib/afx/aggregates';
 import ProvenanceBadge from '@/components/afx/primitives/ProvenanceBadge';
-import ExactFigureInput from '@/components/afx/primitives/ExactFigureInput';
-import { SectionCard } from './cockpitUi';
+import { SectionCard, GhostButton } from './cockpitUi';
 
 const mono = 'var(--afx-mono)';
 
 interface Props {
   draft: ProducerProfile;
-  onOutcomeField: (projectId: string, field: 'recoupment' | 'bondUsed' | 'budget', value: string) => void;
-  /** Keyed `${projectId}:${field}` → the prior provenance an edit dropped from. */
-  reverted: Record<string, Provenance>;
-  onExact: (projectId: string, field: 'budget' | 'fundingSecured' | 'equity' | 'soft' | 'debt' | 'gap', value: ExactMoney | undefined) => void;
-  ndaSigned: boolean;
-  defaultCurrency: AfxCurrency;
+  onAdd: () => void;
+  onEdit: (id: string) => void;
 }
 
-export default function TrackRecordZone({ draft, onOutcomeField, reverted, onExact, ndaSigned, defaultCurrency }: Props) {
+export default function TrackRecordZone({ draft, onAdd, onEdit }: Props) {
   const studies = caseStudies(draft);
   return (
-    <SectionCard title="Track Record" hint="case studies — your proof, judged for experience">
+    <SectionCard title="Track Record" hint="case studies — your proof, judged for experience"
+      action={<GhostButton onClick={onAdd} tone="accent">+ Add case study</GhostButton>}>
       {studies.length === 0 ? (
-        <Empty />
+        <Empty onAdd={onAdd} />
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(320px,1fr))', gap: 14 }}>
-          {studies.map((s) => (
-            <CaseStudyCard key={s.id} study={s} onField={(f, v) => onOutcomeField(s.id, f, v)} reverted={reverted}
-              onExactBudget={(v) => onExact(s.id, 'budget', v)} ndaSigned={ndaSigned} defaultCurrency={defaultCurrency} />
-          ))}
+          {studies.map((s) => <SummaryCard key={s.id} study={s} onEdit={() => onEdit(s.id)} />)}
         </div>
       )}
     </SectionCard>
   );
 }
 
-function Empty() {
+function Empty({ onAdd }: { onAdd: () => void }) {
   return (
-    <div style={{ padding: '28px 20px', textAlign: 'center', border: '1px dashed #DAD7D0', borderRadius: 10 }}>
+    <div style={{ padding: '28px 20px', textAlign: 'center', border: '1px dashed #DAD7D0', borderRadius: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
       <div style={{ fontSize: 13.5, color: '#5E6066' }}>Add your past projects — these are the case studies funders use to judge your experience.</div>
+      <GhostButton onClick={onAdd} tone="accent">+ Add your first case study</GhostButton>
     </div>
   );
 }
 
-function CaseStudyCard({ study, onField, reverted, onExactBudget, ndaSigned, defaultCurrency }: { study: Project; onField: (f: 'recoupment' | 'bondUsed' | 'budget', v: string) => void; reverted: Record<string, Provenance>; onExactBudget: (v: ExactMoney | undefined) => void; ndaSigned: boolean; defaultCurrency: AfxCurrency }) {
+function SummaryCard({ study, onEdit }: { study: Project; onEdit: () => void }) {
   const o = study.outcomes;
+  const distCount = o?.distribution.length ?? 0;
+  const festCount = o?.festivalsAwards.filter((f) => f.trim() !== '').length ?? 0;
+  const evCount = study.evidence?.length ?? 0;
   return (
-    <div style={{ border: '1px solid #EAE8E3', borderRadius: 12, padding: 16, background: '#fff', display: 'flex', flexDirection: 'column', gap: 12 }}>
+    <button onClick={onEdit}
+      style={{ textAlign: 'left', cursor: 'pointer', border: '1px solid #EAE8E3', borderRadius: 12, padding: 16, background: '#fff', display: 'flex', flexDirection: 'column', gap: 10 }}>
       <div>
-        <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: '-0.2px' }}>{study.title}</div>
-        <div style={{ fontFamily: mono, fontSize: 11, color: '#9A9CA3', marginTop: 3 }}>{study.year} · {study.format} · {study.role}</div>
+        <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: '-0.2px' }}>{study.title || 'Untitled case study'}</div>
+        <div style={{ fontFamily: mono, fontSize: 11, color: '#9A9CA3', marginTop: 3 }}>
+          {[study.year, study.format, study.role].filter(Boolean).join(' · ')}
+        </div>
       </div>
 
-      <OutcomeRow label="Budget" value={study.budgetBand.value} provenance={study.budgetBand.provenance} revertedFrom={reverted[`${study.id}:budget`]} onChange={(v) => onField('budget', v)} />
-      <ExactFigureInput value={study.exact?.budget} onCommit={onExactBudget} gated={ndaSigned} label="budget" defaultCurrency={defaultCurrency}
-        confirmHint={study.budgetBand.provenance === 'confirmed' ? '→ confirmed' : undefined} />
-      {o ? (
-        <>
-          <OutcomeRow label="Recoupment" value={o.recoupment.value} provenance={o.recoupment.provenance} revertedFrom={reverted[`${study.id}:recoupment`]} onChange={(v) => onField('recoupment', v)} />
-          <OutcomeRow label="Completion bond" value={o.bondUsed.value} provenance={o.bondUsed.provenance} revertedFrom={reverted[`${study.id}:bondUsed`]} onChange={(v) => onField('bondUsed', v)} />
-          <div>
-            <Tag label="Distribution" />
-            <div style={{ fontSize: 12.5, color: '#5E6066', marginTop: 4 }}>{o.distribution.map((d) => d.name).join(', ') || '—'}</div>
-          </div>
-          {o.festivalsAwards.length > 0 ? (
-            <div>
-              <Tag label="Festivals / awards" />
-              <div style={{ fontSize: 12.5, color: '#5E6066', marginTop: 4 }}>{o.festivalsAwards.join(' · ')}</div>
-            </div>
-          ) : null}
-        </>
-      ) : null}
-    </div>
+      <Row label="Budget" value={study.budgetBand.value || '—'} badge={<ProvenanceBadge provenance={study.budgetBand.provenance} size="sm" />} />
+      {o ? <Row label="Recoupment" value={o.recoupment.value || '—'} badge={<ProvenanceBadge provenance={o.recoupment.provenance} size="sm" />} /> : null}
+      {o ? <Row label="Bond" value={o.bondUsed.value || '—'} /> : null}
+
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 2 }}>
+        {distCount > 0 ? <Chip>{distCount} distribution</Chip> : null}
+        {festCount > 0 ? <Chip>{festCount} festival{festCount > 1 ? 's' : ''}</Chip> : null}
+        {evCount > 0 ? <Chip>{evCount} link{evCount > 1 ? 's' : ''}</Chip> : null}
+      </div>
+
+      <span style={{ fontFamily: mono, fontSize: 10, color: 'var(--afx-accent)', marginTop: 2 }}>Edit →</span>
+    </button>
   );
 }
 
-function Tag({ label }: { label: string }) {
-  return <span style={{ fontFamily: mono, fontSize: 8.5, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#A7A99F' }}>{label}</span>;
-}
-
-function OutcomeRow({ label, value, provenance, revertedFrom, onChange }: { label: string; value: string; provenance: Provenance; revertedFrom?: Provenance; onChange: (v: string) => void }) {
+function Row({ label, value, badge }: { label: string; value: string; badge?: React.ReactNode }) {
   return (
     <div>
-      <Tag label={label} />
-      <input value={value} onChange={(e) => onChange(e.target.value)} style={{ width: '100%', fontFamily: 'var(--afx-body)', fontSize: 12.5, border: '1px solid #E4E2DC', borderRadius: 7, padding: '6px 9px', background: '#fff', outline: 'none', marginTop: 4 }} />
-      <div style={{ marginTop: 6 }}><ProvenanceBadge provenance={provenance} revertedFrom={revertedFrom} size="sm" /></div>
+      <span style={{ fontFamily: mono, fontSize: 8.5, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#A7A99F' }}>{label}</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 3 }}>
+        <span style={{ fontSize: 12.5, color: '#5E6066' }}>{value}</span>
+        {badge}
+      </div>
     </div>
   );
+}
+
+function Chip({ children }: { children: React.ReactNode }) {
+  return <span style={{ fontFamily: mono, fontSize: 9.5, letterSpacing: '0.04em', color: '#5E6066', background: '#F2F0EB', border: '1px solid #EAE8E3', borderRadius: 999, padding: '2px 8px' }}>{children}</span>;
 }
