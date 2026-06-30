@@ -1,4 +1,4 @@
-import type { AfxSeed, DealEntity, ProducerProfile } from './types';
+import type { AfxSeed, DealEntity, ProducerProfile, Project } from './types';
 
 /* ============================================================
    Mock data ported from the Claude Design "AFX Deal Display"
@@ -226,6 +226,7 @@ export const focusProducer: ProducerProfile = {
   bio: 'Cape Town production company with a 12-year track record in feature and premium series, specialising in ZA–UK treaty co-productions and streamer output deals.',
   ratingBand: 'A',
   careerStage: 'Institutional',
+  location: 'Cape Town, ZA',
   filmography: [
     { id: 'f1', title: 'Silverton Siege', year: 2022, format: 'Feature', role: 'Producer', budgetBand: { value: '$5–15M', provenance: 'verified' }, recoupmentBand: { value: 'Fully recouped', provenance: 'verified' } },
     { id: 'f2', title: 'Catch Me a Killer', year: 2024, format: 'Series', role: 'Exec Producer', budgetBand: { value: '$5–15M', provenance: 'confirmed' }, recoupmentBand: { value: 'Partial', provenance: 'self' } },
@@ -248,13 +249,75 @@ export const focusProducer: ProducerProfile = {
   ],
   entityK2: true,
   consentK4: true,
+  ndaSigned: false,
+  slate: [
+    // ---- Track record (case studies) ----
+    {
+      id: 'cs1', status: 'case_study', title: 'Silverton Siege', year: 2022, format: 'feature', genre: 'Thriller', role: 'Producer', jurisdiction: ['ZA'],
+      budgetBand: { value: '$5–15M', provenance: 'verified' },
+      outcomes: {
+        recoupment: { value: 'Fully recouped', provenance: 'verified' },
+        bondUsed: { value: 'Bonded (Film Finances)', provenance: 'verified' },
+        distribution: [{ name: 'Netflix', type: 'streamer', provenance: 'verified' }],
+        festivalsAwards: ['Netflix global top-10 (12 markets)'],
+      },
+    },
+    {
+      id: 'cs2', status: 'case_study', title: 'Catch Me a Killer', year: 2024, format: 'series', genre: 'Crime', role: 'Exec Producer', jurisdiction: ['ZA'],
+      budgetBand: { value: '$5–15M', provenance: 'confirmed' },
+      outcomes: {
+        recoupment: { value: 'Partial', provenance: 'self' },
+        bondUsed: { value: 'Bonded (Film Finances)', provenance: 'confirmed' },
+        distribution: [{ name: 'Showmax', type: 'streamer', provenance: 'confirmed' }],
+        festivalsAwards: ['Multi-season renewal'],
+      },
+    },
+    {
+      id: 'cs3', status: 'case_study', title: 'The Wound', year: 2017, format: 'feature', genre: 'Drama', role: 'Co-Producer', jurisdiction: ['ZA'],
+      budgetBand: { value: '$0.5–2M', provenance: 'verified' },
+      outcomes: {
+        recoupment: { value: 'Fully recouped', provenance: 'confirmed' },
+        bondUsed: { value: 'Not bonded', provenance: 'self' },
+        distribution: [{ name: 'Kino Lorber', type: 'distributor', provenance: 'confirmed' }],
+        festivalsAwards: ['Sundance 2017', 'Oscar shortlist (Foreign Language)'],
+      },
+    },
+    // ---- Live slate (the asks) — bridge to marketplace DealEntities ----
+    {
+      id: 'pr1', status: 'live', title: 'City of Gold', format: 'feature', genre: 'Crime', role: 'Producer', jurisdiction: ['ZA', 'GB'], dealRef: 'pr1',
+      budgetBand: { value: '$5–15M', provenance: 'confirmed' },
+      ask: {
+        logline: 'A gold-heist thriller across Johannesburg\'s underworld.', stage: 'pre', commercialPath: 'Streamer-first', fundingSecuredBand: '80–90% secured',
+        capitalStack: { equityPct: 44, softPct: 34, debtPct: 6, gapPct: 16 },
+        packaging: [
+          { role: 'Director', name: 'Naledi Mokoena', status: 'signed' },
+          { role: 'Writer', name: 'K. van Wyk (locked)', status: 'signed' },
+          { role: 'Lead cast', name: 'Confirmed ensemble', status: 'signed' },
+          { role: 'Sales agent', name: 'Meridian Films Intl', status: 'soft-hold' },
+        ],
+        comps: [{ title: 'Silverton Siege', note: 'streamer #1, 12 markets' }],
+      },
+    },
+    {
+      id: 'pr4', status: 'live', title: 'Mokete', format: 'doc', genre: 'Documentary', role: 'Producer', jurisdiction: ['ZA'], dealRef: 'pr4',
+      budgetBand: { value: '$0.5–2M', provenance: 'self' },
+      ask: {
+        logline: 'A verité portrait of a Durban wedding choir.', stage: 'production', commercialPath: 'Festival-driven', fundingSecuredBand: '70–80% secured',
+        capitalStack: { equityPct: 40, softPct: 30, debtPct: 6, gapPct: 24 },
+        packaging: [
+          { role: 'Director', name: 'Sipho Dlamini', status: 'signed' },
+          { role: 'Writer', name: 'Sipho Dlamini', status: 'signed' },
+          { role: 'Editor', name: 'Attached', status: 'soft-hold' },
+          { role: 'Sales agent', name: 'Dogwoof (talks)', status: 'wishlist' },
+        ],
+      },
+    },
+  ] as Project[],
 };
 
-/** Dev-only invariant: the focus producer must own ≥1 active project so its
- *  Funder Preview matches a marketplace row. */
 export function assertFocusProducerHasProjects(p: ProducerProfile = focusProducer): void {
-  const active = p.projects.filter((pr) => !pr.archived);
-  if (active.length < 1) {
-    throw new Error('[afx/seed] focus producer must own ≥1 active project');
+  const live = (p.slate ?? []).filter((pr) => pr.status === 'live');
+  if (live.length < 1) {
+    throw new Error('[afx/seed] focus producer must own ≥1 live project');
   }
 }
