@@ -1,76 +1,78 @@
 'use client';
 
 import { useState } from 'react';
-import type { ProducerProfile, Provenance, FilmographyRow, ProducerBands } from '@/lib/afx/types';
+import type { ProducerProfile, Provenance, Project } from '@/lib/afx/types';
+import { liveProjects } from '@/lib/afx/aggregates';
+import { meetsCorePackaging } from '@/lib/afx/constants';
 import AfxTopBar from '@/components/afx/AfxTopBar';
 import StatusHeader from '@/components/afx/producer/StatusHeader';
-import OperatorProfile from '@/components/afx/producer/OperatorProfile';
-import SlateProjects from '@/components/afx/producer/SlateProjects';
-import BandsPanel from '@/components/afx/producer/BandsPanel';
+import IdentityPanel from '@/components/afx/producer/IdentityPanel';
+import TrackRecordZone from '@/components/afx/producer/TrackRecordZone';
+import LiveSlateZone from '@/components/afx/producer/LiveSlateZone';
+import AggregatesPanel from '@/components/afx/producer/AggregatesPanel';
+import NdaUpgrade from '@/components/afx/producer/NdaUpgrade';
 import AccountVisibility from '@/components/afx/producer/AccountVisibility';
 import FunderPreview from '@/components/afx/producer/FunderPreview';
 
 const mono = 'var(--afx-mono)';
-
-/** An edit always reverts a field's provenance to self-reported. Returns
- *  whether the change was a downgrade (verified/confirmed → self). */
-function isDowngrade(prev: Provenance): boolean {
-  return prev === 'verified' || prev === 'confirmed';
-}
+const isDowngrade = (p: Provenance) => p === 'verified' || p === 'confirmed';
 
 export default function ProducerProfileClient({ initial }: { initial: ProducerProfile }) {
   const [draft, setDraft] = useState<ProducerProfile>(() => structuredClone(initial));
   const [previewMode, setPreviewMode] = useState<'data' | 'funder'>('data');
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
   const [reverted, setReverted] = useState<Record<string, boolean>>({});
-  const [projCounter, setProjCounter] = useState(0);
+  const [counter, setCounter] = useState(0);
 
-  const flagRevert = (key: string) => setReverted((r) => ({ ...r, [key]: true }));
+  const flagRevert = (k: string) => setReverted((r) => ({ ...r, [k]: true }));
+  const slate = draft.slate ?? [];
 
-  const onIdentity = (patch: Partial<Pick<ProducerProfile, 'name' | 'company' | 'bio'>>) =>
+  const onIdentity = (patch: Partial<Pick<ProducerProfile, 'name' | 'company' | 'bio' | 'location'>>) =>
     setDraft((d) => ({ ...d, ...patch }));
 
-  const onFilmographyField = (rowId: string, field: 'budgetBand' | 'recoupmentBand', value: string) => {
+  const onOutcomeField = (projectId: string, field: 'recoupment' | 'bondUsed' | 'budget', value: string) => {
     setDraft((d) => ({
       ...d,
-      filmography: d.filmography.map((f): FilmographyRow => {
-        if (f.id !== rowId) return f;
-        if (isDowngrade(f[field].provenance)) flagRevert(`${rowId}:${field}`);
-        return { ...f, [field]: { value, provenance: 'self' } };
+      slate: (d.slate ?? []).map((p): Project => {
+        if (p.id !== projectId) return p;
+        if (field === 'budget') {
+          if (isDowngrade(p.budgetBand.provenance)) flagRevert(`${projectId}:budget`);
+          return { ...p, budgetBand: { value, provenance: 'self' } };
+        }
+        if (!p.outcomes) return p;
+        if (isDowngrade(p.outcomes[field].provenance)) flagRevert(`${projectId}:${field}`);
+        return { ...p, outcomes: { ...p.outcomes, [field]: { value, provenance: 'self' } } };
       }),
     }));
   };
 
-  const onBand = (key: keyof ProducerBands, value: string) => {
-    setDraft((d) => {
-      if (isDowngrade(d.bands[key].provenance)) flagRevert(`band:${key}`);
-      return { ...d, bands: { ...d.bands, [key]: { value, provenance: 'self' } } };
-    });
-  };
-
   const onAddProject = () => {
-    const n = projCounter + 1;
-    setProjCounter(n);
+    const n = counter + 1;
+    setCounter(n);
     setDraft((d) => ({
       ...d,
-      projects: [
-        ...d.projects,
-        { id: `np${n}`, title: `New project ${n}`, format: 'Feature', stage: 'Development', securedPctBand: '<40% secured', prsBand: 'C', riskFlag: undefined, provenance: 'self' },
+      slate: [
+        ...(d.slate ?? []),
+        {
+          id: `np${n}`, status: 'live', title: `New project ${n}`, format: 'feature', role: 'Producer', jurisdiction: ['ZA'],
+          budgetBand: { value: '$0.5–2M', provenance: 'self' },
+          ask: { logline: '', stage: 'development', commercialPath: 'Festival-driven', fundingSecuredBand: '<40% secured', capitalStack: { equityPct: 20, softPct: 0, debtPct: 0, gapPct: 80 }, packaging: [{ role: 'Director', name: '—', status: 'wishlist' }, { role: 'Writer', name: '—', status: 'wishlist' }] },
+        },
       ],
     }));
   };
 
   const archiveNow = (id: string) =>
-    setDraft((d) => ({ ...d, projects: d.projects.map((p) => (p.id === id ? { ...p, archived: true } : p)) }));
+    setDraft((d) => ({ ...d, slate: (d.slate ?? []).map((p) => (p.id === id ? { ...p, status: 'archived' as const } : p)) }));
 
   const onArchive = (id: string) => {
-    const active = draft.projects.filter((p) => !p.archived);
-    if (active.length <= 1) {
-      setPendingDelete(id); // last active project — confirm first
-    } else {
-      archiveNow(id);
-    }
+    const screenable = liveProjects(draft).filter(meetsCorePackaging);
+    const target = slate.find((p) => p.id === id);
+    if (target && meetsCorePackaging(target) && screenable.length <= 1) setPendingDelete(id);
+    else archiveNow(id);
   };
+
+  const toggleNda = () => setDraft((d) => ({ ...d, ndaSigned: !d.ndaSigned }));
 
   return (
     <div style={{ paddingBottom: 80 }}>
@@ -96,9 +98,12 @@ export default function ProducerProfileClient({ initial }: { initial: ProducerPr
           <FunderPreview draft={draft} />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <OperatorProfile draft={draft} onIdentity={onIdentity} onFilmographyField={onFilmographyField} reverted={reverted} />
-            <SlateProjects draft={draft} onAddProject={onAddProject} onArchive={onArchive} />
-            <BandsPanel draft={draft} onBand={onBand} reverted={reverted} />
+            <IdentityPanel draft={draft} onIdentity={onIdentity} />
+            {/* Two-zone hard requirement: Track Record BEFORE Live Slate (spec §2.1) */}
+            <TrackRecordZone draft={draft} onOutcomeField={onOutcomeField} reverted={reverted} />
+            <LiveSlateZone draft={draft} onAddProject={onAddProject} onArchive={onArchive} />
+            <AggregatesPanel draft={draft} />
+            <NdaUpgrade signed={!!draft.ndaSigned} onToggle={toggleNda} />
             <AccountVisibility draft={draft} onToggleK2={() => setDraft((d) => ({ ...d, entityK2: !d.entityK2 }))} onToggleK4={() => setDraft((d) => ({ ...d, consentK4: !d.consentK4 }))} />
           </div>
         )}
@@ -106,12 +111,9 @@ export default function ProducerProfileClient({ initial }: { initial: ProducerPr
 
       {pendingDelete ? (
         <ConfirmArchive
-          title={draft.projects.find((p) => p.id === pendingDelete)?.title ?? 'this project'}
+          title={slate.find((p) => p.id === pendingDelete)?.title ?? 'this project'}
           onCancel={() => setPendingDelete(null)}
-          onConfirm={() => {
-            archiveNow(pendingDelete);
-            setPendingDelete(null);
-          }}
+          onConfirm={() => { archiveNow(pendingDelete); setPendingDelete(null); }}
         />
       ) : null}
     </div>
@@ -123,10 +125,10 @@ function ConfirmArchive({ title, onConfirm, onCancel }: { title: string; onConfi
     <>
       <div onClick={onCancel} style={{ position: 'fixed', inset: 0, zIndex: 70, background: 'rgba(28,29,33,0.42)' }} />
       <div role="dialog" aria-modal="true" style={{ position: 'fixed', zIndex: 71, top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 'min(440px,92vw)', background: '#FAF9F7', border: '1px solid #EAE8E3', borderRadius: 14, boxShadow: '0 24px 60px rgba(0,0,0,0.28)', padding: '22px 24px' }}>
-        <h3 style={{ margin: '0 0 8px', fontSize: 17, fontWeight: 700, letterSpacing: '-0.3px' }}>Archive your last active project?</h3>
+        <h3 style={{ margin: '0 0 8px', fontSize: 17, fontWeight: 700, letterSpacing: '-0.3px' }}>Archive your last screenable project?</h3>
         <p style={{ margin: '0 0 18px', fontSize: 13.5, color: '#5E6066', lineHeight: 1.5 }}>
-          Archiving <strong>{title}</strong> drops your slate to zero active projects, so your profile will
-          become <strong>hidden from funders</strong> and leave the Deal Display. You can un-archive at any time.
+          Archiving <strong>{title}</strong> leaves you with no screenable live project, so your profile becomes
+          <strong> hidden from funders</strong> and leaves the Deal Display. Your track record and rating are unaffected.
         </p>
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
           <button onClick={onCancel} style={{ cursor: 'pointer', fontFamily: 'var(--afx-body)', fontSize: 13, fontWeight: 600, padding: '9px 15px', borderRadius: 8, border: '1px solid #E4E2DC', background: '#fff', color: '#5E6066' }}>Keep it</button>
