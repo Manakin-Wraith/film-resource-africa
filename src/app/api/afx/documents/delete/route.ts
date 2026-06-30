@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { AFX_DOCS_BUCKET, afxAdmin, resolveDocAccess } from '@/lib/afx/server/documentAccess';
+import { AFX_DOCS_BUCKET, afxAdmin, resolveDocAccess, isOwnedDocPath } from '@/lib/afx/server/documentAccess';
 
 export async function POST(req: NextRequest) {
   const { path } = await req.json().catch(() => ({} as { path?: string }));
@@ -8,10 +8,13 @@ export async function POST(req: NextRequest) {
   }
   const access = await resolveDocAccess();
   if (!access) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-  if (!path.startsWith(`${access.producerId}/`)) {
+  if (!isOwnedDocPath(path, access.producerId)) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
   const { error } = await afxAdmin.storage.from(AFX_DOCS_BUCKET).remove([path]);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    console.error('[afx-docs] storage error:', error.message);
+    return NextResponse.json({ error: 'Storage error' }, { status: 500 });
+  }
   return NextResponse.json({ ok: true });
 }

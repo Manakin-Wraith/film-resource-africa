@@ -30,3 +30,16 @@ export async function resolveDocAccess(): Promise<DocAccess | null> {
   if (!producer) return null;
   return { producerId: producer.id, ndaSigned: !!producer.profile?.ndaSigned };
 }
+
+/** UUID v4-ish shape (matches crypto.randomUUID output and afx ids). */
+export const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** A document storage key is owned + well-formed iff it is exactly
+ *  `${producerId}/<uuid>/<uuid>.<ext>` with no path-traversal segment. */
+export function isOwnedDocPath(path: string, producerId: string): boolean {
+  if (path.includes('..')) return false;
+  const uuid = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
+  // producerId is a server-derived UUID (no regex metachars), safe to interpolate.
+  const re = new RegExp(`^${producerId}/${uuid}/${uuid}\\.[a-z0-9]+$`, 'i');
+  return re.test(path);
+}
