@@ -1,19 +1,28 @@
 'use client';
-
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { ProducerProfile } from '@/lib/afx/types';
 
-/** Persist `draft` ~`delay`ms after the last change. Skips the initial mount
- *  (the loaded value is already in the DB) so hydration doesn't trigger a write. */
+export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
+
+/** Persist `draft` ~`delay`ms after the last change. Skips the initial mount.
+ *  Returns a status the UI can surface so a failed save is never silent. */
 export function useDebouncedAutosave(
   draft: ProducerProfile,
   save: (p: ProducerProfile) => Promise<void>,
   delay = 800,
-): void {
+): SaveStatus {
   const first = useRef(true);
+  const [status, setStatus] = useState<SaveStatus>('idle');
   useEffect(() => {
     if (first.current) { first.current = false; return; }
-    const t = setTimeout(() => { void save(draft); }, delay);
+    const t = setTimeout(() => {
+      setStatus('saving');
+      save(draft).then(
+        () => setStatus('saved'),
+        (e) => { console.error('[afx] autosave failed', e); setStatus('error'); },
+      );
+    }, delay);
     return () => clearTimeout(t);
   }, [draft, save, delay]);
+  return status;
 }
