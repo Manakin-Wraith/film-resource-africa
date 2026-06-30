@@ -3,6 +3,7 @@
 import type { ProducerProfile, Project, Provenance, ExactMoney, AfxCurrency } from '@/lib/afx/types';
 import { caseStudies } from '@/lib/afx/aggregates';
 import ProvenanceBadge from '@/components/afx/primitives/ProvenanceBadge';
+import ExactFigureInput from '@/components/afx/primitives/ExactFigureInput';
 import { SectionCard } from './cockpitUi';
 
 const mono = 'var(--afx-mono)';
@@ -18,7 +19,6 @@ interface Props {
 }
 
 export default function TrackRecordZone({ draft, onOutcomeField, reverted, onExact, ndaSigned, defaultCurrency }: Props) {
-  void onExact; void ndaSigned; void defaultCurrency;
   const studies = caseStudies(draft);
   return (
     <SectionCard title="Track Record" hint="case studies — your proof, judged for experience">
@@ -27,7 +27,8 @@ export default function TrackRecordZone({ draft, onOutcomeField, reverted, onExa
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(320px,1fr))', gap: 14 }}>
           {studies.map((s) => (
-            <CaseStudyCard key={s.id} study={s} onField={(f, v) => onOutcomeField(s.id, f, v)} reverted={reverted} />
+            <CaseStudyCard key={s.id} study={s} onField={(f, v) => onOutcomeField(s.id, f, v)} reverted={reverted}
+              onExactBudget={(v) => onExact(s.id, 'budget', v)} ndaSigned={ndaSigned} defaultCurrency={defaultCurrency} />
           ))}
         </div>
       )}
@@ -43,7 +44,7 @@ function Empty() {
   );
 }
 
-function CaseStudyCard({ study, onField, reverted }: { study: Project; onField: (f: 'recoupment' | 'bondUsed' | 'budget', v: string) => void; reverted: Record<string, Provenance> }) {
+function CaseStudyCard({ study, onField, reverted, onExactBudget, ndaSigned, defaultCurrency }: { study: Project; onField: (f: 'recoupment' | 'bondUsed' | 'budget', v: string) => void; reverted: Record<string, Provenance>; onExactBudget: (v: ExactMoney | undefined) => void; ndaSigned: boolean; defaultCurrency: AfxCurrency }) {
   const o = study.outcomes;
   return (
     <div style={{ border: '1px solid #EAE8E3', borderRadius: 12, padding: 16, background: '#fff', display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -53,6 +54,8 @@ function CaseStudyCard({ study, onField, reverted }: { study: Project; onField: 
       </div>
 
       <OutcomeRow label="Budget" value={study.budgetBand.value} provenance={study.budgetBand.provenance} revertedFrom={reverted[`${study.id}:budget`]} onChange={(v) => onField('budget', v)} />
+      <ExactFigureInput value={study.exact?.budget} onCommit={onExactBudget} gated={ndaSigned} label="budget" defaultCurrency={defaultCurrency}
+        confirmHint={study.budgetBand.provenance === 'confirmed' ? '→ confirmed' : undefined} />
       {o ? (
         <>
           <OutcomeRow label="Recoupment" value={o.recoupment.value} provenance={o.recoupment.provenance} revertedFrom={reverted[`${study.id}:recoupment`]} onChange={(v) => onField('recoupment', v)} />
