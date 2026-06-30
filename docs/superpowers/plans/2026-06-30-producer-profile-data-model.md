@@ -171,7 +171,7 @@ Create `src/lib/afx/aggregates.ts`:
 import type { ProducerProfile, Project } from './types';
 
 export function projectsOf(p: ProducerProfile): Project[] {
-  return p.projects ?? [];
+  return p.slate ?? [];
 }
 export function caseStudies(p: ProducerProfile): Project[] {
   return projectsOf(p).filter((x) => x.status === 'case_study');
@@ -218,12 +218,12 @@ function budgetRank(band: string): number {
 
 - [ ] **Step 2: Add projects + ndaSigned + location to focusProducer**
 
-In `src/lib/afx/seed.ts`, add `import type { ... Project }` to the existing type import, then inside the `focusProducer` object add `location`, `ndaSigned`, and a `projects` array (keep the existing `filmography`/`bands` fields for now — they're removed in Task 11):
+In `src/lib/afx/seed.ts`, add `import type { ... Project }` to the existing type import, then inside the `focusProducer` object add `location`, `ndaSigned`, and a `slate` array (the unified field; keep the existing `projects: ProfileProject[]`/`filmography`/`bands` fields for now — they're removed in Task 11):
 
 ```ts
   location: 'Cape Town, ZA',
   ndaSigned: false,
-  projects: [
+  slate: [
     // ---- Track record (case studies) ----
     {
       id: 'cs1', status: 'case_study', title: 'Silverton Siege', year: 2022, format: 'feature', genre: 'Thriller', role: 'Producer', jurisdiction: ['ZA'],
@@ -294,7 +294,7 @@ In `src/lib/afx/seed.ts`, replace the body of `assertFocusProducerHasProjects` s
 
 ```ts
 export function assertFocusProducerHasProjects(p: ProducerProfile = focusProducer): void {
-  const live = (p.projects ?? []).filter((pr) => pr.status === 'live');
+  const live = (p.slate ?? []).filter((pr) => pr.status === 'live');
   if (live.length < 1) {
     throw new Error('[afx/seed] focus producer must own ≥1 live project');
   }
@@ -857,7 +857,7 @@ export default function ProducerProfileClient({ initial }: { initial: ProducerPr
   const [counter, setCounter] = useState(0);
 
   const flagRevert = (k: string) => setReverted((r) => ({ ...r, [k]: true }));
-  const projects = draft.projects ?? [];
+  const slate = draft.slate ?? [];
 
   const onIdentity = (patch: Partial<Pick<ProducerProfile, 'name' | 'company' | 'bio' | 'location'>>) =>
     setDraft((d) => ({ ...d, ...patch }));
@@ -865,7 +865,7 @@ export default function ProducerProfileClient({ initial }: { initial: ProducerPr
   const onOutcomeField = (projectId: string, field: 'recoupment' | 'bondUsed' | 'budget', value: string) => {
     setDraft((d) => ({
       ...d,
-      projects: (d.projects ?? []).map((p): Project => {
+      slate: (d.slate ?? []).map((p): Project => {
         if (p.id !== projectId) return p;
         if (field === 'budget') {
           if (isDowngrade(p.budgetBand.provenance)) flagRevert(`${projectId}:budget`);
@@ -883,8 +883,8 @@ export default function ProducerProfileClient({ initial }: { initial: ProducerPr
     setCounter(n);
     setDraft((d) => ({
       ...d,
-      projects: [
-        ...(d.projects ?? []),
+      slate: [
+        ...(d.slate ?? []),
         {
           id: `np${n}`, status: 'live', title: `New project ${n}`, format: 'feature', role: 'Producer', jurisdiction: ['ZA'],
           budgetBand: { value: '$0.5–2M', provenance: 'self' },
@@ -895,11 +895,11 @@ export default function ProducerProfileClient({ initial }: { initial: ProducerPr
   };
 
   const archiveNow = (id: string) =>
-    setDraft((d) => ({ ...d, projects: (d.projects ?? []).map((p) => (p.id === id ? { ...p, status: 'archived' as const } : p)) }));
+    setDraft((d) => ({ ...d, slate: (d.slate ?? []).map((p) => (p.id === id ? { ...p, status: 'archived' as const } : p)) }));
 
   const onArchive = (id: string) => {
     const screenable = liveProjects(draft).filter(meetsCorePackaging);
-    const target = projects.find((p) => p.id === id);
+    const target = slate.find((p) => p.id === id);
     if (target && meetsCorePackaging(target) && screenable.length <= 1) setPendingDelete(id);
     else archiveNow(id);
   };
@@ -943,7 +943,7 @@ export default function ProducerProfileClient({ initial }: { initial: ProducerPr
 
       {pendingDelete ? (
         <ConfirmArchive
-          title={projects.find((p) => p.id === pendingDelete)?.title ?? 'this project'}
+          title={slate.find((p) => p.id === pendingDelete)?.title ?? 'this project'}
           onCancel={() => setPendingDelete(null)}
           onConfirm={() => { archiveNow(pendingDelete); setPendingDelete(null); }}
         />
@@ -1081,7 +1081,7 @@ git rm src/components/afx/producer/OperatorProfile.tsx src/components/afx/produc
 
 - [ ] **Step 2: Remove deprecated types and tighten ProducerProfile**
 
-In `src/lib/afx/types.ts`: delete the `FilmographyRow`, `ProfileProject`, and `ProducerBands` interfaces. Edit `ProducerProfile` to remove `filmography` and `bands`, and make the new fields required:
+In `src/lib/afx/types.ts`: delete the `FilmographyRow`, `ProfileProject`, and `ProducerBands` interfaces. Edit `ProducerProfile` to remove `filmography`, `bands`, and the deprecated `projects: ProfileProject[]`, and make `slate` + `ndaSigned` required:
 
 ```ts
 export interface ProducerProfile {
@@ -1094,16 +1094,16 @@ export interface ProducerProfile {
   ratingBand: RatingBand;
   careerStage: string;
   relationships: Relationship[];
-  projects: Project[];
+  slate: Project[];
   ndaSigned: boolean;
   entityK2: boolean;
   consentK4: boolean;
 }
 ```
 
-- [ ] **Step 3: Drop filmography + bands from the seed**
+- [ ] **Step 3: Drop filmography + bands + old projects from the seed**
 
-In `src/lib/afx/seed.ts`, remove the `filmography: [...]` and `bands: { ... }` properties from the `focusProducer` object (the `projects`/`ndaSigned`/`location` added in Task 2 remain). Change `projects: [...] as Project[]` to no longer be optional-shaped (it now satisfies the required field).
+In `src/lib/afx/seed.ts`, remove the `filmography: [...]`, `bands: { ... }`, and the deprecated `projects: [...]` (the `ProfileProject[]` one) properties from the `focusProducer` object — the `slate`/`ndaSigned`/`location` added in Task 2 remain. You may drop the `as Project[]` assertion on `slate` now that the field is required.
 
 - [ ] **Step 4: Typecheck — catches any lingering references**
 
