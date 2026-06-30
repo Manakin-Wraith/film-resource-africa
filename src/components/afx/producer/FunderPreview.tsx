@@ -1,6 +1,6 @@
 'use client';
 
-import type { ProducerProfile } from '@/lib/afx/types';
+import type { FunderView } from '@/lib/afx/funderView';
 import { afxSeed } from '@/lib/afx/seed';
 import { fmtUSD } from '@/lib/afx/format';
 import { deriveVisibility, VISIBILITY_META, RATING_BAND_LABEL, meetsCorePackaging } from '@/lib/afx/constants';
@@ -15,16 +15,17 @@ const mono = 'var(--afx-mono)';
 /**
  * Read-only render of the producer exactly as a funder sees it on the
  * screening floor: bands (never raw figures), provenance badges, risk flags.
- * Reads the same draft state as the cockpit, so it reflects live edits.
+ * Reads from the FunderView projection passed by the cockpit, so it reflects live edits.
  */
-export default function FunderPreview({ draft }: { draft: ProducerProfile }) {
-  const visibility = deriveVisibility(draft);
+export default function FunderPreview({ view }: { view: FunderView }) {
+  // `view` is a FunderView: every project is Omit<Project,'exact'>, so the
+  // exact-figure invariant is enforced by the compiler here — `.exact` cannot
+  // be referenced, and the projection deleted it at runtime too.
+  const visibility = deriveVisibility(view);
   const vMeta = VISIBILITY_META[visibility];
-  // ⚠️ HARD INVARIANT: never read project.exact here. NDA-gated exact figures
-  // (any currency) are private and must never reach the funder view — bands only.
-  const live = liveProjects(draft).filter(meetsCorePackaging);
-  const agg = computeAggregates(draft);
-  const marketEntity = afxSeed.producers.find((e) => e.id === draft.id);
+  const live = liveProjects(view).filter(meetsCorePackaging);
+  const agg = computeAggregates(view);
+  const marketEntity = afxSeed.producers.find((e) => e.id === view.id);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -36,10 +37,10 @@ export default function FunderPreview({ draft }: { draft: ProducerProfile }) {
       {/* producer header card */}
       <div style={{ background: 'var(--afx-surface)', border: '1px solid #EAE8E3', borderRadius: 14, padding: '18px 22px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
-          <div style={chipStyle(draft.ratingBand, true)}>{draft.ratingBand}</div>
+          <div style={chipStyle(view.ratingBand, true)}>{view.ratingBand}</div>
           <div style={{ flex: 1, minWidth: 180 }}>
-            <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: '-0.3px' }}>{draft.name}</div>
-            <div style={{ fontFamily: mono, fontSize: 11.5, color: '#9A9CA3', marginTop: 3 }}>{draft.ratingBand} · {RATING_BAND_LABEL[draft.ratingBand]} · {draft.careerStage}</div>
+            <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: '-0.3px' }}>{view.name}</div>
+            <div style={{ fontFamily: mono, fontSize: 11.5, color: '#9A9CA3', marginTop: 3 }}>{view.ratingBand} · {RATING_BAND_LABEL[view.ratingBand]} · {view.careerStage}</div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
             <span style={{ width: 8, height: 8, borderRadius: '50%', background: vMeta.tone }} />

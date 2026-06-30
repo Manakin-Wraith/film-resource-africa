@@ -1,12 +1,12 @@
 import type { ProducerProfile, Project } from './types';
 
-export function projectsOf(p: ProducerProfile): Project[] {
+export function projectsOf<T extends Project>(p: { slate?: T[] }): T[] {
   return p.slate ?? [];
 }
-export function caseStudies(p: ProducerProfile): Project[] {
+export function caseStudies<T extends Project>(p: { slate?: T[] }): T[] {
   return projectsOf(p).filter((x) => x.status === 'case_study');
 }
-export function liveProjects(p: ProducerProfile): Project[] {
+export function liveProjects<T extends Project>(p: { slate?: T[] }): T[] {
   return projectsOf(p).filter((x) => x.status === 'live');
 }
 
@@ -18,7 +18,8 @@ export interface Aggregates {
 }
 
 /** Roll up the four lifetime aggregate bands from case-study outcomes.
- *  Bands in, bands out — no raw figures. */
+ *  Bands in, bands out — no raw figures. The param widens a FunderView back to
+ *  ProducerProfile, so never read `.exact` here — bands only. */
 export function computeAggregates(p: ProducerProfile): Aggregates {
   const studies = caseStudies(p);
   if (studies.length === 0) {
