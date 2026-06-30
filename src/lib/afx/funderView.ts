@@ -8,7 +8,10 @@ export type FunderProject = Omit<Project, 'exact'>;
  *  `ProducerProfile` except every slate project is exact-stripped. */
 export type FunderView = Omit<ProducerProfile, 'slate'> & { slate: FunderProject[] };
 
-/** Remove the NDA-gated `exact` figures from a single project (runtime + type). */
+/** Remove the NDA-gated `exact` figures from a single project (runtime + type).
+ *  Shallow by design: nested `budgetBand`/`ask`/`outcomes` are shared by
+ *  reference — safe because `exact` is dropped wholesale and the funder view
+ *  only reads the rest. Do NOT assume this is a deep defensive copy. */
 export function stripExact(pr: Project): FunderProject {
   const clone: FunderProject = { ...pr };
   // `exact` is optional; delete the runtime key so it can never serialise to a funder.

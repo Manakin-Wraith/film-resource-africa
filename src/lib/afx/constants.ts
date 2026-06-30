@@ -62,6 +62,8 @@ export function meetsGoLive(p: ProducerProfile): boolean {
   return p.entityK2 && p.consentK4 && liveProjects(p).some(meetsCorePackaging);
 }
 
+// band-only: this param widens a FunderView back to ProducerProfile, so never
+// read `.exact` here — it would compile but defeat the funder-boundary invariant.
 export function deriveVisibility(p: ProducerProfile): Visibility {
   const screenable = liveProjects(p).filter(meetsCorePackaging);
   if (!p.consentK4 || !p.entityK2) return 'hidden';
