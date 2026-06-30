@@ -20,6 +20,8 @@ const mono = 'var(--afx-mono)';
 export default function FunderPreview({ draft }: { draft: ProducerProfile }) {
   const visibility = deriveVisibility(draft);
   const vMeta = VISIBILITY_META[visibility];
+  // ⚠️ HARD INVARIANT: never read project.exact here. NDA-gated exact figures
+  // (any currency) are private and must never reach the funder view — bands only.
   const live = liveProjects(draft).filter(meetsCorePackaging);
   const agg = computeAggregates(draft);
   const marketEntity = afxSeed.producers.find((e) => e.id === draft.id);

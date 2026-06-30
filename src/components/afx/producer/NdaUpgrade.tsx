@@ -14,7 +14,7 @@ export default function NdaUpgrade({ signed, onToggle }: { signed: boolean; onTo
             funders still see only bands — but they lift your confidence from self-reported to confirmed and raise your rating.
           </div>
           <div style={{ fontFamily: mono, fontSize: 10.5, color: signed ? 'var(--afx-prov-verified)' : '#9A9CA3', marginTop: 8 }}>
-            {signed ? '✓ NDA signed — exact-figure entry unlocked' : 'Not signed — bands only'}
+            {signed ? '✓ NDA signed — exact-figure entry unlocked (USD or ZAR) on every budget, capital-stack and funding field' : 'Not signed — bands only'}
           </div>
         </div>
         <button
