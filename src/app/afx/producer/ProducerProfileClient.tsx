@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { useDebouncedAutosave } from './useDebouncedAutosave';
+import { persistProfileAction } from './actions';
 import type { ProducerProfile, Provenance, Project, ExactFigures, ExactMoney, AfxCurrency } from '@/lib/afx/types';
 import { liveProjects } from '@/lib/afx/aggregates';
 import { meetsCorePackaging } from '@/lib/afx/constants';
@@ -21,6 +23,7 @@ type ExactKey = 'budget' | 'fundingSecured' | 'equity' | 'soft' | 'debt' | 'gap'
 
 export default function ProducerProfileClient({ initial }: { initial: ProducerProfile }) {
   const [draft, setDraft] = useState<ProducerProfile>(() => structuredClone(initial));
+  const saveStatus = useDebouncedAutosave(draft, persistProfileAction);
   const [previewMode, setPreviewMode] = useState<'data' | 'funder'>('data');
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
   const [reverted, setReverted] = useState<Record<string, Provenance>>({});
@@ -93,7 +96,7 @@ export default function ProducerProfileClient({ initial }: { initial: ProducerPr
       slate: [
         ...(d.slate ?? []),
         {
-          id: `np${n}`, status: 'live', title: `New project ${n}`, format: 'feature', role: 'Producer', jurisdiction: ['ZA'],
+          id: crypto.randomUUID(), status: 'live', title: `New project ${n}`, format: 'feature', role: 'Producer', jurisdiction: ['ZA'],
           budgetBand: { value: '$0.5–2M', provenance: 'self' },
           ask: { logline: '', stage: 'development', commercialPath: 'Festival-driven', fundingSecuredBand: '<40% secured', capitalStack: { equityPct: 20, softPct: 0, debtPct: 0, gapPct: 80 }, packaging: [{ role: 'Director', name: '—', status: 'wishlist' }, { role: 'Writer', name: '—', status: 'wishlist' }] },
         },
@@ -155,6 +158,20 @@ export default function ProducerProfileClient({ initial }: { initial: ProducerPr
           onConfirm={() => { archiveNow(pendingDelete); setPendingDelete(null); }}
         />
       ) : null}
+
+      {saveStatus !== 'idle' && (
+        <div role="status" aria-live="polite" style={{
+          position: 'fixed', right: 16, bottom: 16, zIndex: 90,
+          fontFamily: 'var(--afx-mono)', fontSize: 11, letterSpacing: '0.04em',
+          padding: '7px 12px', borderRadius: 8,
+          border: '1px solid ' + (saveStatus === 'error' ? '#c0392b' : 'var(--afx-border, #EAE8E3)'),
+          background: saveStatus === 'error' ? '#fdecea' : '#fff',
+          color: saveStatus === 'error' ? '#c0392b' : '#5E6066',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
+        }}>
+          {saveStatus === 'saving' ? 'Saving…' : saveStatus === 'saved' ? 'Saved' : "Couldn’t save — your last edit will retry on the next change"}
+        </div>
+      )}
     </div>
   );
 }
