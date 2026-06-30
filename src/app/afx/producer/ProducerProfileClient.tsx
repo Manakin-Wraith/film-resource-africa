@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useDebouncedAutosave } from './useDebouncedAutosave';
-import { persistProfileAction } from './actions';
+import { persistProfileAction, submitForVettingAction, withdrawVettingAction } from './actions';
+import { openCaseSubmission } from '@/lib/afx/vetting';
 import type { ProducerProfile, Project, ExactFigures, ExactMoney, AfxCurrency, VettingSubmission } from '@/lib/afx/types';
 import { liveProjects } from '@/lib/afx/aggregates';
 import { meetsCorePackaging } from '@/lib/afx/constants';
@@ -30,6 +31,7 @@ export default function ProducerProfileClient({ initial, initialSubmissions }: {
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
   const [counter, setCounter] = useState(0);
   const [editing, setEditing] = useState<{ study: Project; isNew: boolean } | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const slate = draft.slate ?? [];
 
@@ -52,6 +54,20 @@ export default function ProducerProfileClient({ initial, initialSubmissions }: {
   const onRemoveCaseStudy = (id: string) => {
     setDraft((d) => ({ ...d, slate: (d.slate ?? []).filter((p) => p.id !== id) }));
     setEditing(null);
+  };
+
+  const onSubmitCaseStudy = async (id: string) => {
+    setActionError(null);
+    await persistProfileAction(draft);                 // flush latest (incl. docs) before server gate
+    const res = await submitForVettingAction({ kind: 'case_study', targetId: id });
+    if (res.ok) { setSubmissions((s) => [...s, res.submission]); setEditing(null); }
+    else setActionError(res.error ?? 'Submit failed');
+  };
+  const onWithdrawSubmission = async (submissionId: string) => {
+    setActionError(null);
+    const res = await withdrawVettingAction({ submissionId });
+    if (res.ok) setSubmissions((s) => s.map((x) => (x.id === submissionId ? { ...x, status: 'withdrawn' } : x)));
+    else setActionError(res.error ?? 'Withdraw failed');
   };
 
   const localCurrency: AfxCurrency = (draft.location ?? '').trim().endsWith('ZA') ? 'ZAR' : 'USD';
@@ -145,7 +161,7 @@ export default function ProducerProfileClient({ initial, initialSubmissions }: {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <IdentityPanel draft={draft} onIdentity={onIdentity} />
             {/* Two-zone hard requirement: Track Record BEFORE Live Slate (spec §2.1) */}
-            <TrackRecordZone draft={draft} onAdd={onAddCaseStudy} onEdit={onEditCaseStudy} />
+            <TrackRecordZone draft={draft} submissions={submissions} onAdd={onAddCaseStudy} onEdit={onEditCaseStudy} />
             <LiveSlateZone draft={draft} onAddProject={onAddProject} onArchive={onArchive} onExact={onExact} ndaSigned={!!draft.ndaSigned} defaultCurrency={localCurrency} />
             <AggregatesPanel draft={draft} />
             <NdaUpgrade signed={!!draft.ndaSigned} onToggle={toggleNda} />
@@ -162,16 +178,37 @@ export default function ProducerProfileClient({ initial, initialSubmissions }: {
         />
       ) : null}
 
-      {editing ? (
-        <CaseStudyDrawer
-          initial={editing.study}
-          isNew={editing.isNew}
-          ndaSigned={!!draft.ndaSigned}
-          defaultCurrency={localCurrency}
-          onSave={onSaveCaseStudy}
-          onClose={() => setEditing(null)}
-          onRemove={editing.isNew ? undefined : () => onRemoveCaseStudy(editing.study.id)}
-        />
+      {editing ? (() => {
+        const open = openCaseSubmission(submissions, editing.study.id);
+        return (
+          <CaseStudyDrawer
+            initial={editing.study}
+            isNew={editing.isNew}
+            ndaSigned={!!draft.ndaSigned}
+            defaultCurrency={localCurrency}
+            submission={open}
+            locked={!!open}
+            onSave={onSaveCaseStudy}
+            onClose={() => setEditing(null)}
+            onRemove={editing.isNew ? undefined : () => onRemoveCaseStudy(editing.study.id)}
+            onSubmit={() => onSubmitCaseStudy(editing.study.id)}
+            onWithdraw={open ? () => onWithdrawSubmission(open.id) : undefined}
+          />
+        );
+      })() : null}
+
+      {actionError ? (
+        <div role="alert" onClick={() => setActionError(null)} style={{
+          position: 'fixed', left: 16, bottom: 16, zIndex: 90,
+          fontFamily: 'var(--afx-mono)', fontSize: 11, letterSpacing: '0.04em',
+          padding: '7px 12px', borderRadius: 8, cursor: 'pointer',
+          border: '1px solid #c0392b',
+          background: '#fdecea',
+          color: '#c0392b',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
+        }}>
+          {actionError}
+        </div>
       ) : null}
 
       {saveStatus !== 'idle' && (

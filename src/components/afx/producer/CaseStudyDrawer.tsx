@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import type { Project, AfxCurrency, EvidenceClaim } from '@/lib/afx/types';
+import type { Project, AfxCurrency, EvidenceClaim, VettingSubmission } from '@/lib/afx/types';
+import { isVettingReady } from '@/lib/afx/documents';
+import { VETTING_STATUS_META } from '@/lib/afx/vetting';
 import {
   isCaseStudySavable, toggleJurisdiction, setBudgetBand, setOutcome, setExactBudget,
   addDistribution, updateDistribution, removeDistribution,
@@ -25,12 +27,16 @@ interface CaseStudyDrawerProps {
   isNew: boolean;
   ndaSigned: boolean;
   defaultCurrency: AfxCurrency;
+  submission?: VettingSubmission;
+  locked: boolean;
   onSave: (study: Project) => void;
   onClose: () => void;
   onRemove?: () => void;
+  onSubmit?: () => void;
+  onWithdraw?: () => void;
 }
 
-export default function CaseStudyDrawer({ initial, isNew, ndaSigned, defaultCurrency, onSave, onClose, onRemove }: CaseStudyDrawerProps) {
+export default function CaseStudyDrawer({ initial, isNew, ndaSigned, defaultCurrency, submission, locked, onSave, onClose, onRemove, onSubmit, onWithdraw }: CaseStudyDrawerProps) {
   const [study, setStudy] = useState<Project>(() => structuredClone(initial));
   const [confirmingRemove, setConfirmingRemove] = useState(false);
 
@@ -54,7 +60,17 @@ export default function CaseStudyDrawer({ initial, isNew, ndaSigned, defaultCurr
           <button onClick={onClose} aria-label="Close" style={{ marginLeft: 'auto', cursor: 'pointer', background: 'none', border: 'none', fontSize: 20, lineHeight: 1, color: '#9A9CA3' }}>×</button>
         </header>
 
-        <div style={{ flex: 1, overflowY: 'auto', padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: 18 }}>
+        {submission && submission.status !== 'withdrawn' ? (
+          <div style={{ margin: '0 22px 4px', padding: '10px 12px', borderRadius: 10,
+            background: VETTING_STATUS_META[submission.status].bg, border: `1px solid ${VETTING_STATUS_META[submission.status].border}`,
+            color: VETTING_STATUS_META[submission.status].ink, fontSize: 12.5 }}>
+            <strong style={{ fontWeight: 700 }}>{VETTING_STATUS_META[submission.status].label}</strong>
+            {locked ? ' — read-only while FRA reviews. Withdraw to edit.' : ''}
+            {submission.status === 'changes_requested' && submission.reviewerNotes ? <div style={{ marginTop: 4 }}>{submission.reviewerNotes}</div> : null}
+          </div>
+        ) : null}
+
+        <div style={{ flex: 1, overflowY: 'auto', padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: 18, pointerEvents: locked ? 'none' : 'auto', opacity: locked ? 0.65 : 1 }}>
           {/* Identity */}
           <InlineEdit label="Title" value={study.title} placeholder="Project title" onChange={(v) => setStudy((s) => ({ ...s, title: v }))} />
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
@@ -167,15 +183,27 @@ export default function CaseStudyDrawer({ initial, isNew, ndaSigned, defaultCurr
             </>
           ) : (
             <>
-              {!isNew && onRemove ? (
+              {!isNew && onRemove && !locked ? (
                 <button onClick={() => setConfirmingRemove(true)} style={{ cursor: 'pointer', fontFamily: 'var(--afx-body)', fontSize: 13, fontWeight: 600, padding: '9px 14px', borderRadius: 8, border: '1px solid #E3B6AE', background: '#fff', color: '#7A2E2E' }}>Remove</button>
               ) : null}
               <div style={{ marginLeft: 'auto', display: 'flex', gap: 10 }}>
-                <button onClick={onClose} style={{ cursor: 'pointer', fontFamily: 'var(--afx-body)', fontSize: 13, fontWeight: 600, padding: '9px 15px', borderRadius: 8, border: '1px solid #E4E2DC', background: '#fff', color: '#5E6066' }}>Cancel</button>
-                <button onClick={() => onSave(study)} disabled={!savable}
-                  style={{ cursor: savable ? 'pointer' : 'not-allowed', fontFamily: 'var(--afx-body)', fontSize: 13, fontWeight: 600, padding: '9px 17px', borderRadius: 8, border: '1px solid #1C1D21', background: savable ? '#1C1D21' : '#C9C7C1', color: '#fff', opacity: savable ? 1 : 0.8 }}>
-                  {isNew ? 'Add case study' : 'Save'}
-                </button>
+                <button onClick={onClose} style={{ cursor: 'pointer', fontFamily: 'var(--afx-body)', fontSize: 13, fontWeight: 600, padding: '9px 15px', borderRadius: 8, border: '1px solid #E4E2DC', background: '#fff', color: '#5E6066' }}>Close</button>
+                {locked ? (
+                  <button onClick={onWithdraw} style={{ cursor: 'pointer', fontFamily: 'var(--afx-body)', fontSize: 13, fontWeight: 600, padding: '9px 17px', borderRadius: 8, border: '1px solid #9A6B1E', background: '#fff', color: '#9A6B1E' }}>Withdraw</button>
+                ) : (
+                  <>
+                    <button onClick={() => onSave(study)} disabled={!savable}
+                      style={{ cursor: savable ? 'pointer' : 'not-allowed', fontFamily: 'var(--afx-body)', fontSize: 13, fontWeight: 600, padding: '9px 17px', borderRadius: 8, border: '1px solid #1C1D21', background: savable ? '#1C1D21' : '#C9C7C1', color: '#fff', opacity: savable ? 1 : 0.8 }}>
+                      {isNew ? 'Add case study' : 'Save'}
+                    </button>
+                    {!isNew && onSubmit ? (
+                      <button onClick={onSubmit} disabled={!isVettingReady(study.docs)} title={isVettingReady(study.docs) ? '' : 'Attach all required proof documents first'}
+                        style={{ cursor: isVettingReady(study.docs) ? 'pointer' : 'not-allowed', fontFamily: 'var(--afx-body)', fontSize: 13, fontWeight: 700, padding: '9px 17px', borderRadius: 8, border: '1px solid #1C4E80', background: isVettingReady(study.docs) ? '#1C4E80' : '#A8B6C8', color: '#fff' }}>
+                        Submit for vetting
+                      </button>
+                    ) : null}
+                  </>
+                )}
               </div>
             </>
           )}
