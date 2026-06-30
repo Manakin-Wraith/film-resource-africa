@@ -7,7 +7,6 @@ import { deriveVisibility, VISIBILITY_META, RATING_BAND_LABEL, meetsCorePackagin
 import { liveProjects, computeAggregates } from '@/lib/afx/aggregates';
 import { chipStyle } from '@/components/afx/primitives/bands';
 import SignalChip from '@/components/afx/primitives/SignalChip';
-import ProvenanceBadge from '@/components/afx/primitives/ProvenanceBadge';
 import ConfidenceMarker from '@/components/afx/primitives/ConfidenceMarker';
 import RiskFlag from '@/components/afx/primitives/RiskFlag';
 

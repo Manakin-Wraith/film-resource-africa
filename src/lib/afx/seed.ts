@@ -1,4 +1,4 @@
-import type { AfxSeed, DealEntity, ProducerProfile, Project } from './types';
+import type { AfxSeed, DealEntity, ProducerProfile } from './types';
 
 /* ============================================================
    Mock data ported from the Claude Design "AFX Deal Display"
@@ -227,25 +227,10 @@ export const focusProducer: ProducerProfile = {
   ratingBand: 'A',
   careerStage: 'Institutional',
   location: 'Cape Town, ZA',
-  filmography: [
-    { id: 'f1', title: 'Silverton Siege', year: 2022, format: 'Feature', role: 'Producer', budgetBand: { value: '$5–15M', provenance: 'verified' }, recoupmentBand: { value: 'Fully recouped', provenance: 'verified' } },
-    { id: 'f2', title: 'Catch Me a Killer', year: 2024, format: 'Series', role: 'Exec Producer', budgetBand: { value: '$5–15M', provenance: 'confirmed' }, recoupmentBand: { value: 'Partial', provenance: 'self' } },
-    { id: 'f3', title: 'The Wound', year: 2017, format: 'Feature', role: 'Co-Producer', budgetBand: { value: '$0.5–2M', provenance: 'verified' }, recoupmentBand: { value: 'Fully recouped', provenance: 'confirmed' } },
-  ],
   relationships: [
     { id: 'r1', name: 'Showmax', role: 'Output deal', provenance: 'confirmed' },
     { id: 'r2', name: 'Canal+', role: 'Library licensing', provenance: 'self' },
     { id: 'r3', name: 'Film Finances', role: 'Completion bond', provenance: 'verified' },
-  ],
-  bands: {
-    budgetTier: { value: '$5–15M', provenance: 'verified' },
-    amountRaised: { value: '$20M+ (lifetime)', provenance: 'confirmed' },
-    recoupment: { value: 'Mostly fully recouped', provenance: 'confirmed' },
-    completionBond: { value: '4 titles bonded', provenance: 'verified' },
-  },
-  projects: [
-    { id: 'pr1', title: 'City of Gold', format: 'Feature', stage: 'Pre-sales', securedPctBand: '80–90% secured', prsBand: 'A', provenance: 'confirmed' },
-    { id: 'pr4', title: 'Mokete', format: 'Documentary', stage: 'Financing', securedPctBand: '70–80% secured', prsBand: 'A', riskFlag: undefined, provenance: 'self' },
   ],
   entityK2: true,
   consentK4: true,
@@ -312,7 +297,7 @@ export const focusProducer: ProducerProfile = {
         ],
       },
     },
-  ] as Project[],
+  ],
 };
 
 export function assertFocusProducerHasProjects(p: ProducerProfile = focusProducer): void {

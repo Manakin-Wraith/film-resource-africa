@@ -132,40 +132,11 @@ export interface Provenanced<T> {
   provenance: Provenance;
 }
 
-export interface FilmographyRow {
-  id: string;
-  title: string;
-  year: number;
-  format: string;
-  role: string;
-  budgetBand: Provenanced<string>;
-  recoupmentBand: Provenanced<string>;
-}
-
 export interface Relationship {
   id: string;
   name: string;
   role: string;
   provenance: Provenance;
-}
-
-export interface ProfileProject {
-  id: string; // maps to a DealEntity in afxSeed.projects when present
-  title: string;
-  format: string;
-  stage: string;
-  securedPctBand: string;
-  prsBand: RatingBand;
-  riskFlag?: string;
-  provenance: Provenance;
-  archived?: boolean;
-}
-
-export interface ProducerBands {
-  budgetTier: Provenanced<string>;
-  amountRaised: Provenanced<string>;
-  recoupment: Provenanced<string>;
-  completionBond: Provenanced<string>;
 }
 
 /**
@@ -182,14 +153,9 @@ export interface ProducerProfile {
   location?: string;
   ratingBand: RatingBand;
   careerStage: string;
-  filmography: FilmographyRow[];
   relationships: Relationship[];
-  bands: ProducerBands;
-  projects: ProfileProject[]; // deprecated — removed in Task 11 once `slate` is the sole project array
-  /** Unified case-study + live projects. Named `slate` to coexist additively
-   *  with the deprecated `projects: ProfileProject[]` during migration. */
-  slate?: Project[];
-  ndaSigned?: boolean;
+  slate: Project[];
+  ndaSigned: boolean;
   entityK2: boolean; // legal entity gate
   consentK4: boolean; // transparency/reporting consent gate
 }
