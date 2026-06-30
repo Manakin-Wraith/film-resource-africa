@@ -31,7 +31,7 @@ export function computeAggregates(p: ProducerProfile): Aggregates {
   const recoupedCount = studies.filter((s) => /full/i.test(s.outcomes?.recoupment.value ?? '')).length;
   const bondedCount = studies.filter((s) => /bonded/i.test(s.outcomes?.bondUsed.value ?? '') && !/not/i.test(s.outcomes?.bondUsed.value ?? '')).length;
   return {
-    budgetTier: topBudget,
+    budgetTier: topBudget || '—',
     capitalRaised: studies.length >= 5 ? '$20M+ (lifetime)' : studies.length >= 3 ? '$5–20M (lifetime)' : 'Under $5M (lifetime)',
     recoupmentRecord: `${recoupedCount}/${studies.length} fully recouped`,
     bondHistory: bondedCount > 0 ? `${bondedCount} title${bondedCount > 1 ? 's' : ''} bonded` : 'No bond history',
