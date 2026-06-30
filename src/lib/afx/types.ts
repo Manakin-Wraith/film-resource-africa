@@ -179,12 +179,72 @@ export interface ProducerProfile {
   company: string;
   bio: string;
   photoUrl?: string;
+  location?: string;
   ratingBand: RatingBand;
   careerStage: string;
   filmography: FilmographyRow[];
   relationships: Relationship[];
   bands: ProducerBands;
   projects: ProfileProject[];
+  ndaSigned?: boolean;
   entityK2: boolean; // legal entity gate
   consentK4: boolean; // transparency/reporting consent gate
+}
+
+/* ---------- Unified Project (case study ⇄ live ask) ---------- */
+
+export type ProjectStatus = 'case_study' | 'live' | 'archived';
+
+/** Present when status === 'case_study' — the vetting/outcome layer. */
+export interface ProjectOutcomes {
+  recoupment: Provenanced<string>;   // Fully recouped / Partial / No / Under NDA
+  bondUsed: Provenanced<string>;     // e.g. "Bonded (Film Finances)" / "Not bonded"
+  distribution: { name: string; type: string; provenance: Provenance }[];
+  festivalsAwards: string[];
+}
+
+export interface PackagingAttachment {
+  role: string;
+  name: string;
+  status: 'signed' | 'soft-hold' | 'wishlist';
+}
+
+/** Producer-entered capital stack, as percentage bands. */
+export interface CapitalStackInput {
+  equityPct: number;
+  softPct: number;
+  debtPct: number;
+  gapPct: number;
+}
+
+export type Stage = string;
+export type Format = string;
+
+/** Present when status === 'live' — the forward-looking ask. */
+export interface ProjectAsk {
+  logline: string;
+  stage: Stage;
+  commercialPath: string;
+  fundingSecuredBand: string;
+  capitalStack: CapitalStackInput;
+  packaging: PackagingAttachment[];
+  comps?: { title: string; note: string }[];
+}
+
+export interface Project {
+  id: string;
+  status: ProjectStatus;
+  title: string;
+  format: Format;
+  genre?: string;
+  role: string;
+  year?: number;
+  jurisdiction: string[];
+  budgetBand: Provenanced<string>;
+  /** NDA-gated exact figure. Private — never serialised to the funder view. */
+  exactBudget?: number;
+  outcomes?: ProjectOutcomes;   // when status === 'case_study'
+  ask?: ProjectAsk;             // when status === 'live'
+  /** id of the matching DealEntity in afxSeed.projects for the live deal overlay. */
+  dealRef?: string;
 }
