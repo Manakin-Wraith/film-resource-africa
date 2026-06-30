@@ -1,12 +1,12 @@
 import type { ProducerProfile, Project } from './types';
 
-export function projectsOf(p: ProducerProfile): Project[] {
+export function projectsOf<T extends Project>(p: { slate?: T[] }): T[] {
   return p.slate ?? [];
 }
-export function caseStudies(p: ProducerProfile): Project[] {
+export function caseStudies<T extends Project>(p: { slate?: T[] }): T[] {
   return projectsOf(p).filter((x) => x.status === 'case_study');
 }
-export function liveProjects(p: ProducerProfile): Project[] {
+export function liveProjects<T extends Project>(p: { slate?: T[] }): T[] {
   return projectsOf(p).filter((x) => x.status === 'live');
 }
 
