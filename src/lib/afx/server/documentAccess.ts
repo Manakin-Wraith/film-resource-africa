@@ -38,6 +38,7 @@ export const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f
  *  `${producerId}/<caseStudyUuid|entity>/<docUuid>.<ext>` with no traversal. */
 export function isOwnedDocPath(path: string, producerId: string): boolean {
   if (path.includes('..')) return false;
+  // Self-guard: producerId is interpolated into the RegExp below, so it must be a bare UUID (no regex metachars) — keeps the ownership guarantee local.
   if (!UUID_RE.test(producerId)) return false;
   const uuid = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
   const re = new RegExp(`^${producerId}/(?:entity|${uuid})/${uuid}\\.[a-z0-9]+$`, 'i');
@@ -54,7 +55,7 @@ export async function hasOpenSubmission(producerId: string, kind: 'case_study' |
     .eq('kind', kind)
     .in('status', ['submitted', 'under_review'])
     .limit(1);
-  q = targetId ? q.eq('target_id', targetId) : q.is('target_id', null);
+  q = targetId !== null ? q.eq('target_id', targetId) : q.is('target_id', null);
   const { data } = await q;
   return !!(data && data.length > 0);
 }

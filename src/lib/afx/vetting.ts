@@ -7,7 +7,7 @@ export function isOpenStatus(s: VettingStatus): boolean {
 
 function latest(subs: readonly VettingSubmission[]): VettingSubmission | undefined {
   // Most recent by submittedAt (ISO strings sort lexically).
-  return subs.length ? [...subs].sort((a, b) => (a.submittedAt < b.submittedAt ? 1 : -1))[0] : undefined;
+  return subs.length ? [...subs].sort((a, b) => (a.submittedAt < b.submittedAt ? 1 : a.submittedAt > b.submittedAt ? -1 : 0))[0] : undefined;
 }
 
 export function openCaseSubmission(subs: readonly VettingSubmission[] | undefined, caseStudyId: string): VettingSubmission | undefined {
@@ -26,7 +26,7 @@ export function latestEntitySubmission(subs: readonly VettingSubmission[] | unde
 /** Case-study ids with an OPEN submission → read-only / undeletable. */
 export function lockedCaseStudyIds(subs: readonly VettingSubmission[] | undefined): Set<string> {
   const ids = new Set<string>();
-  for (const s of subs ?? []) if (s.kind === 'case_study' && s.targetId && isOpenStatus(s.status)) ids.add(s.targetId);
+  for (const s of subs ?? []) if (s.kind === 'case_study' && s.targetId !== null && isOpenStatus(s.status)) ids.add(s.targetId);
   return ids;
 }
 export function isEntityLocked(subs: readonly VettingSubmission[] | undefined): boolean {

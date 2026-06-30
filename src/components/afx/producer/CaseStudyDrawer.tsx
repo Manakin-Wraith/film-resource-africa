@@ -33,7 +33,7 @@ interface CaseStudyDrawerProps {
   onSave: (study: Project) => void;
   onClose: () => void;
   onRemove?: () => void;
-  onSubmit?: () => void;
+  onSubmit?: (study: Project) => void;
   onWithdraw?: () => void;
 }
 
@@ -199,7 +199,7 @@ export default function CaseStudyDrawer({ initial, isNew, ndaSigned, defaultCurr
                       {isNew ? 'Add case study' : 'Save'}
                     </button>
                     {!isNew && onSubmit ? (
-                      <button onClick={onSubmit} disabled={busy || !ready} title={ready ? '' : 'Attach all required proof documents first'}
+                      <button onClick={() => onSubmit?.(study)} disabled={busy || !ready} title={ready ? '' : 'Attach all required proof documents first'}
                         style={{ cursor: busy ? 'wait' : ready ? 'pointer' : 'not-allowed', fontFamily: 'var(--afx-body)', fontSize: 13, fontWeight: 700, padding: '9px 17px', borderRadius: 8, border: '1px solid #1C4E80', background: ready ? '#1C4E80' : '#A8B6C8', color: '#fff' }}>
                         Submit for vetting
                       </button>

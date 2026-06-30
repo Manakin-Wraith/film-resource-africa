@@ -58,15 +58,19 @@ export default function ProducerProfileClient({ initial, initialSubmissions }: {
     setEditing(null);
   };
 
-  const onSubmitCaseStudy = async (id: string) => {
+  const onSubmitCaseStudy = async (study: Project) => {
     if (vettingBusy) return;
     setVettingBusy(true);
     setActionError(null);
     try {
-      await persistProfileAction(draft);              // flush latest (incl. docs) before the server gate
-      const res = await submitForVettingAction({ kind: 'case_study', targetId: id });
+      const list = draft.slate ?? [];
+      const exists = list.some((p) => p.id === study.id);
+      const nextDraft = { ...draft, slate: exists ? list.map((p) => (p.id === study.id ? study : p)) : [...list, study] };
+      setDraft(nextDraft);
+      await persistProfileAction(nextDraft);            // persist the MERGED draft (incl. drawer's doc uploads) before the gate
+      const res = await submitForVettingAction({ kind: 'case_study', targetId: study.id });
       if (res.ok) { setSubmissions((s) => [...s, res.submission]); setEditing(null); }
-      else setActionError(res.error ?? 'Submit failed');
+      else setActionError(res.error ?? 'Could not submit for vetting');
     } catch {
       setActionError('Could not submit for vetting — please try again');
     } finally {
@@ -248,7 +252,7 @@ export default function ProducerProfileClient({ initial, initialSubmissions }: {
             onSave={onSaveCaseStudy}
             onClose={() => setEditing(null)}
             onRemove={editing.isNew ? undefined : () => onRemoveCaseStudy(editing.study.id)}
-            onSubmit={() => onSubmitCaseStudy(editing.study.id)}
+            onSubmit={onSubmitCaseStudy}
             onWithdraw={open ? () => onWithdrawSubmission(open.id) : undefined}
           />
         );

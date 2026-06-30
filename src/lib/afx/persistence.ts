@@ -12,6 +12,7 @@ export interface ProjectRow {
   producer_id: string;
   status: Project['status'];
   deal_ref: string | null;
+  /** Project minus the two isolated lanes (exact, docs). */
   body: Omit<Project, 'exact' | 'docs'>;
   exact: Project['exact'] | null;
   docs: AfxDocument[] | null;

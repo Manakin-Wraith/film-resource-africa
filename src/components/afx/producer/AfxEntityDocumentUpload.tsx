@@ -9,6 +9,10 @@ import {
 } from '@/lib/afx/documents';
 
 const mono = 'var(--afx-mono)';
+const linkBtn: React.CSSProperties = {
+  cursor: 'pointer', background: 'none', border: '1px solid #E4E2DC', borderRadius: 7,
+  padding: '6px 10px', fontFamily: mono, fontSize: 10.5, fontWeight: 600, color: '#5E6066',
+};
 const inputStyle: React.CSSProperties = {
   fontFamily: 'var(--afx-body)', fontSize: 13, color: '#1C1D21',
   border: '1px solid #E4E2DC', borderRadius: 8, padding: '8px 11px', background: '#fff', outline: 'none',
@@ -116,8 +120,3 @@ export default function AfxEntityDocumentUpload({ docs, locked, onAdd, onUpdate,
     </div>
   );
 }
-
-const linkBtn: React.CSSProperties = {
-  cursor: 'pointer', background: 'none', border: '1px solid #E4E2DC', borderRadius: 7,
-  padding: '6px 10px', fontFamily: mono, fontSize: 10.5, fontWeight: 600, color: '#5E6066',
-};

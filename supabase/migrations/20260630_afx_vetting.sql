@@ -34,6 +34,7 @@ create policy afx_vs_insert_own on public.afx_vetting_submissions
 create policy afx_vs_update_own on public.afx_vetting_submissions
   for update using (
     producer_id in (select id from public.afx_producers where user_id = auth.uid())
+    and status in ('submitted','under_review')
   ) with check (
     producer_id in (select id from public.afx_producers where user_id = auth.uid())
     and status = 'withdrawn'

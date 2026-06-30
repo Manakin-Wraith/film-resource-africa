@@ -15,10 +15,11 @@ export async function loadProducerState(): Promise<{ profile: ProducerProfile; s
     .from('afx_projects')
     .select('id, producer_id, status, deal_ref, body, exact, docs')
     .eq('producer_id', producer.id);
-  const { data: subs } = await supabase
+  const { data: subs, error: subsErr } = await supabase
     .from('afx_vetting_submissions')
     .select('id, producer_id, kind, target_id, status, reviewer_notes, submitted_at, decided_at')
     .eq('producer_id', producer.id);
+  if (subsErr) console.error('[afx-vetting] submissions load failed:', subsErr.message);
   return {
     profile: rowsToProfile(producer, (projects ?? []) as ProjectRow[]),
     submissions: ((subs ?? []) as VettingSubmissionRow[]).map(submissionFromRow),
