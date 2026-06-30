@@ -13,6 +13,7 @@ import AggregatesPanel from '@/components/afx/producer/AggregatesPanel';
 import NdaUpgrade from '@/components/afx/producer/NdaUpgrade';
 import AccountVisibility from '@/components/afx/producer/AccountVisibility';
 import FunderPreview from '@/components/afx/producer/FunderPreview';
+import { toFunderView } from '@/lib/afx/funderView';
 
 const mono = 'var(--afx-mono)';
 const isDowngrade = (p: Provenance) => p === 'verified' || p === 'confirmed';
@@ -133,7 +134,7 @@ export default function ProducerProfileClient({ initial }: { initial: ProducerPr
         <StatusHeader draft={draft} previewMode={previewMode} onSetPreview={setPreviewMode} />
 
         {previewMode === 'funder' ? (
-          <FunderPreview draft={draft} />
+          <FunderPreview view={toFunderView(draft)} />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <IdentityPanel draft={draft} onIdentity={onIdentity} />
