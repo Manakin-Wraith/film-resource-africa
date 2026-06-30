@@ -1,4 +1,4 @@
-import type { Provenance, RatingBand, Visibility, ProducerProfile } from './types';
+import type { Provenance, RatingBand, Visibility, ProducerProfile, EvidenceClaim } from './types';
 import { liveProjects, caseStudies } from './aggregates';
 import type { Project } from './types';
 
@@ -92,3 +92,20 @@ export function nextBestActions(p: ProducerProfile): string[] {
   out.push('Attach a sales agent to your strongest project to raise packaging strength.');
   return out.slice(0, 3);
 }
+
+/* ---------- Case-study capture (Track Record) ---------- */
+
+export const CASE_STUDY_FORMATS = ['Feature', 'Documentary', 'Series', 'Short'] as const;
+export const RECOUPMENT_OPTIONS = ['Fully recouped', 'Partially recouped', 'Not recouped', 'Under NDA'] as const;
+export const BOND_OPTIONS = ['Bonded', 'Not bonded'] as const;
+export const DISTRIBUTION_TYPES = ['Theatrical', 'SVOD', 'TVOD', 'AVOD', 'Broadcast', 'Festival'] as const;
+export const JURISDICTION_OPTIONS = ['ZA', 'NG', 'KE', 'SN'] as const;
+
+export const EVIDENCE_CLAIM_LABELS: Record<EvidenceClaim, string> = {
+  budget: 'Budget',
+  recoupment: 'Recoupment',
+  bond: 'Bond',
+  distribution: 'Distribution',
+  festival: 'Festival',
+  other: 'Other',
+};

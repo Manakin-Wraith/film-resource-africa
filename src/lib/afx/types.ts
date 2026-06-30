@@ -172,6 +172,15 @@ export interface ProjectOutcomes {
   festivalsAwards: string[];
 }
 
+/** What a piece of evidence substantiates, for the tagged evidence list. */
+export type EvidenceClaim = 'budget' | 'recoupment' | 'bond' | 'distribution' | 'festival' | 'other';
+
+export interface EvidenceLink {
+  id: string;   // crypto.randomUUID()
+  url: string;  // stored as entered
+  supports: EvidenceClaim;
+}
+
 export interface PackagingAttachment {
   role: string;
   name: string;
@@ -235,6 +244,9 @@ export interface Project {
   /** NDA-gated exact figures. Private — NEVER serialised to the funder view.
    *  Keys map to the band/financial fields they substantiate. */
   exact?: ExactFigures;
+  /** Producer-attached supporting links, each tagged to the claim it backs.
+   *  Non-exact (shareable proof) — persisted in body, NOT in the NDA `exact` column. */
+  evidence?: EvidenceLink[];
   outcomes?: ProjectOutcomes;   // when status === 'case_study'
   ask?: ProjectAsk;             // when status === 'live'
   /** id of the matching DealEntity in afxSeed.projects for the live deal overlay. */
