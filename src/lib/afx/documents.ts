@@ -1,4 +1,4 @@
-import type { AfxDocument, DocumentCategory } from './types';
+import type { AfxDocument, DocumentCategory, EntityDocumentCategory } from './types';
 
 export const DOCUMENT_CATEGORIES: readonly DocumentCategory[] = [
   'budget', 'chain_of_title', 'waterfall', 'financing_agreement',
@@ -46,3 +46,35 @@ export const ALLOWED_DOC_TYPES: readonly string[] = [
 ] as const;
 
 export const MAX_DOC_BYTES = 25 * 1024 * 1024; // 25 MB
+
+export const ENTITY_DOCUMENT_CATEGORIES: readonly EntityDocumentCategory[] = [
+  'company_registration', 'director_id', 'tax_registration',
+  'bbbee_certificate', 'good_standing', 'other',
+] as const;
+
+export const ENTITY_DOCUMENT_CATEGORY_LABELS: Record<EntityDocumentCategory, string> = {
+  company_registration: 'Company registration / incorporation',
+  director_id: 'Director ID',
+  tax_registration: 'Tax / VAT registration',
+  bbbee_certificate: 'B-BBEE certificate',
+  good_standing: 'Letter of good standing',
+  other: 'Other',
+};
+
+/** Proof an entity must carry to be vetting-ready. company_registration,
+ *  director_id, tax_registration are required; bbbee_certificate + good_standing
+ *  are optional supporting evidence. */
+export const REQUIRED_ENTITY_DOCUMENT_CATEGORIES: readonly EntityDocumentCategory[] = [
+  'company_registration', 'director_id', 'tax_registration',
+] as const;
+
+export function missingRequiredEntityDocs(docs: readonly AfxDocument[] | undefined): EntityDocumentCategory[] {
+  const present = new Set((docs ?? []).map((d) => d.category));
+  return REQUIRED_ENTITY_DOCUMENT_CATEGORIES.filter((c) => !present.has(c));
+}
+
+/** An entity is vetting-ready iff K2 (legal entity) is attested AND every
+ *  required company document is present. */
+export function isEntityVettingReady(p: { entityK2: boolean; entityDocs?: readonly AfxDocument[] }): boolean {
+  return p.entityK2 === true && missingRequiredEntityDocs(p.entityDocs).length === 0;
+}
