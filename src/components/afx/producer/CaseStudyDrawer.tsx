@@ -30,6 +30,7 @@ interface CaseStudyDrawerProps {
 
 export default function CaseStudyDrawer({ initial, isNew, ndaSigned, defaultCurrency, onSave, onClose, onRemove }: CaseStudyDrawerProps) {
   const [study, setStudy] = useState<Project>(() => structuredClone(initial));
+  const [confirmingRemove, setConfirmingRemove] = useState(false);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -139,16 +140,26 @@ export default function CaseStudyDrawer({ initial, isNew, ndaSigned, defaultCurr
         </div>
 
         <footer style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 22px', borderTop: '1px solid #EAE8E3', background: '#fff' }}>
-          {!isNew && onRemove ? (
-            <button onClick={onRemove} style={{ cursor: 'pointer', fontFamily: 'var(--afx-body)', fontSize: 13, fontWeight: 600, padding: '9px 14px', borderRadius: 8, border: '1px solid #E3B6AE', background: '#fff', color: '#7A2E2E' }}>Remove</button>
-          ) : null}
-          <div style={{ marginLeft: 'auto', display: 'flex', gap: 10 }}>
-            <button onClick={onClose} style={{ cursor: 'pointer', fontFamily: 'var(--afx-body)', fontSize: 13, fontWeight: 600, padding: '9px 15px', borderRadius: 8, border: '1px solid #E4E2DC', background: '#fff', color: '#5E6066' }}>Cancel</button>
-            <button onClick={() => onSave(study)} disabled={!savable}
-              style={{ cursor: savable ? 'pointer' : 'not-allowed', fontFamily: 'var(--afx-body)', fontSize: 13, fontWeight: 600, padding: '9px 17px', borderRadius: 8, border: '1px solid #1C1D21', background: savable ? '#1C1D21' : '#C9C7C1', color: '#fff', opacity: savable ? 1 : 0.8 }}>
-              {isNew ? 'Add case study' : 'Save'}
-            </button>
-          </div>
+          {confirmingRemove ? (
+            <>
+              <span style={{ fontFamily: 'var(--afx-body)', fontSize: 13, color: '#5E6066', flex: 1 }}>Remove this case study? This can't be undone.</span>
+              <button onClick={() => setConfirmingRemove(false)} style={{ cursor: 'pointer', fontFamily: 'var(--afx-body)', fontSize: 13, fontWeight: 600, padding: '9px 14px', borderRadius: 8, border: '1px solid #E4E2DC', background: '#fff', color: '#5E6066' }}>Cancel</button>
+              <button onClick={onRemove} style={{ cursor: 'pointer', fontFamily: 'var(--afx-body)', fontSize: 13, fontWeight: 600, padding: '9px 14px', borderRadius: 8, border: '1px solid #7A2E2E', background: '#7A2E2E', color: '#fff' }}>Remove</button>
+            </>
+          ) : (
+            <>
+              {!isNew && onRemove ? (
+                <button onClick={() => setConfirmingRemove(true)} style={{ cursor: 'pointer', fontFamily: 'var(--afx-body)', fontSize: 13, fontWeight: 600, padding: '9px 14px', borderRadius: 8, border: '1px solid #E3B6AE', background: '#fff', color: '#7A2E2E' }}>Remove</button>
+              ) : null}
+              <div style={{ marginLeft: 'auto', display: 'flex', gap: 10 }}>
+                <button onClick={onClose} style={{ cursor: 'pointer', fontFamily: 'var(--afx-body)', fontSize: 13, fontWeight: 600, padding: '9px 15px', borderRadius: 8, border: '1px solid #E4E2DC', background: '#fff', color: '#5E6066' }}>Cancel</button>
+                <button onClick={() => onSave(study)} disabled={!savable}
+                  style={{ cursor: savable ? 'pointer' : 'not-allowed', fontFamily: 'var(--afx-body)', fontSize: 13, fontWeight: 600, padding: '9px 17px', borderRadius: 8, border: '1px solid #1C1D21', background: savable ? '#1C1D21' : '#C9C7C1', color: '#fff', opacity: savable ? 1 : 0.8 }}>
+                  {isNew ? 'Add case study' : 'Save'}
+                </button>
+              </div>
+            </>
+          )}
         </footer>
       </aside>
     </>
