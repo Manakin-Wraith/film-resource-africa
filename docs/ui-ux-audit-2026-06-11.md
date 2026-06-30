@@ -52,7 +52,7 @@ Navigation: fixed 64px header (Directory dropdown, 7 nav links, Assess + Login C
 - **Siloed sub-systems** — PRS has its own 394-line `.prs-root` namespace; Tech-Pulse has its own stylesheet. Patterns don't cross-pollinate.
 - **Inconsistencies** — animation usage varies per form, error displays differ (AlertCircle vs plain div), empty states inconsistent, editorial-header ordering differs between news and directory, spacing rhythm loose (gap-1→6, p-2→10).
 
-**Existing redesign exploration:** `fra-redesign-concept.html` (repo root) sketches a warmer direction — brown-black bg `#0b0907`, ochre `#e8b057` replacing amber, ember/moss/indigo/sand palette, **Fraunces serif** display replacing Outfit, 1400px container, 18px radii, 56px section-rule stubs, more gradient/shadow depth. Not implemented anywhere in the live app. Also relevant: `fra-x-afx-spec.docx` and the three `Design_*.md` briefs in the root.
+**Existing redesign exploration:** `fra-redesign-concept.html` (repo root) sketches a warmer direction — brown-black bg `#0b0907`, ochre `#e8b057` replacing amber, ember/moss/indigo/sand palette, **Fraunces serif** display replacing Outfit, 1400px container, 18px radii, 56px section-rule stubs, more gradient/shadow depth. Not implemented anywhere in the live app. Also relevant: `FRA-x-AFX-spec.md` and the three `Design_*.md` briefs in the root.
 
 ## 5. Members experience (state of play)
 

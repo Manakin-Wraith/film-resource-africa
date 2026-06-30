@@ -1,0 +1,73 @@
+/* ============================================================
+   AFX — finance layer design system.
+   Everything is scoped under .afx-root so it cannot leak into
+   the FRA app, and AFX never references FRA tokens (--color-*,
+   --font-fraunces). Visuals are expressed as inline styles in
+   the components + these scoped CSS variables, mirroring the
+   supplied Claude Design mockup. Do NOT add these to Tailwind's
+   @theme (that would generate global utilities).
+   ============================================================ */
+
+.afx-root {
+  /* fonts (the *-font-* vars come from next/font, applied on the
+     same element via the generated .variable classes) */
+  --afx-body: var(--afx-font-body), system-ui, -apple-system, sans-serif;
+  --afx-mono: var(--afx-font-mono), ui-monospace, "SFMono-Regular", monospace;
+
+  /* core palette */
+  --afx-accent: #3d46c9;
+  --afx-accent-soft: #eeeffc;
+  --afx-accent-deep: #2b33a8;
+  --afx-ink: #1c1d21;
+  --afx-ink-2: #52555e;
+  --afx-muted: #5e6066;
+  --afx-faint: #9a9ca3;
+  --afx-faintest: #a7a99f;
+  --afx-bg: #faf9f7;
+  --afx-surface: #fff;
+  --afx-surface-2: #fcfbf9;
+  --afx-border: #eae8e3;
+  --afx-border-2: #f2f0eb;
+
+  /* provenance / confidence */
+  --afx-prov-self: #b8860b;      /* amber  — self-reported */
+  --afx-prov-confirmed: #2563eb; /* blue   — confirmed     */
+  --afx-prov-verified: #16a34a;  /* green  — verified      */
+
+  /* base */
+  font-family: var(--afx-body);
+  color: var(--afx-ink);
+  background: var(--afx-bg);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+.afx-root *,
+.afx-root *::before,
+.afx-root *::after {
+  box-sizing: border-box;
+}
+
+.afx-root ::selection {
+  background: #3d46c922;
+}
+
+/* custom scrollbars inside scroll regions */
+.afx-scroll::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.afx-scroll::-webkit-scrollbar-thumb {
+  background: #dad7d0;
+  border-radius: 8px;
+  border: 2px solid #faf9f7;
+}
+
+/* table row hover (used by the Deal Display) */
+.afx-row:hover {
+  background: #fcfbf9 !important;
+}
+.afx-row:hover .afx-open {
+  opacity: 1 !important;
+  transform: translateX(0) !important;
+}

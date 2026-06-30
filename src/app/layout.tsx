@@ -2,9 +2,7 @@ import type { Metadata } from 'next';
 import { Inter, Fraunces, JetBrains_Mono } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
 import './globals.css';
-import Footer from '@/components/Footer';
-import SiteNav from '@/components/SiteNav';
-import MobileTabBar from '@/components/MobileTabBar';
+import SiteShell from '@/components/SiteShell';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const fraunces = Fraunces({ subsets: ['latin'], axes: ['opsz'], style: ['normal', 'italic'], variable: '--font-fraunces' });
@@ -48,16 +46,8 @@ export default async function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.variable} ${fraunces.variable} ${jetbrainsMono.variable}`}>
-      <body className="font-sans antialiased text-foreground bg-background film-grain">
-        <div className="site-bg" aria-hidden="true" />
-        <SiteNav />
-        <div className="relative z-10 flex flex-col min-h-screen pt-(--header-h) pb-(--tabbar-h) md:pb-0">
-          <div className="grow">
-            {children}
-          </div>
-          <Footer />
-        </div>
-        <MobileTabBar />
+      <body className="font-sans antialiased text-foreground bg-background">
+        <SiteShell>{children}</SiteShell>
         <Analytics />
       </body>
     </html>
