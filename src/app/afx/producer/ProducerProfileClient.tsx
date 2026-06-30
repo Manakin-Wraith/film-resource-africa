@@ -32,6 +32,7 @@ export default function ProducerProfileClient({ initial, initialSubmissions }: {
   const [counter, setCounter] = useState(0);
   const [editing, setEditing] = useState<{ study: Project; isNew: boolean } | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [vettingBusy, setVettingBusy] = useState(false);
 
   const slate = draft.slate ?? [];
 
@@ -57,17 +58,33 @@ export default function ProducerProfileClient({ initial, initialSubmissions }: {
   };
 
   const onSubmitCaseStudy = async (id: string) => {
+    if (vettingBusy) return;
+    setVettingBusy(true);
     setActionError(null);
-    await persistProfileAction(draft);                 // flush latest (incl. docs) before server gate
-    const res = await submitForVettingAction({ kind: 'case_study', targetId: id });
-    if (res.ok) { setSubmissions((s) => [...s, res.submission]); setEditing(null); }
-    else setActionError(res.error ?? 'Submit failed');
+    try {
+      await persistProfileAction(draft);              // flush latest (incl. docs) before the server gate
+      const res = await submitForVettingAction({ kind: 'case_study', targetId: id });
+      if (res.ok) { setSubmissions((s) => [...s, res.submission]); setEditing(null); }
+      else setActionError(res.error ?? 'Submit failed');
+    } catch {
+      setActionError('Could not submit for vetting — please try again');
+    } finally {
+      setVettingBusy(false);
+    }
   };
   const onWithdrawSubmission = async (submissionId: string) => {
+    if (vettingBusy) return;
+    setVettingBusy(true);
     setActionError(null);
-    const res = await withdrawVettingAction({ submissionId });
-    if (res.ok) setSubmissions((s) => s.map((x) => (x.id === submissionId ? { ...x, status: 'withdrawn' } : x)));
-    else setActionError(res.error ?? 'Withdraw failed');
+    try {
+      const res = await withdrawVettingAction({ submissionId });
+      if (res.ok) setSubmissions((s) => s.map((x) => (x.id === submissionId ? { ...x, status: 'withdrawn' } : x)));
+      else setActionError(res.error ?? 'Withdraw failed');
+    } catch {
+      setActionError('Could not withdraw — please try again');
+    } finally {
+      setVettingBusy(false);
+    }
   };
 
   const localCurrency: AfxCurrency = (draft.location ?? '').trim().endsWith('ZA') ? 'ZAR' : 'USD';
@@ -188,6 +205,7 @@ export default function ProducerProfileClient({ initial, initialSubmissions }: {
             defaultCurrency={localCurrency}
             submission={open}
             locked={!!open}
+            busy={vettingBusy}
             onSave={onSaveCaseStudy}
             onClose={() => setEditing(null)}
             onRemove={editing.isNew ? undefined : () => onRemoveCaseStudy(editing.study.id)}

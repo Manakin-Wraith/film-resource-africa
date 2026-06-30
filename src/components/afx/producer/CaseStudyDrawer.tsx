@@ -29,6 +29,7 @@ interface CaseStudyDrawerProps {
   defaultCurrency: AfxCurrency;
   submission?: VettingSubmission;
   locked: boolean;
+  busy?: boolean;
   onSave: (study: Project) => void;
   onClose: () => void;
   onRemove?: () => void;
@@ -36,7 +37,7 @@ interface CaseStudyDrawerProps {
   onWithdraw?: () => void;
 }
 
-export default function CaseStudyDrawer({ initial, isNew, ndaSigned, defaultCurrency, submission, locked, onSave, onClose, onRemove, onSubmit, onWithdraw }: CaseStudyDrawerProps) {
+export default function CaseStudyDrawer({ initial, isNew, ndaSigned, defaultCurrency, submission, locked, busy, onSave, onClose, onRemove, onSubmit, onWithdraw }: CaseStudyDrawerProps) {
   const [study, setStudy] = useState<Project>(() => structuredClone(initial));
   const [confirmingRemove, setConfirmingRemove] = useState(false);
 
@@ -48,6 +49,7 @@ export default function CaseStudyDrawer({ initial, isNew, ndaSigned, defaultCurr
 
   const o = study.outcomes;
   const savable = isCaseStudySavable(study);
+  const ready = isVettingReady(study.docs);
 
   return (
     <>
@@ -189,7 +191,7 @@ export default function CaseStudyDrawer({ initial, isNew, ndaSigned, defaultCurr
               <div style={{ marginLeft: 'auto', display: 'flex', gap: 10 }}>
                 <button onClick={onClose} style={{ cursor: 'pointer', fontFamily: 'var(--afx-body)', fontSize: 13, fontWeight: 600, padding: '9px 15px', borderRadius: 8, border: '1px solid #E4E2DC', background: '#fff', color: '#5E6066' }}>Close</button>
                 {locked ? (
-                  <button onClick={onWithdraw} style={{ cursor: 'pointer', fontFamily: 'var(--afx-body)', fontSize: 13, fontWeight: 600, padding: '9px 17px', borderRadius: 8, border: '1px solid #9A6B1E', background: '#fff', color: '#9A6B1E' }}>Withdraw</button>
+                  <button onClick={onWithdraw} disabled={busy} style={{ cursor: busy ? 'wait' : 'pointer', fontFamily: 'var(--afx-body)', fontSize: 13, fontWeight: 600, padding: '9px 17px', borderRadius: 8, border: '1px solid #9A6B1E', background: '#fff', color: '#9A6B1E', opacity: busy ? 0.6 : 1 }}>Withdraw</button>
                 ) : (
                   <>
                     <button onClick={() => onSave(study)} disabled={!savable}
@@ -197,8 +199,8 @@ export default function CaseStudyDrawer({ initial, isNew, ndaSigned, defaultCurr
                       {isNew ? 'Add case study' : 'Save'}
                     </button>
                     {!isNew && onSubmit ? (
-                      <button onClick={onSubmit} disabled={!isVettingReady(study.docs)} title={isVettingReady(study.docs) ? '' : 'Attach all required proof documents first'}
-                        style={{ cursor: isVettingReady(study.docs) ? 'pointer' : 'not-allowed', fontFamily: 'var(--afx-body)', fontSize: 13, fontWeight: 700, padding: '9px 17px', borderRadius: 8, border: '1px solid #1C4E80', background: isVettingReady(study.docs) ? '#1C4E80' : '#A8B6C8', color: '#fff' }}>
+                      <button onClick={onSubmit} disabled={busy || !ready} title={ready ? '' : 'Attach all required proof documents first'}
+                        style={{ cursor: busy ? 'wait' : ready ? 'pointer' : 'not-allowed', fontFamily: 'var(--afx-body)', fontSize: 13, fontWeight: 700, padding: '9px 17px', borderRadius: 8, border: '1px solid #1C4E80', background: ready ? '#1C4E80' : '#A8B6C8', color: '#fff' }}>
                         Submit for vetting
                       </button>
                     ) : null}
