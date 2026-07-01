@@ -274,7 +274,9 @@ export default function ProducerProfileClient({ initial, initialSubmissions }: {
 
       {saveStatus !== 'idle' && (
         <div role="status" aria-live="polite" style={{
-          position: 'fixed', right: 16, bottom: 16, zIndex: 90,
+          // When the case-study drawer is open its footer action bar sits at the
+          // bottom-right; lift the toast above it so it never covers Save / Submit.
+          position: 'fixed', right: 16, bottom: editing ? 84 : 16, zIndex: 90,
           fontFamily: 'var(--afx-mono)', fontSize: 11, letterSpacing: '0.04em',
           padding: '7px 12px', borderRadius: 8,
           border: '1px solid ' + (saveStatus === 'error' ? '#c0392b' : 'var(--afx-border, #EAE8E3)'),
