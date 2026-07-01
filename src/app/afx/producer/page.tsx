@@ -6,7 +6,7 @@ import AccessWall from './AccessWall';
 
 export default async function AfxProducerPage() {
   const user = await getSessionUser();
-  if (!user) redirect('/login?next=/afx/producer');
+  if (!user) redirect('/afx/login');
 
   const state = await loadProducerState();
   if (!state) return <AccessWall />; // authenticated but not invited
