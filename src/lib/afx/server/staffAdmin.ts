@@ -12,25 +12,29 @@ export interface StaffMember {
 
 const PER_PAGE = 1000;
 
-/** uuid → email map from the auth admin API, paging until exhausted. */
-async function emailMap(): Promise<Map<string, string>> {
+/** uuid → email map from the auth admin API, paging until exhausted.
+ *  `failed` is true if any page errored — callers must distinguish a genuine
+ *  "not found" from a transient auth-API failure (an empty map means both). */
+async function emailMap(): Promise<{ map: Map<string, string>; failed: boolean }> {
   const map = new Map<string, string>();
   for (let page = 1; ; page++) {
     const { data, error } = await afxAdmin.auth.admin.listUsers({ page, perPage: PER_PAGE });
-    if (error || !data) break;
+    if (error || !data) return { map, failed: true };
     for (const u of data.users) if (u.email) map.set(u.id, u.email);
     if (data.users.length < PER_PAGE) break;
   }
-  return map;
+  return { map, failed: false };
 }
 
-/** Resolve an email (case-insensitive) to an auth user id, or null. */
-async function resolveUserIdByEmail(email: string): Promise<string | null> {
+/** Resolve an email (case-insensitive) to an auth user id. `failed` signals a
+ *  transient lookup failure (distinct from `userId: null` = no such account). */
+async function resolveUserIdByEmail(email: string): Promise<{ userId: string | null; failed: boolean }> {
   const target = email.trim().toLowerCase();
-  if (!target) return null;
-  const map = await emailMap();
-  for (const [id, mail] of map) if (mail.toLowerCase() === target) return id;
-  return null;
+  if (!target) return { userId: null, failed: false };
+  const { map, failed } = await emailMap();
+  if (failed) return { userId: null, failed: true };
+  for (const [id, mail] of map) if (mail.toLowerCase() === target) return { userId: id, failed: false };
+  return { userId: null, failed: false };
 }
 
 /** Roster for the admin team page. Admin-only; [] for anyone else. */
@@ -40,7 +44,7 @@ export async function listStaff(): Promise<StaffMember[]> {
   const { data } = await afxAdmin.from('afx_staff').select('user_id, role, created_at');
   const rows = (data ?? []) as { user_id: string; role: 'reviewer' | 'admin'; created_at: string }[];
   if (rows.length === 0) return [];
-  const emails = await emailMap();
+  const { map: emails } = await emailMap();
   return rows
     .map((r) => ({ userId: r.user_id, email: emails.get(r.user_id) ?? '—', role: r.role, createdAt: r.created_at }))
     .sort((a, b) => (a.role === b.role ? a.createdAt.localeCompare(b.createdAt) : a.role === 'admin' ? -1 : 1));
@@ -53,7 +57,8 @@ export async function addStaffByEmail(email: string): Promise<Result> {
   if (!gate.ok) return gate;
   const valid = validateEmail(email);
   if (!valid.ok) return valid;
-  const userId = await resolveUserIdByEmail(email);
+  const { userId, failed } = await resolveUserIdByEmail(email);
+  if (failed) return { ok: false, error: 'Could not verify the email right now — please retry.' };
   if (!userId) return { ok: false, error: 'No account for that email — they must sign in to FRA at least once first.' };
   const { error } = await afxAdmin
     .from('afx_staff')
