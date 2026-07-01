@@ -1,9 +1,8 @@
 import 'server-only';
 import { afxAdmin } from '@/lib/afx/server/documentAccess';
 import { resolveStaff } from '@/lib/afx/server/staffAccess';
-import { toInviteRow, sortInvites, type InviteRow, type RawInvite } from '@/lib/afx/inviteFunnel';
+import { toInviteRow, sortInvites, inviteOutcome, type InviteRow, type RawInvite } from '@/lib/afx/inviteFunnel';
 import { validateEmail } from '@/lib/afx/staffAdminGuards';
-import { inviteOutcome } from '@/lib/afx/inviteFunnel';
 
 const PER_PAGE = 1000;
 
@@ -69,10 +68,14 @@ export async function createInvite(email: string): Promise<InviteResult> {
   const { error: insErr } = await afxAdmin.from('afx_invites').insert({ email: addr });
   if (insErr) return { ok: false, error: 'Could not create the invite.' };
 
+  const emailFailedNote = 'Invited, but the email failed to send — follow up manually.';
   try {
     const { Resend } = await import('resend');
     const resend = new Resend(process.env.RESEND_API_KEY);
-    await resend.emails.send({
+    // Resend resolves with { error } for API-level failures (unverified domain,
+    // suppressed recipient, missing key) instead of throwing — check it, don't
+    // hide it behind a bare { ok: true }.
+    const { error: sendErr } = await resend.emails.send({
       from: 'FRA System <hello@film-resource-africa.com>',
       to: addr,
       subject: "You're invited to AFX",
@@ -82,8 +85,9 @@ export async function createInvite(email: string): Promise<InviteResult> {
 <p style="color:#5E6066;font-size:13px">Or open ${SITE_URL}/afx/login and enter this email.</p>`,
       text: `You've been invited to AFX, the Film Resource Africa finance layer for producers.\n\nSign in with this email address at ${SITE_URL}/afx/login to get started.`,
     });
+    if (sendErr) return { ok: true, note: emailFailedNote };
   } catch {
-    return { ok: true, note: 'Invited, but the email failed to send — follow up manually.' };
+    return { ok: true, note: emailFailedNote };
   }
   return { ok: true };
 }
