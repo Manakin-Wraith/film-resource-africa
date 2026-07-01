@@ -51,6 +51,19 @@ export default function StaffSubmissionDetail({ detail }: { detail: SubmissionDe
   }
   const docs = project ? (project.docs ?? []) : (producer.entityDocs ?? []);
 
+  const ex = project?.exact;
+  const exactRows: { label: string; value: string }[] = [];
+  if (ex) {
+    const money = (m?: { amount: number; currency: string }) => (m ? `${m.currency} ${m.amount.toLocaleString('en-US')}` : null);
+    const push = (label: string, m?: { amount: number; currency: string }) => { const v = money(m); if (v) exactRows.push({ label, value: v }); };
+    push('Total budget', ex.budget);
+    push('Funding secured', ex.fundingSecured);
+    push('Capital stack — Equity', ex.capitalStack?.equity);
+    push('Capital stack — Soft', ex.capitalStack?.soft);
+    push('Capital stack — Debt', ex.capitalStack?.debt);
+    push('Capital stack — Gap', ex.capitalStack?.gap);
+  }
+
   const cardStyle: React.CSSProperties = { border: '1px solid var(--afx-border)', borderRadius: 12, background: '#fff', padding: 16, display: 'flex', flexDirection: 'column', gap: 12 };
   const btn = (bg: string, bd: string, fg: string): React.CSSProperties => ({ cursor: busy ? 'wait' : 'pointer', opacity: busy ? 0.6 : 1, fontFamily: 'var(--afx-body)', fontSize: 13, fontWeight: 700, padding: '9px 15px', borderRadius: 8, border: `1px solid ${bd}`, background: bg, color: fg });
 
@@ -82,6 +95,21 @@ export default function StaffSubmissionDetail({ detail }: { detail: SubmissionDe
                   ? <button disabled={busy} onClick={() => run(() => revertFieldAction(submission.id, f.field))} style={btn('#fff', 'var(--afx-border)', 'var(--afx-muted)')}>Revert</button>
                   : <button disabled={busy} onClick={() => run(() => verifyFieldAction(submission.id, f.field))} style={btn('#F2FBF4', '#CDEAD5', '#2E7D46')}>Verify</button>
               ) : null}
+            </div>
+          ))}
+        </div>
+      ) : null}
+
+      {exactRows.length > 0 ? (
+        <div style={{ ...cardStyle, border: '1px solid #E3B6AE', background: '#FDF7F5' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+            <div style={{ fontFamily: mono, fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A2E2E' }}>NDA figures — confidential</div>
+            <div style={{ fontSize: 11, color: 'var(--afx-faint)' }}>Verify claims against these. Never shared with funders.</div>
+          </div>
+          {exactRows.map((r) => (
+            <div key={r.label} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 600 }}>{r.label}</div>
+              <div style={{ fontFamily: mono, fontSize: 13, color: 'var(--afx-ink)' }}>{r.value}</div>
             </div>
           ))}
         </div>
