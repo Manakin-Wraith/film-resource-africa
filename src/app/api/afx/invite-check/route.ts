@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
   const { data } = await supabase
     .from('afx_invites')
     .select('id')
-    .ilike('email', email)
+    .eq('email', email)
     .limit(1);
   return NextResponse.json({ invited: (data ?? []).length > 0 });
 }
