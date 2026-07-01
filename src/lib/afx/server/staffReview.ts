@@ -47,7 +47,9 @@ export async function listSubmissions(filter: 'open' | 'decided'): Promise<Staff
   }));
 }
 
-/** Full read-only projection of one submission for the drill-down. */
+/** Full read-only projection of one submission for the drill-down.
+ *  Staff are authorized to see NDA-gated `exact` figures — the drill-down is
+ *  gated behind resolveStaff(), so they ride along for verification against proof docs. */
 export async function getSubmissionDetail(id: string): Promise<SubmissionDetail | null> {
   if (!(await resolveStaff())) return null;
   const { data: subRow } = await afxAdmin.from('afx_vetting_submissions').select(SUBMISSION_COLS).eq('id', id).maybeSingle<VettingSubmissionRow>();
