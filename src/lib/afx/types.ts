@@ -161,6 +161,10 @@ export interface ProducerProfile {
   /** Producer-level confidential company documents (entity vetting). Isolated:
    *  persisted in afx_producers.entity_docs, never in the profile blob, never funder-visible. */
   entityDocs?: AfxDocument[];
+  /** FRA entity-verification marker. Isolated: persisted in afx_producers.entity_verified_at,
+   *  NEVER inside the profile blob (a producer's client-authoritative persistProfile must not
+   *  be able to forge it) — written only by the staff review action. Presence = verified company. */
+  entityVerifiedAt?: string;
 }
 
 /* ---------- Unified Project (case study ⇄ live ask) ---------- */
@@ -223,6 +227,8 @@ export interface VettingSubmission {
   reviewerNotes?: string;
   submittedAt: string;
   decidedAt?: string;
+  /** auth.users id of the staff member who decided (audit). Written by the FRA review slice. */
+  reviewedBy?: string;
 }
 
 export interface PackagingAttachment {
