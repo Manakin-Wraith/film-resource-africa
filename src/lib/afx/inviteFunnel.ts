@@ -48,3 +48,10 @@ export function sortInvites(rows: InviteRow[]): InviteRow[] {
     return (b.activatedAt ?? '').localeCompare(a.activatedAt ?? '');
   });
 }
+
+/** Classify an add-invite attempt from the existing afx_invites row (or null).
+ *  new = no row; already_producer = row already redeemed; already_invited = pending row. */
+export function inviteOutcome(existing: { redeemed_at: string | null } | null): 'new' | 'already_invited' | 'already_producer' {
+  if (!existing) return 'new';
+  return existing.redeemed_at != null ? 'already_producer' : 'already_invited';
+}
