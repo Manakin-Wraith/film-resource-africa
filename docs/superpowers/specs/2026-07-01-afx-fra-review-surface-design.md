@@ -62,6 +62,55 @@ alter table public.afx_vetting_submissions add column if not exists reviewed_by 
 
 -- Entity verification marker — its OWN column, never inside the profile JSONB blob (see §8).
 alter table public.afx_producers add column if not exists entity_verified_at timestamptz;
+
+-- === Anti-forge triggers (see §8). Producers can write their own rows via RLS with no
+-- === column/content restriction, so 'verified' must be blocked at the DB for client roles.
+-- === Only 'authenticated'/'anon' are guarded; service-role (staff actions) + migrations pass.
+
+create or replace function public.afx_guard_entity_verified()
+returns trigger language plpgsql as $$
+begin
+  if current_user not in ('authenticated','anon') then return new; end if;
+  if new.entity_verified_at is distinct from old.entity_verified_at then
+    raise exception 'entity_verified_at is FRA-only';
+  end if;
+  return new;
+end $$;
+drop trigger if exists afx_producers_guard_verified on public.afx_producers;
+create trigger afx_producers_guard_verified
+  before update on public.afx_producers for each row
+  execute function public.afx_guard_entity_verified();
+
+-- Block a client role from INTRODUCING provenance='verified' into a case study's body.
+-- Allows verified→self (producer edits revert) and re-saving a body that retains an
+-- already-verified field (so autosave of unrelated fields still works).
+create or replace function public.afx_guard_verified_provenance()
+returns trigger language plpgsql as $$
+declare new_d jsonb; old_d jsonb; i int;
+begin
+  if current_user not in ('authenticated','anon') then return new; end if;
+  if (new.body->'budgetBand'->>'provenance') = 'verified'
+     and (old.body->'budgetBand'->>'provenance') is distinct from 'verified' then
+    raise exception 'verified provenance is FRA-only (budgetBand)'; end if;
+  if (new.body->'outcomes'->'recoupment'->>'provenance') = 'verified'
+     and (old.body->'outcomes'->'recoupment'->>'provenance') is distinct from 'verified' then
+    raise exception 'verified provenance is FRA-only (recoupment)'; end if;
+  if (new.body->'outcomes'->'bondUsed'->>'provenance') = 'verified'
+     and (old.body->'outcomes'->'bondUsed'->>'provenance') is distinct from 'verified' then
+    raise exception 'verified provenance is FRA-only (bondUsed)'; end if;
+  new_d := coalesce(new.body->'outcomes'->'distribution', '[]'::jsonb);
+  old_d := coalesce(old.body->'outcomes'->'distribution', '[]'::jsonb);
+  for i in 0 .. greatest(jsonb_array_length(new_d) - 1, -1) loop
+    if (new_d->i->>'provenance') = 'verified'
+       and (old_d->i->>'provenance') is distinct from 'verified' then
+      raise exception 'verified provenance is FRA-only (distribution)'; end if;
+  end loop;
+  return new;
+end $$;
+drop trigger if exists afx_projects_guard_verified on public.afx_projects;
+create trigger afx_projects_guard_verified
+  before update on public.afx_projects for each row
+  execute function public.afx_guard_verified_provenance();
 ```
 
 **Type/persistence changes:**
@@ -110,7 +159,7 @@ Server actions wrap these in `src/app/afx/staff/actions.ts` (`'use server'`), re
 ## 8. Security & audit
 
 - **One gate:** every staff route/action and the `/afx/staff` layout call `resolveStaff()` first; service-role writes happen only behind it.
-- **No forged verification (the load-bearing invariant):** both `entity_verified_at` and every case-study field `provenance` are written **only** by staff actions via service-role — never reachable from the producer path. The entity marker is an isolated column that `profileToRows` strips out of the producer-written blob and `persistProfile` never writes; case-study field flips happen only while the producer is edit-locked (`under_review`). A tampering producer cannot set either.
+- **No forged verification (the load-bearing invariant), enforced at the DATABASE:** the S1 RLS policies (`afx_projects_upd`, `afx_producers_upd`) let a producer update any column/content of their own rows, and the anon key + a session JWT are enough to bypass the cockpit — so app-layer isolation alone does **not** stop a producer from writing `provenance='verified'` or `entity_verified_at` directly. Two `BEFORE UPDATE` triggers close this (migration §4): `afx_producers_guard_verified` rejects any `authenticated`/`anon` change to `entity_verified_at`; `afx_projects_guard_verified` rejects any `authenticated`/`anon` write that **introduces** `provenance='verified'` into `body` (budgetBand / recoupment / bondUsed / each distribution row). Both let service-role (staff actions) and migrations through. `verified→self` is allowed (producer edits legitimately revert) and re-saving a body that keeps an already-verified field is allowed (autosave of unrelated fields still works). Belt-and-suspenders on top: the entity marker is also an isolated column stripped from the producer-written blob and never written by `persistProfile`, and staff field-flips happen only while the producer is edit-locked (`under_review`).
 - **Scoped doc access:** the staff sign route validates the requested path against the specific submission's producer + target, so staff cannot fish arbitrary producer files by path.
 - **Audit trail:** `reviewed_by` + `decided_at` record who decided and when.
 - **No shared secret:** the cookie `/admin` model is not reused; every reviewer is an identified auth user in `afx_staff`.
