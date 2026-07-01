@@ -4,7 +4,7 @@ import { resolveStaff } from '@/lib/afx/server/staffAccess';
 
 export async function POST(req: NextRequest) {
   const { submissionId, path } = await req.json().catch(() => ({} as { submissionId?: string; path?: string }));
-  if (typeof submissionId !== 'string' || typeof path !== 'string' || path === '') {
+  if (typeof submissionId !== 'string' || submissionId === '' || typeof path !== 'string' || path === '') {
     return NextResponse.json({ error: 'Missing submissionId or path' }, { status: 400 });
   }
   if (!(await resolveStaff())) return NextResponse.json({ error: 'Not authorized' }, { status: 403 });

@@ -123,8 +123,10 @@ export async function decide(id: string, decision: 'approve' | 'request_changes'
   const patch = decision === 'approve'
     ? { status: 'verified', decided_at: now, reviewed_by: staff.userId, updated_at: now }
     : { status: 'changes_requested', reviewer_notes: notes ?? null, decided_at: now, reviewed_by: staff.userId, updated_at: now };
-  const { error } = await afxAdmin.from('afx_vetting_submissions').update(patch).eq('id', id);
+  const { data: updated, error } = await afxAdmin.from('afx_vetting_submissions')
+    .update(patch).eq('id', id).in('status', ['submitted', 'under_review']).select('id');
   if (error) return { ok: false, error: 'Could not record decision' };
+  if (!updated || updated.length === 0) return { ok: false, error: 'Already decided' };
   if (decision === 'approve' && sub.kind === 'entity') {
     const { error: mErr } = await afxAdmin.from('afx_producers').update({ entity_verified_at: now, updated_at: now }).eq('id', sub.producer_id);
     if (mErr) return { ok: false, error: 'Decision saved but marker failed' };
