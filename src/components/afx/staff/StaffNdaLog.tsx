@@ -22,9 +22,9 @@ export default function StaffNdaLog({ entries }: { entries: NdaProducerEntry[] }
   const [open, setOpen] = useState<Record<string, boolean>>({});
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 16 }}>
-        <h1 style={{ fontSize: 18, fontWeight: 700, color: 'var(--afx-ink)', margin: 0 }}>NDA signatures</h1>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
         <Link href="/afx/staff" style={{ fontFamily: mono, fontSize: 11, color: 'var(--afx-faint)', textDecoration: 'none' }}>← Queue</Link>
+        <h1 style={{ fontSize: 18, fontWeight: 700, color: 'var(--afx-ink)', margin: 0 }}>NDA signatures</h1>
       </div>
       {entries.length === 0 ? (
         <div style={{ fontSize: 13, color: 'var(--afx-faint)', padding: '20px 0' }}>No NDA activity yet.</div>
