@@ -69,5 +69,5 @@ export function renderNda(p: { producerName: string; company?: string; date: str
     .replaceAll('{{producerName}}', p.producerName || '—')
     .replaceAll('{{company}}', (p.company && p.company.trim()) || 'an independent capacity')
     .replaceAll('{{date}}', p.date)
-    .replaceAll('{{fraSignatories}}', 'Gerhard Mostert, Catharina Weinek and Jarred Roberts');
+    .replaceAll('{{fraSignatories}}', 'Gerhard Mostert');
 }
