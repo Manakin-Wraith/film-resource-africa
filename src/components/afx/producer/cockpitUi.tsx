@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 const mono = 'var(--afx-mono)';
 
 export function SectionCard({
@@ -13,15 +15,29 @@ export function SectionCard({
   children: React.ReactNode;
   action?: React.ReactNode;
 }) {
+  const [open, setOpen] = useState(true);
+
   return (
     <section style={{ background: 'var(--afx-surface)', border: '1px solid #EAE8E3', borderRadius: 14, overflow: 'hidden' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '16px 22px', borderBottom: '1px solid #F2F0EB', background: 'linear-gradient(180deg,#FCFBF9,#fff)' }}>
+      <div
+        role="button"
+        tabIndex={0}
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setOpen((v) => !v); }
+        }}
+        style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '16px 22px', borderBottom: open ? '1px solid #F2F0EB' : 'none', background: 'linear-gradient(180deg,#FCFBF9,#fff)', cursor: 'pointer', userSelect: 'none' }}
+      >
         <div style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--afx-accent)' }} />
         <h2 style={{ margin: 0, fontSize: 15, fontWeight: 700, letterSpacing: '-0.3px' }}>{title}</h2>
         {hint ? <span style={{ fontSize: 11.5, color: '#9A9CA3' }}>{hint}</span> : null}
-        {action ? <div style={{ marginLeft: 'auto' }}>{action}</div> : null}
+        {action ? (
+          <div style={{ marginLeft: 'auto' }} onClick={(e) => { e.stopPropagation(); setOpen(true); }}>{action}</div>
+        ) : null}
+        <span aria-hidden style={{ marginLeft: action ? 10 : 'auto', fontFamily: mono, fontSize: 12, color: '#9A9CA3', transition: 'transform 0.15s', transform: open ? 'rotate(90deg)' : 'none', lineHeight: 1 }}>▸</span>
       </div>
-      <div style={{ padding: '18px 22px' }}>{children}</div>
+      <div style={{ padding: '18px 22px', display: open ? 'block' : 'none' }}>{children}</div>
     </section>
   );
 }
