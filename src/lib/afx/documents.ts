@@ -1,4 +1,4 @@
-import type { AfxDocument, DocumentCategory, EntityDocumentCategory } from './types';
+import type { AfxDocument, DocumentCategory, EntityDocumentCategory, IndividualDocumentCategory } from './types';
 
 export const DOCUMENT_CATEGORIES: readonly DocumentCategory[] = [
   'budget', 'chain_of_title', 'waterfall', 'financing_agreement',
@@ -77,4 +77,24 @@ export function missingRequiredEntityDocs(docs: readonly AfxDocument[] | undefin
  *  required company document is present. */
 export function isEntityVettingReady(p: { entityK2: boolean; entityDocs?: readonly AfxDocument[] }): boolean {
   return p.entityK2 === true && missingRequiredEntityDocs(p.entityDocs).length === 0;
+}
+
+export const INDIVIDUAL_DOCUMENT_CATEGORIES: readonly IndividualDocumentCategory[] = ['cv', 'other'] as const;
+
+export const INDIVIDUAL_DOCUMENT_CATEGORY_LABELS: Record<IndividualDocumentCategory, string> = {
+  cv: 'CV / résumé',
+  other: 'Other',
+};
+
+/** A CV is the one required individual proof; 'other' docs are optional supporting evidence. */
+export const REQUIRED_INDIVIDUAL_DOCUMENT_CATEGORIES: readonly IndividualDocumentCategory[] = ['cv'] as const;
+
+export function missingRequiredIndividualDocs(docs: readonly AfxDocument[] | undefined): IndividualDocumentCategory[] {
+  const present = new Set((docs ?? []).map((d) => d.category));
+  return REQUIRED_INDIVIDUAL_DOCUMENT_CATEGORIES.filter((c) => !present.has(c));
+}
+
+/** An individual is vetting-ready iff the standing gate (K2, reused) is attested AND a CV is present. */
+export function isIndividualVettingReady(p: { entityK2: boolean; individualDocs?: readonly AfxDocument[] }): boolean {
+  return p.entityK2 === true && missingRequiredIndividualDocs(p.individualDocs).length === 0;
 }

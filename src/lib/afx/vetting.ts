@@ -23,6 +23,13 @@ export function latestEntitySubmission(subs: readonly VettingSubmission[] | unde
   return latest((subs ?? []).filter((s) => s.kind === 'entity'));
 }
 
+export function openIndividualSubmission(subs: readonly VettingSubmission[] | undefined): VettingSubmission | undefined {
+  return (subs ?? []).find((s) => s.kind === 'individual' && isOpenStatus(s.status));
+}
+export function latestIndividualSubmission(subs: readonly VettingSubmission[] | undefined): VettingSubmission | undefined {
+  return latest((subs ?? []).filter((s) => s.kind === 'individual'));
+}
+
 /** Case-study ids with an OPEN submission → read-only / undeletable. */
 export function lockedCaseStudyIds(subs: readonly VettingSubmission[] | undefined): Set<string> {
   const ids = new Set<string>();
