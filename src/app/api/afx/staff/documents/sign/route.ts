@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
   if (!sub) return NextResponse.json({ error: 'Submission not found' }, { status: 404 });
 
   // The path must belong to THIS submission's producer + target.
-  const expectedSegment = sub.kind === 'entity' ? 'entity' : sub.target_id;
+  const expectedSegment = sub.kind === 'entity' ? 'entity' : sub.kind === 'individual' ? 'individual' : sub.target_id;
   if (!expectedSegment || !isOwnedDocPath(path, sub.producer_id) || path.split('/')[1] !== expectedSegment) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }

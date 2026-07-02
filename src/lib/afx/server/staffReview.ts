@@ -54,7 +54,7 @@ export async function getSubmissionDetail(id: string): Promise<SubmissionDetail 
   if (!(await resolveStaff())) return null;
   const { data: subRow } = await afxAdmin.from('afx_vetting_submissions').select(SUBMISSION_COLS).eq('id', id).maybeSingle<VettingSubmissionRow>();
   if (!subRow) return null;
-  const { data: prod } = await afxAdmin.from('afx_producers').select('id, user_id, profile, entity_docs, entity_verified_at').eq('id', subRow.producer_id).maybeSingle<ProducerRow>();
+  const { data: prod } = await afxAdmin.from('afx_producers').select('id, user_id, profile, entity_docs, entity_verified_at, individual_docs, individual_verified_at').eq('id', subRow.producer_id).maybeSingle<ProducerRow>();
   if (!prod) return null;
   const { data: projRows } = await afxAdmin.from('afx_projects').select('id, producer_id, status, deal_ref, body, exact, docs').eq('producer_id', subRow.producer_id);
   const projects = (projRows ?? []) as ProjectRow[];
@@ -129,8 +129,9 @@ export async function decide(id: string, decision: 'approve' | 'request_changes'
     .update(patch).eq('id', id).in('status', ['submitted', 'under_review']).select('id');
   if (error) return { ok: false, error: 'Could not record decision' };
   if (!updated || updated.length === 0) return { ok: false, error: 'Already decided' };
-  if (decision === 'approve' && sub.kind === 'entity') {
-    const { error: mErr } = await afxAdmin.from('afx_producers').update({ entity_verified_at: now, updated_at: now }).eq('id', sub.producer_id);
+  if (decision === 'approve' && (sub.kind === 'entity' || sub.kind === 'individual')) {
+    const col = sub.kind === 'individual' ? 'individual_verified_at' : 'entity_verified_at';
+    const { error: mErr } = await afxAdmin.from('afx_producers').update({ [col]: now, updated_at: now }).eq('id', sub.producer_id);
     if (mErr) return { ok: false, error: 'Decision saved but marker failed' };
   }
   return { ok: true };

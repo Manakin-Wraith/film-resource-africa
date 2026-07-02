@@ -49,7 +49,7 @@ export default function StaffSubmissionDetail({ detail }: { detail: SubmissionDe
       o.distribution.forEach((d, i) => fields.push({ field: `distribution:${i}` as VerifyField, label: `Distribution — ${d.name || d.type}`, value: `${d.name} (${d.type})`, provenance: d.provenance }));
     }
   }
-  const docs = project ? (project.docs ?? []) : (producer.entityDocs ?? []);
+  const docs = project ? (project.docs ?? []) : (submission.kind === 'individual' ? (producer.individualDocs ?? []) : (producer.entityDocs ?? []));
 
   const ex = project?.exact;
   const exactRows: { label: string; value: string }[] = [];
@@ -72,8 +72,8 @@ export default function StaffSubmissionDetail({ detail }: { detail: SubmissionDe
       <div style={cardStyle}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 17, fontWeight: 700 }}>{submission.kind === 'entity' ? `${producer.company} — company vetting` : (project?.title || 'Case study')}</div>
-            <div style={{ fontFamily: mono, fontSize: 11, color: 'var(--afx-faint)', marginTop: 3 }}>{producer.name} · {producer.company}{producer.entityVerifiedAt ? ' · ✓ verified company' : ''}</div>
+            <div style={{ fontSize: 17, fontWeight: 700 }}>{submission.kind === 'entity' ? `${producer.company} — company vetting` : submission.kind === 'individual' ? `${producer.name} — individual vetting` : (project?.title || 'Case study')}</div>
+            <div style={{ fontFamily: mono, fontSize: 11, color: 'var(--afx-faint)', marginTop: 3 }}>{producer.name} · {producer.company}{producer.entityVerifiedAt ? ' · ✓ verified company' : ''}{producer.individualVerifiedAt ? ' · ✓ verified individual' : ''}</div>
           </div>
           <span style={{ fontFamily: mono, fontSize: 10, fontWeight: 700, color: m.ink, background: m.bg, border: `1px solid ${m.border}`, borderRadius: 999, padding: '3px 10px' }}>{m.label}</span>
         </div>
@@ -124,6 +124,21 @@ export default function StaffSubmissionDetail({ detail }: { detail: SubmissionDe
           </div>
         ))}
       </div>
+
+      {submission.kind === 'individual' && producer.individualLinks && (producer.individualLinks.imdb || producer.individualLinks.linkedin || producer.individualLinks.portfolio) ? (
+        <div style={cardStyle}>
+          <div style={{ fontFamily: mono, fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--afx-faintest)' }}>Professional links</div>
+          {(['imdb', 'linkedin', 'portfolio'] as const).map((k) => {
+            const url = producer.individualLinks?.[k];
+            return url ? (
+              <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ flex: '0 0 90px', fontSize: 12.5, fontWeight: 600, textTransform: 'capitalize' }}>{k}</div>
+                <a href={url} target="_blank" rel="noopener noreferrer" style={{ flex: 1, minWidth: 0, fontFamily: mono, fontSize: 12, color: '#1C4E80', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{url}</a>
+              </div>
+            ) : null;
+          })}
+        </div>
+      ) : null}
 
       {open ? (
         <div style={cardStyle}>
