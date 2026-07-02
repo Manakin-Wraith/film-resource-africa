@@ -11,10 +11,12 @@ export async function POST(req: NextRequest) {
   if (!isOwnedDocPath(path, access.producerId)) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
-  // path = producerId/<segment>/docId.ext — segment is 'entity' or a case-study uuid.
+  // path = producerId/<segment>/docId.ext — segment is 'entity', 'individual', or a case-study uuid.
   const segment = path.split('/')[1];
   const locked = segment === 'entity'
     ? await hasOpenSubmission(access.producerId, 'entity', null)
+    : segment === 'individual'
+    ? await hasOpenSubmission(access.producerId, 'individual', null)
     : await hasOpenSubmission(access.producerId, 'case_study', segment);
   if (locked) {
     return NextResponse.json({ error: 'Locked for review — withdraw to edit' }, { status: 409 });
