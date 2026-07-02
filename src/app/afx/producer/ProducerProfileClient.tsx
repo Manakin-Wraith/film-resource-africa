@@ -114,7 +114,11 @@ export default function ProducerProfileClient({ initial, initialSubmissions }: {
     }
   };
 
-  const localCurrency: AfxCurrency = currencyForCountry(draft.country);
+  // Country drives currency once set; fall back to the legacy location heuristic
+  // for existing producers who have no country yet (avoids a silent ZAR→USD flip).
+  const localCurrency: AfxCurrency = draft.country
+    ? currencyForCountry(draft.country)
+    : (draft.location ?? '').trim().endsWith('ZA') ? 'ZAR' : 'USD';
 
   const onExact = (projectId: string, field: ExactKey, value: ExactMoney | undefined) => {
     setDraft((d) => ({
