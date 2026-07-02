@@ -14,6 +14,7 @@ export const afxAdmin = createClient(
 export interface DocAccess {
   producerId: string;
   ndaSigned: boolean;
+  individualVerifiedAt: string | null;
 }
 
 /** Resolve the calling session's producer. The producerId comes from the
@@ -24,11 +25,11 @@ export async function resolveDocAccess(): Promise<DocAccess | null> {
   if (!user) return null;
   const { data: producer } = await afxAdmin
     .from('afx_producers')
-    .select('id, profile')
+    .select('id, profile, individual_verified_at')
     .eq('user_id', user.id)
-    .maybeSingle<{ id: string; profile: { ndaSigned?: boolean } }>();
+    .maybeSingle<{ id: string; profile: { ndaSigned?: boolean }; individual_verified_at: string | null }>();
   if (!producer) return null;
-  return { producerId: producer.id, ndaSigned: !!producer.profile?.ndaSigned };
+  return { producerId: producer.id, ndaSigned: !!producer.profile?.ndaSigned, individualVerifiedAt: producer.individual_verified_at ?? null };
 }
 
 /** UUID v4-ish shape (matches crypto.randomUUID output and afx ids). */

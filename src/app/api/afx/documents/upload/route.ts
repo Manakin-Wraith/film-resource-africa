@@ -30,6 +30,9 @@ export async function POST(req: NextRequest) {
   // Resolve the path segment + enforce the edit-lock for this target.
   let segment: string;
   if (scope === 'entity') {
+    if (!access.individualVerifiedAt) {
+      return NextResponse.json({ error: 'Complete individual vetting before uploading company documents' }, { status: 403 });
+    }
     if (await hasOpenSubmission(access.producerId, 'entity', null)) {
       return NextResponse.json({ error: 'Entity is locked for review — withdraw to edit' }, { status: 409 });
     }

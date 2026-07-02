@@ -21,6 +21,7 @@ import FunderPreview from '@/components/afx/producer/FunderPreview';
 import { toFunderView } from '@/lib/afx/funderView';
 import CaseStudyDrawer from '@/components/afx/producer/CaseStudyDrawer';
 import EntityVettingPanel from '@/components/afx/producer/EntityVettingPanel';
+import EntityVettingLockedCard from '@/components/afx/producer/EntityVettingLockedCard';
 import { newCaseStudy } from '@/lib/afx/caseStudy';
 
 const mono = 'var(--afx-mono)';
@@ -237,7 +238,8 @@ export default function ProducerProfileClient({ initial, initialSubmissions }: {
                 since the vetting panel's hints reference the NDA and the K2 gate. */}
             <NdaUpgrade signed={!!draft.ndaSigned} onToggle={toggleNda} />
             <AccountVisibility draft={draft} onToggleK2={() => setDraft((d) => ({ ...d, entityK2: !d.entityK2 }))} onToggleK4={() => setDraft((d) => ({ ...d, consentK4: !d.consentK4 }))} />
-            {producerTypeOf(draft) === 'individual' ? (() => {
+            {/* Individual vetting — universal, always first (the operator/person). */}
+            {(() => {
               const open = openIndividualSubmission(submissions);
               return (
                 <IndividualVettingPanel
@@ -253,23 +255,31 @@ export default function ProducerProfileClient({ initial, initialSubmissions }: {
                   onWithdraw={open ? () => onWithdrawSubmission(open.id) : () => {}}
                 />
               );
-            })() : (() => {
-              const open = openEntitySubmission(submissions);
-              return (
-                <EntityVettingPanel
-                  draft={draft}
-                  submission={latestEntitySubmission(submissions)}
-                  locked={!!open}
-                  ndaSigned={!!draft.ndaSigned}
-                  busy={vettingBusy}
-                  onAddDoc={onAddEntityDoc}
-                  onUpdateDoc={onUpdateEntityDoc}
-                  onRemoveDoc={onRemoveEntityDoc}
-                  onSubmit={onSubmitEntity}
-                  onWithdraw={open ? () => onWithdrawSubmission(open.id) : () => {}}
-                />
-              );
             })()}
+            {/* Entity vetting — company producers only, hard-gated behind individual verification.
+                Locked until individual verified UNLESS the entity is already verified (legacy-safe:
+                EntityVettingPanel renders EntityVerifiedCard when entityVerifiedAt is set). */}
+            {producerTypeOf(draft) === 'company' ? (
+              !draft.entityVerifiedAt && !draft.individualVerifiedAt ? (
+                <EntityVettingLockedCard />
+              ) : (() => {
+                const open = openEntitySubmission(submissions);
+                return (
+                  <EntityVettingPanel
+                    draft={draft}
+                    submission={latestEntitySubmission(submissions)}
+                    locked={!!open}
+                    ndaSigned={!!draft.ndaSigned}
+                    busy={vettingBusy}
+                    onAddDoc={onAddEntityDoc}
+                    onUpdateDoc={onUpdateEntityDoc}
+                    onRemoveDoc={onRemoveEntityDoc}
+                    onSubmit={onSubmitEntity}
+                    onWithdraw={open ? () => onWithdrawSubmission(open.id) : () => {}}
+                  />
+                );
+              })()
+            ) : null}
             {/* Two-zone hard requirement: Track Record BEFORE Live Slate (spec §2.1) */}
             <TrackRecordZone draft={draft} submissions={submissions} onAdd={onAddCaseStudy} onEdit={onEditCaseStudy} />
             <LiveSlateZone draft={draft} onAddProject={onAddProject} onArchive={onArchive} onExact={onExact} ndaSigned={!!draft.ndaSigned} defaultCurrency={localCurrency} />

@@ -29,9 +29,12 @@ export async function submitForVetting(input: { kind: VettingKind; targetId?: st
     if (!isVettingReady(proj.docs ?? undefined)) return { ok: false, error: 'Required proof documents are missing' };
   } else if (input.kind === 'entity') {
     const { data: prod } = await supabase
-      .from('afx_producers').select('profile, entity_docs').eq('id', producerId)
-      .single<{ profile: { entityK2?: boolean }; entity_docs: AfxDocument[] | null }>();
+      .from('afx_producers').select('profile, entity_docs, individual_verified_at').eq('id', producerId)
+      .single<{ profile: { entityK2?: boolean }; entity_docs: AfxDocument[] | null; individual_verified_at: string | null }>();
     if (!prod) return { ok: false, error: 'Producer not found' };
+    if (!prod.individual_verified_at) {
+      return { ok: false, error: 'Complete individual vetting before submitting the entity' };
+    }
     if (!isEntityVettingReady({ entityK2: !!prod.profile?.entityK2, entityDocs: prod.entity_docs ?? undefined })) {
       return { ok: false, error: 'Entity is not vetting-ready (K2 + required company documents)' };
     }
