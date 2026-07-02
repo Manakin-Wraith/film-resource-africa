@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import type { AfxDocument, IndividualDocumentCategory, ProducerProfile } from '@/lib/afx/types';
 import { INDIVIDUAL_DOCUMENT_CATEGORY_LABELS } from '@/lib/afx/documents';
+import { safeHttpUrl } from '@/lib/afx/links';
 
 const mono = 'var(--afx-mono)';
 type Links = NonNullable<ProducerProfile['individualLinks']>;
@@ -49,9 +50,12 @@ export default function IndividualVerifiedCard({ verifiedAt, docs, links }: { ve
 
       {linkEntries.length > 0 ? (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-          {linkEntries.map(([k, v]) => (
-            <a key={k} href={v} target="_blank" rel="noopener noreferrer" style={{ fontFamily: mono, fontSize: 11, color: '#1C4E80', textDecoration: 'none', border: '1px solid #C4D8EF', borderRadius: 999, padding: '4px 11px', textTransform: 'capitalize' }}>{k}</a>
-          ))}
+          {linkEntries.map(([k, v]) => {
+            const href = safeHttpUrl(v);
+            return href ? (
+              <a key={k} href={href} target="_blank" rel="noopener noreferrer" style={{ fontFamily: mono, fontSize: 11, color: '#1C4E80', textDecoration: 'none', border: '1px solid #C4D8EF', borderRadius: 999, padding: '4px 11px', textTransform: 'capitalize' }}>{k}</a>
+            ) : null;
+          })}
         </div>
       ) : null}
 

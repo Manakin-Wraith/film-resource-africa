@@ -20,3 +20,12 @@ begin
   end if;
   return new;
 end $$;
+
+-- Allow the new 'individual' vetting kind (widen the CHECK from 20260630_afx_vetting.sql).
+alter table public.afx_vetting_submissions drop constraint if exists afx_vetting_submissions_kind_check;
+alter table public.afx_vetting_submissions add constraint afx_vetting_submissions_kind_check
+  check (kind in ('case_study','entity','individual'));
+
+-- One open individual submission per producer (DB-level dedup, parallel to afx_vs_one_open_entity).
+create unique index if not exists afx_vs_one_open_individual on public.afx_vetting_submissions (producer_id)
+  where kind = 'individual' and status in ('submitted','under_review');

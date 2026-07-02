@@ -8,6 +8,7 @@ import type { Provenance } from '@/lib/afx/types';
 import { VETTING_STATUS_META } from '@/lib/afx/vetting';
 import { startReviewAction, verifyFieldAction, revertFieldAction, decideAction } from '@/app/afx/staff/actions';
 import ProvenanceBadge from '@/components/afx/primitives/ProvenanceBadge';
+import { safeHttpUrl } from '@/lib/afx/links';
 
 const mono = 'var(--afx-mono)';
 
@@ -129,7 +130,7 @@ export default function StaffSubmissionDetail({ detail }: { detail: SubmissionDe
         <div style={cardStyle}>
           <div style={{ fontFamily: mono, fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--afx-faintest)' }}>Professional links</div>
           {(['imdb', 'linkedin', 'portfolio'] as const).map((k) => {
-            const url = producer.individualLinks?.[k];
+            const url = safeHttpUrl(producer.individualLinks?.[k]);
             return url ? (
               <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <div style={{ flex: '0 0 90px', fontSize: 12.5, fontWeight: 600, textTransform: 'capitalize' }}>{k}</div>
