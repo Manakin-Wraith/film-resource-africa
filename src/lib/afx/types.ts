@@ -146,6 +146,12 @@ export interface Relationship {
  */
 export type ProducerType = 'individual' | 'company';
 
+export interface NdaSignature {
+  name: string;      // full legal name as typed by the signer
+  signedAt: string;  // ISO timestamp
+  version: string;   // NDA_VERSION at signing
+}
+
 export interface ProducerProfile {
   id: string; // === afxSeed.producers[n].id
   name: string;
@@ -162,6 +168,9 @@ export interface ProducerProfile {
   relationships: Relationship[];
   slate: Project[];
   ndaSigned: boolean;
+  /** Denormalized current NDA signature for display (name/date/version). Profile blob;
+   *  null when unsigned/withdrawn. The immutable audit trail lives in afx_nda_signatures. */
+  ndaSignature?: NdaSignature | null;
   entityK2: boolean; // legal entity gate
   consentK4: boolean; // transparency/reporting consent gate
   /** Producer-level confidential company documents (entity vetting). Isolated:

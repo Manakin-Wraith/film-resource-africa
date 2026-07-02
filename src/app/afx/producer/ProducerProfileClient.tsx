@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useDebouncedAutosave } from './useDebouncedAutosave';
-import { persistProfileAction, submitForVettingAction, withdrawVettingAction } from './actions';
+import { persistProfileAction, submitForVettingAction, withdrawVettingAction, signNdaAction, withdrawNdaAction } from './actions';
 import { openCaseSubmission, openEntitySubmission, latestEntitySubmission, openIndividualSubmission, latestIndividualSubmission } from '@/lib/afx/vetting';
 import type { ProducerProfile, Project, ExactFigures, ExactMoney, AfxCurrency, VettingSubmission, EntityDocumentCategory, IndividualDocumentCategory, AfxDocument } from '@/lib/afx/types';
 import { liveProjects } from '@/lib/afx/aggregates';
@@ -37,6 +37,7 @@ export default function ProducerProfileClient({ initial, initialSubmissions }: {
   const [editing, setEditing] = useState<{ study: Project; isNew: boolean } | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [vettingBusy, setVettingBusy] = useState(false);
+  const [ndaBusy, setNdaBusy] = useState(false);
 
   const slate = draft.slate ?? [];
 
@@ -206,7 +207,40 @@ export default function ProducerProfileClient({ initial, initialSubmissions }: {
     else archiveNow(id);
   };
 
-  const toggleNda = () => setDraft((d) => ({ ...d, ndaSigned: !d.ndaSigned }));
+  const onSignNda = async (name: string) => {
+    if (ndaBusy) return;
+    setNdaBusy(true);
+    setActionError(null);
+    try {
+      const res = await signNdaAction({ name });
+      if (res.ok && res.signature) {
+        const next = { ...draft, ndaSigned: true, ndaSignature: res.signature };
+        setDraft(next);
+        await persistProfileAction(next);
+      } else setActionError(res.error ?? 'Could not sign the NDA');
+    } catch {
+      setActionError('Could not sign the NDA — please try again');
+    } finally {
+      setNdaBusy(false);
+    }
+  };
+  const onWithdrawNda = async () => {
+    if (ndaBusy) return;
+    setNdaBusy(true);
+    setActionError(null);
+    try {
+      const res = await withdrawNdaAction({ lastSignerName: draft.ndaSignature?.name });
+      if (res.ok) {
+        const next = { ...draft, ndaSigned: false, ndaSignature: null };
+        setDraft(next);
+        await persistProfileAction(next);
+      } else setActionError(res.error ?? 'Could not withdraw the NDA');
+    } catch {
+      setActionError('Could not withdraw the NDA — please try again');
+    } finally {
+      setNdaBusy(false);
+    }
+  };
 
   return (
     <div style={{ paddingBottom: 80 }}>
@@ -236,7 +270,15 @@ export default function ProducerProfileClient({ initial, initialSubmissions }: {
             <IdentityPanel draft={draft} onIdentity={onIdentity} />
             {/* COMPANY / ENTITY — NDA + knockout gates + entity vetting kept adjacent,
                 since the vetting panel's hints reference the NDA and the K2 gate. */}
-            <NdaUpgrade signed={!!draft.ndaSigned} onToggle={toggleNda} />
+            <NdaUpgrade
+              signed={!!draft.ndaSigned}
+              signature={draft.ndaSignature ?? null}
+              producerName={draft.name}
+              company={draft.company}
+              busy={ndaBusy}
+              onSign={onSignNda}
+              onWithdraw={onWithdrawNda}
+            />
             <AccountVisibility draft={draft} onToggleK2={() => setDraft((d) => ({ ...d, entityK2: !d.entityK2 }))} onToggleK4={() => setDraft((d) => ({ ...d, consentK4: !d.consentK4 }))} />
             {/* Individual vetting — universal, always first (the operator/person). */}
             {(() => {
