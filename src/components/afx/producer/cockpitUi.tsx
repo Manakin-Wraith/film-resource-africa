@@ -75,6 +75,37 @@ export function InlineEdit({
   );
 }
 
+/** Inline labelled dropdown, styled to match InlineEdit. */
+export function InlineSelect({
+  value,
+  onChange,
+  label,
+  options,
+  placeholder,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  label?: string;
+  options: readonly { code: string; name: string }[];
+  placeholder?: string;
+}) {
+  const baseStyle: React.CSSProperties = {
+    width: '100%', fontFamily: 'var(--afx-body)', fontSize: 13.5, color: value ? '#1C1D21' : '#9A9CA3',
+    border: '1px solid #E4E2DC', borderRadius: 8, padding: '8px 11px', background: '#fff', outline: 'none', cursor: 'pointer',
+  };
+  return (
+    <label style={{ display: 'block' }}>
+      {label ? (
+        <span style={{ display: 'block', fontFamily: mono, fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#A7A99F', marginBottom: 6 }}>{label}</span>
+      ) : null}
+      <select value={value} onChange={(e) => onChange(e.target.value)} style={baseStyle}>
+        {placeholder ? <option value="">{placeholder}</option> : null}
+        {options.map((o) => <option key={o.code} value={o.code}>{o.name}</option>)}
+      </select>
+    </label>
+  );
+}
+
 export function GhostButton({ onClick, children, tone = 'neutral' }: { onClick: () => void; children: React.ReactNode; tone?: 'neutral' | 'danger' | 'accent' }) {
   const color = tone === 'danger' ? '#7A2E2E' : tone === 'accent' ? 'var(--afx-accent)' : '#5E6066';
   const border = tone === 'danger' ? '#E3B6AE' : tone === 'accent' ? '#D6D8F5' : '#E4E2DC';

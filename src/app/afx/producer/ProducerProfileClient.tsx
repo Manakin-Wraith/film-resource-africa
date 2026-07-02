@@ -6,6 +6,7 @@ import { persistProfileAction, submitForVettingAction, withdrawVettingAction } f
 import { openCaseSubmission, openEntitySubmission, latestEntitySubmission } from '@/lib/afx/vetting';
 import type { ProducerProfile, Project, ExactFigures, ExactMoney, AfxCurrency, VettingSubmission, EntityDocumentCategory, AfxDocument } from '@/lib/afx/types';
 import { liveProjects } from '@/lib/afx/aggregates';
+import { currencyForCountry } from '@/lib/afx/countries';
 import { meetsCorePackaging } from '@/lib/afx/constants';
 import AfxTopBar from '@/components/afx/AfxTopBar';
 import StatusHeader from '@/components/afx/producer/StatusHeader';
@@ -37,7 +38,7 @@ export default function ProducerProfileClient({ initial, initialSubmissions }: {
 
   const slate = draft.slate ?? [];
 
-  const onIdentity = (patch: Partial<Pick<ProducerProfile, 'name' | 'company' | 'bio' | 'location'>>) =>
+  const onIdentity = (patch: Partial<Pick<ProducerProfile, 'name' | 'company' | 'bio' | 'location' | 'producerType' | 'country'>>) =>
     setDraft((d) => ({ ...d, ...patch }));
 
   const onAddCaseStudy = () => setEditing({ study: newCaseStudy(), isNew: true });
@@ -113,7 +114,7 @@ export default function ProducerProfileClient({ initial, initialSubmissions }: {
     }
   };
 
-  const localCurrency: AfxCurrency = (draft.location ?? '').trim().endsWith('ZA') ? 'ZAR' : 'USD';
+  const localCurrency: AfxCurrency = currencyForCountry(draft.country);
 
   const onExact = (projectId: string, field: ExactKey, value: ExactMoney | undefined) => {
     setDraft((d) => ({
