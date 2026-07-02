@@ -34,7 +34,11 @@ export default function StaffQueue({ open, decided }: { open: StaffQueueItem[]; 
                   border: '1px solid var(--afx-border)', borderRadius: 12, background: '#fff' }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--afx-ink)' }}>
-                    {r.submission.kind === 'entity' ? `${r.company} — company vetting` : (r.targetTitle || 'Untitled case study')}
+                    {r.submission.kind === 'entity'
+                      ? `${r.company} — company vetting`
+                      : r.submission.kind === 'individual'
+                      ? `${r.producerName} — individual vetting`
+                      : (r.targetTitle || 'Untitled case study')}
                   </div>
                   <div style={{ fontFamily: mono, fontSize: 10.5, color: 'var(--afx-faint)', marginTop: 3 }}>
                     {r.producerName} · {r.company} · submitted {r.submission.submittedAt.slice(0, 10)}
