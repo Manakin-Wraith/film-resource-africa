@@ -30,15 +30,17 @@ export default function NdaUpgrade({ signed, signature, producerName, company, b
     <pre style={{ maxHeight: 260, overflowY: 'auto', whiteSpace: 'pre-wrap', fontFamily: 'var(--afx-body)', fontSize: 12.5, lineHeight: 1.55, color: '#3A3B40', background: '#FAF9F6', border: '1px solid #EDEBE4', borderRadius: 10, padding: '14px 16px', margin: 0 }}>{docText}</pre>
   );
 
-  if (signed && signature) {
+  if (signed) {
     return (
       <SectionCard title="Confidentiality (NDA)" hint="signed · read-only">
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', borderRadius: 10, background: '#F2FBF4', border: '1px solid #CDEAD5' }}>
           <span aria-hidden style={{ fontSize: 15, color: '#2E7D46' }}>✓</span>
           <span style={{ fontSize: 13, color: '#2E7D46' }}>
-            Signed by <strong>{signature.name}</strong> on {signature.signedAt.slice(0, 10)}
+            {signature
+              ? <>Signed by <strong>{signature.name}</strong> on {signature.signedAt.slice(0, 10)}</>
+              : <>NDA on file <span style={{ color: '#5E9A6E' }}>(legacy record — withdraw and re-sign to add an audit signature)</span></>}
           </span>
-          <span style={{ fontFamily: mono, fontSize: 10, color: '#5E9A6E', marginLeft: 'auto' }}>NDA v{signature.version}</span>
+          {signature ? <span style={{ fontFamily: mono, fontSize: 10, color: '#5E9A6E', marginLeft: 'auto' }}>NDA v{signature.version}</span> : null}
         </div>
         <div style={{ fontFamily: mono, fontSize: 10.5, color: 'var(--afx-prov-verified)', marginTop: 8 }}>
           ✓ NDA signed — exact-figure entry unlocked (USD or ZAR) on every budget, capital-stack and funding field
