@@ -202,11 +202,10 @@ export default function ProducerProfileClient({ initial, initialSubmissions }: {
           <FunderPreview view={toFunderView(draft)} />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {/* WHO — personal identity */}
             <IdentityPanel draft={draft} onIdentity={onIdentity} />
-            {/* Two-zone hard requirement: Track Record BEFORE Live Slate (spec §2.1) */}
-            <TrackRecordZone draft={draft} submissions={submissions} onAdd={onAddCaseStudy} onEdit={onEditCaseStudy} />
-            <LiveSlateZone draft={draft} onAddProject={onAddProject} onArchive={onArchive} onExact={onExact} ndaSigned={!!draft.ndaSigned} defaultCurrency={localCurrency} />
-            <AggregatesPanel draft={draft} />
+            {/* COMPANY / ENTITY — NDA + knockout gates + entity vetting kept adjacent,
+                since the vetting panel's hints reference the NDA and the K2 gate. */}
             <NdaUpgrade signed={!!draft.ndaSigned} onToggle={toggleNda} />
             <AccountVisibility draft={draft} onToggleK2={() => setDraft((d) => ({ ...d, entityK2: !d.entityK2 }))} onToggleK4={() => setDraft((d) => ({ ...d, consentK4: !d.consentK4 }))} />
             {(() => {
@@ -226,6 +225,10 @@ export default function ProducerProfileClient({ initial, initialSubmissions }: {
                 />
               );
             })()}
+            {/* Two-zone hard requirement: Track Record BEFORE Live Slate (spec §2.1) */}
+            <TrackRecordZone draft={draft} submissions={submissions} onAdd={onAddCaseStudy} onEdit={onEditCaseStudy} />
+            <LiveSlateZone draft={draft} onAddProject={onAddProject} onArchive={onArchive} onExact={onExact} ndaSigned={!!draft.ndaSigned} defaultCurrency={localCurrency} />
+            <AggregatesPanel draft={draft} />
           </div>
         )}
       </main>
