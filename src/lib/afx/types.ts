@@ -171,6 +171,14 @@ export interface ProducerProfile {
    *  NEVER inside the profile blob (a producer's client-authoritative persistProfile must not
    *  be able to forge it) — written only by the staff review action. Presence = verified company. */
   entityVerifiedAt?: string;
+  /** Individual (freelance) confidential docs — the CV (+ optional supporting). Isolated
+   *  column afx_producers.individual_docs, never in the profile blob, never funder-visible. */
+  individualDocs?: AfxDocument[];
+  /** FRA individual-verification marker. Isolated column afx_producers.individual_verified_at;
+   *  staff-only (anti-forge trigger). Presence = verified individual. */
+  individualVerifiedAt?: string;
+  /** Optional public professional links (profile blob, not confidential). */
+  individualLinks?: { imdb?: string; linkedin?: string; portfolio?: string };
 }
 
 /* ---------- Unified Project (case study ⇄ live ask) ---------- */
@@ -203,6 +211,9 @@ export type EntityDocumentCategory =
   | 'company_registration' | 'director_id' | 'tax_registration'
   | 'bbbee_certificate' | 'good_standing' | 'other';
 
+/** Individual (freelance) confidential document categories. */
+export type IndividualDocumentCategory = 'cv' | 'other';
+
 /** Confidential supporting document. Producer + FRA only — NEVER funder-visible.
  *  Lives in the private `afx-documents` bucket; this is just the metadata,
  *  persisted in an isolated column (`afx_projects.docs` or `afx_producers.entity_docs`). */
@@ -210,7 +221,7 @@ export interface AfxDocument {
   id: string;            // crypto.randomUUID()
   path: string;          // storage key: producerId/<caseStudyId|entity>/docId.ext
   filename: string;      // original name, for display
-  category: DocumentCategory | EntityDocumentCategory;
+  category: DocumentCategory | EntityDocumentCategory | IndividualDocumentCategory;
   sizeBytes: number;
   contentType: string;
   uploadedAt: string;    // ISO timestamp
@@ -218,7 +229,7 @@ export interface AfxDocument {
 
 /* ---------- Vetting submissions (S2 producer side) ---------- */
 
-export type VettingKind = 'case_study' | 'entity';
+export type VettingKind = 'case_study' | 'entity' | 'individual';
 export type VettingStatus =
   | 'submitted' | 'under_review' | 'verified' | 'changes_requested' | 'withdrawn';
 

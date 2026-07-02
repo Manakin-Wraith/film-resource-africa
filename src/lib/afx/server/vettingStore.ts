@@ -1,6 +1,6 @@
 import 'server-only';
 import { createSupabaseServerClient, getSessionUser } from '@/lib/supabase/server';
-import { isVettingReady, isEntityVettingReady } from '@/lib/afx/documents';
+import { isVettingReady, isEntityVettingReady, isIndividualVettingReady } from '@/lib/afx/documents';
 import { submissionFromRow, type VettingSubmissionRow } from '@/lib/afx/persistence';
 import type { AfxDocument, VettingKind, VettingSubmission } from '@/lib/afx/types';
 
@@ -27,13 +27,21 @@ export async function submitForVetting(input: { kind: VettingKind; targetId?: st
       .single<{ id: string; docs: AfxDocument[] | null }>();
     if (!proj) return { ok: false, error: 'Case study not found' };
     if (!isVettingReady(proj.docs ?? undefined)) return { ok: false, error: 'Required proof documents are missing' };
-  } else {
+  } else if (input.kind === 'entity') {
     const { data: prod } = await supabase
       .from('afx_producers').select('profile, entity_docs').eq('id', producerId)
       .single<{ profile: { entityK2?: boolean }; entity_docs: AfxDocument[] | null }>();
     if (!prod) return { ok: false, error: 'Producer not found' };
     if (!isEntityVettingReady({ entityK2: !!prod.profile?.entityK2, entityDocs: prod.entity_docs ?? undefined })) {
       return { ok: false, error: 'Entity is not vetting-ready (K2 + required company documents)' };
+    }
+  } else {
+    const { data: prod } = await supabase
+      .from('afx_producers').select('profile, individual_docs').eq('id', producerId)
+      .single<{ profile: { entityK2?: boolean }; individual_docs: AfxDocument[] | null }>();
+    if (!prod) return { ok: false, error: 'Producer not found' };
+    if (!isIndividualVettingReady({ entityK2: !!prod.profile?.entityK2, individualDocs: prod.individual_docs ?? undefined })) {
+      return { ok: false, error: 'Not vetting-ready (professional standing gate + a CV)' };
     }
   }
 

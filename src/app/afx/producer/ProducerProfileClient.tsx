@@ -3,11 +3,12 @@
 import { useState } from 'react';
 import { useDebouncedAutosave } from './useDebouncedAutosave';
 import { persistProfileAction, submitForVettingAction, withdrawVettingAction } from './actions';
-import { openCaseSubmission, openEntitySubmission, latestEntitySubmission } from '@/lib/afx/vetting';
-import type { ProducerProfile, Project, ExactFigures, ExactMoney, AfxCurrency, VettingSubmission, EntityDocumentCategory, AfxDocument } from '@/lib/afx/types';
+import { openCaseSubmission, openEntitySubmission, latestEntitySubmission, openIndividualSubmission, latestIndividualSubmission } from '@/lib/afx/vetting';
+import type { ProducerProfile, Project, ExactFigures, ExactMoney, AfxCurrency, VettingSubmission, EntityDocumentCategory, IndividualDocumentCategory, AfxDocument } from '@/lib/afx/types';
 import { liveProjects } from '@/lib/afx/aggregates';
 import { currencyForCountry } from '@/lib/afx/countries';
-import { meetsCorePackaging } from '@/lib/afx/constants';
+import { meetsCorePackaging, producerTypeOf } from '@/lib/afx/constants';
+import IndividualVettingPanel from '@/components/afx/producer/IndividualVettingPanel';
 import AfxTopBar from '@/components/afx/AfxTopBar';
 import StatusHeader from '@/components/afx/producer/StatusHeader';
 import IdentityPanel from '@/components/afx/producer/IdentityPanel';
@@ -105,6 +106,29 @@ export default function ProducerProfileClient({ initial, initialSubmissions }: {
     try {
       await persistProfileAction(draft);               // flush entityDocs + K2 before server gate
       const res = await submitForVettingAction({ kind: 'entity' });
+      if (res.ok) setSubmissions((s) => [...s, res.submission]);
+      else setActionError(res.error ?? 'Submit failed');
+    } catch {
+      setActionError('Could not submit for vetting — please try again');
+    } finally {
+      setVettingBusy(false);
+    }
+  };
+
+  const onAddIndividualDoc = (doc: AfxDocument) => setDraft((d) => ({ ...d, individualDocs: [...(d.individualDocs ?? []), doc] }));
+  const onUpdateIndividualDoc = (id: string, patch: { category: IndividualDocumentCategory }) =>
+    setDraft((d) => ({ ...d, individualDocs: (d.individualDocs ?? []).map((x) => (x.id === id ? { ...x, ...patch } : x)) }));
+  const onRemoveIndividualDoc = (id: string) => setDraft((d) => ({ ...d, individualDocs: (d.individualDocs ?? []).filter((x) => x.id !== id) }));
+  const onIndividualLinks = (patch: Partial<NonNullable<ProducerProfile['individualLinks']>>) =>
+    setDraft((d) => ({ ...d, individualLinks: { ...(d.individualLinks ?? {}), ...patch } }));
+
+  const onSubmitIndividual = async () => {
+    if (vettingBusy) return;
+    setVettingBusy(true);
+    setActionError(null);
+    try {
+      await persistProfileAction(draft);
+      const res = await submitForVettingAction({ kind: 'individual' });
       if (res.ok) setSubmissions((s) => [...s, res.submission]);
       else setActionError(res.error ?? 'Submit failed');
     } catch {
@@ -213,7 +237,23 @@ export default function ProducerProfileClient({ initial, initialSubmissions }: {
                 since the vetting panel's hints reference the NDA and the K2 gate. */}
             <NdaUpgrade signed={!!draft.ndaSigned} onToggle={toggleNda} />
             <AccountVisibility draft={draft} onToggleK2={() => setDraft((d) => ({ ...d, entityK2: !d.entityK2 }))} onToggleK4={() => setDraft((d) => ({ ...d, consentK4: !d.consentK4 }))} />
-            {(() => {
+            {producerTypeOf(draft) === 'individual' ? (() => {
+              const open = openIndividualSubmission(submissions);
+              return (
+                <IndividualVettingPanel
+                  draft={draft}
+                  submission={latestIndividualSubmission(submissions)}
+                  locked={!!open}
+                  busy={vettingBusy}
+                  onAddDoc={onAddIndividualDoc}
+                  onUpdateDoc={onUpdateIndividualDoc}
+                  onRemoveDoc={onRemoveIndividualDoc}
+                  onLinks={onIndividualLinks}
+                  onSubmit={onSubmitIndividual}
+                  onWithdraw={open ? () => onWithdrawSubmission(open.id) : () => {}}
+                />
+              );
+            })() : (() => {
               const open = openEntitySubmission(submissions);
               return (
                 <EntityVettingPanel

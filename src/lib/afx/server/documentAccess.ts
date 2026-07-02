@@ -41,13 +41,13 @@ export function isOwnedDocPath(path: string, producerId: string): boolean {
   // Self-guard: producerId is interpolated into the RegExp below, so it must be a bare UUID (no regex metachars) — keeps the ownership guarantee local.
   if (!UUID_RE.test(producerId)) return false;
   const uuid = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
-  const re = new RegExp(`^${producerId}/(?:entity|${uuid})/${uuid}\\.[a-z0-9]+$`, 'i');
+  const re = new RegExp(`^${producerId}/(?:entity|individual|${uuid})/${uuid}\\.[a-z0-9]+$`, 'i');
   return re.test(path);
 }
 
 /** True iff the producer has an OPEN (submitted/under_review) submission for the
  *  given target. `targetId` is the case-study id, or null for the entity. */
-export async function hasOpenSubmission(producerId: string, kind: 'case_study' | 'entity', targetId: string | null): Promise<boolean> {
+export async function hasOpenSubmission(producerId: string, kind: 'case_study' | 'entity' | 'individual', targetId: string | null): Promise<boolean> {
   let q = afxAdmin
     .from('afx_vetting_submissions')
     .select('id')
