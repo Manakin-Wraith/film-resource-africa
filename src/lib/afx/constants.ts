@@ -1,4 +1,4 @@
-import type { Provenance, RatingBand, Visibility, ProducerProfile, EvidenceClaim } from './types';
+import type { Provenance, RatingBand, Visibility, ProducerProfile, EvidenceClaim, ProducerType } from './types';
 import { liveProjects, caseStudies } from './aggregates';
 import type { Project } from './types';
 
@@ -58,6 +58,21 @@ export function meetsCorePackaging(pr: Project): boolean {
   return hasDirector && hasWriter && hasFundingPlan;
 }
 
+export function producerTypeOf(p: { producerType?: ProducerType }): ProducerType {
+  return p.producerType ?? 'company';
+}
+
+export function isIndividual(p: { producerType?: ProducerType }): boolean {
+  return producerTypeOf(p) === 'individual';
+}
+
+/** Type-aware copy for the reused K2 "operator standing" gate. */
+export function operatorGateLabel(type: ProducerType): { title: string; note: string } {
+  return type === 'individual'
+    ? { title: 'Individual / professional standing', note: 'Your standing as an individual producer. Missing caps your rating band.' }
+    : { title: 'Legal entity / structure', note: 'An operating entity must be in place. Missing caps your rating band.' };
+}
+
 export function meetsGoLive(p: ProducerProfile): boolean {
   return p.entityK2 && p.consentK4 && liveProjects(p).some(meetsCorePackaging);
 }
@@ -87,7 +102,7 @@ export function nextBestActions(p: ProducerProfile): string[] {
   const selfStudies = caseStudies(p).filter((s) => s.outcomes?.recoupment.provenance === 'self' || s.budgetBand.provenance === 'self').length;
   if (selfStudies > 0) out.push(`Confirm ${selfStudies} self-reported case stud${selfStudies > 1 ? 'ies' : 'y'} to lift your rating.`);
   if (!p.ndaSigned) out.push('Sign the FRA NDA to add exact figures and raise verification confidence.');
-  if (!p.entityK2) out.push('Complete your legal entity (K2) to remove the rating cap.');
+  if (!p.entityK2) out.push(isIndividual(p) ? 'Confirm your individual / professional standing (K2) to remove the rating cap.' : 'Complete your legal entity (K2) to remove the rating cap.');
   if (!p.consentK4) out.push('Grant transparency consent (K4) to become visible to funders.');
   out.push('Attach a sales agent to your strongest project to raise packaging strength.');
   return out.slice(0, 3);

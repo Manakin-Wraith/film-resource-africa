@@ -144,6 +144,8 @@ export interface Relationship {
  * edited in-session. Its marketplace identity is the matching DealEntity in
  * afxSeed.producers (same id), which keeps the Funder Preview consistent.
  */
+export type ProducerType = 'individual' | 'company';
+
 export interface ProducerProfile {
   id: string; // === afxSeed.producers[n].id
   name: string;
@@ -151,6 +153,10 @@ export interface ProducerProfile {
   bio: string;
   photoUrl?: string;
   location?: string;
+  /** Individual/freelance vs company/entity. Absent = 'company' (back-compat). Profile blob. */
+  producerType?: ProducerType;
+  /** ISO-ish country code from AFRICAN_COUNTRIES (e.g. 'ZA', 'INTL'). Profile blob; drives currency. */
+  country?: string;
   ratingBand: RatingBand;
   careerStage: string;
   relationships: Relationship[];
