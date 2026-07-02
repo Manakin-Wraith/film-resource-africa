@@ -3,10 +3,12 @@ import type { ProducerProfile, Project, AfxDocument, VettingSubmission, VettingK
 export interface ProducerRow {
   id: string;
   user_id: string;
-  /** ProducerProfile minus `id`, `slate`, and the isolated `entityDocs` and `entityVerifiedAt` lanes. */
-  profile: Omit<ProducerProfile, 'id' | 'slate' | 'entityDocs' | 'entityVerifiedAt'>;
+  /** ProducerProfile minus id, slate, and the isolated entity + individual lanes. */
+  profile: Omit<ProducerProfile, 'id' | 'slate' | 'entityDocs' | 'entityVerifiedAt' | 'individualDocs' | 'individualVerifiedAt'>;
   entity_docs: AfxDocument[] | null;
   entity_verified_at: string | null;
+  individual_docs: AfxDocument[] | null;
+  individual_verified_at: string | null;
 }
 export interface ProjectRow {
   id: string;
@@ -58,12 +60,14 @@ export function rowsToProfile(producer: ProducerRow, projects: ProjectRow[]): Pr
   const profile: ProducerProfile = { ...producer.profile, id: producer.id, slate: projects.map(projectFromRow) };
   if (producer.entity_docs != null) profile.entityDocs = producer.entity_docs;
   if (producer.entity_verified_at != null) profile.entityVerifiedAt = producer.entity_verified_at;
+  if (producer.individual_docs != null) profile.individualDocs = producer.individual_docs;
+  if (producer.individual_verified_at != null) profile.individualVerifiedAt = producer.individual_verified_at;
   return profile;
 }
 
 /** Split a ProducerProfile into the producer-level blob + isolated entity docs + project rows. */
-export function profileToRows(p: ProducerProfile): { profile: ProducerRow['profile']; entityDocs: AfxDocument[] | null; projects: ProjectRow[] } {
-  const { id: _id, slate, entityDocs, entityVerifiedAt, ...profile } = p;
-  void _id; void entityVerifiedAt;
-  return { profile, entityDocs: entityDocs ?? null, projects: (slate ?? []).map((pr) => projectToRow(p.id, pr)) };
+export function profileToRows(p: ProducerProfile): { profile: ProducerRow['profile']; entityDocs: AfxDocument[] | null; individualDocs: AfxDocument[] | null; projects: ProjectRow[] } {
+  const { id: _id, slate, entityDocs, entityVerifiedAt, individualDocs, individualVerifiedAt, ...profile } = p;
+  void _id; void entityVerifiedAt; void individualVerifiedAt;
+  return { profile, entityDocs: entityDocs ?? null, individualDocs: individualDocs ?? null, projects: (slate ?? []).map((pr) => projectToRow(p.id, pr)) };
 }

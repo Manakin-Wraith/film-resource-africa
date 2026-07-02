@@ -44,23 +44,29 @@ export async function persistProfile(profile: ProducerProfile): Promise<void> {
     .eq('producer_id', producer.id).in('status', ['submitted', 'under_review']);
   const subs = (openRows ?? []).map((r) => ({ kind: r.kind, targetId: r.target_id, status: r.status, id: '', submittedAt: '' })) as VettingSubmission[];
   const lockedCases = lockedCaseStudyIds(subs);
+
+  const { profile: profileBlob, entityDocs, individualDocs, projects } = profileToRows({ ...profile, id: producer.id });
+
   const entityLocked = isEntityLocked(subs);
+  const individualLocked = subs.some((s) => s.kind === 'individual');
 
-  const { profile: profileBlob, entityDocs, projects } = profileToRows({ ...profile, id: producer.id });
-
-  // Entity lock: pin the vetted profile subset + entity_docs to their stored values.
+  // While a submission is open, pin its vetted data to the stored values.
   let entityDocsToWrite = entityDocs;
-  if (entityLocked) {
+  let individualDocsToWrite = individualDocs;
+  if (entityLocked || individualLocked) {
     const { data: stored } = await supabase
-      .from('afx_producers').select('profile, entity_docs').eq('id', producer.id)
-      .single<{ profile: Record<string, unknown>; entity_docs: AfxDocument[] | null }>();
-    if (!stored) throw new Error('entity locked but stored profile unavailable');
-    for (const f of VETTED_ENTITY_FIELDS) (profileBlob as Record<string, unknown>)[f] = stored.profile?.[f];
-    entityDocsToWrite = stored.entity_docs;
+      .from('afx_producers').select('profile, entity_docs, individual_docs').eq('id', producer.id)
+      .single<{ profile: Record<string, unknown>; entity_docs: AfxDocument[] | null; individual_docs: AfxDocument[] | null }>();
+    if (!stored) throw new Error('locked but stored profile unavailable');
+    if (entityLocked) {
+      for (const f of VETTED_ENTITY_FIELDS) (profileBlob as Record<string, unknown>)[f] = stored.profile?.[f];
+      entityDocsToWrite = stored.entity_docs;
+    }
+    if (individualLocked) individualDocsToWrite = stored.individual_docs;
   }
 
   const { error: updateErr } = await supabase.from('afx_producers')
-    .update({ profile: profileBlob, entity_docs: entityDocsToWrite, updated_at: new Date().toISOString() })
+    .update({ profile: profileBlob, entity_docs: entityDocsToWrite, individual_docs: individualDocsToWrite, updated_at: new Date().toISOString() })
     .eq('id', producer.id);
   if (updateErr) throw new Error(`producer update failed: ${updateErr.message}`);
 
