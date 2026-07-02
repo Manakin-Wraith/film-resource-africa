@@ -1,7 +1,7 @@
 'use client';
 
 import type { ProducerProfile } from '@/lib/afx/types';
-import { deriveVisibility, VISIBILITY_META } from '@/lib/afx/constants';
+import { deriveVisibility, VISIBILITY_META, producerTypeOf, operatorGateLabel } from '@/lib/afx/constants';
 import { SectionCard } from './cockpitUi';
 
 const mono = 'var(--afx-mono)';
@@ -15,14 +15,15 @@ interface Props {
 export default function AccountVisibility({ draft, onToggleK2, onToggleK4 }: Props) {
   const visibility = deriveVisibility(draft);
   const vMeta = VISIBILITY_META[visibility];
+  const k2 = operatorGateLabel(producerTypeOf(draft));
 
   return (
     <SectionCard title="Account & Visibility" hint="knockout gates">
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <Gate
           code="K2"
-          title="Legal entity / structure"
-          note="An operating entity must be in place. Missing caps your rating band."
+          title={k2.title}
+          note={k2.note}
           on={draft.entityK2}
           onToggle={onToggleK2}
         />
