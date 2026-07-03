@@ -1,14 +1,16 @@
 import Link from 'next/link';
+import AfxNavSwitcher from './AfxNavSwitcher';
 
 interface Props {
   subtitle: string;
+  staffRole?: 'reviewer' | 'admin' | null;
   right?: React.ReactNode;
 }
 
 const mono = 'var(--afx-mono)';
 
 /** Sticky AFX masthead shared by the cockpit and the deal display. */
-export default function AfxTopBar({ subtitle, right }: Props) {
+export default function AfxTopBar({ subtitle, staffRole, right }: Props) {
   return (
     <header
       style={{
@@ -25,6 +27,7 @@ export default function AfxTopBar({ subtitle, right }: Props) {
             <span style={{ fontFamily: mono, fontSize: 9.5, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9A9CA3' }}>{subtitle}</span>
           </div>
         </Link>
+        {staffRole ? <AfxNavSwitcher role={staffRole} /> : null}
         <div style={{ flex: 1 }} />
         {right}
       </div>

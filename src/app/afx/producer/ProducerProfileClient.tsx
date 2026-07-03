@@ -27,7 +27,7 @@ import { newCaseStudy } from '@/lib/afx/caseStudy';
 
 const mono = 'var(--afx-mono)';
 
-export default function ProducerProfileClient({ initial, initialSubmissions }: { initial: ProducerProfile; initialSubmissions: VettingSubmission[] }) {
+export default function ProducerProfileClient({ initial, initialSubmissions, staffRole }: { initial: ProducerProfile; initialSubmissions: VettingSubmission[]; staffRole?: 'reviewer' | 'admin' | null }) {
   const [draft, setDraft] = useState<ProducerProfile>(() => structuredClone(initial));
   const [submissions, setSubmissions] = useState<VettingSubmission[]>(() => structuredClone(initialSubmissions));
   const saveStatus = useDebouncedAutosave(draft, persistProfileAction);
@@ -217,6 +217,7 @@ export default function ProducerProfileClient({ initial, initialSubmissions }: {
     <div style={{ paddingBottom: 80 }}>
       <AfxTopBar
         subtitle="Producer cockpit"
+        staffRole={staffRole}
         right={
           <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
             <div style={{ textAlign: 'right', lineHeight: 1.1 }}>
