@@ -17,6 +17,7 @@ export default async function AfxStaffPage() {
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginBottom: 12 }}>
           <Link href="/afx/staff/invites" style={navLink}>Invites →</Link>
           <Link href="/afx/staff/nda" style={navLink}>NDA log →</Link>
+          <Link href="/afx/staff/marketplace" style={navLink}>Marketplace review →</Link>
           {staff?.role === 'admin' ? (
             <Link href="/afx/staff/team" style={navLink}>Manage team →</Link>
           ) : null}
