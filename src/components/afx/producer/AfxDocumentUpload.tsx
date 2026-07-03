@@ -22,6 +22,9 @@ interface Props {
   /** When provided, render the required-docs readiness banner against this set.
    *  Omit (live projects) to hide the banner entirely. */
   requiredCategories?: readonly DocumentCategory[];
+  /** Label map for category display (dropdown + readiness chips). Defaults to
+   *  the case-study label set; live projects pass LIVE_DOCUMENT_CATEGORY_LABELS. */
+  categoryLabels?: Record<DocumentCategory, string>;
 }
 
 function prettySize(bytes: number): string {
@@ -33,6 +36,7 @@ export default function AfxDocumentUpload({
   caseStudyId, docs, onAdd, onUpdate, onRemove,
   categories = DOCUMENT_CATEGORIES,
   requiredCategories,
+  categoryLabels = DOCUMENT_CATEGORY_LABELS,
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
@@ -108,7 +112,7 @@ export default function AfxDocumentUpload({
               const have = !missing.includes(c);
               return (
                 <span key={c} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontFamily: mono, fontSize: 10, color: have ? '#2E7D46' : '#8A8C82', background: '#fff', border: `1px solid ${have ? '#CDEAD5' : '#E4E2DC'}`, borderRadius: 999, padding: '3px 9px' }}>
-                  <span aria-hidden>{have ? '✓' : '○'}</span>{DOCUMENT_CATEGORY_LABELS[c]}
+                  <span aria-hidden>{have ? '✓' : '○'}</span>{categoryLabels[c]}
                 </span>
               );
             })}
@@ -123,7 +127,7 @@ export default function AfxDocumentUpload({
             <div style={{ fontFamily: mono, fontSize: 10, color: '#9A9CA3' }}>{prettySize(d.sizeBytes)}</div>
           </div>
           <select value={d.category} onChange={(e) => onUpdate(d.id, { category: e.target.value as DocumentCategory })} style={{ ...inputStyle, cursor: 'pointer', minWidth: 140 }}>
-            {categories.map((c) => <option key={c} value={c}>{DOCUMENT_CATEGORY_LABELS[c]}</option>)}
+            {categories.map((c) => <option key={c} value={c}>{categoryLabels[c]}</option>)}
           </select>
           <button onClick={() => view(d)} style={linkBtn}>View</button>
           <button onClick={() => remove(d)} aria-label="Remove document" style={{ cursor: 'pointer', background: 'none', border: '1px solid #E4E2DC', borderRadius: 7, width: 30, height: 30, color: '#9A9CA3', fontSize: 15, lineHeight: 1 }}>×</button>

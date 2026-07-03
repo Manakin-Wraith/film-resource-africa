@@ -1,14 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import type { Project, AfxCurrency, SoftFundingStatus, ExactMoney } from '@/lib/afx/types';
+import type { Project, AfxCurrency, SoftFundingStatus, ExactMoney, ExactFigures } from '@/lib/afx/types';
 import {
   isLiveProjectSavable,
   addSoftFunding, updateSoftFunding, removeSoftFunding,
   addPackaging, updatePackaging, removePackaging,
   addDocument, updateDocument, removeDocument,
 } from '@/lib/afx/liveProject';
-import { LIVE_DOCUMENT_CATEGORIES } from '@/lib/afx/documents';
+import { LIVE_DOCUMENT_CATEGORIES, LIVE_DOCUMENT_CATEGORY_LABELS } from '@/lib/afx/documents';
 import { LIVE_STAGE_OPTIONS, FUNDING_SECURED_BANDS, SOFT_FUNDING_STATUS_LABELS, CASE_STUDY_FORMATS, JURISDICTION_OPTIONS } from '@/lib/afx/constants';
 import AfxDocumentUpload from './AfxDocumentUpload';
 import { InlineEdit, GhostButton } from './cockpitUi';
@@ -42,15 +42,26 @@ export default function LiveProjectDrawer({ initial, ndaSigned, defaultCurrency,
     setProj((p) => (p.ask ? { ...p, ask: { ...p.ask, ...patch } } : p));
   const setLeg = (leg: 'equityPct' | 'softPct' | 'debtPct' | 'gapPct', v: number) =>
     setProj((p) => (p.ask ? { ...p, ask: { ...p.ask, capitalStack: { ...p.ask.capitalStack, [leg]: v } } } : p));
-  const setExactBudget = (v: ExactMoney | undefined) =>
+  const setExact = (field: 'budget' | 'fundingSecured' | 'equity' | 'soft' | 'debt' | 'gap', v: ExactMoney | undefined) =>
     setProj((p) => {
-      const exact = { ...p.exact };
-      if (v === undefined) delete exact.budget; else exact.budget = v;
+      const exact: ExactFigures = { ...p.exact };
+      if (field === 'budget' || field === 'fundingSecured') {
+        if (v === undefined) delete exact[field]; else exact[field] = v;
+      } else {
+        const cs = { ...exact.capitalStack };
+        if (v === undefined) delete cs[field]; else cs[field] = v;
+        exact.capitalStack = Object.keys(cs).length ? cs : undefined;
+      }
       let budgetBand = p.budgetBand;
-      if (v !== undefined && p.budgetBand.provenance === 'self') budgetBand = { ...p.budgetBand, provenance: 'confirmed' };
-      if (v === undefined && p.budgetBand.provenance === 'confirmed') budgetBand = { ...p.budgetBand, provenance: 'self' };
-      const hasExact = exact.budget || exact.fundingSecured || exact.capitalStack;
-      return { ...p, budgetBand, exact: hasExact ? exact : undefined };
+      if (field === 'budget') {
+        if (v !== undefined && p.budgetBand.provenance === 'self') budgetBand = { ...p.budgetBand, provenance: 'confirmed' };
+        if (v === undefined && p.budgetBand.provenance === 'confirmed') budgetBand = { ...p.budgetBand, provenance: 'self' };
+      }
+      const cleaned: ExactFigures = {};
+      if (exact.budget !== undefined) cleaned.budget = exact.budget;
+      if (exact.fundingSecured !== undefined) cleaned.fundingSecured = exact.fundingSecured;
+      if (exact.capitalStack) cleaned.capitalStack = exact.capitalStack;
+      return { ...p, budgetBand, exact: Object.keys(cleaned).length ? cleaned : undefined };
     });
 
   return (
@@ -103,6 +114,7 @@ export default function LiveProjectDrawer({ initial, ndaSigned, defaultCurrency,
                 <InlineEdit label="Commercial path" value={ask.commercialPath} placeholder="e.g. Streamer-first" onChange={(v) => setAsk({ commercialPath: v })} />
                 <Field label="Funding secured">
                   <Select value={ask.fundingSecuredBand} options={FUNDING_SECURED_BANDS} placeholder="—" onChange={(v) => setAsk({ fundingSecuredBand: v })} />
+                  <ExactFigureInput value={proj.exact?.fundingSecured} onCommit={(v) => setExact('fundingSecured', v)} gated={ndaSigned} label="funding" defaultCurrency={defaultCurrency} />
                 </Field>
               </div>
 
@@ -110,17 +122,18 @@ export default function LiveProjectDrawer({ initial, ndaSigned, defaultCurrency,
               <Field label="Budget band">
                 <input value={proj.budgetBand.value} placeholder="e.g. $1–2M" onChange={(e) => setProj((p) => ({ ...p, budgetBand: { value: e.target.value, provenance: 'self' } }))} style={inputStyle} />
                 <div style={{ marginTop: 6 }}><ProvenanceBadge provenance={proj.budgetBand.provenance} size="sm" /></div>
-                <ExactFigureInput value={proj.exact?.budget} onCommit={setExactBudget} gated={ndaSigned} label="budget" defaultCurrency={defaultCurrency}
+                <ExactFigureInput value={proj.exact?.budget} onCommit={(v) => setExact('budget', v)} gated={ndaSigned} label="budget" defaultCurrency={defaultCurrency}
                   confirmHint={proj.budgetBand.provenance === 'confirmed' ? '→ confirmed' : undefined} />
               </Field>
 
               {/* Capital stack % */}
               <Field label="Capital stack %">
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px 14px' }}>
-                  {(['equityPct', 'softPct', 'debtPct', 'gapPct'] as const).map((leg) => (
-                    <div key={leg}>
-                      <span style={{ fontSize: 11, color: '#9A9CA3' }}>{leg.replace('Pct', '')}</span>
-                      <input type="number" min={0} max={100} value={ask.capitalStack[leg]} onChange={(e) => setLeg(leg, Number(e.target.value) || 0)} style={{ ...inputStyle, width: '100%' }} />
+                  {([['equityPct', 'equity'], ['softPct', 'soft'], ['debtPct', 'debt'], ['gapPct', 'gap']] as const).map(([pctKey, exactKey]) => (
+                    <div key={pctKey}>
+                      <span style={{ fontSize: 11, color: '#9A9CA3' }}>{exactKey}</span>
+                      <input type="number" min={0} max={100} value={ask.capitalStack[pctKey]} onChange={(e) => setLeg(pctKey, Number(e.target.value) || 0)} style={{ ...inputStyle, width: '100%' }} />
+                      <ExactFigureInput value={proj.exact?.capitalStack?.[exactKey]} onCommit={(v) => setExact(exactKey, v)} gated={ndaSigned} label={exactKey} defaultCurrency={defaultCurrency} />
                     </div>
                   ))}
                 </div>
@@ -168,6 +181,7 @@ export default function LiveProjectDrawer({ initial, ndaSigned, defaultCurrency,
                 caseStudyId={proj.id}
                 docs={proj.docs ?? []}
                 categories={LIVE_DOCUMENT_CATEGORIES}
+                categoryLabels={LIVE_DOCUMENT_CATEGORY_LABELS}
                 onAdd={(doc) => setProj((p) => addDocument(p, doc))}
                 onUpdate={(id, patch) => setProj((p) => updateDocument(p, id, patch))}
                 onRemove={(id) => setProj((p) => removeDocument(p, id))}
