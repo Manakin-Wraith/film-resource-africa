@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AFX_DOCS_BUCKET, afxAdmin, resolveDocAccess, UUID_RE, hasOpenSubmission } from '@/lib/afx/server/documentAccess';
-import { ALLOWED_DOC_TYPES, MAX_DOC_BYTES, DOCUMENT_CATEGORIES, ENTITY_DOCUMENT_CATEGORIES, INDIVIDUAL_DOCUMENT_CATEGORIES } from '@/lib/afx/documents';
+import { ALLOWED_DOC_TYPES, MAX_DOC_BYTES, DOCUMENT_CATEGORIES, ENTITY_DOCUMENT_CATEGORIES, INDIVIDUAL_DOCUMENT_CATEGORIES, LIVE_DOCUMENT_CATEGORIES } from '@/lib/afx/documents';
 import type { AfxDocument, DocumentCategory, EntityDocumentCategory, IndividualDocumentCategory } from '@/lib/afx/types';
 
 export async function POST(req: NextRequest) {
@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
   }
   const allowedCats = scope === 'entity' ? ENTITY_DOCUMENT_CATEGORIES
     : scope === 'individual' ? INDIVIDUAL_DOCUMENT_CATEGORIES
-    : DOCUMENT_CATEGORIES;
+    : [...DOCUMENT_CATEGORIES, ...LIVE_DOCUMENT_CATEGORIES];
   if (!(allowedCats as readonly string[]).includes(category)) {
     return NextResponse.json({ error: 'Invalid category' }, { status: 400 });
   }
