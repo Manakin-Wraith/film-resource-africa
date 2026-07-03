@@ -2,37 +2,6 @@ import type { Provenance, RatingBand, Visibility, ProducerProfile, EvidenceClaim
 import { liveProjects, caseStudies } from './aggregates';
 import type { Project } from './types';
 
-/* ---------- Deal Display ---------- */
-
-export const ENTITY_TABS: { key: 'producers' | 'slates' | 'projects'; label: string }[] = [
-  { key: 'producers', label: 'Producers' },
-  { key: 'slates', label: 'Slates' },
-  { key: 'projects', label: 'Projects' },
-];
-
-export const SIGNAL_TABS: { key: 'band' | 'ring' | 'bar'; label: string }[] = [
-  { key: 'band', label: 'Band' },
-  { key: 'ring', label: 'Ring' },
-  { key: 'bar', label: 'Bar' },
-];
-
-/** Sortable columns after the implicit name column. */
-export const SORT_COLUMNS: { key: string; label: string }[] = [
-  { key: 'name', label: 'Producer / project' },
-  { key: 'score', label: 'Deal signal' },
-  { key: 'budget', label: 'Budget' },
-  { key: 'funding', label: 'Funding / gap' },
-  { key: 'rebate', label: 'Rebate' },
-  { key: 'rating', label: 'Rating' },
-  { key: 'stage', label: 'Stage / region' },
-];
-
-export const FILTER_GROUPS: { label: string; key: 'band' | 'conf' | 'juris'; options: { l: string; v: string }[] }[] = [
-  { label: 'Rating', key: 'band', options: [{ l: 'All', v: 'All' }, { l: 'A', v: 'A' }, { l: 'B', v: 'B' }, { l: 'C', v: 'C' }, { l: 'D', v: 'D' }] },
-  { label: 'Rebate confidence', key: 'conf', options: [{ l: 'All', v: 'All' }, { l: 'Confirmed', v: 'Confirmed' }, { l: 'Likely', v: 'Likely' }, { l: 'Aspirational', v: 'Aspirational' }, { l: 'Missing', v: 'Missing' }] },
-  { label: 'Jurisdiction', key: 'juris', options: [{ l: 'All', v: 'All' }, { l: 'ZA', v: 'ZA' }, { l: 'NG', v: 'NG' }, { l: 'KE', v: 'KE' }, { l: 'SN', v: 'SN' }] },
-];
-
 export const RATING_BAND_LABEL: Record<RatingBand, string> = {
   A: 'Anchor', B: 'Roster', C: 'Watchlist', D: 'Not-yet',
 };
