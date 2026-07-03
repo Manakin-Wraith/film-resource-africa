@@ -69,7 +69,7 @@ function LiveProjectCard({ project, onArchive, lastScreenable, onOpen }: { proje
           <div>
             <span style={{ fontFamily: mono, fontSize: 8.5, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#A7A99F' }}>Packaging</span>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 3, marginTop: 5 }}>
-              {ask.packaging.map((a, i) => (
+              {ask.packaging.slice(0, 3).map((a, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
                   <span style={{ width: 70, flex: 'none', color: '#9A9CA3' }}>{a.role}</span>
                   <span style={{ flex: 1, fontWeight: 600 }}>{a.name}</span>
@@ -77,6 +77,15 @@ function LiveProjectCard({ project, onArchive, lastScreenable, onOpen }: { proje
                 </div>
               ))}
             </div>
+            {ask.packaging.length > 3 ? (
+              <button
+                type="button"
+                onClick={onOpen}
+                style={{ fontFamily: mono, fontSize: 11, color: 'var(--afx-accent)', background: 'none', border: 'none', padding: 0, marginTop: 6, cursor: 'pointer' }}
+              >
+                +{ask.packaging.length - 3} more
+              </button>
+            ) : null}
           </div>
         </>
       ) : null}
