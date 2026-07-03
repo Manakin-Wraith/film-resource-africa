@@ -10,7 +10,7 @@ export default async function AfxMarketplacePage() {
   const rows = await listFunderMarketRows();
   return (
     <div style={{ paddingBottom: 80 }}>
-      <AfxTopBar subtitle="Deal screening" />
+      <AfxTopBar subtitle="Deal screening" staffRole={staff?.role ?? null} />
       <main style={{ maxWidth: 1100, margin: '0 auto', padding: '24px 28px 0' }}>
         <FunderMarket rows={rows} />
       </main>
