@@ -5,7 +5,10 @@ import { rowsToProfile, type ProducerRow, type ProjectRow } from '@/lib/afx/pers
 import { toReviewRows, type ReviewProducerInput, type ReviewRow } from '@/lib/afx/reviewMarketplace';
 
 const PRODUCER_COLS = 'id, user_id, profile, entity_docs, entity_verified_at, individual_docs, individual_verified_at';
-const PROJECT_COLS = 'id, producer_id, status, deal_ref, body, exact, docs';
+// Deliberately omits the NDA-gated `exact` column (never read by derisking and
+// stripped before the client) — defense-in-depth: don't pull the highest-
+// sensitivity data into this reader at all. `deal_ref` is unused (dealRef lives in body).
+const PROJECT_COLS = 'id, producer_id, status, body, docs';
 
 /** Staff review surface: every producer with >=1 live project, ranked by best
  *  de-risking score. Any staff; [] for anyone else. The score is computed on
