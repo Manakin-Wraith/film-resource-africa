@@ -7,10 +7,12 @@ import {
   addSoftFunding, updateSoftFunding, removeSoftFunding,
   addPackaging, updatePackaging, removePackaging,
   addDocument, updateDocument, removeDocument,
+  backfillPackagingIds, setPackagingDoc, clearPackagingDoc,
 } from '@/lib/afx/liveProject';
 import { LIVE_DOCUMENT_CATEGORIES, LIVE_DOCUMENT_CATEGORY_LABELS } from '@/lib/afx/documents';
 import { LIVE_STAGE_OPTIONS, FUNDING_SECURED_BANDS, SOFT_FUNDING_STATUS_LABELS, CASE_STUDY_FORMATS, JURISDICTION_OPTIONS } from '@/lib/afx/constants';
 import AfxDocumentUpload from './AfxDocumentUpload';
+import PackagingDocSlot from './PackagingDocSlot';
 import { InlineEdit, GhostButton } from './cockpitUi';
 import ProvenanceBadge from '@/components/afx/primitives/ProvenanceBadge';
 import ExactFigureInput from '@/components/afx/primitives/ExactFigureInput';
@@ -27,8 +29,9 @@ interface LiveProjectDrawerProps {
 }
 
 export default function LiveProjectDrawer({ initial, ndaSigned, defaultCurrency, onSave, onClose, onRemove }: LiveProjectDrawerProps) {
-  const [proj, setProj] = useState<Project>(() => structuredClone(initial));
+  const [proj, setProj] = useState<Project>(() => backfillPackagingIds(structuredClone(initial)));
   const [confirmingRemove, setConfirmingRemove] = useState(false);
+  const [docError, setDocError] = useState('');
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -63,6 +66,21 @@ export default function LiveProjectDrawer({ initial, ndaSigned, defaultCurrency,
       if (exact.capitalStack) cleaned.capitalStack = exact.capitalStack;
       return { ...p, budgetBand, exact: Object.keys(cleaned).length ? cleaned : undefined };
     });
+
+  const removeAttachment = async (index: number) => {
+    setDocError('');
+    const row = proj.ask?.packaging[index];
+    const linked = row?.id ? (proj.docs ?? []).filter((d) => d.packagingId === row.id) : [];
+    for (const d of linked) {
+      try {
+        const res = await fetch('/api/afx/documents/delete', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path: d.path }),
+        });
+        if (!res.ok) { const j = await res.json().catch(() => ({})); setDocError(j.error ?? 'Could not remove attachment documents'); return; }
+      } catch { setDocError('Could not remove attachment documents — check your connection'); return; }
+    }
+    setProj((p) => removePackaging(p, index));
+  };
 
   return (
     <>
@@ -141,16 +159,31 @@ export default function LiveProjectDrawer({ initial, ndaSigned, defaultCurrency,
 
               {/* Packaging */}
               <Field label="Packaging">
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   {ask.packaging.map((a, i) => (
-                    <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                      <input value={a.role} placeholder="Role" onChange={(e) => setProj((p) => updatePackaging(p, i, { role: e.target.value }))} style={{ ...inputStyle, width: 90 }} />
-                      <input value={a.name} placeholder="Name" onChange={(e) => setProj((p) => updatePackaging(p, i, { name: e.target.value }))} style={{ ...inputStyle, flex: 1 }} />
-                      <Select value={a.status} options={['signed', 'soft-hold', 'wishlist'] as const} onChange={(v) => setProj((p) => updatePackaging(p, i, { status: v as 'signed' | 'soft-hold' | 'wishlist' }))} />
-                      <RemoveBtn onClick={() => setProj((p) => removePackaging(p, i))} />
+                    <div key={a.id ?? i} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                        <input value={a.role} placeholder="Role" onChange={(e) => setProj((p) => updatePackaging(p, i, { role: e.target.value }))} style={{ ...inputStyle, width: 90 }} />
+                        <input value={a.name} placeholder="Name" onChange={(e) => setProj((p) => updatePackaging(p, i, { name: e.target.value }))} style={{ ...inputStyle, flex: 1 }} />
+                        <Select value={a.status} options={['signed', 'soft-hold', 'wishlist'] as const} onChange={(v) => setProj((p) => updatePackaging(p, i, { status: v as 'signed' | 'soft-hold' | 'wishlist' }))} />
+                        <RemoveBtn onClick={() => removeAttachment(i)} />
+                      </div>
+                      {ndaSigned && a.id ? (
+                        <div style={{ display: 'flex', gap: 12, paddingLeft: 4 }}>
+                          <PackagingDocSlot projectId={proj.id} packagingId={a.id} category="talent_cv" label="CV"
+                            doc={(proj.docs ?? []).find((d) => d.packagingId === a.id && d.category === 'talent_cv')}
+                            onReplace={(doc) => setProj((p) => setPackagingDoc(p, a.id!, 'talent_cv', doc))}
+                            onClear={() => setProj((p) => clearPackagingDoc(p, a.id!, 'talent_cv'))} />
+                          <PackagingDocSlot projectId={proj.id} packagingId={a.id} category="talent_contract" label="Contract"
+                            doc={(proj.docs ?? []).find((d) => d.packagingId === a.id && d.category === 'talent_contract')}
+                            onReplace={(doc) => setProj((p) => setPackagingDoc(p, a.id!, 'talent_contract', doc))}
+                            onClear={() => setProj((p) => clearPackagingDoc(p, a.id!, 'talent_contract'))} />
+                        </div>
+                      ) : null}
                     </div>
                   ))}
                   <GhostButton onClick={() => setProj((p) => addPackaging(p))} tone="accent">+ Add attachment</GhostButton>
+                  {docError ? <span style={{ fontSize: 11, color: '#c0392b' }}>{docError}</span> : null}
                 </div>
               </Field>
 
@@ -179,7 +212,7 @@ export default function LiveProjectDrawer({ initial, ndaSigned, defaultCurrency,
             {ndaSigned ? (
               <AfxDocumentUpload
                 caseStudyId={proj.id}
-                docs={proj.docs ?? []}
+                docs={(proj.docs ?? []).filter((d) => !d.packagingId)}
                 categories={LIVE_DOCUMENT_CATEGORIES}
                 categoryLabels={LIVE_DOCUMENT_CATEGORY_LABELS}
                 onAdd={(doc) => setProj((p) => addDocument(p, doc))}
