@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useDebouncedAutosave } from './useDebouncedAutosave';
 import { persistProfileAction, submitForVettingAction, withdrawVettingAction, signNdaAction, withdrawNdaAction } from './actions';
 import { openCaseSubmission, openEntitySubmission, latestEntitySubmission, openIndividualSubmission, latestIndividualSubmission } from '@/lib/afx/vetting';
-import type { ProducerProfile, Project, ExactFigures, ExactMoney, AfxCurrency, VettingSubmission, EntityDocumentCategory, IndividualDocumentCategory, AfxDocument } from '@/lib/afx/types';
+import type { ProducerProfile, Project, AfxCurrency, VettingSubmission, EntityDocumentCategory, IndividualDocumentCategory, AfxDocument } from '@/lib/afx/types';
 import { liveProjects } from '@/lib/afx/aggregates';
 import { currencyForCountry } from '@/lib/afx/countries';
 import { meetsCorePackaging, producerTypeOf } from '@/lib/afx/constants';
@@ -20,12 +20,12 @@ import AccountVisibility from '@/components/afx/producer/AccountVisibility';
 import FunderPreview from '@/components/afx/producer/FunderPreview';
 import { toFunderView } from '@/lib/afx/funderView';
 import CaseStudyDrawer from '@/components/afx/producer/CaseStudyDrawer';
+import LiveProjectDrawer from '@/components/afx/producer/LiveProjectDrawer';
 import EntityVettingPanel from '@/components/afx/producer/EntityVettingPanel';
 import EntityVettingLockedCard from '@/components/afx/producer/EntityVettingLockedCard';
 import { newCaseStudy } from '@/lib/afx/caseStudy';
 
 const mono = 'var(--afx-mono)';
-type ExactKey = 'budget' | 'fundingSecured' | 'equity' | 'soft' | 'debt' | 'gap';
 
 export default function ProducerProfileClient({ initial, initialSubmissions }: { initial: ProducerProfile; initialSubmissions: VettingSubmission[] }) {
   const [draft, setDraft] = useState<ProducerProfile>(() => structuredClone(initial));
@@ -35,6 +35,7 @@ export default function ProducerProfileClient({ initial, initialSubmissions }: {
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
   const [counter, setCounter] = useState(0);
   const [editing, setEditing] = useState<{ study: Project; isNew: boolean } | null>(null);
+  const [editingLive, setEditingLive] = useState<Project | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [vettingBusy, setVettingBusy] = useState(false);
   const [ndaBusy, setNdaBusy] = useState(false);
@@ -60,6 +61,15 @@ export default function ProducerProfileClient({ initial, initialSubmissions }: {
   const onRemoveCaseStudy = (id: string) => {
     setDraft((d) => ({ ...d, slate: (d.slate ?? []).filter((p) => p.id !== id) }));
     setEditing(null);
+  };
+
+  const onOpenLiveProject = (id: string) => {
+    const found = (draft.slate ?? []).find((p) => p.id === id);
+    if (found) setEditingLive(structuredClone(found));
+  };
+  const onSaveLiveProject = (project: Project) => {
+    setDraft((d) => ({ ...d, slate: (d.slate ?? []).map((p) => (p.id === project.id ? project : p)) }));
+    setEditingLive(null);
   };
 
   const onSubmitCaseStudy = async (study: Project) => {
@@ -146,55 +156,16 @@ export default function ProducerProfileClient({ initial, initialSubmissions }: {
     ? currencyForCountry(draft.country)
     : (draft.location ?? '').trim().endsWith('ZA') ? 'ZAR' : 'USD';
 
-  const onExact = (projectId: string, field: ExactKey, value: ExactMoney | undefined) => {
-    setDraft((d) => ({
-      ...d,
-      slate: (d.slate ?? []).map((p): Project => {
-        if (p.id !== projectId) return p;
-        const exact: ExactFigures = { ...p.exact };
-
-        if (field === 'budget' || field === 'fundingSecured') {
-          if (value === undefined) delete exact[field];
-          else exact[field] = value;
-        } else {
-          // capital-stack leg
-          const cs = { ...exact.capitalStack };
-          if (value === undefined) delete cs[field];
-          else cs[field] = value;
-          exact.capitalStack = Object.keys(cs).length ? cs : undefined;
-        }
-
-        // Budget exact raises/lowers the band provenance (Global Constraints).
-        let budgetBand = p.budgetBand;
-        if (field === 'budget') {
-          if (value !== undefined && p.budgetBand.provenance === 'self') budgetBand = { ...p.budgetBand, provenance: 'confirmed' };
-          if (value === undefined && p.budgetBand.provenance === 'confirmed') budgetBand = { ...p.budgetBand, provenance: 'self' };
-        }
-
-        const cleaned: ExactFigures = {};
-        if (exact.budget !== undefined) cleaned.budget = exact.budget;
-        if (exact.fundingSecured !== undefined) cleaned.fundingSecured = exact.fundingSecured;
-        if (exact.capitalStack) cleaned.capitalStack = exact.capitalStack;
-
-        return { ...p, budgetBand, exact: Object.keys(cleaned).length ? cleaned : undefined };
-      }),
-    }));
-  };
-
   const onAddProject = () => {
     const n = counter + 1;
     setCounter(n);
-    setDraft((d) => ({
-      ...d,
-      slate: [
-        ...(d.slate ?? []),
-        {
-          id: crypto.randomUUID(), status: 'live', title: `New project ${n}`, format: 'feature', role: 'Producer', jurisdiction: ['ZA'],
-          budgetBand: { value: '$0.5–2M', provenance: 'self' },
-          ask: { logline: '', stage: 'development', commercialPath: 'Festival-driven', fundingSecuredBand: '<40% secured', capitalStack: { equityPct: 20, softPct: 0, debtPct: 0, gapPct: 80 }, packaging: [{ role: 'Director', name: '—', status: 'wishlist' }, { role: 'Writer', name: '—', status: 'wishlist' }] },
-        },
-      ],
-    }));
+    const project: Project = {
+      id: crypto.randomUUID(), status: 'live', title: `New project ${n}`, format: 'feature', role: 'Producer', jurisdiction: ['ZA'],
+      budgetBand: { value: '$0.5–2M', provenance: 'self' },
+      ask: { logline: '', stage: 'development', commercialPath: 'Festival-driven', fundingSecuredBand: '<40% secured', capitalStack: { equityPct: 20, softPct: 0, debtPct: 0, gapPct: 80 }, packaging: [{ role: 'Director', name: '—', status: 'wishlist' }, { role: 'Writer', name: '—', status: 'wishlist' }] },
+    };
+    setDraft((d) => ({ ...d, slate: [...(d.slate ?? []), project] }));
+    setEditingLive(structuredClone(project));
   };
 
   const archiveNow = (id: string) =>
@@ -324,7 +295,7 @@ export default function ProducerProfileClient({ initial, initialSubmissions }: {
             ) : null}
             {/* Two-zone hard requirement: Track Record BEFORE Live Slate (spec §2.1) */}
             <TrackRecordZone draft={draft} submissions={submissions} onAdd={onAddCaseStudy} onEdit={onEditCaseStudy} />
-            <LiveSlateZone draft={draft} onAddProject={onAddProject} onArchive={onArchive} onExact={onExact} ndaSigned={!!draft.ndaSigned} defaultCurrency={localCurrency} />
+            <LiveSlateZone draft={draft} onAddProject={onAddProject} onArchive={onArchive} onOpenProject={onOpenLiveProject} />
             <AggregatesPanel draft={draft} />
           </div>
         )}
@@ -357,6 +328,17 @@ export default function ProducerProfileClient({ initial, initialSubmissions }: {
           />
         );
       })() : null}
+
+      {editingLive ? (
+        <LiveProjectDrawer
+          initial={editingLive}
+          ndaSigned={!!draft.ndaSigned}
+          defaultCurrency={localCurrency}
+          onSave={onSaveLiveProject}
+          onClose={() => setEditingLive(null)}
+          onRemove={() => { onArchive(editingLive.id); setEditingLive(null); }}
+        />
+      ) : null}
 
       {actionError ? (
         <div role="alert" onClick={() => setActionError(null)} style={{
