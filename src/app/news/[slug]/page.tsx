@@ -157,31 +157,68 @@ export default async function NewsArticlePage({ params }: { params: Promise<{ sl
 
         {/* Article body — MarkdownBody is the single typography source (no prose wrapper) */}
         <article className="mb-10 border-t border-line pt-8">
-          <div className="max-w-none">
+          <div className={`max-w-none relative ${article.is_truncated ? 'max-h-[480px] overflow-hidden' : ''}`}>
             {article.content && (
               <MarkdownBody content={decodeEntities(article.content)} />
             )}
+            {/* Gradient fade on truncated content */}
+            {article.is_truncated && (
+              <div
+                className="absolute inset-x-0 bottom-0 h-40 pointer-events-none"
+                style={{ background: 'linear-gradient(to bottom, transparent, var(--background))' }}
+              />
+            )}
           </div>
 
-          {/* Source attribution */}
-          {article.url && (
-            <div className="mt-8 pt-5 border-t border-line">
-              <p className="text-[12px]" style={{ color: 'var(--foreground-tertiary)' }}>
-                Source:{' '}
-                <TrackOutboundLink
-                  href={article.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  context="news_source"
-                  className="underline underline-offset-2 hover:text-foreground/60 transition-colors"
-                >
-                  {(() => {
-                    try { return new URL(article.url).hostname.replace('www.', ''); }
-                    catch { return 'Original article'; }
-                  })()}
-                </TrackOutboundLink>
-              </p>
+          {/* Paywall blurb — shown instead of the normal source line when content is truncated */}
+          {article.is_truncated && article.url ? (
+            <div className="mt-6 rounded-xl border border-line p-6 text-center" style={{ background: 'var(--surface)' }}>
+              {(() => {
+                let sourceDomain = 'the original source';
+                try { sourceDomain = new URL(article.url).hostname.replace('www.', ''); } catch { /* noop */ }
+                return (
+                  <>
+                    <p className="text-[13px] font-semibold mb-1 text-foreground">
+                      Full story available on {sourceDomain}
+                    </p>
+                    <p className="text-[12px] mb-5" style={{ color: 'var(--foreground-tertiary)' }}>
+                      We&apos;re sharing a curated preview. For the complete article, visit the original publication.
+                    </p>
+                    <TrackOutboundLink
+                      href={article.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      context="paywall_cta"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-[13px] font-semibold transition-colors"
+                      style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}
+                    >
+                      Read full article on {sourceDomain} →
+                    </TrackOutboundLink>
+                  </>
+                );
+              })()}
             </div>
+          ) : (
+            /* Normal source attribution for complete articles */
+            article.url && (
+              <div className="mt-8 pt-5 border-t border-line">
+                <p className="text-[12px]" style={{ color: 'var(--foreground-tertiary)' }}>
+                  Source:{' '}
+                  <TrackOutboundLink
+                    href={article.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    context="news_source"
+                    className="underline underline-offset-2 hover:text-foreground/60 transition-colors"
+                  >
+                    {(() => {
+                      try { return new URL(article.url).hostname.replace('www.', ''); }
+                      catch { return 'Original article'; }
+                    })()}
+                  </TrackOutboundLink>
+                </p>
+              </div>
+            )
           )}
         </article>
 

@@ -298,7 +298,6 @@ export async function getNewsArticle(slug: string): Promise<NewsItem | null> {
       .select('*')
       .eq('slug', slug)
       .eq('status', 'published')
-      .eq('is_truncated', false)
       .single();
       
     if (error) throw error;
