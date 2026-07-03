@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -40,10 +40,23 @@ export default function AfxNavSwitcher({ role }: { role: 'reviewer' | 'admin' })
   const pathname = usePathname() ?? '';
   const active = activeTop(pathname);
   const [open, setOpen] = useState(false);
+  const navRef = useRef<HTMLElement>(null);
   const items = REVIEW_ITEMS.filter((it) => !it.adminOnly || role === 'admin');
 
+  // Close the dropdown on a click outside the switcher. A document listener
+  // (not a full-viewport backdrop) so top-level links stay clickable on the
+  // first click even while the menu is open.
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (navRef.current && !navRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
+  }, [open]);
+
   return (
-    <nav style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+    <nav ref={navRef} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
       <Link href="/afx/producer" style={topStyle(active === 'producer')}>Producer</Link>
       <Link href="/afx/marketplace" style={topStyle(active === 'funder')}>Funder</Link>
       <div style={{ position: 'relative' }}>
@@ -55,8 +68,6 @@ export default function AfxNavSwitcher({ role }: { role: 'reviewer' | 'admin' })
           FRA review <span style={{ fontSize: 8 }}>{open ? '▲' : '▼'}</span>
         </button>
         {open ? (
-          <>
-            <div onClick={() => setOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 40 }} />
             <div style={{ position: 'absolute', top: 'calc(100% + 6px)', left: 0, zIndex: 41, background: '#fff', border: '1px solid var(--afx-border)', borderRadius: 10, boxShadow: '0 6px 20px rgba(0,0,0,0.10)', padding: 5, minWidth: 190, display: 'flex', flexDirection: 'column', gap: 2 }}>
               {items.map((it) => {
                 const isCurrent = pathname === it.href;
@@ -72,7 +83,6 @@ export default function AfxNavSwitcher({ role }: { role: 'reviewer' | 'admin' })
                 );
               })}
             </div>
-          </>
         ) : null}
       </div>
     </nav>
