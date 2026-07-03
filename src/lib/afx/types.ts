@@ -214,7 +214,8 @@ export interface EvidenceLink {
 export type DocumentCategory =
   | 'budget' | 'chain_of_title' | 'waterfall' | 'financing_agreement'
   | 'distribution_agreement' | 'completion_bond' | 'audit' | 'other'
-  | 'talent_deal' | 'script' | 'deck' | 'soft_funding_letter' | 'sales_estimate';
+  | 'talent_deal' | 'script' | 'deck' | 'soft_funding_letter' | 'sales_estimate'
+  | 'talent_cv' | 'talent_contract';
 
 /** Producer/company-level confidential document categories (entity vetting). */
 export type EntityDocumentCategory =
@@ -235,6 +236,9 @@ export interface AfxDocument {
   sizeBytes: number;
   contentType: string;
   uploadedAt: string;    // ISO timestamp
+  /** When set, this doc belongs to the packaging attachment with this id
+   *  (a talent CV/Contract). Absent = a project-level document. Confidential either way. */
+  packagingId?: string;
 }
 
 /* ---------- Vetting submissions (S2 producer side) ---------- */
@@ -259,6 +263,9 @@ export interface VettingSubmission {
 }
 
 export interface PackagingAttachment {
+  /** Stable id for linking confidential CV/Contract docs (see AfxDocument.packagingId).
+   *  Optional for back-compat; the live drawer backfills missing ids on load. */
+  id?: string;
   role: string;
   name: string;
   status: 'signed' | 'soft-hold' | 'wishlist';

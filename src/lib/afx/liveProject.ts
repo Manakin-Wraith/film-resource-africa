@@ -1,4 +1,4 @@
-import type { Project, SoftFundingApplication, PackagingAttachment } from './types';
+import type { Project, SoftFundingApplication, PackagingAttachment, AfxDocument, DocumentCategory } from './types';
 
 // Document mutations are status-agnostic (operate on Project.docs) — reuse, do not duplicate.
 export { addDocument, updateDocument, removeDocument } from './caseStudy';
@@ -22,7 +22,7 @@ export function removeSoftFunding(p: Project, id: string): Project {
 /** Packaging lives on the live `ask`. No-op if there is no ask. */
 export function addPackaging(p: Project): Project {
   if (!p.ask) return p;
-  const row: PackagingAttachment = { role: '', name: '', status: 'wishlist' };
+  const row: PackagingAttachment = { id: crypto.randomUUID(), role: '', name: '', status: 'wishlist' };
   return { ...p, ask: { ...p.ask, packaging: [...p.ask.packaging, row] } };
 }
 export function updatePackaging(p: Project, index: number, patch: Partial<PackagingAttachment>): Project {
@@ -31,5 +31,35 @@ export function updatePackaging(p: Project, index: number, patch: Partial<Packag
 }
 export function removePackaging(p: Project, index: number): Project {
   if (!p.ask) return p;
-  return { ...p, ask: { ...p.ask, packaging: p.ask.packaging.filter((_, i) => i !== index) } };
+  const removed = p.ask.packaging[index];
+  const packaging = p.ask.packaging.filter((_, i) => i !== index);
+  let next: Project = { ...p, ask: { ...p.ask, packaging } };
+  if (removed?.id && p.docs) {
+    next = { ...next, docs: p.docs.filter((d) => d.packagingId !== removed.id) };
+  }
+  return next;
+}
+
+/** Assign a stable id to any packaging row lacking one (back-compat for legacy rows).
+ *  Returns the same object when nothing needed changing. */
+export function backfillPackagingIds(p: Project): Project {
+  if (!p.ask) return p;
+  let changed = false;
+  const packaging = p.ask.packaging.map((a) => {
+    if (a.id) return a;
+    changed = true;
+    return { ...a, id: crypto.randomUUID() };
+  });
+  return changed ? { ...p, ask: { ...p.ask, packaging } } : p;
+}
+
+/** Attach/replace the single doc in a packaging slot (one doc per packagingId+category). */
+export function setPackagingDoc(p: Project, packagingId: string, category: DocumentCategory, doc: AfxDocument): Project {
+  const others = (p.docs ?? []).filter((d) => !(d.packagingId === packagingId && d.category === category));
+  return { ...p, docs: [...others, doc] };
+}
+
+/** Remove the doc in a packaging slot (state only; the caller hard-deletes storage). */
+export function clearPackagingDoc(p: Project, packagingId: string, category: DocumentCategory): Project {
+  return { ...p, docs: (p.docs ?? []).filter((d) => !(d.packagingId === packagingId && d.category === category)) };
 }

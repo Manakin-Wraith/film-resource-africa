@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AFX_DOCS_BUCKET, afxAdmin, resolveDocAccess, UUID_RE, hasOpenSubmission } from '@/lib/afx/server/documentAccess';
-import { ALLOWED_DOC_TYPES, MAX_DOC_BYTES, DOCUMENT_CATEGORIES, ENTITY_DOCUMENT_CATEGORIES, INDIVIDUAL_DOCUMENT_CATEGORIES, LIVE_DOCUMENT_CATEGORIES } from '@/lib/afx/documents';
+import { ALLOWED_DOC_TYPES, MAX_DOC_BYTES, DOCUMENT_CATEGORIES, ENTITY_DOCUMENT_CATEGORIES, INDIVIDUAL_DOCUMENT_CATEGORIES, LIVE_DOCUMENT_CATEGORIES, PACKAGING_DOC_CATEGORIES } from '@/lib/afx/documents';
 import type { AfxDocument, DocumentCategory, EntityDocumentCategory, IndividualDocumentCategory } from '@/lib/afx/types';
 
 export async function POST(req: NextRequest) {
@@ -9,6 +9,7 @@ export async function POST(req: NextRequest) {
   const scope = (form.get('scope') as string | null) ?? 'case_study';
   const caseStudyId = form.get('caseStudyId') as string | null;
   const category = form.get('category') as string | null;
+  const packagingId = form.get('packagingId') as string | null;
 
   if (!file || !category) {
     return NextResponse.json({ error: 'Missing file or category' }, { status: 400 });
@@ -18,7 +19,7 @@ export async function POST(req: NextRequest) {
   }
   const allowedCats = scope === 'entity' ? ENTITY_DOCUMENT_CATEGORIES
     : scope === 'individual' ? INDIVIDUAL_DOCUMENT_CATEGORIES
-    : [...DOCUMENT_CATEGORIES, ...LIVE_DOCUMENT_CATEGORIES];
+    : [...DOCUMENT_CATEGORIES, ...LIVE_DOCUMENT_CATEGORIES, ...PACKAGING_DOC_CATEGORIES];
   if (!(allowedCats as readonly string[]).includes(category)) {
     return NextResponse.json({ error: 'Invalid category' }, { status: 400 });
   }
@@ -73,6 +74,7 @@ export async function POST(req: NextRequest) {
   const doc: AfxDocument = {
     id: docId, path, filename: file.name, category: category as DocumentCategory | EntityDocumentCategory | IndividualDocumentCategory,
     sizeBytes: file.size, contentType: file.type, uploadedAt: new Date().toISOString(),
+    ...(packagingId ? { packagingId } : {}),
   };
   return NextResponse.json({ doc });
 }

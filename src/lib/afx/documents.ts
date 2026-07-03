@@ -19,6 +19,8 @@ export const DOCUMENT_CATEGORY_LABELS: Record<DocumentCategory, string> = {
   deck: 'Deck / lookbook',
   soft_funding_letter: 'Soft-funding award letter',
   sales_estimate: 'Sales estimate',
+  talent_cv: 'CV',
+  talent_contract: 'Contract',
 };
 
 /** Proof a case study must carry to be vetting-ready (provable to FRA).
@@ -63,7 +65,14 @@ export const LIVE_DOCUMENT_CATEGORY_LABELS: Record<DocumentCategory, string> = {
   soft_funding_letter: 'Soft-funding award letter',
   sales_estimate: 'Sales estimate',
   other: 'Other',
+  talent_cv: 'CV',
+  talent_contract: 'Contract',
 };
+
+/** Per-attachment packaging document categories (CV + Contract). Kept SEPARATE from
+ *  LIVE_DOCUMENT_CATEGORIES so they never appear in the project-level uploader dropdown;
+ *  the upload route accepts them for the case_study scope (see upload/route.ts). */
+export const PACKAGING_DOC_CATEGORIES: readonly DocumentCategory[] = ['talent_cv', 'talent_contract'] as const;
 
 /** MIME allowlist — authoritative copy; the client mirrors it for pre-flight. */
 export const ALLOWED_DOC_TYPES: readonly string[] = [
