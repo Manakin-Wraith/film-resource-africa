@@ -14,6 +14,11 @@ export const DOCUMENT_CATEGORY_LABELS: Record<DocumentCategory, string> = {
   completion_bond: 'Completion bond',
   audit: 'Final audit / cost report',
   other: 'Other',
+  talent_deal: 'Talent / packaging deal',
+  script: 'Script / treatment',
+  deck: 'Deck / lookbook',
+  soft_funding_letter: 'Soft-funding award letter',
+  sales_estimate: 'Sales estimate',
 };
 
 /** Proof a case study must carry to be vetting-ready (provable to FRA).
@@ -35,6 +40,30 @@ export function missingRequiredDocs(docs: readonly AfxDocument[] | undefined): D
 export function isVettingReady(docs: readonly AfxDocument[] | undefined): boolean {
   return missingRequiredDocs(docs).length === 0;
 }
+
+/** Live-project (forward-looking) document categories. A SEPARATE list from
+ *  DOCUMENT_CATEGORIES so the case-study dropdown + required-docs logic are
+ *  unchanged. The upload route accepts the union of both for the case_study scope. */
+export const LIVE_DOCUMENT_CATEGORIES: readonly DocumentCategory[] = [
+  'budget', 'financing_agreement', 'talent_deal', 'script', 'deck',
+  'chain_of_title', 'soft_funding_letter', 'sales_estimate', 'other',
+] as const;
+
+export const LIVE_DOCUMENT_CATEGORY_LABELS: Record<DocumentCategory, string> = {
+  budget: 'Budget / cost report',
+  chain_of_title: 'Chain of title',
+  waterfall: 'Recoupment waterfall',
+  financing_agreement: 'Financing agreement / LOI',
+  distribution_agreement: 'Distribution / sales agreement',
+  completion_bond: 'Completion bond',
+  audit: 'Final audit / cost report',
+  talent_deal: 'Talent / packaging deal',
+  script: 'Script / treatment',
+  deck: 'Deck / lookbook',
+  soft_funding_letter: 'Soft-funding award letter',
+  sales_estimate: 'Sales estimate',
+  other: 'Other',
+};
 
 /** MIME allowlist — authoritative copy; the client mirrors it for pre-flight. */
 export const ALLOWED_DOC_TYPES: readonly string[] = [

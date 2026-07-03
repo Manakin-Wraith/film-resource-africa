@@ -213,7 +213,8 @@ export interface EvidenceLink {
 
 export type DocumentCategory =
   | 'budget' | 'chain_of_title' | 'waterfall' | 'financing_agreement'
-  | 'distribution_agreement' | 'completion_bond' | 'audit' | 'other';
+  | 'distribution_agreement' | 'completion_bond' | 'audit' | 'other'
+  | 'talent_deal' | 'script' | 'deck' | 'soft_funding_letter' | 'sales_estimate';
 
 /** Producer/company-level confidential document categories (entity vetting). */
 export type EntityDocumentCategory =
@@ -307,6 +308,17 @@ export interface ExactFigures {
   capitalStack?: { equity?: ExactMoney; soft?: ExactMoney; debt?: ExactMoney; gap?: ExactMoney };
 }
 
+/** Producer soft-funding / grant application, captured on a live project.
+ *  Confidential (applied-for amounts) — isolated at the top level of Project,
+ *  stripped at the funder boundary like `exact`/`docs`. */
+export type SoftFundingStatus = 'applied' | 'in_review' | 'awarded' | 'declined';
+export interface SoftFundingApplication {
+  id: string;            // crypto.randomUUID()
+  body: string;          // fund / grant body name, as entered
+  amount?: ExactMoney;   // optional applied-for amount
+  status: SoftFundingStatus;
+}
+
 export interface Project {
   id: string;
   status: ProjectStatus;
@@ -326,6 +338,9 @@ export interface Project {
   /** Confidential documents — isolated like `exact`; persisted in the `docs`
    *  column, NEVER in `body`, NEVER serialized to the funder view. */
   docs?: AfxDocument[];
+  /** Soft-funding / grant applications (live projects). Confidential like `docs`;
+   *  NEVER serialized to the funder view. */
+  softFunding?: SoftFundingApplication[];
   outcomes?: ProjectOutcomes;   // when status === 'case_study'
   ask?: ProjectAsk;             // when status === 'live'
   /** id of the matching DealEntity in afxSeed.projects for the live deal overlay. */

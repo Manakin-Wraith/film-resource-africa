@@ -1,20 +1,21 @@
 import type { ProducerProfile, Project } from './types';
 
-export type FunderProject = Omit<Project, 'exact' | 'docs'>;
+export type FunderProject = Omit<Project, 'exact' | 'docs' | 'softFunding'>;
 
 /** Funder view: slate exact-/docs-stripped AND the producer-level confidential
  *  doc lanes (`entityDocs`, `individualDocs`) removed at the type level. */
 export type FunderView = Omit<ProducerProfile, 'slate' | 'entityDocs' | 'individualDocs'> & { slate: FunderProject[] };
 
-/** Remove the NDA-gated exact figures AND confidential docs from a single project (runtime + type). Shallow by design. */
+/** Remove the NDA-gated exact figures, confidential docs, AND soft-funding from a single project (runtime + type). Shallow by design. */
 export function stripExact(pr: Project): FunderProject {
   const clone = { ...pr };
   delete (clone as Partial<Project>).exact;
   delete (clone as Partial<Project>).docs;
+  delete (clone as Partial<Project>).softFunding;
   return clone as FunderProject;
 }
 
-/** Project a producer's cockpit profile into the funder-safe view. THE funder boundary — NDA-gated exact figures, confidential case-study docs, and confidential entity_docs/individual_docs do not exist past this function. Returns a fresh object; never mutates p. */
+/** Project a producer's cockpit profile into the funder-safe view. THE funder boundary — NDA-gated exact figures, confidential case-study docs, softFunding, and confidential entity_docs/individual_docs do not exist past this function. Returns a fresh object; never mutates p. */
 export function toFunderView(p: ProducerProfile): FunderView {
   const { entityDocs: _entityDocs, individualDocs: _individualDocs, ...rest } = p;
   void _entityDocs;

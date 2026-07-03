@@ -1,4 +1,4 @@
-import type { Provenance, RatingBand, Visibility, ProducerProfile, EvidenceClaim, ProducerType } from './types';
+import type { Provenance, RatingBand, Visibility, ProducerProfile, EvidenceClaim, ProducerType, SoftFundingStatus } from './types';
 import { liveProjects, caseStudies } from './aggregates';
 import type { Project } from './types';
 
@@ -123,4 +123,17 @@ export const EVIDENCE_CLAIM_LABELS: Record<EvidenceClaim, string> = {
   distribution: 'Distribution',
   festival: 'Festival',
   other: 'Other',
+};
+
+export const LIVE_STAGE_OPTIONS = ['development', 'packaging', 'financing', 'pre-production', 'production'] as const;
+
+/** Controlled funding-secured bands (ordinal, low → high). Used by the live
+ *  drawer dropdown AND the de-risking score's fundingSecured ordinal. */
+export const FUNDING_SECURED_BANDS = ['<40% secured', '40–60% secured', '60–80% secured', '80%+ secured'] as const;
+
+export const SOFT_FUNDING_STATUS_LABELS: Record<SoftFundingStatus, string> = {
+  applied: 'Applied',
+  in_review: 'In review',
+  awarded: 'Awarded',
+  declined: 'Declined',
 };

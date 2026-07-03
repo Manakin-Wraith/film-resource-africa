@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import type { Project, AfxCurrency, EvidenceClaim, VettingSubmission } from '@/lib/afx/types';
-import { isVettingReady } from '@/lib/afx/documents';
+import { isVettingReady, REQUIRED_DOCUMENT_CATEGORIES } from '@/lib/afx/documents';
 import { VETTING_STATUS_META } from '@/lib/afx/vetting';
 import {
   isCaseStudySavable, toggleJurisdiction, setBudgetBand, setOutcome, setExactBudget,
@@ -164,6 +164,7 @@ export default function CaseStudyDrawer({ initial, isNew, ndaSigned, defaultCurr
               <AfxDocumentUpload
                 caseStudyId={study.id}
                 docs={study.docs ?? []}
+                requiredCategories={REQUIRED_DOCUMENT_CATEGORIES}
                 onAdd={(doc) => setStudy((s) => addDocument(s, doc))}
                 onUpdate={(id, patch) => setStudy((s) => updateDocument(s, id, patch))}
                 onRemove={(id) => setStudy((s) => removeDocument(s, id))}

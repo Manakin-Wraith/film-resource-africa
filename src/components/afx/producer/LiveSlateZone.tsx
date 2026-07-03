@@ -1,6 +1,6 @@
 'use client';
 
-import type { ProducerProfile, Project, ExactMoney, AfxCurrency } from '@/lib/afx/types';
+import type { ProducerProfile, Project } from '@/lib/afx/types';
 import { liveProjects } from '@/lib/afx/aggregates';
 import { meetsCorePackaging } from '@/lib/afx/constants';
 import { afxSeed } from '@/lib/afx/seed';
@@ -8,7 +8,6 @@ import ProvenanceBadge from '@/components/afx/primitives/ProvenanceBadge';
 import ConfidenceMarker from '@/components/afx/primitives/ConfidenceMarker';
 import RiskFlag from '@/components/afx/primitives/RiskFlag';
 import { SectionCard, GhostButton } from './cockpitUi';
-import ExactFigureInput from '@/components/afx/primitives/ExactFigureInput';
 
 const mono = 'var(--afx-mono)';
 
@@ -16,12 +15,10 @@ interface Props {
   draft: ProducerProfile;
   onAddProject: () => void;
   onArchive: (id: string) => void;
-  onExact: (projectId: string, field: 'budget' | 'fundingSecured' | 'equity' | 'soft' | 'debt' | 'gap', value: ExactMoney | undefined) => void;
-  ndaSigned: boolean;
-  defaultCurrency: AfxCurrency;
+  onOpenProject: (id: string) => void;
 }
 
-export default function LiveSlateZone({ draft, onAddProject, onArchive, onExact, ndaSigned, defaultCurrency }: Props) {
+export default function LiveSlateZone({ draft, onAddProject, onArchive, onOpenProject }: Props) {
   const live = liveProjects(draft);
   const screenable = live.filter(meetsCorePackaging);
   return (
@@ -39,7 +36,7 @@ export default function LiveSlateZone({ draft, onAddProject, onArchive, onExact,
             {live.map((p) => (
               <LiveProjectCard key={p.id} project={p} onArchive={() => onArchive(p.id)}
                 lastScreenable={screenable.length <= 1 && meetsCorePackaging(p)}
-                onExact={(field, v) => onExact(p.id, field, v)} ndaSigned={ndaSigned} defaultCurrency={defaultCurrency} />
+                onOpen={() => onOpenProject(p.id)} />
             ))}
           </div>
         </>
@@ -48,8 +45,7 @@ export default function LiveSlateZone({ draft, onAddProject, onArchive, onExact,
   );
 }
 
-type LiveExactField = 'budget' | 'fundingSecured' | 'equity' | 'soft' | 'debt' | 'gap';
-function LiveProjectCard({ project, onArchive, lastScreenable, onExact, ndaSigned, defaultCurrency }: { project: Project; onArchive: () => void; lastScreenable: boolean; onExact: (field: LiveExactField, v: ExactMoney | undefined) => void; ndaSigned: boolean; defaultCurrency: AfxCurrency }) {
+function LiveProjectCard({ project, onArchive, lastScreenable, onOpen }: { project: Project; onArchive: () => void; lastScreenable: boolean; onOpen: () => void }) {
   const ask = project.ask;
   const deal = project.dealRef ? afxSeed.projects.find((d) => d.id === project.dealRef) : undefined;
   const screenable = meetsCorePackaging(project);
@@ -94,34 +90,12 @@ function LiveProjectCard({ project, onArchive, lastScreenable, onExact, ndaSigne
         </div>
       ) : null}
 
-      {ndaSigned ? (
-        <div style={{ borderTop: '1px dashed #ECEAE4', paddingTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <span style={{ fontFamily: mono, fontSize: 8.5, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--afx-accent)' }}>Exact figures (NDA)</span>
-          <div>
-            <span style={{ fontFamily: mono, fontSize: 8.5, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#A7A99F' }}>Budget</span>
-            <ExactFigureInput value={project.exact?.budget} onCommit={(v) => onExact('budget', v)} gated={ndaSigned} label="budget" defaultCurrency={defaultCurrency}
-              confirmHint={project.budgetBand.provenance === 'confirmed' ? '→ confirmed' : undefined} />
-          </div>
-          <div>
-            <span style={{ fontFamily: mono, fontSize: 8.5, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#A7A99F' }}>Funding secured</span>
-            <ExactFigureInput value={project.exact?.fundingSecured} onCommit={(v) => onExact('fundingSecured', v)} gated={ndaSigned} label="funding" defaultCurrency={defaultCurrency} />
-          </div>
-          <div>
-            <span style={{ fontFamily: mono, fontSize: 8.5, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#A7A99F' }}>Capital stack</span>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px 14px', marginTop: 2 }}>
-              {(['equity', 'soft', 'debt', 'gap'] as const).map((leg) => (
-                <div key={leg}>
-                  <span style={{ fontSize: 11, color: '#9A9CA3', textTransform: 'capitalize' }}>{leg}</span>
-                  <ExactFigureInput value={project.exact?.capitalStack?.[leg]} onCommit={(v) => onExact(leg, v)} gated={ndaSigned} label={leg} defaultCurrency={defaultCurrency} />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      ) : null}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginTop: 2 }}>
         <ProvenanceBadge provenance={project.budgetBand.provenance} size="sm" />
-        <GhostButton onClick={onArchive} tone={lastScreenable ? 'danger' : 'neutral'}>Archive</GhostButton>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <GhostButton onClick={onOpen} tone="accent">Package / edit</GhostButton>
+          <GhostButton onClick={onArchive} tone={lastScreenable ? 'danger' : 'neutral'}>Archive</GhostButton>
+        </div>
       </div>
     </div>
   );
