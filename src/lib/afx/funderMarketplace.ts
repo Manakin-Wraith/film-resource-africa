@@ -1,4 +1,4 @@
-import type { ProducerProfile, Project, RatingBand, PackagingAttachment, CapitalStackInput, Provenance, Relationship, EvidenceLink, Slate, RiskTier } from './types';
+import type { ProducerProfile, Project, RatingBand, PackagingAttachment, CapitalStackInput, Provenance, Relationship, EvidenceLink } from './types';
 import { deriveVisibility, meetsCorePackaging } from './constants';
 import { liveProjects, caseStudies, computeAggregates, type Aggregates } from './aggregates';
 import { derisking } from './derisking';
@@ -19,25 +19,6 @@ export interface FunderMarketProjectRow {
   capitalStack: CapitalStackInput;
   comps: { title: string; note: string }[];
   evidence: EvidenceLink[];
-}
-
-/** Funder-safe projection of a producer-curated slate. Banded econ fields
- *  only, self-reported, no NDA-gated exact layer in this slice. */
-export interface FunderMarketSlateRow {
-  id: string;
-  name: string;
-  genreStrategy: string;
-  stage: Slate['stage'];
-  volume: number;
-  totalBudgetBand: string;
-  securedBand: string;
-  askBand: string;
-  targetIRR: string;
-  portfolioROI: string;
-  riskSpread: Record<RiskTier, number>;
-  distributionStrategy: string;
-  evidence: EvidenceLink[];
-  projects: FunderMarketProjectRow[];
 }
 
 /** One past project (case study) as evidence behind a producer's track record. */
@@ -66,7 +47,6 @@ export interface FunderMarketRow {
   visibility: 'live' | 'one-away';
   screenableCount: number;
   relationships: Relationship[];
-  slates: FunderMarketSlateRow[];
   projects: FunderMarketProjectRow[];
   /** Lifetime track-record bands, rolled up from case studies. '—' fields mean no case studies yet. */
   trackRecord: Aggregates;
@@ -91,7 +71,7 @@ export function toFunderMarketRows(profiles: ProducerProfile[]): FunderMarketRow
       .map((proj) => ({ proj, score: derisking(proj).total }))
       .sort((a, b) => (b.score - a.score) || (a.proj.title < b.proj.title ? -1 : a.proj.title > b.proj.title ? 1 : 0));
 
-    const toProjectRow = (proj: Project): FunderMarketProjectRow => ({
+    const projects: FunderMarketProjectRow[] = ranked.map(({ proj }) => ({
       id: proj.id,
       title: proj.title,
       stage: proj.ask?.stage ?? '',
@@ -104,44 +84,7 @@ export function toFunderMarketRows(profiles: ProducerProfile[]): FunderMarketRow
       capitalStack: proj.ask?.capitalStack ?? { equityPct: 0, softPct: 0, debtPct: 0, gapPct: 0 },
       comps: proj.ask?.comps ?? [],
       evidence: proj.evidence ?? [],
-    });
-
-    const screenableIds = new Set(screenable.map((proj) => proj.id));
-    const slatedIds = new Set<string>();
-    const slateRows: FunderMarketSlateRow[] = [];
-
-    for (const s of p.slates ?? []) {
-      const memberIds = s.projectIds.filter((id) => screenableIds.has(id));
-      if (memberIds.length === 0) continue; // no screenable members — drop the slate entirely
-
-      const riskSpread: Record<RiskTier, number> = { low: 0, mid: 0, 'high-upside': 0 };
-      for (const id of memberIds) {
-        const tier = s.riskTiers[id];
-        if (tier) riskSpread[tier] += 1;
-        slatedIds.add(id);
-      }
-
-      const memberRanked = ranked.filter((r) => memberIds.includes(r.proj.id));
-      slateRows.push({
-        id: s.id,
-        name: s.name,
-        genreStrategy: s.genreStrategy,
-        stage: s.stage,
-        volume: memberIds.length,
-        totalBudgetBand: s.totalBudgetBand.value,
-        securedBand: s.securedBand,
-        askBand: s.askBand.value,
-        targetIRR: s.targetIRR.value,
-        portfolioROI: s.portfolioROI.value,
-        riskSpread,
-        distributionStrategy: s.distributionStrategy,
-        evidence: s.evidence ?? [],
-        projects: memberRanked.map(({ proj }) => toProjectRow(proj)),
-      });
-    }
-
-    const standaloneRanked = ranked.filter((r) => !slatedIds.has(r.proj.id));
-    const projects: FunderMarketProjectRow[] = standaloneRanked.map(({ proj }) => toProjectRow(proj));
+    }));
 
     const studyRows: FunderMarketCaseStudyRow[] = caseStudies(p).map((s) => ({
       id: s.id,
@@ -168,7 +111,6 @@ export function toFunderMarketRows(profiles: ProducerProfile[]): FunderMarketRow
         visibility,
         screenableCount: screenable.length,
         relationships: p.relationships,
-        slates: slateRows,
         projects,
         trackRecord: computeAggregates(p),
         caseStudies: studyRows,
