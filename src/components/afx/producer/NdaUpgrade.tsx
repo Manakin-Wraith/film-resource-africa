@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { SectionCard } from './cockpitUi';
 import { renderNda } from '@/lib/afx/nda';
 import type { NdaSignature } from '@/lib/afx/types';
@@ -21,6 +21,7 @@ export default function NdaUpgrade({ signed, signature, producerName, company, b
   const [expanded, setExpanded] = useState(false);
   const [name, setName] = useState('');
   const [agreed, setAgreed] = useState(false);
+  const docRef = useRef<HTMLPreElement>(null);
 
   const today = new Date().toISOString().slice(0, 10);
   const docText = renderNda({ producerName, company, date: today });
@@ -64,12 +65,13 @@ export default function NdaUpgrade({ signed, signature, producerName, company, b
         <button onClick={() => setExpanded(true)} disabled={busy} style={{ ...primary, marginTop: 12 }}>Review &amp; sign NDA</button>
       ) : (
         <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {docBox}
+          <pre ref={docRef} style={{ maxHeight: 260, overflowY: 'auto', whiteSpace: 'pre-wrap', fontFamily: 'var(--afx-body)', fontSize: 12.5, lineHeight: 1.55, color: '#3A3B40', background: '#FAF9F6', border: '1px solid #EDEBE4', borderRadius: 10, padding: '14px 16px', margin: 0 }}>{docText}</pre>
           <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Full legal name"
             style={{ fontFamily: 'var(--afx-body)', fontSize: 13.5, padding: '9px 12px', borderRadius: 9, border: '1px solid #E4E2DC' }} />
-          <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12.5, color: '#5E6066' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12.5, color: '#5E6066', flexWrap: 'wrap' }}>
             <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} />
-            I have read and agree to this agreement.
+            I have read and agree to the{' '}
+            <button type="button" onClick={() => { if (docRef.current) { docRef.current.scrollTop = 0; docRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' }); } }} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--afx-accent)', textDecoration: 'underline', fontSize: 12.5, fontFamily: 'var(--afx-body)' }}>terms of this agreement</button>.
           </label>
           <div style={{ display: 'flex', gap: 10 }}>
             <button onClick={() => onSign(name.trim())} disabled={!canSign} style={{ ...primary, opacity: canSign ? 1 : 0.5, cursor: canSign ? 'pointer' : 'not-allowed' }}>Sign agreement</button>
