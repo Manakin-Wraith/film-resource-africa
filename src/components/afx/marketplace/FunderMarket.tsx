@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import type { FunderMarketRow, FunderMarketProjectRow } from '@/lib/afx/funderMarketplace';
+import type { FunderMarketRow, FunderMarketProjectRow, FunderMarketCaseStudyRow } from '@/lib/afx/funderMarketplace';
 import { RATING_BAND_LABEL, VISIBILITY_META } from '@/lib/afx/constants';
+import ProvenanceBadge from '@/components/afx/primitives/ProvenanceBadge';
+import CapitalStackBarPct from '@/components/afx/primitives/CapitalStackBarPct';
 
 const mono = 'var(--afx-mono)';
 
@@ -20,20 +22,81 @@ function VisibilityChip({ visibility }: { visibility: FunderMarketRow['visibilit
   );
 }
 
+/** Compact "3/4 fully recouped · 2 titles bonded" glance line. Renders nothing
+ *  once the producer has zero case studies (both fields stay '—'). */
+function TrackRecordLine({ trackRecord }: { trackRecord: FunderMarketRow['trackRecord'] }) {
+  if (trackRecord.recoupmentRecord === '—') return null;
+  return (
+    <span style={{ fontFamily: mono, fontSize: 10, color: 'var(--afx-muted)' }}>
+      {trackRecord.recoupmentRecord} · {trackRecord.bondHistory}
+    </span>
+  );
+}
+
+function CaseStudyRowView({ s }: { s: FunderMarketCaseStudyRow }) {
+  return (
+    <div style={{ padding: '10px 0', borderTop: '1px solid var(--afx-border)' }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--afx-ink)' }}>{s.title || 'Untitled'}</span>
+        <span style={{ fontFamily: mono, fontSize: 10, color: 'var(--afx-faint)' }}>{[s.format, s.budgetBand].filter(Boolean).join(' · ')}</span>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 6 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
+          <span style={{ width: 78, flex: 'none', color: 'var(--afx-faint)' }}>Recoupment</span>
+          <span style={{ flex: 1, fontWeight: 600 }}>{s.recoupment.value}</span>
+          <ProvenanceBadge provenance={s.recoupment.provenance} size="sm" />
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
+          <span style={{ width: 78, flex: 'none', color: 'var(--afx-faint)' }}>Bond</span>
+          <span style={{ flex: 1, fontWeight: 600 }}>{s.bondUsed.value}</span>
+          <ProvenanceBadge provenance={s.bondUsed.provenance} size="sm" />
+        </div>
+        {s.distribution.map((d, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
+            <span style={{ width: 78, flex: 'none', color: 'var(--afx-faint)' }}>Distribution</span>
+            <span style={{ flex: 1, fontWeight: 600 }}>{d.name} · {d.type}</span>
+            <ProvenanceBadge provenance={d.provenance} size="sm" />
+          </div>
+        ))}
+      </div>
+      {s.festivalsAwards.length > 0 ? (
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 8 }}>
+          {s.festivalsAwards.map((f, i) => (
+            <span key={i} style={{ fontSize: 10.5, color: 'var(--afx-muted)', background: '#F6F5F2', border: '1px solid var(--afx-border)', borderRadius: 6, padding: '2px 7px' }}>{f}</span>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 function ProjectRowView({ p }: { p: FunderMarketProjectRow }) {
   const meta = [p.stage, p.format, p.budgetBand, p.fundingSecuredBand, p.commercialPath].filter(Boolean).join(' · ');
   return (
     <div style={{ padding: '10px 0', borderTop: '1px solid var(--afx-border)' }}>
       <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--afx-ink)' }}>{p.title || 'Untitled'}</div>
       <div style={{ fontFamily: mono, fontSize: 10, color: 'var(--afx-faint)', marginTop: 3 }}>{meta || '—'}</div>
+      {p.logline ? (
+        <div style={{ fontSize: 12, color: 'var(--afx-muted)', fontStyle: 'italic', marginTop: 6 }}>{p.logline}</div>
+      ) : null}
+      <div style={{ marginTop: 8 }}>
+        <CapitalStackBarPct stack={p.capitalStack} />
+      </div>
       {p.packaging.length > 0 ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 3, marginTop: 6 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 3, marginTop: 8 }}>
           {p.packaging.map((a, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
               <span style={{ width: 70, flex: 'none', color: 'var(--afx-faint)' }}>{a.role}</span>
               <span style={{ flex: 1, fontWeight: 600 }}>{a.name || '—'}</span>
               <span style={{ fontSize: 10.5, color: 'var(--afx-muted)' }}>{STATUS_LABEL[a.status]}</span>
             </div>
+          ))}
+        </div>
+      ) : null}
+      {p.comps.length > 0 ? (
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 8 }}>
+          {p.comps.map((c, i) => (
+            <span key={i} title={c.note} style={{ fontSize: 10.5, color: 'var(--afx-muted)', background: '#F6F5F2', border: '1px solid var(--afx-border)', borderRadius: 6, padding: '2px 7px' }}>{c.title}</span>
           ))}
         </div>
       ) : null}
@@ -66,6 +129,7 @@ export default function FunderMarket({ rows }: { rows: FunderMarketRow[] }) {
                       <span style={{ fontFamily: mono, fontSize: 10, fontWeight: 700, color: 'var(--afx-ink)', background: '#F6F5F2', border: '1px solid var(--afx-border)', borderRadius: 6, padding: '2px 7px' }}>{r.ratingBand} · {RATING_BAND_LABEL[r.ratingBand]}</span>
                       <span style={{ fontFamily: mono, fontSize: 10, color: 'var(--afx-faint)' }}>{r.careerStage}</span>
                       <VisibilityChip visibility={r.visibility} />
+                      <TrackRecordLine trackRecord={r.trackRecord} />
                     </div>
                   </div>
                   <button onClick={() => setOpen((o) => ({ ...o, [r.producerId]: !o[r.producerId] }))}
@@ -75,6 +139,13 @@ export default function FunderMarket({ rows }: { rows: FunderMarketRow[] }) {
                 </div>
                 {isOpen ? (
                   <div style={{ marginTop: 8 }}>
+                    {r.caseStudies.length > 0 ? (
+                      <div style={{ marginBottom: 10 }}>
+                        <div style={{ fontFamily: mono, fontSize: 9, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--afx-faint)', marginTop: 6 }}>Track record</div>
+                        {r.caseStudies.map((s) => <CaseStudyRowView key={s.id} s={s} />)}
+                      </div>
+                    ) : null}
+                    <div style={{ fontFamily: mono, fontSize: 9, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--afx-faint)', marginTop: 6 }}>Live slate</div>
                     {r.projects.map((p) => <ProjectRowView key={p.id} p={p} />)}
                   </div>
                 ) : null}

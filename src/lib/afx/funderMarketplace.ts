@@ -1,6 +1,6 @@
-import type { ProducerProfile, Project, RatingBand, PackagingAttachment } from './types';
+import type { ProducerProfile, Project, RatingBand, PackagingAttachment, CapitalStackInput, Provenance } from './types';
 import { deriveVisibility, meetsCorePackaging } from './constants';
-import { liveProjects } from './aggregates';
+import { liveProjects, caseStudies, computeAggregates, type Aggregates } from './aggregates';
 import { derisking } from './derisking';
 
 /** Funder-safe projection of one screenable live project — bands + packaging only.
@@ -14,6 +14,22 @@ export interface FunderMarketProjectRow {
   fundingSecuredBand: string;
   commercialPath: string;
   packaging: PackagingAttachment[];
+  logline: string;
+  /** Percentage bands only — no dollar figures are funder-visible. */
+  capitalStack: CapitalStackInput;
+  comps: { title: string; note: string }[];
+}
+
+/** One past project (case study) as evidence behind a producer's track record. */
+export interface FunderMarketCaseStudyRow {
+  id: string;
+  title: string;
+  format: string;
+  budgetBand: string;
+  recoupment: { value: string; provenance: Provenance };
+  bondUsed: { value: string; provenance: Provenance };
+  distribution: { name: string; type: string; provenance: Provenance }[];
+  festivalsAwards: string[];
 }
 
 /** One producer row on the funder marketplace. Carries no score field —
@@ -27,6 +43,9 @@ export interface FunderMarketRow {
   visibility: 'live' | 'one-away';
   screenableCount: number;
   projects: FunderMarketProjectRow[];
+  /** Lifetime track-record bands, rolled up from case studies. '—' fields mean no case studies yet. */
+  trackRecord: Aggregates;
+  caseStudies: FunderMarketCaseStudyRow[];
 }
 
 const VIS_RANK: Record<'live' | 'one-away', number> = { live: 0, 'one-away': 1 };
@@ -56,6 +75,20 @@ export function toFunderMarketRows(profiles: ProducerProfile[]): FunderMarketRow
       fundingSecuredBand: proj.ask?.fundingSecuredBand ?? '',
       commercialPath: proj.ask?.commercialPath ?? '',
       packaging: proj.ask?.packaging ?? [],
+      logline: proj.ask?.logline ?? '',
+      capitalStack: proj.ask?.capitalStack ?? { equityPct: 0, softPct: 0, debtPct: 0, gapPct: 0 },
+      comps: proj.ask?.comps ?? [],
+    }));
+
+    const studyRows: FunderMarketCaseStudyRow[] = caseStudies(p).map((s) => ({
+      id: s.id,
+      title: s.title,
+      format: s.format,
+      budgetBand: s.budgetBand.value,
+      recoupment: s.outcomes?.recoupment ?? { value: '—', provenance: 'self' },
+      bondUsed: s.outcomes?.bondUsed ?? { value: '—', provenance: 'self' },
+      distribution: s.outcomes?.distribution ?? [],
+      festivalsAwards: s.outcomes?.festivalsAwards ?? [],
     }));
 
     scored.push({
@@ -69,6 +102,8 @@ export function toFunderMarketRows(profiles: ProducerProfile[]): FunderMarketRow
         visibility,
         screenableCount: screenable.length,
         projects,
+        trackRecord: computeAggregates(p),
+        caseStudies: studyRows,
       },
     });
   }
