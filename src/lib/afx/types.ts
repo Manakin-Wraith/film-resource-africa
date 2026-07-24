@@ -188,6 +188,9 @@ export interface ProducerProfile {
   individualVerifiedAt?: string;
   /** Optional public professional links (profile blob, not confidential). */
   individualLinks?: { imdb?: string; linkedin?: string; portfolio?: string };
+  /** Producer-curated portfolios grouping a subset of live projects. Profile
+   *  blob field — not confidential, flows through `profile` like `bio`/`company`. */
+  slates?: Slate[];
 }
 
 /* ---------- Unified Project (case study ⇄ live ask) ---------- */
@@ -209,6 +212,31 @@ export interface EvidenceLink {
   id: string;   // crypto.randomUUID()
   url: string;  // stored as entered
   supports: EvidenceClaim;
+}
+
+/** Risk tier a producer assigns a project when adding it to a Slate. Only
+ *  meaningful in the context of slate membership — a standalone project has
+ *  no risk tier. */
+export type RiskTier = 'low' | 'mid' | 'high-upside';
+
+/** A producer-curated portfolio of a subset of their live projects, pitched
+ *  to funders as a diversified instrument rather than a single bet. All econ
+ *  fields are bands/ranges — never exact figures — and self-reported, same
+ *  as ProjectAsk fields today. A live project belongs to at most one Slate. */
+export interface Slate {
+  id: string;
+  name: string;
+  genreStrategy: string;
+  stage: 'packaging' | 'financing' | 'ready';
+  projectIds: string[];
+  riskTiers: Record<string, RiskTier>;
+  totalBudgetBand: Provenanced<string>;
+  securedBand: string;
+  askBand: Provenanced<string>;
+  targetIRR: Provenanced<string>;
+  portfolioROI: Provenanced<string>;
+  distributionStrategy: string;
+  evidence?: EvidenceLink[];
 }
 
 export type DocumentCategory =
