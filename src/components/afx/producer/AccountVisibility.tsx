@@ -1,7 +1,7 @@
 'use client';
 
 import type { ProducerProfile } from '@/lib/afx/types';
-import { deriveVisibility, VISIBILITY_META, producerTypeOf, operatorGateLabel } from '@/lib/afx/constants';
+import { producerTypeOf, operatorGateLabel } from '@/lib/afx/constants';
 import { SectionCard } from './cockpitUi';
 
 const mono = 'var(--afx-mono)';
@@ -12,13 +12,14 @@ interface Props {
   onToggleK4: () => void;
 }
 
+/** The two switches funders require before a producer can be screened.
+ *  Live visibility status is shown once, in the page's top status header —
+ *  not repeated here. */
 export default function AccountVisibility({ draft, onToggleK2, onToggleK4 }: Props) {
-  const visibility = deriveVisibility(draft);
-  const vMeta = VISIBILITY_META[visibility];
   const k2 = operatorGateLabel(producerTypeOf(draft));
 
   return (
-    <SectionCard title="Account & Visibility" hint="knockout gates">
+    <SectionCard title="Account & Visibility" hint="what funders require to see you">
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <Gate
           code="K2"
@@ -29,19 +30,11 @@ export default function AccountVisibility({ draft, onToggleK2, onToggleK4 }: Pro
         />
         <Gate
           code="K4"
-          title="Transparency / reporting consent"
-          note="One tap. Required to become visible to funders."
+          title="Consent to share your profile with funders"
+          note="One tap. You can withdraw this at any time — doing so removes your projects from the marketplace immediately."
           on={draft.consentK4}
           onToggle={onToggleK4}
         />
-      </div>
-
-      <div style={{ marginTop: 16, display: 'flex', alignItems: 'center', gap: 10, padding: '13px 16px', borderRadius: 10, background: '#FCFBF9', border: '1px solid #EFEDE8' }}>
-        <span style={{ width: 8, height: 8, borderRadius: '50%', background: vMeta.tone }} />
-        <span style={{ fontSize: 13, fontWeight: 600 }}>{vMeta.label}</span>
-        <span style={{ fontFamily: mono, fontSize: 11, color: '#9A9CA3', marginLeft: 'auto' }}>
-          {visibility === 'live' ? 'appears in Deal Display' : visibility === 'one-away' ? 'add a project to go live' : 'private — not screenable'}
-        </span>
       </div>
     </SectionCard>
   );

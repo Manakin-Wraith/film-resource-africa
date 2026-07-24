@@ -38,8 +38,8 @@ export function isIndividual(p: { producerType?: ProducerType }): boolean {
 /** Type-aware copy for the reused K2 "operator standing" gate. */
 export function operatorGateLabel(type: ProducerType): { title: string; note: string } {
   return type === 'individual'
-    ? { title: 'Individual / professional standing', note: 'Your standing as an individual producer. Missing caps your rating band.' }
-    : { title: 'Legal entity / structure', note: 'An operating entity must be in place. Missing caps your rating band.' };
+    ? { title: 'Individual / professional standing', note: 'Your standing as an individual producer. Required to complete vetting.' }
+    : { title: 'Legal entity / structure', note: 'An operating entity must be in place. Required to complete vetting.' };
 }
 
 export function meetsGoLive(p: ProducerProfile): boolean {
