@@ -2,9 +2,11 @@
 
 import { useState } from 'react';
 import type { FunderMarketRow, FunderMarketProjectRow, FunderMarketCaseStudyRow } from '@/lib/afx/funderMarketplace';
-import { RATING_BAND_LABEL, VISIBILITY_META } from '@/lib/afx/constants';
+import type { EvidenceLink } from '@/lib/afx/types';
+import { RATING_BAND_LABEL, VISIBILITY_META, EVIDENCE_CLAIM_LABELS } from '@/lib/afx/constants';
 import ProvenanceBadge from '@/components/afx/primitives/ProvenanceBadge';
 import CapitalStackBarPct from '@/components/afx/primitives/CapitalStackBarPct';
+import RiskFlag from '@/components/afx/primitives/RiskFlag';
 
 const mono = 'var(--afx-mono)';
 
@@ -30,6 +32,48 @@ function TrackRecordLine({ trackRecord }: { trackRecord: FunderMarketRow['trackR
     <span style={{ fontFamily: mono, fontSize: 10, color: 'var(--afx-muted)' }}>
       {trackRecord.recoupmentRecord} · {trackRecord.bondHistory}
     </span>
+  );
+}
+
+function EvidenceLinks({ evidence }: { evidence: EvidenceLink[] }) {
+  if (evidence.length === 0) return null;
+  return (
+    <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 6 }}>
+      {evidence.map((e) => (
+        <a key={e.id} href={e.url} target="_blank" rel="noreferrer" style={{ fontSize: 10.5, color: 'var(--afx-accent, #3D46C9)', textDecoration: 'none' }}>
+          {EVIDENCE_CLAIM_LABELS[e.supports]} ↗
+        </a>
+      ))}
+    </div>
+  );
+}
+
+function AboutRow({ r }: { r: FunderMarketRow }) {
+  if (!r.bio && !r.location) return null;
+  return (
+    <div style={{ marginBottom: 10 }}>
+      <div style={{ fontFamily: mono, fontSize: 9, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--afx-faint)', marginBottom: 6 }}>About</div>
+      {r.bio ? <div style={{ fontSize: 12.5, color: 'var(--afx-ink)', lineHeight: 1.5 }}>{r.bio}</div> : null}
+      {r.location ? <div style={{ fontFamily: mono, fontSize: 10.5, color: 'var(--afx-faint)', marginTop: 4 }}>{r.location}</div> : null}
+    </div>
+  );
+}
+
+function TeamRow({ relationships }: { relationships: FunderMarketRow['relationships'] }) {
+  if (relationships.length === 0) return null;
+  return (
+    <div style={{ marginBottom: 10 }}>
+      <div style={{ fontFamily: mono, fontSize: 9, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--afx-faint)', marginBottom: 6 }}>Team & relationships</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        {relationships.map((rel) => (
+          <div key={rel.id} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
+            <span style={{ flex: 1, fontWeight: 600 }}>{rel.name}</span>
+            <span style={{ fontFamily: mono, fontSize: 10.5, color: 'var(--afx-faint)' }}>{rel.role}</span>
+            <ProvenanceBadge provenance={rel.provenance} size="sm" />
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -66,6 +110,7 @@ function CaseStudyRowView({ s }: { s: FunderMarketCaseStudyRow }) {
           ))}
         </div>
       ) : null}
+      <EvidenceLinks evidence={s.evidence} />
     </div>
   );
 }
@@ -100,6 +145,7 @@ function ProjectRowView({ p }: { p: FunderMarketProjectRow }) {
           ))}
         </div>
       ) : null}
+      <EvidenceLinks evidence={p.evidence} />
     </div>
   );
 }
@@ -139,6 +185,13 @@ export default function FunderMarket({ rows }: { rows: FunderMarketRow[] }) {
                 </div>
                 {isOpen ? (
                   <div style={{ marginTop: 8 }}>
+                    {r.visibility === 'one-away' ? (
+                      <div style={{ marginBottom: 10 }}>
+                        <RiskFlag label="Single-project slate — higher risk, sorts lower" />
+                      </div>
+                    ) : null}
+                    <AboutRow r={r} />
+                    <TeamRow relationships={r.relationships} />
                     {r.caseStudies.length > 0 ? (
                       <div style={{ marginBottom: 10 }}>
                         <div style={{ fontFamily: mono, fontSize: 9, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--afx-faint)', marginTop: 6 }}>Track record</div>

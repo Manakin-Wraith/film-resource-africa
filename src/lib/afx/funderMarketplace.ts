@@ -1,4 +1,4 @@
-import type { ProducerProfile, Project, RatingBand, PackagingAttachment, CapitalStackInput, Provenance } from './types';
+import type { ProducerProfile, Project, RatingBand, PackagingAttachment, CapitalStackInput, Provenance, Relationship, EvidenceLink } from './types';
 import { deriveVisibility, meetsCorePackaging } from './constants';
 import { liveProjects, caseStudies, computeAggregates, type Aggregates } from './aggregates';
 import { derisking } from './derisking';
@@ -18,6 +18,7 @@ export interface FunderMarketProjectRow {
   /** Percentage bands only — no dollar figures are funder-visible. */
   capitalStack: CapitalStackInput;
   comps: { title: string; note: string }[];
+  evidence: EvidenceLink[];
 }
 
 /** One past project (case study) as evidence behind a producer's track record. */
@@ -30,6 +31,7 @@ export interface FunderMarketCaseStudyRow {
   bondUsed: { value: string; provenance: Provenance };
   distribution: { name: string; type: string; provenance: Provenance }[];
   festivalsAwards: string[];
+  evidence: EvidenceLink[];
 }
 
 /** One producer row on the funder marketplace. Carries no score field —
@@ -38,10 +40,13 @@ export interface FunderMarketRow {
   producerId: string;
   producerName: string;
   company: string;
+  bio: string;
+  location?: string;
   ratingBand: RatingBand;
   careerStage: string;
   visibility: 'live' | 'one-away';
   screenableCount: number;
+  relationships: Relationship[];
   projects: FunderMarketProjectRow[];
   /** Lifetime track-record bands, rolled up from case studies. '—' fields mean no case studies yet. */
   trackRecord: Aggregates;
@@ -78,6 +83,7 @@ export function toFunderMarketRows(profiles: ProducerProfile[]): FunderMarketRow
       logline: proj.ask?.logline ?? '',
       capitalStack: proj.ask?.capitalStack ?? { equityPct: 0, softPct: 0, debtPct: 0, gapPct: 0 },
       comps: proj.ask?.comps ?? [],
+      evidence: proj.evidence ?? [],
     }));
 
     const studyRows: FunderMarketCaseStudyRow[] = caseStudies(p).map((s) => ({
@@ -89,6 +95,7 @@ export function toFunderMarketRows(profiles: ProducerProfile[]): FunderMarketRow
       bondUsed: s.outcomes?.bondUsed ?? { value: '—', provenance: 'self' },
       distribution: s.outcomes?.distribution ?? [],
       festivalsAwards: s.outcomes?.festivalsAwards ?? [],
+      evidence: s.evidence ?? [],
     }));
 
     scored.push({
@@ -97,10 +104,13 @@ export function toFunderMarketRows(profiles: ProducerProfile[]): FunderMarketRow
         producerId: p.id,
         producerName: p.name,
         company: p.company,
+        bio: p.bio,
+        location: p.location,
         ratingBand: p.ratingBand,
         careerStage: p.careerStage,
         visibility,
         screenableCount: screenable.length,
+        relationships: p.relationships,
         projects,
         trackRecord: computeAggregates(p),
         caseStudies: studyRows,
