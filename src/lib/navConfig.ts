@@ -53,6 +53,7 @@ export const footerExtras: NavLink[] = [
   { href: '/tech-pulse', label: 'Tech-Pulse' },
   { href: '/rebate-calculator', label: 'Rebate Calculator' },
   { href: '/submit', label: 'Submit an Opportunity' },
+  { href: '/afx/login', label: 'AFX' },
 ];
 
 export interface MobileTab extends NavLink {
