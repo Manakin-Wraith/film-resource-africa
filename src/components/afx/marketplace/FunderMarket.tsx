@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import type { FunderMarketRow, FunderMarketProjectRow, FunderMarketCaseStudyRow } from '@/lib/afx/funderMarketplace';
-import type { EvidenceLink } from '@/lib/afx/types';
+import type { FunderMarketRow, FunderMarketProjectRow, FunderMarketCaseStudyRow, FunderMarketSlateRow } from '@/lib/afx/funderMarketplace';
+import type { EvidenceLink, RiskTier, Provenance } from '@/lib/afx/types';
 import { RATING_BAND_LABEL, VISIBILITY_META, EVIDENCE_CLAIM_LABELS } from '@/lib/afx/constants';
 import ProvenanceBadge from '@/components/afx/primitives/ProvenanceBadge';
 import CapitalStackBarPct from '@/components/afx/primitives/CapitalStackBarPct';
@@ -12,6 +12,10 @@ const mono = 'var(--afx-mono)';
 
 const STATUS_LABEL: Record<FunderMarketProjectRow['packaging'][number]['status'], string> = {
   signed: 'Signed', 'soft-hold': 'Soft-hold', wishlist: 'Wishlist',
+};
+
+const RISK_TIER_LABEL: Record<RiskTier, string> = {
+  low: 'low-risk', mid: 'mid', 'high-upside': 'high-upside',
 };
 
 function VisibilityChip({ visibility }: { visibility: FunderMarketRow['visibility'] }) {
@@ -115,6 +119,72 @@ function CaseStudyRowView({ s }: { s: FunderMarketCaseStudyRow }) {
   );
 }
 
+function RiskSpreadLine({ riskSpread }: { riskSpread: FunderMarketSlateRow['riskSpread'] }) {
+  const parts = (['low', 'mid', 'high-upside'] as const)
+    .filter((tier) => riskSpread[tier] > 0)
+    .map((tier) => `${riskSpread[tier]} ${RISK_TIER_LABEL[tier]}`);
+  if (parts.length === 0) return null;
+  return <span style={{ fontSize: 12, color: 'var(--afx-muted)' }}>{parts.join(' / ')}</span>;
+}
+
+function SlateEconRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, fontSize: 12 }}>
+      <span style={{ width: 110, flex: 'none', color: 'var(--afx-faint)' }}>{label}</span>
+      <span style={{ fontWeight: 600, color: 'var(--afx-ink)' }}>{value || '—'}</span>
+    </div>
+  );
+}
+
+function SlateEconRowProvenanced({ label, field }: { label: string; field: { value: string; provenance: Provenance } }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
+      <span style={{ width: 110, flex: 'none', color: 'var(--afx-faint)' }}>{label}</span>
+      <span style={{ flex: 1, fontWeight: 600, color: 'var(--afx-ink)' }}>{field.value || '—'}</span>
+      <ProvenanceBadge provenance={field.provenance} size="sm" />
+    </div>
+  );
+}
+
+function SlateRowView({ s }: { s: FunderMarketSlateRow }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div style={{ padding: '10px 0', borderTop: '1px solid var(--afx-border)' }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
+        <div>
+          <span style={{ fontFamily: mono, fontSize: 9, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--afx-faint)' }}>Slate</span>
+          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--afx-ink)', marginTop: 2 }}>{s.name}</div>
+          <div style={{ fontFamily: mono, fontSize: 10, color: 'var(--afx-faint)', marginTop: 2 }}>{[s.genreStrategy, `${s.volume} film${s.volume === 1 ? '' : 's'}`].filter(Boolean).join(' · ')}</div>
+        </div>
+        <span style={{ fontFamily: mono, fontSize: 10, fontWeight: 700, color: 'var(--afx-ink)', background: '#F6F5F2', border: '1px solid var(--afx-border)', borderRadius: 6, padding: '2px 7px' }}>{s.stage}</span>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8 }}>
+        <SlateEconRowProvenanced label="Budget" field={s.totalBudgetBand} />
+        <SlateEconRow label="Secured" value={s.securedBand} />
+        <SlateEconRowProvenanced label="Ask" field={s.askBand} />
+        <SlateEconRowProvenanced label="Target IRR" field={s.targetIRR} />
+        <SlateEconRowProvenanced label="Portfolio ROI" field={s.portfolioROI} />
+      </div>
+      <div style={{ marginTop: 6 }}>
+        <RiskSpreadLine riskSpread={s.riskSpread} />
+      </div>
+      {s.distributionStrategy ? (
+        <div style={{ fontSize: 12, color: 'var(--afx-muted)', marginTop: 6 }}>{s.distributionStrategy}</div>
+      ) : null}
+      <EvidenceLinks evidence={s.evidence} />
+      <button onClick={() => setOpen((o) => !o)}
+        style={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0, marginTop: 8, fontFamily: mono, fontSize: 10.5, fontWeight: 600, color: 'var(--afx-muted)' }}>
+        {open ? '▾' : '▸'} {s.volume} project{s.volume === 1 ? '' : 's'}
+      </button>
+      {open ? (
+        <div>
+          {s.projects.map((p) => <ProjectRowView key={p.id} p={p} />)}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 function ProjectRowView({ p }: { p: FunderMarketProjectRow }) {
   const meta = [p.stage, p.format, p.budgetBand, p.fundingSecuredBand, p.commercialPath].filter(Boolean).join(' · ');
   return (
@@ -198,8 +268,17 @@ export default function FunderMarket({ rows }: { rows: FunderMarketRow[] }) {
                         {r.caseStudies.map((s) => <CaseStudyRowView key={s.id} s={s} />)}
                       </div>
                     ) : null}
-                    <div style={{ fontFamily: mono, fontSize: 9, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--afx-faint)', marginTop: 6 }}>Live slate</div>
-                    {r.projects.map((p) => <ProjectRowView key={p.id} p={p} />)}
+                    {r.slates.length > 0 ? (
+                      <div style={{ marginBottom: 10 }}>
+                        {r.slates.map((s) => <SlateRowView key={s.id} s={s} />)}
+                      </div>
+                    ) : null}
+                    {r.projects.length > 0 ? (
+                      <div style={{ marginBottom: 10 }}>
+                        <div style={{ fontFamily: mono, fontSize: 9, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--afx-faint)', marginTop: 6 }}>Live slate</div>
+                        {r.projects.map((p) => <ProjectRowView key={p.id} p={p} />)}
+                      </div>
+                    ) : null}
                   </div>
                 ) : null}
               </div>
