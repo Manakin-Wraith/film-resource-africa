@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import type { FunderMarketRow, FunderMarketProjectRow, FunderMarketCaseStudyRow, FunderMarketSlateRow } from '@/lib/afx/funderMarketplace';
-import type { EvidenceLink, RiskTier } from '@/lib/afx/types';
+import type { EvidenceLink, RiskTier, Provenance } from '@/lib/afx/types';
 import { RATING_BAND_LABEL, VISIBILITY_META, EVIDENCE_CLAIM_LABELS } from '@/lib/afx/constants';
 import ProvenanceBadge from '@/components/afx/primitives/ProvenanceBadge';
 import CapitalStackBarPct from '@/components/afx/primitives/CapitalStackBarPct';
@@ -136,6 +136,16 @@ function SlateEconRow({ label, value }: { label: string; value: string }) {
   );
 }
 
+function SlateEconRowProvenanced({ label, field }: { label: string; field: { value: string; provenance: Provenance } }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
+      <span style={{ width: 110, flex: 'none', color: 'var(--afx-faint)' }}>{label}</span>
+      <span style={{ flex: 1, fontWeight: 600, color: 'var(--afx-ink)' }}>{field.value || '—'}</span>
+      <ProvenanceBadge provenance={field.provenance} size="sm" />
+    </div>
+  );
+}
+
 function SlateRowView({ s }: { s: FunderMarketSlateRow }) {
   const [open, setOpen] = useState(false);
   return (
@@ -149,11 +159,11 @@ function SlateRowView({ s }: { s: FunderMarketSlateRow }) {
         <span style={{ fontFamily: mono, fontSize: 10, fontWeight: 700, color: 'var(--afx-ink)', background: '#F6F5F2', border: '1px solid var(--afx-border)', borderRadius: 6, padding: '2px 7px' }}>{s.stage}</span>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8 }}>
-        <SlateEconRow label="Budget" value={s.totalBudgetBand} />
+        <SlateEconRowProvenanced label="Budget" field={s.totalBudgetBand} />
         <SlateEconRow label="Secured" value={s.securedBand} />
-        <SlateEconRow label="Ask" value={s.askBand} />
-        <SlateEconRow label="Target IRR" value={s.targetIRR} />
-        <SlateEconRow label="Portfolio ROI" value={s.portfolioROI} />
+        <SlateEconRowProvenanced label="Ask" field={s.askBand} />
+        <SlateEconRowProvenanced label="Target IRR" field={s.targetIRR} />
+        <SlateEconRowProvenanced label="Portfolio ROI" field={s.portfolioROI} />
       </div>
       <div style={{ marginTop: 6 }}>
         <RiskSpreadLine riskSpread={s.riskSpread} />
@@ -263,8 +273,12 @@ export default function FunderMarket({ rows }: { rows: FunderMarketRow[] }) {
                         {r.slates.map((s) => <SlateRowView key={s.id} s={s} />)}
                       </div>
                     ) : null}
-                    <div style={{ fontFamily: mono, fontSize: 9, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--afx-faint)', marginTop: 6 }}>Live slate</div>
-                    {r.projects.map((p) => <ProjectRowView key={p.id} p={p} />)}
+                    {r.projects.length > 0 ? (
+                      <div style={{ marginBottom: 10 }}>
+                        <div style={{ fontFamily: mono, fontSize: 9, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--afx-faint)', marginTop: 6 }}>Live slate</div>
+                        {r.projects.map((p) => <ProjectRowView key={p.id} p={p} />)}
+                      </div>
+                    ) : null}
                   </div>
                 ) : null}
               </div>

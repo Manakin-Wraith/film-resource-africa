@@ -29,11 +29,11 @@ export interface FunderMarketSlateRow {
   genreStrategy: string;
   stage: Slate['stage'];
   volume: number;
-  totalBudgetBand: string;
+  totalBudgetBand: { value: string; provenance: Provenance };
   securedBand: string;
-  askBand: string;
-  targetIRR: string;
-  portfolioROI: string;
+  askBand: { value: string; provenance: Provenance };
+  targetIRR: { value: string; provenance: Provenance };
+  portfolioROI: { value: string; provenance: Provenance };
   riskSpread: Record<RiskTier, number>;
   distributionStrategy: string;
   evidence: EvidenceLink[];
@@ -128,11 +128,11 @@ export function toFunderMarketRows(profiles: ProducerProfile[]): FunderMarketRow
         genreStrategy: s.genreStrategy,
         stage: s.stage,
         volume: memberIds.length,
-        totalBudgetBand: s.totalBudgetBand.value,
+        totalBudgetBand: s.totalBudgetBand,
         securedBand: s.securedBand,
-        askBand: s.askBand.value,
-        targetIRR: s.targetIRR.value,
-        portfolioROI: s.portfolioROI.value,
+        askBand: s.askBand,
+        targetIRR: s.targetIRR,
+        portfolioROI: s.portfolioROI,
         riskSpread,
         distributionStrategy: s.distributionStrategy,
         evidence: s.evidence ?? [],
