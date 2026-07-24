@@ -1,8 +1,7 @@
 'use client';
 
 import type { ProducerProfile } from '@/lib/afx/types';
-import { deriveVisibility, VISIBILITY_META, nextBestActions, RATING_BAND_LABEL } from '@/lib/afx/constants';
-import { chipStyle } from '@/components/afx/primitives/bands';
+import { deriveVisibility, VISIBILITY_META, nextBestActions, deriveVettingStatus, VETTING_STATUS_META } from '@/lib/afx/constants';
 
 const mono = 'var(--afx-mono)';
 
@@ -15,6 +14,8 @@ interface Props {
 export default function StatusHeader({ draft, previewMode, onSetPreview }: Props) {
   const visibility = deriveVisibility(draft);
   const vMeta = VISIBILITY_META[visibility];
+  const vettingStatus = deriveVettingStatus(draft);
+  const vsMeta = VETTING_STATUS_META[vettingStatus];
   const actions = nextBestActions(draft);
 
   return (
@@ -26,12 +27,14 @@ export default function StatusHeader({ draft, previewMode, onSetPreview }: Props
       }}
     >
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 22, flexWrap: 'wrap' }}>
-        {/* rating scoreboard */}
+        {/* vetting status */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div style={chipStyle(draft.ratingBand, true)}>{draft.ratingBand}</div>
+          <div style={{ width: 34, height: 34, borderRadius: 9, background: vsMeta.tone, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14 }}>
+            {vettingStatus === 'fully_vetted' ? '✓' : vettingStatus === 'individual_verified' ? '½' : '—'}
+          </div>
           <div style={{ lineHeight: 1.2 }}>
-            <div style={{ fontFamily: mono, fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#A7A99F', marginBottom: 4 }}>Producer rating</div>
-            <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: '-0.3px' }}>{draft.ratingBand} · {RATING_BAND_LABEL[draft.ratingBand]}</div>
+            <div style={{ fontFamily: mono, fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#A7A99F', marginBottom: 4 }}>Vetting status</div>
+            <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: '-0.3px' }}>{vsMeta.label}</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginTop: 6 }}>
               <span style={{ width: 8, height: 8, borderRadius: '50%', background: vMeta.tone }} />
               <span style={{ fontSize: 12.5, fontWeight: 600, color: '#5E6066' }}>{vMeta.label}</span>
@@ -43,7 +46,7 @@ export default function StatusHeader({ draft, previewMode, onSetPreview }: Props
 
         {/* next-best actions */}
         <div style={{ flex: 1, minWidth: 280 }}>
-          <div style={{ fontFamily: mono, fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#A7A99F', marginBottom: 8 }}>Next best — climb your rating</div>
+          <div style={{ fontFamily: mono, fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#A7A99F', marginBottom: 8 }}>Next steps to get vetted</div>
           <ol style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 6 }}>
             {actions.map((a, i) => (
               <li key={i} style={{ fontSize: 12.5, color: '#5E6066', lineHeight: 1.4 }}>{a}</li>

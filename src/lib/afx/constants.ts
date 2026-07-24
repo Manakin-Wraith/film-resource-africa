@@ -62,18 +62,35 @@ export const VISIBILITY_META: Record<Visibility, { label: string; tone: string }
   hidden: { label: 'Hidden from funders', tone: '#9a9ca3' },
 };
 
+/** Vetting is staff-adjudicated (entityVerifiedAt/individualVerifiedAt are
+ *  staff-write-only). Entity vetting is gated on individual verification
+ *  first, so a company producer can't be "fully vetted" without both. */
+export type VettingStatus = 'not_started' | 'individual_verified' | 'fully_vetted';
+
+export function deriveVettingStatus(p: ProducerProfile): VettingStatus {
+  if (!p.individualVerifiedAt) return 'not_started';
+  if (isIndividual(p)) return 'fully_vetted';
+  return p.entityVerifiedAt ? 'fully_vetted' : 'individual_verified';
+}
+
+export const VETTING_STATUS_META: Record<VettingStatus, { label: string; tone: string }> = {
+  not_started: { label: 'Not yet vetted', tone: '#9a9ca3' },
+  individual_verified: { label: 'Individual verified', tone: '#b8860b' },
+  fully_vetted: { label: 'Fully vetted', tone: '#16a34a' },
+};
+
 /** Top next-best actions for the cockpit status header. */
 export function nextBestActions(p: ProducerProfile): string[] {
   const out: string[] = [];
   const live = liveProjects(p);
   const screenable = live.filter(meetsCorePackaging);
-  if (screenable.length < 2) out.push('Add another live project to diversify your slate and climb the default sort.');
+  if (screenable.length < 2) out.push('Add another live project — funders need at least two to consider your slate.');
   const selfStudies = caseStudies(p).filter((s) => s.outcomes?.recoupment.provenance === 'self' || s.budgetBand.provenance === 'self').length;
-  if (selfStudies > 0) out.push(`Confirm ${selfStudies} self-reported case stud${selfStudies > 1 ? 'ies' : 'y'} to lift your rating.`);
+  if (selfStudies > 0) out.push(`Confirm ${selfStudies} self-reported case stud${selfStudies > 1 ? 'ies' : 'y'} to complete verification.`);
   if (!p.ndaSigned) out.push('Sign the FRA NDA to add exact figures and raise verification confidence.');
-  if (!p.entityK2) out.push(isIndividual(p) ? 'Confirm your individual / professional standing (K2) to remove the rating cap.' : 'Complete your legal entity (K2) to remove the rating cap.');
+  if (!p.entityK2) out.push(isIndividual(p) ? 'Confirm your individual / professional standing (K2) to complete vetting.' : 'Complete your legal entity (K2) to complete vetting.');
   if (!p.consentK4) out.push('Grant transparency consent (K4) to become visible to funders.');
-  out.push('Attach a sales agent to your strongest project to raise packaging strength.');
+  out.push('Attach a sales agent to your strongest project to strengthen its packaging.');
   return out.slice(0, 3);
 }
 
