@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import AfxNavSwitcher from './AfxNavSwitcher';
+import AfxSignOutButton from './AfxSignOutButton';
 
 interface Props {
   subtitle: string;
@@ -30,6 +31,7 @@ export default function AfxTopBar({ subtitle, staffRole, right }: Props) {
         {staffRole ? <AfxNavSwitcher role={staffRole} /> : null}
         <div style={{ flex: 1 }} />
         {right}
+        <AfxSignOutButton />
       </div>
     </header>
   );
