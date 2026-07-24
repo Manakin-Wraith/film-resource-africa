@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useDebouncedAutosave } from './useDebouncedAutosave';
 import { persistProfileAction, submitForVettingAction, withdrawVettingAction, signNdaAction, withdrawNdaAction } from './actions';
 import { openCaseSubmission, openEntitySubmission, latestEntitySubmission, openIndividualSubmission, latestIndividualSubmission } from '@/lib/afx/vetting';
-import type { ProducerProfile, Project, AfxCurrency, VettingSubmission, EntityDocumentCategory, IndividualDocumentCategory, AfxDocument } from '@/lib/afx/types';
+import type { ProducerProfile, Project, Slate, AfxCurrency, VettingSubmission, EntityDocumentCategory, IndividualDocumentCategory, AfxDocument } from '@/lib/afx/types';
 import { liveProjects } from '@/lib/afx/aggregates';
 import { currencyForCountry } from '@/lib/afx/countries';
 import { meetsCorePackaging, producerTypeOf } from '@/lib/afx/constants';
@@ -14,6 +14,8 @@ import StatusHeader from '@/components/afx/producer/StatusHeader';
 import IdentityPanel from '@/components/afx/producer/IdentityPanel';
 import TrackRecordZone from '@/components/afx/producer/TrackRecordZone';
 import LiveSlateZone from '@/components/afx/producer/LiveSlateZone';
+import SlatesZone from '@/components/afx/producer/SlatesZone';
+import SlateDrawer from '@/components/afx/producer/SlateDrawer';
 import AggregatesPanel from '@/components/afx/producer/AggregatesPanel';
 import NdaUpgrade from '@/components/afx/producer/NdaUpgrade';
 import AccountVisibility from '@/components/afx/producer/AccountVisibility';
@@ -24,6 +26,7 @@ import LiveProjectDrawer from '@/components/afx/producer/LiveProjectDrawer';
 import EntityVettingPanel from '@/components/afx/producer/EntityVettingPanel';
 import EntityVettingLockedCard from '@/components/afx/producer/EntityVettingLockedCard';
 import { newCaseStudy } from '@/lib/afx/caseStudy';
+import { newSlate } from '@/lib/afx/slate';
 
 const mono = 'var(--afx-mono)';
 
@@ -36,6 +39,7 @@ export default function ProducerProfileClient({ initial, initialSubmissions, sta
   const [counter, setCounter] = useState(0);
   const [editing, setEditing] = useState<{ study: Project; isNew: boolean } | null>(null);
   const [editingLive, setEditingLive] = useState<Project | null>(null);
+  const [editingSlate, setEditingSlate] = useState<{ slate: Slate; isNew: boolean } | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [vettingBusy, setVettingBusy] = useState(false);
   const [ndaBusy, setNdaBusy] = useState(false);
@@ -70,6 +74,24 @@ export default function ProducerProfileClient({ initial, initialSubmissions, sta
   const onSaveLiveProject = (project: Project) => {
     setDraft((d) => ({ ...d, slate: (d.slate ?? []).map((p) => (p.id === project.id ? project : p)) }));
     setEditingLive(null);
+  };
+
+  const onAddSlate = () => setEditingSlate({ slate: newSlate(), isNew: true });
+  const onEditSlate = (id: string) => {
+    const found = (draft.slates ?? []).find((s) => s.id === id);
+    if (found) setEditingSlate({ slate: structuredClone(found), isNew: false });
+  };
+  const onSaveSlate = (slate: Slate) => {
+    setDraft((d) => {
+      const list = d.slates ?? [];
+      const exists = list.some((s) => s.id === slate.id);
+      return { ...d, slates: exists ? list.map((s) => (s.id === slate.id ? slate : s)) : [...list, slate] };
+    });
+    setEditingSlate(null);
+  };
+  const onRemoveSlate = (id: string) => {
+    setDraft((d) => ({ ...d, slates: (d.slates ?? []).filter((s) => s.id !== id) }));
+    setEditingSlate(null);
   };
 
   const onSubmitCaseStudy = async (study: Project) => {
@@ -296,6 +318,7 @@ export default function ProducerProfileClient({ initial, initialSubmissions, sta
             ) : null}
             {/* Two-zone hard requirement: Track Record BEFORE Live Slate (spec §2.1) */}
             <TrackRecordZone draft={draft} submissions={submissions} onAdd={onAddCaseStudy} onEdit={onEditCaseStudy} />
+            <SlatesZone draft={draft} onAddSlate={onAddSlate} onOpenSlate={onEditSlate} />
             <LiveSlateZone draft={draft} onAddProject={onAddProject} onArchive={onArchive} onOpenProject={onOpenLiveProject} />
             <AggregatesPanel draft={draft} />
           </div>
@@ -338,6 +361,18 @@ export default function ProducerProfileClient({ initial, initialSubmissions, sta
           onSave={onSaveLiveProject}
           onClose={() => setEditingLive(null)}
           onRemove={() => { onArchive(editingLive.id); setEditingLive(null); }}
+        />
+      ) : null}
+
+      {editingSlate ? (
+        <SlateDrawer
+          initial={editingSlate.slate}
+          isNew={editingSlate.isNew}
+          liveProjects={liveProjects(draft)}
+          otherSlates={(draft.slates ?? []).filter((s) => s.id !== editingSlate.slate.id)}
+          onSave={onSaveSlate}
+          onClose={() => setEditingSlate(null)}
+          onRemove={editingSlate.isNew ? undefined : () => onRemoveSlate(editingSlate.slate.id)}
         />
       ) : null}
 
