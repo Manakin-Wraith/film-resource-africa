@@ -78,12 +78,12 @@ export async function createInvite(email: string): Promise<InviteResult> {
     const { error: sendErr } = await resend.emails.send({
       from: 'FRA System <hello@film-resource-africa.com>',
       to: addr,
-      subject: "You're invited to AFX",
-      html: `<p>You&apos;ve been invited to <strong>AFX</strong>, the Film Resource Africa finance layer for producers.</p>
-<p>Sign in with <strong>this email address</strong> to get started:</p>
-<p><a href="${SITE_URL}/afx/login" style="display:inline-block;padding:10px 18px;border-radius:9px;background:#1C1D21;color:#fff;text-decoration:none;font-weight:700">Sign in to AFX &rarr;</a></p>
-<p style="color:#5E6066;font-size:13px">Or open ${SITE_URL}/afx/login and enter this email.</p>`,
-      text: `You've been invited to AFX, the Film Resource Africa finance layer for producers.\n\nSign in with this email address at ${SITE_URL}/afx/login to get started.`,
+      subject: "You've been invited — your Film Resource Africa producer profile",
+      html: `<p>You&apos;re one of a small group of producers we&apos;ve personally invited to Film Resource Africa&apos;s new producer profile. This is the first step in a marketplace we&apos;re building to connect producers and slates directly with financiers &mdash; the more complete your profile, the more we can de-risk your slate in front of the right investors.</p>
+<p><a href="${SITE_URL}/afx/login" style="display:inline-block;padding:10px 18px;border-radius:9px;background:#1C1D21;color:#fff;text-decoration:none;font-weight:700">Complete my profile &rarr;</a></p>
+<p style="color:#5E6066;font-size:13px">No password needed — just go to ${SITE_URL}/afx/login and enter <strong>${addr}</strong> (the email address this invite was sent to) to get started.</p>
+<p style="color:#5E6066;font-size:13px">A quick note: you&apos;re one of the first producers trying this out. We&apos;re building it alongside a fund manager partner, so if anything is confusing, frustrating, or missing along the way, we&apos;d genuinely love to hear about it &mdash; just reply to this email. Your feedback will directly shape how this works going forward.</p>`,
+      text: `You're one of a small group of producers we've personally invited to Film Resource Africa's new producer profile. This is the first step in a marketplace we're building to connect producers and slates directly with financiers — the more complete your profile, the more we can de-risk your slate in front of the right investors.\n\nNo password needed — just go to ${SITE_URL}/afx/login and enter ${addr} (the email address this invite was sent to) to get started.\n\nA quick note: you're one of the first producers trying this out. We're building it alongside a fund manager partner, so if anything is confusing, frustrating, or missing along the way, we'd genuinely love to hear about it — just reply to this email. Your feedback will directly shape how this works going forward.`,
     });
     if (sendErr) return { ok: true, note: emailFailedNote };
   } catch {
