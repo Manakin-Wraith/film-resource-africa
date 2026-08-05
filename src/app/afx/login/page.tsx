@@ -1,9 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 
-export default function AfxLoginPage() {
+function AfxLoginForm() {
+  const searchParams = useSearchParams();
+  const linkExpired = searchParams.get('error') === 'auth_failed';
+
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
@@ -42,6 +47,12 @@ export default function AfxLoginPage() {
           <p style={{ fontSize: 13.5, color: 'var(--afx-muted)', marginTop: 8 }}>We&apos;ll email you a magic link — no password.</p>
         </div>
 
+        {linkExpired && (
+          <div style={{ marginBottom: 16, padding: '12px 14px', borderRadius: 10, background: 'rgba(192,57,43,0.08)', border: '1px solid rgba(192,57,43,0.25)', fontSize: 13, color: '#c0392b', textAlign: 'center' }}>
+            That link has expired or was opened in a different browser. Enter your email below to get a new one — make sure to open it in <strong>this browser</strong>.
+          </div>
+        )}
+
         <div style={{ border: '1px solid var(--afx-border)', borderRadius: 14, background: 'var(--afx-surface)', padding: 24 }}>
           {sent ? (
             <div style={{ textAlign: 'center' }}>
@@ -74,5 +85,13 @@ export default function AfxLoginPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function AfxLoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <AfxLoginForm />
+    </Suspense>
   );
 }
