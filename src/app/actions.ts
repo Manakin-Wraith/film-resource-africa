@@ -26,6 +26,12 @@ function enrichWithCountry<T extends { country_id?: string; countries?: { iso_co
   });
 }
 
+// Columns needed to render an opportunity *card* or pick related items. Omits the long free-text
+// columns ("What Is It?", "Strongest Submission Tips", ...), which only the detail page needs.
+// Rows fetched with this list are partial, hence the `as Opportunity[]` casts below.
+const OPP_CARD_COLUMNS =
+  'id, title, slug, category, deadline_date, "Next Deadline", application_status, geo_scope, country_id, directory_destination, created_at, logo, og_image_url';
+
 export interface Opportunity {
   id: number;
   title: string;
@@ -117,7 +123,7 @@ export async function getOpportunities(): Promise<Opportunity[]> {
   try {
     const { data, error } = await supabase
       .from('opportunities')
-      .select('*, countries(iso_code, name)')
+      .select(OPP_CARD_COLUMNS)
       .eq('status', 'approved')
       .order('id', { ascending: false });
       
@@ -201,7 +207,7 @@ export async function getClosingSoonOpportunities(): Promise<Opportunity[]> {
   try {
     const { data, error } = await supabase
       .from('opportunities')
-      .select('*, countries(iso_code, name)')
+      .select(`${OPP_CARD_COLUMNS}, countries(iso_code, name)`)
       .eq('status', 'approved')
       .eq('application_status', 'closing_soon')
       .order('deadline_date', { ascending: true, nullsFirst: false });
@@ -211,7 +217,7 @@ export async function getClosingSoonOpportunities(): Promise<Opportunity[]> {
     // Filter out past-deadline entries (safeguard against stale application_status)
     const now = new Date();
     now.setHours(0, 0, 0, 0);
-    const enriched = enrichWithCountry(data) as Opportunity[];
+    const enriched = enrichWithCountry(data as any[]) as Opportunity[];
     const active = enriched.filter((o) => {
       const raw = o.deadline_date || o["Next Deadline"] || null;
       if (!raw) return false; // no deadline info = exclude from closing soon
@@ -240,13 +246,13 @@ export async function getOpenOpportunities(): Promise<Opportunity[]> {
   try {
     const { data, error } = await supabase
       .from('opportunities')
-      .select('*, countries(iso_code, name)')
+      .select(`${OPP_CARD_COLUMNS}, countries(iso_code, name)`)
       .eq('status', 'approved')
       .eq('application_status', 'open')
       .order('id', { ascending: false });
       
     if (error) throw error;
-    return enrichWithCountry(data) as Opportunity[];
+    return enrichWithCountry(data as any[]) as Opportunity[];
   } catch (error) {
     console.error('Failed to fetch open opportunities', error);
     return [];
@@ -401,7 +407,7 @@ export async function getJustAddedOpportunities(): Promise<Opportunity[]> {
   try {
     const { data, error } = await supabase
       .from('opportunities')
-      .select('*')
+      .select(OPP_CARD_COLUMNS)
       .eq('status', 'approved')
       .order('id', { ascending: false })
       .limit(20);
