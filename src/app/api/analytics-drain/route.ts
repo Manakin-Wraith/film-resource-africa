@@ -34,6 +34,27 @@ interface VercelAnalyticsEvent {
   deviceModel?: string;
 }
 
+// Crawlers and automated clients add write load without telling us anything about real readers.
+const BOT_PATTERN = /bot|crawl|spider|slurp|headless|lighthouse|python|curl|wget|scrapy|go-http|java\/|okhttp|axios|node-fetch|facebookexternalhit|preview|monitor|uptime|pingdom/i;
+
+function isBot(evt: VercelAnalyticsEvent): boolean {
+  return (
+    evt.deviceType?.toLowerCase() === 'bot' ||
+    BOT_PATTERN.test(evt.clientName || '') ||
+    BOT_PATTERN.test(evt.deviceBrand || '') ||
+    BOT_PATTERN.test(evt.deviceModel || '')
+  );
+}
+
+function parseEventData(raw?: string): unknown {
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
 // Vercel sends a GET with x-vercel-verify header to validate the drain endpoint
 export async function GET(req: NextRequest) {
   const verify = req.headers.get('x-vercel-verify');
@@ -82,15 +103,18 @@ export async function POST(req: NextRequest) {
       events = Array.isArray(body) ? body : [body];
     }
 
+    const received = events.length;
+    events = events.filter(evt => evt.path && !isBot(evt));
+
     if (events.length === 0) {
-      return NextResponse.json({ received: 0 });
+      return NextResponse.json({ received, stored: 0 });
     }
 
     // Map Vercel events to our page_views table schema
     const rows = events.map(evt => ({
       event_type: evt.eventType || 'pageview',
       event_name: evt.eventName || null,
-      event_data: evt.eventData ? JSON.parse(evt.eventData) : null,
+      event_data: parseEventData(evt.eventData),
       timestamp: new Date(evt.timestamp).toISOString(),
       session_id: evt.sessionId || null,
       device_id: evt.deviceId || null,
@@ -110,18 +134,19 @@ export async function POST(req: NextRequest) {
       device_model: evt.deviceModel || null,
     }));
 
-    // Batch insert
+    // Batch insert. Failures return 200 on purpose: analytics is best-effort, and a non-2xx makes
+    // Vercel retry the batch, which piles more writes onto a database that may already be struggling.
     const { error } = await supabase.from('page_views').insert(rows);
 
     if (error) {
-      console.error('[Analytics Drain] Insert error:', error.message);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.error('[Analytics Drain] Insert error (batch dropped):', error.message);
+      return NextResponse.json({ received, stored: 0, dropped: rows.length });
     }
 
-    return NextResponse.json({ received: rows.length });
+    return NextResponse.json({ received, stored: rows.length });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error';
-    console.error('[Analytics Drain] Error:', message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error('[Analytics Drain] Error (batch dropped):', message);
+    return NextResponse.json({ received: 0, stored: 0, error: message });
   }
 }
