@@ -327,15 +327,16 @@ export async function getPublishedSpotlights(): Promise<NewsItem[]> {
 
 export async function getAllNews(): Promise<NewsItem[]> {
   try {
+    // List view: omit `content` (full article body) — it is only needed on the detail page.
     const { data, error } = await supabase
       .from('news')
-      .select('*, countries(iso_code, name)')
+      .select('id, title, summary, category, slug, published_at, image_url, geo_scope, country_id, countries(iso_code, name)')
       .eq('status', 'published')
       .eq('is_truncated', false)
       .order('published_at', { ascending: false });
       
     if (error) throw error;
-    return enrichWithCountry(data) as NewsItem[];
+    return enrichWithCountry(data as any[]) as NewsItem[];
   } catch (error) {
     console.error('Failed to fetch all news', error);
     return [];

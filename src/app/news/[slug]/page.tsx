@@ -12,7 +12,12 @@ import TrackNewsRead from '@/components/TrackNewsRead';
 import TrackOutboundLink from '@/components/TrackOutboundLink';
 import { newsCategories as categoryConfig } from '@/lib/newsCategoryConfig';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 300; // ISR: serve cached HTML, hit Postgres at most once per 5 min
+
+// Render on first request, then cache (ISR) — nothing is prebuilt, so the build needs no database.
+export async function generateStaticParams() {
+  return [];
+}
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('en-GB', {

@@ -4,7 +4,7 @@ import NewsletterCTA from '@/components/NewsletterCTA';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import { ItemListJsonLd } from '@/components/JsonLd';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 300; // ISR: serve cached HTML, hit Postgres at most once per 5 min
 
 export const metadata = {
   title: 'Industry Directory — Film Resource Africa',

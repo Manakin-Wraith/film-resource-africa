@@ -4,7 +4,7 @@ import NewsletterCTA from '@/components/NewsletterCTA';
 import FrontPageGrid from '@/components/home/FrontPageGrid';
 import JustAddedRow from '@/components/home/JustAddedRow';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 300; // ISR: serve cached HTML, hit Postgres at most once per 5 min
 
 export default async function Home() {
   const [closingSoon, openNow, justAdded] = await Promise.all([

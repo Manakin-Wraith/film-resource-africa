@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import SpotlightSubmitForm from './SpotlightSubmitForm';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 300; // ISR: serve cached HTML, hit Postgres at most once per 5 min
 
 function formatDate(date: string) {
   return new Date(date).toLocaleDateString('en-GB', {

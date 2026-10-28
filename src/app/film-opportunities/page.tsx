@@ -6,7 +6,7 @@ import { getFlagEmoji, getRegionColor } from '@/lib/countries';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import NewsletterCTA from '@/components/NewsletterCTA';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 300; // ISR: serve cached HTML, hit Postgres at most once per 5 min
 
 export const metadata: Metadata = {
   title: 'Film Opportunities by Country',
