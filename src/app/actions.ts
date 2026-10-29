@@ -3,6 +3,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 import { revalidatePath } from 'next/cache';
+import { cookies } from 'next/headers';
 import { buildWelcomeEmailHtml } from '@/lib/welcomeEmail';
 import { getSessionUser } from '@/lib/supabase/server';
 import type { Country } from '@/lib/countries';
@@ -31,6 +32,17 @@ function enrichWithCountry<T extends { country_id?: string; countries?: { iso_co
 // Rows fetched with this list are partial, hence the `as Opportunity[]` casts below.
 const OPP_CARD_COLUMNS =
   'id, title, slug, category, deadline_date, "Next Deadline", application_status, geo_scope, country_id, directory_destination, created_at, logo, og_image_url';
+
+// Logos and OG images must be uploaded to Storage (see uploadOpportunityLogo) and saved as URLs.
+// A base64 data: URI in these columns rides along with every list query — one such row once cost
+// ~880 KB per request. Rejecting them on insert stops a stale client from re-introducing the problem.
+function assertNoInlineImages(fields: { logo?: string; og_image_url?: string }) {
+  for (const value of [fields.logo, fields.og_image_url]) {
+    if (typeof value === 'string' && value.startsWith('data:')) {
+      throw new Error('Images must be uploaded as files, not embedded. Please re-select the logo and try again.');
+    }
+  }
+}
 
 export interface Opportunity {
   id: number;
@@ -434,6 +446,7 @@ export async function getJustAddedOpportunities(): Promise<Opportunity[]> {
 }
 
 export async function addOpportunity(newOpp: Omit<Opportunity, 'id'>) {
+  assertNoInlineImages(newOpp);
   const targetOpp = { status: 'approved' as const, ...newOpp };
   const { data, error } = await supabase
     .from('opportunities')
@@ -446,6 +459,7 @@ export async function addOpportunity(newOpp: Omit<Opportunity, 'id'>) {
 }
 
 export async function submitPublicOpportunity(newOpp: Omit<Opportunity, 'id' | 'status'>) {
+  assertNoInlineImages(newOpp);
   const targetOpp = { ...newOpp, status: 'pending' as const };
   const { data, error } = await supabase
     .from('opportunities')
@@ -522,6 +536,7 @@ export async function submitMemberOpportunity(
   form: Partial<Opportunity>,
   visibility: { scope: 'public' | 'members'; category?: string }
 ) {
+  assertNoInlineImages(form);
   const member = await getCurrentMember();
   if (!member) throw new Error('NOT_A_MEMBER');
   if (member.tier !== 'business') throw new Error('NOT_BUSINESS');
@@ -1233,6 +1248,34 @@ export async function deleteCallSheetListing(id: string) {
 }
 
 // ─── Community Spotlight ─────────────────────────────────────────────────────
+
+const LOGO_MAX_BYTES = 1024 * 1024; // Next's default Server Action body limit is 1 MB; forms downscale first
+const LOGO_TYPES: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+  'image/gif': 'gif',
+};
+
+// Admin (cookie) or a signed-in member may upload; both opportunity forms sit behind one of those.
+export async function uploadOpportunityLogo(formData: FormData): Promise<string> {
+  const isAdmin = (await cookies()).get('admin_auth')?.value === 'true';
+  if (!isAdmin && !(await getCurrentMember())) throw new Error('Please sign in to upload a logo.');
+
+  const file = formData.get('file') as File;
+  if (!file || !file.size) throw new Error('No file provided');
+  if (file.size > LOGO_MAX_BYTES) throw new Error('Logo is too large. Please use an image under 1 MB.');
+  const ext = LOGO_TYPES[file.type];
+  if (!ext) throw new Error('Invalid file type. Please upload a JPG, PNG, WebP, or GIF.');
+
+  const filePath = `opportunities/logo-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const { error } = await supabase.storage
+    .from('directory-logos')
+    .upload(filePath, Buffer.from(await file.arrayBuffer()), { contentType: file.type, upsert: false });
+  if (error) throw new Error(`Upload failed: ${error.message}`);
+
+  return supabase.storage.from('directory-logos').getPublicUrl(filePath).data.publicUrl;
+}
 
 export async function uploadSpotlightImage(formData: FormData): Promise<string> {
   const file = formData.get('file') as File;

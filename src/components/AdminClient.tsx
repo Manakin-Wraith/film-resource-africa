@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Opportunity, updateOpportunity, deleteOpportunity, addOpportunity, CallSheetListing, updateCallSheetListing, deleteCallSheetListing, DirectoryListing, updateDirectoryListing, deleteDirectoryListing, Partner, addPartner, updatePartner, deletePartner, uploadDirectoryImage, uploadNewsImage, NewsItem, updateNewsItem, deleteNewsItem } from '@/app/actions';
+import { Opportunity, updateOpportunity, deleteOpportunity, addOpportunity, CallSheetListing, updateCallSheetListing, deleteCallSheetListing, DirectoryListing, updateDirectoryListing, deleteDirectoryListing, Partner, addPartner, updatePartner, deletePartner, uploadDirectoryImage, uploadNewsImage, NewsItem, updateNewsItem, deleteNewsItem, uploadOpportunityLogo } from '@/app/actions';
+import { prepareLogoFile } from '@/lib/prepareLogoFile';
 import { Edit2, Trash2, Plus, X, CheckCircle2, Clapperboard, Building2, Handshake, Upload, Crown, Star, Package, FileText, Sparkles, RefreshCw } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -36,6 +37,8 @@ export default function AdminClient({ initialData, callSheetData = [], directory
   const [newsImagePreview, setNewsImagePreview] = useState<string | null>(null);
   const [newsImageUploading, setNewsImageUploading] = useState(false);
   const [partnerSaving, setPartnerSaving] = useState(false);
+  const [oppLogoUploading, setOppLogoUploading] = useState(false);
+  const [oppLogoError, setOppLogoError] = useState<string | null>(null);
 
   const handleEdit = (opp: Opportunity) => {
     setEditingId(opp.id);
@@ -50,6 +53,7 @@ export default function AdminClient({ initialData, callSheetData = [], directory
   };
 
   const handleSave = async () => {
+    if (oppLogoUploading) return;
     if (editingId) {
       const updated = await updateOpportunity(editingId, formData);
       setData(data.map(o => o.id === editingId ? updated : o));
@@ -91,14 +95,21 @@ export default function AdminClient({ initialData, callSheetData = [], directory
             <input 
               type="file" 
               accept="image/*"
-              onChange={(e) => {
+              disabled={oppLogoUploading}
+              onChange={async (e) => {
                 const file = e.target.files?.[0];
-                if (file) {
-                  const reader = new FileReader();
-                  reader.onloadend = () => {
-                    setFormData({ ...formData, logo: reader.result as string });
-                  };
-                  reader.readAsDataURL(file);
+                if (!file) return;
+                setOppLogoUploading(true);
+                setOppLogoError(null);
+                try {
+                  const body = new FormData();
+                  body.append('file', await prepareLogoFile(file));
+                  const url = await uploadOpportunityLogo(body);
+                  setFormData(prev => ({ ...prev, logo: url }));
+                } catch (err) {
+                  setOppLogoError(err instanceof Error ? err.message : 'Logo upload failed. Please try again.');
+                } finally {
+                  setOppLogoUploading(false);
                 }
               }}
               className="mt-1 block w-full text-sm text-foreground/70
@@ -108,7 +119,9 @@ export default function AdminClient({ initialData, callSheetData = [], directory
                 file:bg-primary file:text-white
                 hover:file:bg-primary-hover file:cursor-pointer file:transition-colors"
             />
-            <p className="text-xs opacity-60 mt-2">Uploading an image will securely store it as part of the directory data.</p>
+            {oppLogoUploading && <p className="text-xs text-primary mt-2">Uploading logo…</p>}
+            {oppLogoError && <p className="text-xs text-red-500 mt-2">{oppLogoError}</p>}
+            <p className="text-xs opacity-60 mt-2">The logo is uploaded to storage and only its link is saved with the entry.</p>
           </div>
         </div>
 
