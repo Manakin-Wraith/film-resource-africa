@@ -905,6 +905,7 @@ export async function deleteProject(token: string): Promise<{ deleted: number }>
 }
 
 export async function updateOpportunity(id: number, updatedFields: Partial<Opportunity>) {
+  assertNoInlineImages(updatedFields);
   const { data, error } = await supabase
     .from('opportunities')
     .update(updatedFields)
