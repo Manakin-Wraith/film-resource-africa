@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { submitMemberOpportunity, Opportunity } from '@/app/actions';
+import { submitMemberOpportunity, uploadOpportunityLogo, Opportunity } from '@/app/actions';
+import { prepareLogoFile } from '@/lib/prepareLogoFile';
 import { directoryCategories } from '@/lib/directoryConfig';
 import { Upload, CheckCircle2, AlertCircle, ArrowLeft, Globe2, Lock } from 'lucide-react';
 import Link from 'next/link';
@@ -16,9 +17,15 @@ export default function SubmitOpportunityForm({ memberName }: { memberName: stri
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [logoUploading, setLogoUploading] = useState(false);
+  const [logoError, setLogoError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (logoUploading) {
+      setError('Please wait for the logo to finish uploading.');
+      return;
+    }
     setIsSubmitting(true);
     setError(null);
     try {
@@ -144,16 +151,27 @@ export default function SubmitOpportunityForm({ memberName }: { memberName: stri
           <input
             type="file"
             accept="image/*"
-            onChange={(e) => {
+            disabled={logoUploading}
+            onChange={async (e) => {
               const file = e.target.files?.[0];
-              if (file) {
-                const reader = new FileReader();
-                reader.onloadend = () => setFormData({ ...formData, logo: reader.result as string });
-                reader.readAsDataURL(file);
+              if (!file) return;
+              setLogoUploading(true);
+              setLogoError(null);
+              try {
+                const body = new FormData();
+                body.append('file', await prepareLogoFile(file));
+                const url = await uploadOpportunityLogo(body);
+                setFormData((prev) => ({ ...prev, logo: url }));
+              } catch (err) {
+                setLogoError(err instanceof Error ? err.message : 'Logo upload failed. Please try again.');
+              } finally {
+                setLogoUploading(false);
               }
             }}
             className="mt-1 block w-full text-sm text-foreground/70 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-primary file:text-white hover:file:bg-primary-hover file:cursor-pointer file:transition-colors focus:outline-none"
           />
+          {logoUploading && <p className="text-sm text-primary mt-3">Uploading logo…</p>}
+          {logoError && <p className="text-sm text-red-500 mt-3">{logoError}</p>}
           <p className="text-sm opacity-60 mt-3 text-balance">Optional: a high-resolution, square logo for the organization or programme.</p>
         </div>
       </div>

@@ -5,7 +5,7 @@ import DirectoryClient from '@/components/DirectoryClient';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import NewsletterCTA from '@/components/NewsletterCTA';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 300; // ISR: serve cached HTML, hit Postgres at most once per 5 min
 
 export const metadata: Metadata = {
   title: 'Directory — Film Funds, Grants & Festivals in Africa',

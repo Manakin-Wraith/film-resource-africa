@@ -13,7 +13,12 @@ import OpportunityMarkdown from '@/components/OpportunityMarkdown';
 import ShareButton from '@/components/ShareButton';
 import NewsletterCTA from '@/components/NewsletterCTA';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 300; // ISR: serve cached HTML, hit Postgres at most once per 5 min
+
+// Render on first request, then cache (ISR) — nothing is prebuilt, so the build needs no database.
+export async function generateStaticParams() {
+  return [];
+}
 
 const baseUrl = 'https://film-resource-africa.com';
 
